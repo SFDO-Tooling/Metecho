@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import GitHubUserButton from '~js/components/githubUsers/button';
-import RefreshGitHubUsersButton from '~js/components/githubUsers/refreshUsersButton';
-import { SpinnerWrapper } from '~js/components/utils';
-import { GitHubUser, User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
-import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
+import GitHubUserButton from '@/js/components/githubUsers/button';
+import RefreshGitHubUsersButton from '@/js/components/githubUsers/refreshUsersButton';
+import { SpinnerWrapper } from '@/js/components/utils';
+import { GitHubUser, User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
+import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
 const AssignTaskRoleModal = ({
   projectId,

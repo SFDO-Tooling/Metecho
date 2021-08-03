@@ -1,8 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import { EditModal } from '~js/components/utils';
-import { updateObject } from '~js/store/actions';
+import { EditModal } from '@/js/components/utils';
+import { updateObject } from '@/js/store/actions';
 
 import {
   renderWithRedux,
@@ -10,7 +10,7 @@ import {
   storeWithThunk,
 } from './../../utils';
 
-jest.mock('~js/store/actions');
+jest.mock('@/js/store/actions');
 
 updateObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

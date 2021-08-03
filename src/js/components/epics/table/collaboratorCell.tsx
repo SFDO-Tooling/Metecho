@@ -2,7 +2,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import classNames from 'classnames';
 import React from 'react';
 
-import { TableCellProps } from '~js/components/epics/table';
+import { TableCellProps } from '@/js/components/epics/table';
 
 const CollaboratorTableCell = ({
   className,

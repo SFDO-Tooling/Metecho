@@ -1,9 +1,9 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import Path from '~js/components/path';
-import { Task } from '~js/store/tasks/reducer';
-import { REVIEW_STATUSES, TASK_STATUSES } from '~js/utils/constants';
+import Path from '@/js/components/path';
+import { Task } from '@/js/store/tasks/reducer';
+import { REVIEW_STATUSES, TASK_STATUSES } from '@/js/utils/constants';
 
 const TaskStatusPath = ({ task }: { task: Task }) => {
   let activeIdx;

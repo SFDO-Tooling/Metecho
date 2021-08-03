@@ -1,10 +1,14 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '~js/store';
-import { Epic, EpicsByProjectState, EpicsState } from '~js/store/epics/reducer';
-import { Project } from '~js/store/projects/reducer';
-import { selectProject } from '~js/store/projects/selectors';
+import { AppState } from '@/js/store';
+import {
+  Epic,
+  EpicsByProjectState,
+  EpicsState,
+} from '@/js/store/epics/reducer';
+import { Project } from '@/js/store/projects/reducer';
+import { selectProject } from '@/js/store/projects/selectors';
 
 export const selectEpicState = (appState: AppState): EpicsState =>
   appState.epics;

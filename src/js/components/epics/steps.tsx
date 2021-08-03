@@ -1,11 +1,11 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import Steps from '~js/components/steps';
-import { Step } from '~js/components/steps/stepsItem';
-import { Epic } from '~js/store/epics/reducer';
-import { Task } from '~js/store/tasks/reducer';
-import { EPIC_STATUSES } from '~js/utils/constants';
+import Steps from '@/js/components/steps';
+import { Step } from '@/js/components/steps/stepsItem';
+import { Epic } from '@/js/store/epics/reducer';
+import { Task } from '@/js/store/tasks/reducer';
+import { EPIC_STATUSES } from '@/js/utils/constants';
 
 interface EpicStatusStepsProps {
   epic: Epic;

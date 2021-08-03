@@ -1,7 +1,7 @@
 import Icon from '@salesforce/design-system-react/components/icon';
 import React, { ReactNode } from 'react';
 
-import githubIcon from '~img/github.svg';
+import githubIcon from '@/img/github.svg';
 
 const ExternalLink = ({
   url,

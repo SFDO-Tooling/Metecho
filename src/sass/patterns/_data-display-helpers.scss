@@ -48,3 +48,9 @@
 .metecho-transition-out {
   animation: fadeout $duration-slowly ease-in 2s forwards;
 }
+
+// Override the padding on components with default padding like tab panels
+.outdented_medium {
+  margin: 0 ($spacing-medium * -1);
+  width: calc(100% + (#{$spacing-medium} * 2));
+}

@@ -9,19 +9,20 @@ const path = require('path');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const svgToMiniDataURI = require('mini-svg-data-uri');
 
 module.exports = {
   context: path.join(__dirname, 'src', 'js'),
   entry: {
-    app: ['whatwg-fetch', 'js/index', 'sass/app.scss'],
     sentry: 'js/sentry',
+    app: ['whatwg-fetch', 'js/index', 'sass/app.scss'],
   },
   resolve: {
     modules: ['src', 'static', 'node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
-      '~js': path.join(__dirname, 'src', 'js'),
-      '~img': path.join(__dirname, 'static', 'images'),
+      '@/js': path.join(__dirname, 'src', 'js'),
+      '@/img': path.join(__dirname, 'static', 'images'),
     },
   },
   output: {
@@ -39,7 +40,7 @@ module.exports = {
         },
         styles: {
           name: 'styles',
-          test: /\.css$/,
+          type: 'css/mini-extract',
           chunks: 'all',
           enforce: true,
         },
@@ -48,6 +49,11 @@ module.exports = {
   },
   module: {
     rules: [
+      // Use `?raw` query on imports to bypass loaders and import raw file
+      {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
       {
         test: /\.(j|t)sx?$/,
         include: [
@@ -76,7 +82,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              url: (url) => !url.startsWith('/'),
+              url: { filter: (url) => !url.startsWith('/') },
               sourceMap: true,
               importLoaders: 1,
             },
@@ -93,38 +99,24 @@ module.exports = {
       },
       {
         test: /\.(gif|jpe?g|png)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 10000 },
-          },
-        ],
-      },
-      {
-        test: /\.svg$/i,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              limit: false,
-            },
-          },
-        ],
+        type: 'asset',
       },
       {
         test: /\.(eot|woff|woff2|ttf)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 30 },
-          },
-        ],
+        type: 'asset',
+      },
+      {
+        test: /\.svg$/i,
+        resourceQuery: { not: [/raw/] },
+        type: 'asset/inline',
+        generator: {
+          dataUrl: (content) => svgToMiniDataURI(content.toString()),
+        },
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],

@@ -4,8 +4,8 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 
-import { TableCellProps } from '~js/components/epics/table';
-import { EPIC_STATUSES } from '~js/utils/constants';
+import { TableCellProps } from '@/js/components/epics/table';
+import { EPIC_STATUSES } from '@/js/utils/constants';
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */

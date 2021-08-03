@@ -5,8 +5,8 @@ const SpinnerWrapper = ({
   size,
   variant,
 }: {
-  size?: string;
-  variant?: string;
+  size?: 'small' | 'xx-small' | 'x-small' | 'medium' | 'large';
+  variant?: 'base' | 'brand' | 'inverse';
 }) => (
   <Spinner
     containerClassName="spinner-container"

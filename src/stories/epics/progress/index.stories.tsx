@@ -1,7 +1,7 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicProgressComponent from '~js/components/epics/progress';
+import EpicProgressComponent from '@/js/components/epics/progress';
 
 import { withRedux } from '../../decorators';
 
@@ -18,4 +18,9 @@ const Template: Story<ComponentProps<typeof EpicProgressComponent>> = (
 export const EpicProgress = Template.bind({});
 EpicProgress.args = {
   range: [1, 10],
+};
+
+export const EpicProgressComplete = Template.bind({});
+EpicProgressComplete.args = {
+  range: [10, 10],
 };

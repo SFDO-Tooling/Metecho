@@ -1,11 +1,11 @@
 import { createSelector } from 'reselect';
 
-import { AppState } from '~js/store';
-import { selectEpic } from '~js/store/epics/selectors';
-import { Org, OrgState } from '~js/store/orgs/reducer';
-import { selectProject } from '~js/store/projects/selectors';
-import { selectTask } from '~js/store/tasks/selectors';
-import { ORG_TYPES } from '~js/utils/constants';
+import { AppState } from '@/js/store';
+import { selectEpic } from '@/js/store/epics/selectors';
+import { Org, OrgState } from '@/js/store/orgs/reducer';
+import { selectProject } from '@/js/store/projects/selectors';
+import { selectTask } from '@/js/store/tasks/selectors';
+import { ORG_TYPES } from '@/js/utils/constants';
 
 export const selectOrgState = (appState: AppState): OrgState => appState.orgs;
 

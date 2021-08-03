@@ -7,11 +7,11 @@ import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { EmptyIllustration } from '~js/components/404';
-import GitHubUserButton from '~js/components/githubUsers/button';
-import RefreshGitHubUsersButton from '~js/components/githubUsers/refreshUsersButton';
-import { SpinnerWrapper } from '~js/components/utils';
-import { GitHubUser } from '~js/store/user/reducer';
+import { EmptyIllustration } from '@/js/components/404';
+import GitHubUserButton from '@/js/components/githubUsers/button';
+import RefreshGitHubUsersButton from '@/js/components/githubUsers/refreshUsersButton';
+import { SpinnerWrapper } from '@/js/components/utils';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 interface TableCellProps {
   [key: string]: any;

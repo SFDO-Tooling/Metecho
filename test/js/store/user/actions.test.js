@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '~js/store/user/actions';
+import * as actions from '@/js/store/user/actions';
 
 import { storeWithThunk } from './../../utils';
 

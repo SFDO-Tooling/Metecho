@@ -1,5 +1,5 @@
-import { TASK_STATUSES } from '~js/utils/constants';
-import * as helpers from '~js/utils/helpers';
+import { TASK_STATUSES } from '@/js/utils/constants';
+import * as helpers from '@/js/utils/helpers';
 
 describe('pluralize', () => {
   test.each([

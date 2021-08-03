@@ -5,10 +5,10 @@ import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import TourPopover from '~js/components/tour/popover';
-import { ExternalLink, PageDescription } from '~js/components/utils';
-import { OBJECT_TYPES } from '~js/utils/constants';
-import routes from '~js/utils/routes';
+import TourPopover from '@/js/components/tour/popover';
+import { ExternalLink, PageDescription } from '@/js/components/utils';
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface Crumb {
   name: string;
@@ -106,7 +106,7 @@ const DetailPageLayout = ({
                   alt={i18n.t('social image for {{title}}', { title })}
                 />
               </div>
-            ) : null
+            ) : undefined
           }
         />
       </div>
@@ -151,7 +151,8 @@ const DetailPageLayout = ({
         <div
           className="slds-col
             slds-size_1-of-1
-            slds-medium-size_7-of-12
+            slds-medium-size_8-of-12
+            slds-large-size_7-of-12
             slds-p-bottom_x-large"
         >
           {children}
@@ -159,7 +160,8 @@ const DetailPageLayout = ({
         <div
           className="slds-col
             slds-size_1-of-1
-            slds-medium-size_5-of-12"
+            slds-medium-size_4-of-12
+            slds-large-size_5-of-12"
         >
           {description && (
             <PageDescription

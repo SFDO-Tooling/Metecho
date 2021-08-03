@@ -3,7 +3,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
 
-import GuidedTour, { getFinalStep } from '~js/components/tour/guided';
+import GuidedTour, { getFinalStep } from '@/js/components/tour/guided';
 
 interface Props {
   run: boolean;

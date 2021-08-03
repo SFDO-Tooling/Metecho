@@ -23,8 +23,8 @@ settings:
             - static
             - node_modules
           alias:
-            '~js': js
-            '~img': images
+            '@/js': js
+            '@/img': images
   react:
     version: 'detect'
 plugins:
@@ -46,9 +46,6 @@ rules:
   # Prettier
   prettier/prettier:
     - 2
-    - singleQuote: true
-      trailingComma: all
-      proseWrap: always
 
   # Import
   import/default: 0

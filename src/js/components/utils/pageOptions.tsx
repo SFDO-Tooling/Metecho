@@ -2,7 +2,7 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React from 'react';
 
-import { OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 const PageOptions = ({
   modelType,

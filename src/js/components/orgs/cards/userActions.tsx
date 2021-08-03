@@ -3,7 +3,7 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React from 'react';
 
-import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
+import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
 const UserActions = ({
   type,
@@ -66,12 +66,10 @@ const UserActions = ({
     );
   }
 
+  /* istanbul ignore else */
   if (userHasPermissions) {
     return <Button label={i18n.t('Assign')} onClick={openAssignUserModal} />;
-  } /* istanbul ignore else */ else if (
-    type === ORG_TYPES.QA &&
-    currentUserId
-  ) {
+  } else if (type === ORG_TYPES.QA && currentUserId) {
     return (
       <Button
         label={i18n.t('Self-Assign')}

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import PathItem from '~js/components/path/pathItem';
+import PathItem from '@/js/components/path/pathItem';
 
 interface PathProps {
   steps: string[];

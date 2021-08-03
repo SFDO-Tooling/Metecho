@@ -2,19 +2,19 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AppState, ThunkDispatch } from '~js/store';
-import { fetchObjects } from '~js/store/actions';
-import { Epic } from '~js/store/epics/reducer';
-import { Org } from '~js/store/orgs/reducer';
+import { AppState, ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
+import { Epic } from '@/js/store/epics/reducer';
+import { Org } from '@/js/store/orgs/reducer';
 import {
   selectOrgsByTask,
   selectPlaygroundOrgsByEpic,
   selectPlaygroundOrgsByProject,
-} from '~js/store/orgs/selectors';
-import { Project } from '~js/store/projects/reducer';
-import { Task } from '~js/store/tasks/reducer';
-import { selectUserState } from '~js/store/user/selectors';
-import { OBJECT_TYPES } from '~js/utils/constants';
+} from '@/js/store/orgs/selectors';
+import { Project } from '@/js/store/projects/reducer';
+import { Task } from '@/js/store/tasks/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export default ({
   task,

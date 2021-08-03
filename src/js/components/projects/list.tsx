@@ -7,23 +7,23 @@ import { ScrollProps, withScroll } from 'react-fns';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { EmptyIllustration } from '~js/components/404';
-import ProjectListItem from '~js/components/projects/listItem';
-import TourPopover from '~js/components/tour/popover';
+import { EmptyIllustration } from '@/js/components/404';
+import ProjectListItem from '@/js/components/projects/listItem';
+import TourPopover from '@/js/components/tour/popover';
 import {
   LabelWithSpinner,
   SpinnerWrapper,
   useIsMounted,
-} from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { fetchObjects } from '~js/store/actions';
-import { refreshProjects } from '~js/store/projects/actions';
+} from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
+import { refreshProjects } from '@/js/store/projects/actions';
 import {
   selectNextUrl,
   selectProjects,
   selectProjectsRefreshing,
-} from '~js/store/projects/selectors';
-import { OBJECT_TYPES } from '~js/utils/constants';
+} from '@/js/store/projects/selectors';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 const ProjectList = withScroll(({ y }: ScrollProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);

@@ -5,9 +5,9 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { CommitData, ModalCard } from '~js/components/tasks/capture';
-import { UseFormProps } from '~js/components/utils';
-import { TargetDirectories } from '~js/store/orgs/reducer';
+import { CommitData, ModalCard } from '@/js/components/tasks/capture';
+import { UseFormProps } from '@/js/components/utils';
+import { TargetDirectories } from '@/js/store/orgs/reducer';
 
 interface Props {
   directories: TargetDirectories;

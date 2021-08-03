@@ -1,4 +1,4 @@
-import * as logging from '~js/utils/logging';
+import * as logging from '@/js/utils/logging';
 
 describe('logError', () => {
   describe('with Sentry', () => {

@@ -5,11 +5,11 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { ExternalLink } from '~js/components/utils';
-import { Org } from '~js/store/orgs/reducer';
-import { Task } from '~js/store/tasks/reducer';
-import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '~js/utils/constants';
-import { getOrgBehindLatestMsg, getOrgStatusMsg } from '~js/utils/helpers';
+import { ExternalLink } from '@/js/components/utils';
+import { Org } from '@/js/store/orgs/reducer';
+import { Task } from '@/js/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '@/js/utils/constants';
+import { getOrgBehindLatestMsg, getOrgStatusMsg } from '@/js/utils/helpers';
 
 const OrgInfo = ({
   org,

@@ -5,9 +5,9 @@ import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { TableCellProps } from '~js/components/epics/table';
-import { ExternalLink } from '~js/components/utils';
-import routes from '~js/utils/routes';
+import { TableCellProps } from '@/js/components/epics/table';
+import { ExternalLink } from '@/js/components/utils';
+import routes from '@/js/utils/routes';
 
 const DetailTableCell = ({
   projectSlug,

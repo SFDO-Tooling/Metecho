@@ -1,7 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '~js/store/orgs/actions';
-import { addUrlParams } from '~js/utils/api';
+import * as actions from '@/js/store/orgs/actions';
+import { addUrlParams } from '@/js/utils/api';
+import { ORG_TYPES } from '@/js/utils/constants';
 
 import { getStoreWithHistory, storeWithThunk } from './../../utils';
 
@@ -945,14 +946,32 @@ describe('orgProvisioning', () => {
 
   test('subscribes to socket and returns action', () => {
     const store = storeWithThunk(defaultState);
-    const org = { id: 'org-id' };
+    const org = {
+      id: 'org-id',
+      owner: 'user-id',
+      org_type: ORG_TYPES.PLAYGROUND,
+    };
     const action = { type: 'SCRATCH_ORG_PROVISIONING', payload: org };
     store.dispatch(actions.orgProvisioning(org));
+
     expect(store.getActions()).toEqual([action]);
     expect(window.socket.subscribe).toHaveBeenCalledWith({
       model: 'scratch_org',
       id: 'org-id',
     });
+  });
+
+  test('does not return action if user is not owner of scratch org', () => {
+    const store = storeWithThunk(defaultState);
+    const org = {
+      id: 'org-id',
+      owner: 'other-user-id',
+      org_type: ORG_TYPES.PLAYGROUND,
+    };
+    store.dispatch(actions.orgProvisioning(org));
+
+    expect(store.getActions()).toEqual([]);
+    expect(window.socket.subscribe).not.toHaveBeenCalled();
   });
 });
 

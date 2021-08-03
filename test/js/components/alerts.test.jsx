@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import Alerts from '~js/components/alerts';
+import Alerts from '@/js/components/alerts';
 
 import { renderWithRedux } from './../utils';
 

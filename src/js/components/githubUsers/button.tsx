@@ -2,9 +2,9 @@ import Button from '@salesforce/design-system-react/components/button';
 import classNames from 'classnames';
 import React from 'react';
 
-import GitHubUserAvatar from '~js/components/githubUsers/avatar';
-import ReadonlyBadge from '~js/components/githubUsers/readonlyBadge';
-import { GitHubUser } from '~js/store/user/reducer';
+import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
+import ReadonlyBadge from '@/js/components/githubUsers/readonlyBadge';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 const GitHubUserButton = ({
   user,

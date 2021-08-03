@@ -1,4 +1,4 @@
-import routes, { routePatterns } from '~js/utils/routes';
+import routes, { routePatterns } from '@/js/utils/routes';
 
 describe('routes', () => {
   test.each([

@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 
-import ProjectNotFound from '~js/components/projects/project404';
-import { SpinnerWrapper } from '~js/components/utils';
-import { Project } from '~js/store/projects/reducer';
+import ProjectNotFound from '@/js/components/projects/project404';
+import { SpinnerWrapper } from '@/js/components/utils';
+import { Project } from '@/js/store/projects/reducer';
 
 export default ({
   project,

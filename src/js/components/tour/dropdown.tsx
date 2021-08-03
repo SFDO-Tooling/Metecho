@@ -7,20 +7,20 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
 
-// import backpackIcon from '~img/backpack-sm.svg';
-import mapIcon from '~img/map-sm.svg';
-import seesawIcon from '~img/seesaw-sm.svg';
-import { useIsMounted } from '~js/components/utils';
-import { AppState, ThunkDispatch } from '~js/store';
-import { selectProject } from '~js/store/projects/selectors';
-import { updateTour } from '~js/store/user/actions';
-import { selectUserState } from '~js/store/user/selectors';
+// import backpackIcon from '@/img/backpack-sm.svg';
+import mapIcon from '@/img/map-sm.svg';
+import seesawIcon from '@/img/seesaw-sm.svg';
+import { useIsMounted } from '@/js/components/utils';
+import { AppState, ThunkDispatch } from '@/js/store';
+import { selectProject } from '@/js/store/projects/selectors';
+import { updateTour } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
 import {
   SHOW_WALKTHROUGH,
   WALKTHROUGH_TYPES,
   WalkthroughType,
-} from '~js/utils/constants';
-import routes, { routePatterns } from '~js/utils/routes';
+} from '@/js/utils/constants';
+import routes, { routePatterns } from '@/js/utils/routes';
 
 const TourDropdown = ({
   className,

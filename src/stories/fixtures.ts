@@ -3,7 +3,7 @@ import {
   ORG_TYPES,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '~js/utils/constants';
+} from '@/js/utils/constants';
 
 export const api_urls = {
   account_logout: () => '/accounts/logout/',
@@ -26,6 +26,7 @@ export const api_urls = {
   scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
+  task_list: () => 'api/tasks/',
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
   task_review: (id: string) => `/api/tasks/${id}/review/`,
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
@@ -249,7 +250,12 @@ export const sampleTask1 = {
   name: 'Data Mapping',
   slug: 'data-mapping',
   old_slugs: [],
-  epic: 'e1',
+  epic: {
+    id: 'e1',
+    name: 'My Epic',
+    slug: 'my-epic',
+    github_users: [sampleGitHubUser2.id],
+  },
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
@@ -280,7 +286,12 @@ export const sampleTask2 = {
   name: 'Control Toggles for Accessible Actions',
   slug: 'control-toggles',
   old_slugs: [],
-  epic: 'e1',
+  epic: {
+    id: 'e1',
+    name: 'My Epic',
+    slug: 'my-epic',
+    github_users: [sampleGitHubUser2.id],
+  },
   description:
     'Add panel for controls toggles allowing for accessible interaction',
   description_rendered:
@@ -311,7 +322,12 @@ export const sampleTask3 = {
   name: 'Dark Mode and High Contrast Options',
   slug: 'dark-mode',
   old_slugs: [],
-  epic: 'e1',
+  epic: {
+    id: 'e1',
+    name: 'My Epic',
+    slug: 'my-epic',
+    github_users: [sampleGitHubUser2.id],
+  },
   description: 'Include options set by operating system preferences',
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
@@ -343,7 +359,12 @@ export const sampleTask4 = {
   name: 'Universal Language Selectors',
   slug: 'universal-language',
   old_slugs: [],
-  epic: 'e1',
+  epic: {
+    id: 'e1',
+    name: 'My Epic',
+    slug: 'my-epic',
+    github_users: [sampleGitHubUser2.id],
+  },
   description: 'Internationalization and Localization built in options',
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
@@ -375,7 +396,12 @@ export const sampleTask5 = {
   name: 'Additional User Role Permissions',
   slug: 'user-roles',
   old_slugs: [],
-  epic: 'e1',
+  epic: {
+    id: 'e1',
+    name: 'My Epic',
+    slug: 'my-epic',
+    github_users: [sampleGitHubUser2.id],
+  },
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -406,7 +432,12 @@ export const sampleTask6 = {
   name: 'Add the Widgets',
   slug: 'add-widgets',
   old_slugs: [],
-  epic: 'e1',
+  epic: {
+    id: 'e1',
+    name: 'My Epic',
+    slug: 'my-epic',
+    github_users: [sampleGitHubUser2.id],
+  },
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,

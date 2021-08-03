@@ -6,8 +6,8 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThunkDispatch } from 'src/js/store';
 
-import { updateTour } from '~js/store/user/actions';
-import { selectUserState } from '~js/store/user/selectors';
+import { updateTour } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
 
 const TourPopover = ({
   align,

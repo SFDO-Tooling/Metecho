@@ -1,7 +1,7 @@
-import { ObjectsAction, PaginatedObjectResponse } from '~js/store/actions';
-import { EpicAction } from '~js/store/epics/actions';
-import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
-import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
+import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
+import { EpicAction } from '@/js/store/epics/actions';
+import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
+import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 export interface Epic {
   id: string;

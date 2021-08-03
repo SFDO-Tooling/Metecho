@@ -10,7 +10,7 @@ import Joyride, {
   StoreHelpers,
 } from 'react-joyride';
 
-import tourStyles from '~js/components/tour/styles';
+import tourStyles from '@/js/components/tour/styles';
 
 interface Props {
   steps: Step[];

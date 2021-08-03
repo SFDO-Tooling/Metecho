@@ -1,9 +1,9 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '~js/store';
-import { selectEpic } from '~js/store/epics/selectors';
-import { Task, TaskState } from '~js/store/tasks/reducer';
+import { AppState } from '@/js/store';
+import { selectEpic } from '@/js/store/epics/selectors';
+import { Task, TaskState } from '@/js/store/tasks/reducer';
 
 export const selectTaskState = (appState: AppState): TaskState =>
   appState.tasks;

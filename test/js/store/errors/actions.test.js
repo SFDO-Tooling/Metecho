@@ -1,4 +1,4 @@
-import * as actions from '~js/store/errors/actions';
+import * as actions from '@/js/store/errors/actions';
 
 describe('addError', () => {
   test('returns AddErrorAction', () => {

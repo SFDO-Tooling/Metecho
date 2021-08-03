@@ -3,7 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React from 'react';
 
-import { ExternalLink } from '~js/components/utils';
+import { ExternalLink } from '@/js/components/utils';
 
 const OrgIcon = ({
   orgId,

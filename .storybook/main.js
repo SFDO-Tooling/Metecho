@@ -12,6 +12,7 @@ const minimalWebpackConfig = {
   module: {
     rules: [
       webpackConfig.module.rules[0],
+      webpackConfig.module.rules[1],
       {
         test: /\.scss$/,
         use: [
@@ -19,7 +20,7 @@ const minimalWebpackConfig = {
           {
             loader: 'css-loader',
             options: {
-              url: (url) => !url.startsWith('/'),
+              url: { filter: (url) => !url.startsWith('/') },
               importLoaders: 2,
             },
           },

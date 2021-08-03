@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { LabelWithSpinner } from '~js/components/utils';
+import { LabelWithSpinner } from '@/js/components/utils';
 
 import { render } from './../../utils';
 

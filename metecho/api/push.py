@@ -9,6 +9,7 @@ Websocket notifications you can subscribe to:
     project.:id
         PROJECT_UPDATE
         PROJECT_UPDATE_ERROR
+        SCRATCH_ORG_PROVISIONING
 
     epic.:id
         EPIC_UPDATE

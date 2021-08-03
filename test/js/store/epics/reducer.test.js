@@ -1,4 +1,4 @@
-import reducer from '~js/store/epics/reducer';
+import reducer from '@/js/store/epics/reducer';
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {

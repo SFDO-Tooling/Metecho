@@ -1,8 +1,8 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import Path from '~js/components/path';
-import { EPIC_STATUSES, EpicStatuses } from '~js/utils/constants';
+import Path from '@/js/components/path';
+import { EPIC_STATUSES, EpicStatuses } from '@/js/utils/constants';
 
 interface Props {
   status: EpicStatuses;

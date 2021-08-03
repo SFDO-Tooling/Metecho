@@ -1,9 +1,9 @@
 import i18n from 'i18next';
 
-import { ThunkResult } from '~js/store';
-import { isCurrentUser } from '~js/store/helpers';
-import { Task } from '~js/store/tasks/reducer';
-import { addToast } from '~js/store/toasts/actions';
+import { ThunkResult } from '@/js/store';
+import { isCurrentUser } from '@/js/store/helpers';
+import { Task } from '@/js/store/tasks/reducer';
+import { addToast } from '@/js/store/toasts/actions';
 
 interface TaskUpdated {
   type: 'TASK_UPDATE';

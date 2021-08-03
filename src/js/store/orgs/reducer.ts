@@ -1,14 +1,14 @@
 import { omit } from 'lodash';
 
-import { ObjectsAction } from '~js/store/actions';
-import { OrgsAction } from '~js/store/orgs/actions';
-import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
+import { ObjectsAction } from '@/js/store/actions';
+import { OrgsAction } from '@/js/store/orgs/actions';
+import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
   ORG_TYPES,
   OrgTypes,
-} from '~js/utils/constants';
+} from '@/js/utils/constants';
 
 export interface MinimalOrg {
   id: string;

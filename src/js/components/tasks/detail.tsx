@@ -9,20 +9,20 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '~js/components/404';
-import CommitList from '~js/components/commits/list';
-import SubmitReviewModal from '~js/components/orgs/cards/submitReview';
-import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
+import FourOhFour from '@/js/components/404';
+import CommitList from '@/js/components/commits/list';
+import SubmitReviewModal from '@/js/components/orgs/cards/submitReview';
+import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import TaskOrgCards, {
   ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
-} from '~js/components/orgs/taskOrgCards';
-import { Step } from '~js/components/steps/stepsItem';
-import CaptureModal from '~js/components/tasks/capture';
-import CreateTaskModal from '~js/components/tasks/createForm';
-import TaskStatusPath from '~js/components/tasks/path';
-import TaskStatusSteps from '~js/components/tasks/steps';
-import TourPopover from '~js/components/tour/popover';
+} from '@/js/components/orgs/taskOrgCards';
+import { Step } from '@/js/components/steps/stepsItem';
+import CaptureModal from '@/js/components/tasks/capture';
+import CreateTaskModal from '@/js/components/tasks/createForm';
+import TaskStatusPath from '@/js/components/tasks/path';
+import TaskStatusSteps from '@/js/components/tasks/steps';
+import TourPopover from '@/js/components/tour/popover';
 import {
   ContributeWorkModal,
   CreateOrgModal,
@@ -42,15 +42,15 @@ import {
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
   useIsMounted,
-} from '~js/components/utils';
-import { AppState, ThunkDispatch } from '~js/store';
-import { createObject, updateObject } from '~js/store/actions';
-import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
-import { Org, OrgsByParent } from '~js/store/orgs/reducer';
-import { selectProjectCollaborator } from '~js/store/projects/selectors';
-import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
-import { User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
+} from '@/js/components/utils';
+import { AppState, ThunkDispatch } from '@/js/store';
+import { createObject, updateObject } from '@/js/store/actions';
+import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
+import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
+import { selectProjectCollaborator } from '@/js/store/projects/selectors';
+import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
@@ -59,9 +59,9 @@ import {
   RETRIEVE_CHANGES,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '~js/utils/constants';
-import { getBranchLink, getTaskCommits } from '~js/utils/helpers';
-import routes from '~js/utils/routes';
+} from '@/js/utils/constants';
+import { getBranchLink, getTaskCommits } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 const ResubmitButton = ({
   canSubmit,
@@ -424,32 +424,37 @@ const TaskDetail = (
   const doContributeFromScratchOrg = useCallback(
     ({ id, useExistingTask }: { id: string; useExistingTask: boolean }) => {
       closeContributeModal();
+      // eslint-disable-next-line no-negated-condition
       if (!useExistingTask) {
         openCreateModal(id);
-      } /* istanbul ignore else */ else if (!devOrg) {
+      } else {
         /* istanbul ignore else */
-        if (!userIsAssignedDev) {
-          // Assign current user as Dev
+        // eslint-disable-next-line no-lonely-if
+        if (!devOrg) {
+          /* istanbul ignore else */
+          if (!userIsAssignedDev) {
+            // Assign current user as Dev
+            dispatch(
+              updateObject({
+                objectType: OBJECT_TYPES.TASK,
+                url: window.api_urls.task_assignees(task?.id),
+                data: {
+                  assigned_dev: user.github_id,
+                },
+              }),
+            );
+          }
+          // Convert Scratch Org to Dev Org
           dispatch(
             updateObject({
-              objectType: OBJECT_TYPES.TASK,
-              url: window.api_urls.task_assignees(task?.id),
-              data: {
-                assigned_dev: user.github_id,
-              },
+              objectType: OBJECT_TYPES.ORG,
+              url: window.api_urls.scratch_org_detail(id),
+              data: { org_type: ORG_TYPES.DEV },
+              patch: true,
             }),
           );
+          history.replace({ state: { [RETRIEVE_CHANGES]: true } });
         }
-        // Convert Scratch Org to Dev Org
-        dispatch(
-          updateObject({
-            objectType: OBJECT_TYPES.ORG,
-            url: window.api_urls.scratch_org_detail(id),
-            data: { org_type: ORG_TYPES.DEV },
-            patch: true,
-          }),
-        );
-        history.replace({ state: { [RETRIEVE_CHANGES]: true } });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

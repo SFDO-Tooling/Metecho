@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ErrorBoundary from '~js/components/error';
+import ErrorBoundary from '@/js/components/error';
 
 import { render } from './../utils';
 

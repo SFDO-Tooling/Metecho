@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useIsMounted } from '~js/components/utils';
+import { useIsMounted } from '@/js/components/utils';
 
 export default ({ timeout }: { timeout: number } = { timeout: 3000 }) => {
   const isMounted = useIsMounted();

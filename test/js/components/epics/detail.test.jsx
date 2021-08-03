@@ -2,24 +2,24 @@ import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import EpicDetail from '~js/components/epics/detail';
+import EpicDetail from '@/js/components/epics/detail';
 import {
   createObject,
   fetchObject,
   fetchObjects,
   updateObject,
-} from '~js/store/actions';
+} from '@/js/store/actions';
 import {
   refreshGitHubUsers,
   refreshOrgConfigs,
-} from '~js/store/projects/actions';
-import { EPIC_STATUSES } from '~js/utils/constants';
-import routes from '~js/utils/routes';
+} from '@/js/store/projects/actions';
+import { EPIC_STATUSES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('~js/store/actions');
-jest.mock('~js/store/projects/actions');
+jest.mock('@/js/store/actions');
+jest.mock('@/js/store/projects/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
@@ -62,6 +62,13 @@ const defaultOrg = {
     post: ['foo/bar', 'buz/baz'],
   },
   has_been_visited: true,
+};
+
+const epic = {
+  id: 'epic1',
+  slug: 'epic-1',
+  name: 'Epic 1',
+  github_users: ['123456', '234567', 'user-id', 'readonly'],
 };
 
 const defaultState = {
@@ -122,16 +129,13 @@ const defaultState = {
     r1: {
       epics: [
         {
-          id: 'epic1',
-          slug: 'epic-1',
-          name: 'Epic 1',
+          ...epic,
           project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: ['old-slug'],
-          github_users: ['123456', '234567', 'user-id', 'readonly'],
         },
       ],
       next: null,
@@ -145,7 +149,7 @@ const defaultState = {
         id: 'task1',
         name: 'Task 1',
         slug: 'task-1',
-        epic: 'epic1',
+        epic,
         description: 'Task Description',
         description_rendered: '<p>Task Description</p>',
         branch_url: 'https://github.com/test/test-repo/tree/epic__task',
@@ -158,7 +162,7 @@ const defaultState = {
         id: 'task2',
         name: 'Task 2',
         slug: 'task-2',
-        epic: 'epic1',
+        epic,
         status: 'In progress',
         assigned_dev: '123456',
       },
@@ -166,20 +170,20 @@ const defaultState = {
         id: 'task3',
         name: 'Task 3',
         slug: 'task-3',
-        epic: 'epic1',
+        epic,
         status: 'Planned',
       },
       {
         id: 'task4',
         name: 'Task 4',
         slug: 'task-4',
-        epic: 'epic1',
+        epic,
       },
       {
         id: 'task5',
         name: 'Task 5',
         slug: 'task-5',
-        epic: 'epic1',
+        epic,
         status: 'In progress',
         review_valid: true,
         review_status: 'Changes requested',
@@ -188,7 +192,7 @@ const defaultState = {
         id: 'task6',
         name: 'Task 6',
         slug: 'task-6',
-        epic: 'epic1',
+        epic,
         status: 'In progress',
         review_valid: true,
         review_status: 'Approved',
@@ -197,7 +201,7 @@ const defaultState = {
         id: 'task7',
         name: 'Task 7',
         slug: 'task-7',
-        epic: 'epic1',
+        epic,
         status: 'In progress',
         pr_is_open: true,
       },
@@ -205,7 +209,7 @@ const defaultState = {
         id: 'task8',
         name: 'Task 8',
         slug: 'task-8',
-        epic: 'epic1',
+        epic,
         status: 'Canceled',
         pr_is_open: false,
       },

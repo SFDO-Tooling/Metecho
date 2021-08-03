@@ -7,12 +7,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StaticContext } from 'react-router';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import Logout from '~js/components/user/logout';
-import { LabelWithSpinner, useIsMounted } from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { agreeToTerms } from '~js/store/user/actions';
-import { selectUserState } from '~js/store/user/selectors';
-import routes from '~js/utils/routes';
+import Logout from '@/js/components/user/logout';
+import { LabelWithSpinner, useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { agreeToTerms } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 interface TermsProps
   extends RouteComponentProps<
@@ -37,7 +37,7 @@ export const TermsModal = ({
   handleSubmit?: () => void;
 }) => (
   <Modal
-    isOpen={isRequired || isOpen}
+    isOpen={isRequired || isOpen || false}
     disableClose={isRequired}
     heading={i18n.t('Metecho Terms of Service')}
     size="medium"

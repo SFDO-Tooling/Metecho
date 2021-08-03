@@ -2,12 +2,12 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { SubmitModal } from '~js/components/utils';
-import { createObject } from '~js/store/actions';
+import { SubmitModal } from '@/js/components/utils';
+import { createObject } from '@/js/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('~js/store/actions');
+jest.mock('@/js/store/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

@@ -1,4 +1,4 @@
-import * as actions from '~js/store/tasks/actions';
+import * as actions from '@/js/store/tasks/actions';
 
 import { storeWithThunk } from './../../utils';
 
