@@ -117,6 +117,12 @@ class MinimalUserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "avatar_url")
 
 
+class ProjectCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ("name", "description", "repo_owner", "repo_name", "github_users")
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)

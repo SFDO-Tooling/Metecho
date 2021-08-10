@@ -23,6 +23,7 @@ from .gh import (
     get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
+    get_org,
     get_project_config,
     get_repo_info,
     local_github_checkout,
@@ -133,6 +134,34 @@ def _create_branches_on_github(
     task.finalize_task_update(originating_user_id=originating_user_id)
 
     return task_branch_name
+
+
+def create_repository(project, *, user, originating_user_id: str):
+    """
+    Given a local Metecho Project create the corresponding GitHub repository.
+    """
+    project.refresh_from_db()
+
+    try:
+        org = get_org(project.repo_owner)
+        team = org.create_team(f"{project} Team")
+        team.add_or_update_membership(user.username, role="maintainer")
+        for collaborator in project.github_users:
+            team.add_or_update_membership(collaborator["login"], role="member")
+        repo = org.create_repository(project.repo_name, private=True, team_id=team.id)
+        project.repo_id = repo.id
+    except Exception as e:
+        project.finalize_create_repository(
+            error=e, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_create_repository(originating_user_id=originating_user_id)
+
+
+create_repository_job = job(create_repository)
 
 
 def alert_user_about_expiring_org(*, org, days):

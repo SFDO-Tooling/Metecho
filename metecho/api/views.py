@@ -32,6 +32,7 @@ from .serializers import (
     EpicSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
+    ProjectCreateSerializer,
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
@@ -193,6 +194,13 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
 
         repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
         return self.queryset.filter(repo_id__in=repo_ids)
+
+    def create(self, request):
+        serializer = ProjectCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        project = serializer.save()
+        project.queue_create_repository(originating_user_id=str(request.user.id))
+        return Response(self.get_serializer(project).data)
 
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):

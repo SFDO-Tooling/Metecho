@@ -55,6 +55,20 @@ def gh_as_app(repo_owner, repo_name):
     return gh
 
 
+def get_org(orgname: str):
+    """
+    Authenticate as a GitHub organization.
+    A different app key is used to grant write access.
+    """
+    app_id = settings.FULL_ACCESS_GITHUB_APP_ID
+    app_key = settings.FULL_ACCESS_GITHUB_APP_KEY
+    gh = GitHub()
+    gh.login_as_app(app_key, app_id, expire_in=120)
+    installation = gh.app_installation_for_organization(orgname)
+    gh.login_as_app_installation(app_key, app_id, installation.id)
+    return gh.organization(orgname)
+
+
 def get_all_org_repos(user):
     gh = gh_given_user(user)
     return set(gh.repositories())

@@ -1,5 +1,6 @@
 import html
 import logging
+from contextlib import suppress
 from datetime import timedelta
 from typing import Dict, Optional
 
@@ -22,6 +23,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from github3.exceptions import NotFoundError
 from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from requests.exceptions import HTTPError
@@ -351,24 +353,42 @@ class Project(
         unique_together = (("repo_owner", "repo_name"),)
 
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            repo = gh.get_repo_info(
-                None, repo_owner=self.repo_owner, repo_name=self.repo_name
-            )
-            self.branch_name = repo.default_branch
-            self.latest_sha = repo.branch(repo.default_branch).latest_sha()
+        # Ignore GitHub 404 errors if the repository for a Project has not been created
+        with suppress(NotFoundError):
+            if not self.branch_name:
+                repo = gh.get_repo_info(
+                    None, repo_owner=self.repo_owner, repo_name=self.repo_name
+                )
+                self.branch_name = repo.default_branch
+                self.latest_sha = repo.branch(repo.default_branch).latest_sha()
 
-        if not self.latest_sha:
-            repo = gh.get_repo_info(
-                None, repo_owner=self.repo_owner, repo_name=self.repo_name
-            )
-            self.latest_sha = repo.branch(self.branch_name).latest_sha()
+            if not self.latest_sha:
+                repo = gh.get_repo_info(
+                    None, repo_owner=self.repo_owner, repo_name=self.repo_name
+                )
+                self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
         super().save(*args, **kwargs)
 
     def finalize_get_social_image(self):
         self.save()
         self.notify_changed(originating_user_id=None)
+
+    def queue_create_repository(self, *, originating_user_id: str):
+        from .jobs import create_repository_job
+
+        user = User.objects.get(id=originating_user_id)
+        create_repository_job.delay(
+            self, user=user, originating_user_id=originating_user_id
+        )
+
+    def finalize_create_repository(self, *, error=None, originating_user_id):
+        if error is None:
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
+            self.notify_error(error, originating_user_id=originating_user_id)
+            self.delete()
 
     def queue_refresh_github_users(self, *, originating_user_id):
         from .jobs import refresh_github_users_job

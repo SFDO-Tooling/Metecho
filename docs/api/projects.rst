@@ -2,7 +2,7 @@
 Projects
 ========
 
-This allows list, retrieve, create, update, and delete of Projects.
+This allows list, retrieve, and create of Projects.
 
 Retrieve
 --------
@@ -63,6 +63,28 @@ Retrieve
         ...
       ]
     }
+
+Create
+------
+
+.. sourcecode:: http
+
+   POST /api/projects/ HTTP/1.1
+
+   {
+      "name": "Test Project",
+      "repo_owner": "SFDO-Tooling",
+      "repo_name": "test-project",
+      "description": "",
+      "github_users": [
+        {
+          "id": "12345",
+          "login": "username",
+          "name": "Full Name",
+          "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
+        }
+      ]
+   }
 
 Refresh GitHub Users
 --------------------
