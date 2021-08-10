@@ -43,6 +43,8 @@ import {
 } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
+import CreateTaskModal from '../tasks/createForm';
+
 const ProjectDetail = (
   props: RouteComponentProps<
     any,
@@ -54,6 +56,7 @@ const ProjectDetail = (
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
@@ -145,6 +148,10 @@ const ProjectDetail = (
   }, []);
   const closeCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(false);
+  }, []);
+
+  const openCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(false);
   }, []);
 
   // guided tour related
@@ -397,20 +404,31 @@ const ProjectDetail = (
           >
             {tasks ? (
               <>
-                {tasks.length > 0 ? (
-                  <TasksTableComponent
-                    projectId={project.id}
-                    projectSlug={project.slug}
-                    tasks={tasks}
-                    githubUsers={project.github_users}
-                    canAssign={project.has_push_permission}
-                    isRefreshingUsers={project.currently_fetching_github_users}
-                    assignUserAction={doAssignUser}
-                    viewEpicsColumn
+                <div className="slds-is-relative">
+                  <Button
+                    label={i18n.t('Add a Task')}
+                    variant="brand"
+                    onClick={openCreateTaskModal}
+                    className="slds-m-bottom_large"
                   />
-                ) : (
-                  <p>{i18n.t('There are no Tasks for this Project.')}</p>
-                )}
+
+                  {tasks.length > 0 ? (
+                    <TasksTableComponent
+                      projectId={project.id}
+                      projectSlug={project.slug}
+                      tasks={tasks}
+                      githubUsers={project.github_users}
+                      canAssign={project.has_push_permission}
+                      isRefreshingUsers={
+                        project.currently_fetching_github_users
+                      }
+                      assignUserAction={doAssignUser}
+                      viewEpicsColumn
+                    />
+                  ) : (
+                    <p>{i18n.t('There are no Tasks for this Project.')}</p>
+                  )}
+                </div>
               </>
             ) : (
               // Fetching tasks from API
@@ -443,6 +461,12 @@ const ProjectDetail = (
           project={project}
           isOpen={createOrgModalOpen}
           closeModal={closeCreateOrgModal}
+        />
+        <CreateTaskModal
+          project={project}
+          isOpenOrOrgId={createTaskModalOpen}
+          playgroundOrg={playgroundOrg}
+          closeCreateModal={closeCreateModal}
         />
       </DetailPageLayout>
     </DocumentTitle>

@@ -28,7 +28,7 @@ import routes from '@/js/utils/routes';
 
 interface Props {
   project: Project;
-  epic: Epic;
+  epic?: Epic;
   isOpenOrOrgId: boolean | string | null;
   playgroundOrg?: Org;
   closeCreateModal: () => void;
@@ -64,10 +64,10 @@ const CreateTaskModal = ({
   };
 
   const additionalData: { [key: string]: any } = {
-    epic: epic.id,
+    epic: epic?.id,
   };
 
-  if (isContributingFromOrg) {
+  if (isContributingFromOrg && epic) {
     additionalData.dev_org = isOpenOrOrgId as string;
   }
 
@@ -117,9 +117,17 @@ const CreateTaskModal = ({
         if (
           type === 'CREATE_OBJECT_SUCCEEDED' &&
           objectType === OBJECT_TYPES.TASK &&
-          object?.slug
+          object?.slug &&
+          epic
         ) {
           const url = routes.task_detail(project.slug, epic.slug, object.slug);
+          history.push(url, { [RETRIEVE_CHANGES]: true });
+        } else if (
+          type === 'CREATE_OBJECT_SUCCEEDED' &&
+          objectType === OBJECT_TYPES.TASK &&
+          object?.slug
+        ) {
+          const url = routes.project_detail(project.slug);
           history.push(url, { [RETRIEVE_CHANGES]: true });
         }
       }
@@ -153,8 +161,12 @@ const CreateTaskModal = ({
   let heading;
   if (isContributingFromOrg) {
     heading = i18n.t('Add a Task to Contribute Work from Scratch Org');
-  } else {
+  } else if (epic) {
     heading = i18n.t('Add a Task for {{epic_name}}', { epic_name: epic.name });
+  } else {
+    heading = i18n.t('Add a Task for {{project_name}}', {
+      project_name: project.name,
+    });
   }
 
   return (
