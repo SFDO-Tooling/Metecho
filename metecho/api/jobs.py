@@ -148,7 +148,7 @@ def create_repository(project, *, user, originating_user_id: str):
         team.add_or_update_membership(user.username, role="maintainer")
         for collaborator in project.github_users:
             team.add_or_update_membership(collaborator["login"], role="member")
-        repo = org.create_repository(project.repo_name, private=True, team_id=team.id)
+        repo = org.create_repository(project.repo_name, private=False, team_id=team.id)
         project.repo_id = repo.id
     except Exception as e:
         project.finalize_create_repository(
