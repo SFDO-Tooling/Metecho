@@ -23,33 +23,20 @@ Retrieve
         {
           "id": "wm0zn08",
           "name": "Example Org",
-          "avatar_url": "https://avatars.githubusercontent.com/u/780830?v=4",
-          "members": [
-              {
-                  "id": "61586",
-                  "login": "user1",
-                  "avatar_url": "https://avatars.githubusercontent.com/u/61586?v=4"
-              },
-              {
-                  "id": "41588129",
-                  "login": "user2",
-                  "avatar_url": "https://avatars.githubusercontent.com/u/41588129?v=4"
-              }
-          ],
-          "currently_refreshing": false
         }
         ...
       ]
     }
 
-Refresh from GitHub
--------------------
+Members
+-------
 
-This will queue a job to refresh the organization's information using the GitHub API.
+This will queue a job to get the organization's members using the GitHub API.
+Only members visible to the current user will be returned.
 
 .. sourcecode:: http
 
-   POST /api/organizations/:id/refresh/ HTTP/1.1
+   POST /api/organizations/:id/members/ HTTP/1.1
 
 .. sourcecode:: http
 

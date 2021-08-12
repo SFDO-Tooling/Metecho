@@ -190,9 +190,9 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
     queryset = GitHubOrganization.objects.all()
 
     @action(detail=True, methods=["POST"])
-    def refresh(self, request, pk):
-        org = self.get_object()
-        org.queue_refresh(originating_user_id=str(request.user.id))
+    def members(self, request, pk):
+        org: GitHubOrganization = self.get_object()
+        org.queue_get_members(user=request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

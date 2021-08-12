@@ -462,23 +462,9 @@ class Project(
             return None
 
 
-class GitHubOrganization(HashIdMixin, PushMixin, TimestampsMixin):
-    """
-    Used to keep a list of known GH orgs and their members.
-    """
-
+class GitHubOrganization(HashIdMixin, TimestampsMixin):
     name = StringField()
     login = StringField(unique=True, help_text="Organization's 'username' on GitHub")
-    avatar_url = models.URLField(blank=True)
-    # User data is shaped like this:
-    #   {
-    #     "id": str,
-    #     "login": str,
-    #     "avatar_url": str,
-    #   }
-    members = models.JSONField(blank=True, default=list)
-
-    currently_refreshing = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("GitHub organization")
@@ -487,38 +473,29 @@ class GitHubOrganization(HashIdMixin, PushMixin, TimestampsMixin):
     def __str__(self):
         return self.name
 
-    # begin PushMixin configuration:
-    push_update_type = "GITHUB_ORGANIZATION_UPDATE"
-    push_error_type = "GITHUB_ORGANIZATION_UPDATE_ERROR"
-
-    def get_serialized_representation(self, user):
-        from .serializers import GitHubOrganizationSerializer
-
-        return GitHubOrganizationSerializer(
-            self, context=self._create_context_with_user(user)
-        ).data
-
-    # end PushMixin configuration
-
     @property
     def github_url(self):
         return f"https://github.com/{self.login}"
 
-    def queue_refresh(self, *, originating_user_id: str):
-        from .jobs import refresh_github_org_job
+    def queue_get_members(self, *, user: User):
+        from .jobs import get_org_members_job
 
-        if not self.currently_refreshing:
-            self.currently_refreshing = True
-            self.save()
-            refresh_github_org_job.delay(self, originating_user_id=originating_user_id)
+        get_org_members_job.delay(self, user=user)
 
-    def finalize_refresh(self, *, error=None, originating_user_id: str):
-        self.currently_refreshing = False
-        self.save()
-        if error is None:
-            self.notify_changed(originating_user_id=originating_user_id)
-        else:
-            self.notify_error(error, originating_user_id=originating_user_id)
+    def finalize_get_members(
+        self, *, members: list = None, error: Exception = None, originating_user_id: str
+    ):
+        message = {
+            "type": "GITHUB_ORGANIZATION_MEMBERS_FETCH",
+            "payload": {
+                "originating_user_id": originating_user_id,
+                "message": members,
+            },
+        }
+        if error is not None:
+            message["type"] = "GITHUB_ORGANIZATION_MEMBERS_ERROR"
+            message["payload"]["message"] = str(error)
+        async_to_sync(push.push_message_about_instance)(self, message)
 
 
 class GitHubRepository(HashIdMixin, models.Model):

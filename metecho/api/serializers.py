@@ -123,7 +123,7 @@ class GitHubOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GitHubOrganization
-        fields = ("id", "name", "avatar_url", "members", "currently_refreshing")
+        fields = ("id", "name")
 
 
 class ProjectCreateSerializer(serializers.ModelSerializer):

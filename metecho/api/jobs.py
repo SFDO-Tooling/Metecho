@@ -26,11 +26,12 @@ from .gh import (
     get_org,
     get_project_config,
     get_repo_info,
+    gh_given_user,
     local_github_checkout,
     normalize_commit,
     try_to_make_branch,
 )
-from .models import TASK_REVIEW_STATUS, GitHubOrganization
+from .models import TASK_REVIEW_STATUS, GitHubOrganization, User
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -705,15 +706,17 @@ def refresh_commits(*, project, branch_name, originating_user_id):
 refresh_commits_job = job(refresh_commits)
 
 
-def refresh_github_org(org: GitHubOrganization, *, originating_user_id: str):
+def get_org_members(org: GitHubOrganization, *, user: User):
     """
-    Refresh an organization's information from the GitHub API.
+    Get organization's members from the GitHub API, as seen by `user`.
     """
-    org.refresh_from_db()
     try:
-        gh_org = get_org(org.login)
-        org.avatar_url = gh_org.avatar_url
-        org.members = sorted(
+        org.refresh_from_db()
+        originating_user_id = str(user.id)
+
+        gh = gh_given_user(user)
+        gh_org = gh.organization(org.login)
+        members = sorted(
             (
                 {
                     "id": str(member.id),
@@ -724,16 +727,18 @@ def refresh_github_org(org: GitHubOrganization, *, originating_user_id: str):
             ),
             key=lambda x: x["login"].lower(),
         )
-    except Exception as e:
-        org.finalize_refresh(error=e, originating_user_id=originating_user_id)
+    except Exception as error:
+        org.finalize_get_members(error=error, originating_user_id=originating_user_id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        org.finalize_refresh(originating_user_id=originating_user_id)
+        org.finalize_get_members(
+            members=members, originating_user_id=originating_user_id
+        )
 
 
-refresh_github_org_job = job(refresh_github_org)
+get_org_members_job = job(get_org_members)
 
 
 def refresh_github_users(project, *, originating_user_id):
