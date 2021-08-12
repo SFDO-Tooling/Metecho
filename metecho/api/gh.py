@@ -55,7 +55,7 @@ def gh_as_app(repo_owner, repo_name):
     return gh
 
 
-def get_org(orgname: str):
+def get_org_for_repo_creation(orgname: str):
     """
     Authenticate as a GitHub organization.
     A different app key is used to grant write access.

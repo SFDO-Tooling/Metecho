@@ -23,7 +23,7 @@ from .gh import (
     get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
-    get_org,
+    get_org_for_repo_creation,
     get_project_config,
     get_repo_info,
     gh_given_user,
@@ -31,7 +31,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import TASK_REVIEW_STATUS, GitHubOrganization, User
+from .models import TASK_REVIEW_STATUS, GitHubOrganization, Project, User
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -137,14 +137,14 @@ def _create_branches_on_github(
     return task_branch_name
 
 
-def create_repository(project, *, user, originating_user_id: str):
+def create_repository(project: Project, *, user: User, originating_user_id: str):
     """
     Given a local Metecho Project create the corresponding GitHub repository.
     """
     project.refresh_from_db()
 
     try:
-        org = get_org(project.repo_owner)
+        org = get_org_for_repo_creation(project.repo_owner)
         team = org.create_team(f"{project} Team")
         team.add_or_update_membership(user.username, role="maintainer")
         for collaborator in project.github_users:
