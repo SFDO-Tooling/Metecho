@@ -30,7 +30,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import TASK_REVIEW_STATUS
+from .models import TASK_REVIEW_STATUS, GitHubOrganization
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -703,6 +703,37 @@ def refresh_commits(*, project, branch_name, originating_user_id):
 
 
 refresh_commits_job = job(refresh_commits)
+
+
+def refresh_github_org(org: GitHubOrganization, *, originating_user_id: str):
+    """
+    Refresh an organization's information from the GitHub API.
+    """
+    org.refresh_from_db()
+    try:
+        gh_org = get_org(org.login)
+        org.avatar_url = gh_org.avatar_url
+        org.members = sorted(
+            (
+                {
+                    "id": str(member.id),
+                    "login": member.login,
+                    "avatar_url": member.avatar_url,
+                }
+                for member in gh_org.members()
+            ),
+            key=lambda x: x["login"].lower(),
+        )
+    except Exception as e:
+        org.finalize_refresh(error=e, originating_user_id=originating_user_id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        org.finalize_refresh(originating_user_id=originating_user_id)
+
+
+refresh_github_org_job = job(refresh_github_org)
 
 
 def refresh_github_users(project, *, originating_user_id):

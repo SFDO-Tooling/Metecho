@@ -4,6 +4,7 @@ from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 from django.db.models import JSONField
 from django.forms.widgets import Textarea
+from django.template.defaultfilters import urlize
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 
@@ -11,6 +12,7 @@ from . import gh
 from .models import (
     Epic,
     EpicSlug,
+    GitHubOrganization,
     GitHubRepository,
     Project,
     ProjectSlug,
@@ -106,6 +108,15 @@ class ProjectSlugAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     list_select_related = ("parent",)
     search_fields = ("slug",)
+
+
+@admin.register(GitHubOrganization)
+class GitHubOrganizationAdmin(admin.ModelAdmin):
+    list_display = ("name", "github_link")
+    search_fields = ("name", "login")
+
+    def github_link(self, obj):
+        return urlize(obj.github_url)
 
 
 @admin.register(GitHubRepository)

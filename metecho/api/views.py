@@ -12,7 +12,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
@@ -22,7 +22,15 @@ from .hook_serializers import (
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Project, ScratchOrg, Task
+from .models import (
+    EPIC_STATUSES,
+    SCRATCH_ORG_TYPES,
+    Epic,
+    GitHubOrganization,
+    Project,
+    ScratchOrg,
+    Task,
+)
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -31,6 +39,7 @@ from .serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubOrganizationSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
     ProjectSerializer,
@@ -172,6 +181,19 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     serializer_class = MinimalUserSerializer
     pagination_class = CustomPaginator
     queryset = User.objects.all()
+
+
+class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GitHubOrganizationSerializer
+    pagination_class = CustomPaginator
+    queryset = GitHubOrganization.objects.all()
+
+    @action(detail=True, methods=["POST"])
+    def refresh(self, request, pk):
+        org = self.get_object()
+        org.queue_refresh(originating_user_id=str(request.user.id))
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):

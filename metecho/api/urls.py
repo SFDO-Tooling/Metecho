@@ -4,6 +4,7 @@ from rest_framework import routers
 from .views import (
     CurrentUserViewSet,
     EpicViewSet,
+    GitHubOrganizationViewSet,
     HookView,
     ProjectViewSet,
     ScratchOrgViewSet,
@@ -18,6 +19,7 @@ router.register("projects", ProjectViewSet, basename="project")
 router.register("epics", EpicViewSet, basename="epic")
 router.register("tasks", TaskViewSet, basename="task")
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
+router.register("organizations", GitHubOrganizationViewSet, basename="organization")
 urlpatterns = router.urls + [
     path("hook/", HookView.as_view(), name="hook"),
     path(  # Current user detail action without PK

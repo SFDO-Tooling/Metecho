@@ -13,6 +13,7 @@ from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
     Epic,
+    GitHubOrganization,
     Project,
     ScratchOrg,
     SiteProfile,
@@ -115,6 +116,14 @@ class MinimalUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "avatar_url")
+
+
+class GitHubOrganizationSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = GitHubOrganization
+        fields = ("id", "name", "avatar_url", "members", "currently_refreshing")
 
 
 class ProjectCreateSerializer(serializers.ModelSerializer):

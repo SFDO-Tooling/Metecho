@@ -382,10 +382,12 @@ class Project(
             self, user=user, originating_user_id=originating_user_id
         )
 
-    def finalize_create_repository(self, *, error=None, originating_user_id):
+    def finalize_create_repository(self, *, error=None, originating_user_id: str):
         if error is None:
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)
+            # Get fresh permission information for each collaborator
+            self.queue_refresh_github_users(originating_user_id=originating_user_id)
         else:
             self.notify_error(error, originating_user_id=originating_user_id)
             self.delete()
@@ -458,6 +460,65 @@ class Project(
             return [u for u in self.github_users if u["id"] == gh_uid][0]
         except IndexError:
             return None
+
+
+class GitHubOrganization(HashIdMixin, PushMixin, TimestampsMixin):
+    """
+    Used to keep a list of known GH orgs and their members.
+    """
+
+    name = StringField()
+    login = StringField(unique=True, help_text="Organization's 'username' on GitHub")
+    avatar_url = models.URLField(blank=True)
+    # User data is shaped like this:
+    #   {
+    #     "id": str,
+    #     "login": str,
+    #     "avatar_url": str,
+    #   }
+    members = models.JSONField(blank=True, default=list)
+
+    currently_refreshing = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = _("GitHub organization")
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
+    # begin PushMixin configuration:
+    push_update_type = "GITHUB_ORGANIZATION_UPDATE"
+    push_error_type = "GITHUB_ORGANIZATION_UPDATE_ERROR"
+
+    def get_serialized_representation(self, user):
+        from .serializers import GitHubOrganizationSerializer
+
+        return GitHubOrganizationSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
+
+    # end PushMixin configuration
+
+    @property
+    def github_url(self):
+        return f"https://github.com/{self.login}"
+
+    def queue_refresh(self, *, originating_user_id: str):
+        from .jobs import refresh_github_org_job
+
+        if not self.currently_refreshing:
+            self.currently_refreshing = True
+            self.save()
+            refresh_github_org_job.delay(self, originating_user_id=originating_user_id)
+
+    def finalize_refresh(self, *, error=None, originating_user_id: str):
+        self.currently_refreshing = False
+        self.save()
+        if error is None:
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
+            self.notify_error(error, originating_user_id=originating_user_id)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
