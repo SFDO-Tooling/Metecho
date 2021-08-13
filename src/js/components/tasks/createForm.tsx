@@ -118,16 +118,9 @@ const CreateTaskModal = ({
           type === 'CREATE_OBJECT_SUCCEEDED' &&
           objectType === OBJECT_TYPES.TASK &&
           object?.slug &&
-          epic
+          epic?.slug
         ) {
           const url = routes.task_detail(project.slug, epic.slug, object.slug);
-          history.push(url, { [RETRIEVE_CHANGES]: true });
-        } else if (
-          type === 'CREATE_OBJECT_SUCCEEDED' &&
-          objectType === OBJECT_TYPES.TASK &&
-          object?.slug
-        ) {
-          const url = routes.project_detail(project.slug);
           history.push(url, { [RETRIEVE_CHANGES]: true });
         }
       }

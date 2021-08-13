@@ -12,6 +12,7 @@ import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
+import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
 import LandingModal from '@/js/components/tour/landing';
 import PlanTour from '@/js/components/tour/plan';
@@ -42,8 +43,6 @@ import {
   WalkthroughType,
 } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
-
-import CreateTaskModal from '../tasks/createForm';
 
 const ProjectDetail = (
   props: RouteComponentProps<
@@ -151,6 +150,10 @@ const ProjectDetail = (
   }, []);
 
   const openCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(true);
+  }, []);
+
+  const closeCreateTaskModal = useCallback(() => {
     setCreateTaskModalOpen(false);
   }, []);
 
@@ -466,7 +469,7 @@ const ProjectDetail = (
           project={project}
           isOpenOrOrgId={createTaskModalOpen}
           playgroundOrg={playgroundOrg}
-          closeCreateModal={closeCreateModal}
+          closeCreateModal={closeCreateTaskModal}
         />
       </DetailPageLayout>
     </DocumentTitle>
