@@ -64,6 +64,16 @@ const EpicTable = ({
         <DetailTableCell projectSlug={projectSlug} />
       </DataTableColumn>
       <DataTableColumn
+        key="taskCount"
+        label={'Tasks'}
+        property="taskCount"
+        width="0"
+      >
+        {
+          // @@@ Placeholder for Task Count Column
+        }
+      </DataTableColumn>
+      <DataTableColumn
         key="status"
         label={
           <>
