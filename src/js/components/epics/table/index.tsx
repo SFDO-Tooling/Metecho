@@ -66,7 +66,7 @@ const EpicTable = ({
       <DataTableColumn
         key="taskCount"
         label={'Tasks'}
-        property="taskCount"
+        property="task_count"
         width="0"
       >
         {
