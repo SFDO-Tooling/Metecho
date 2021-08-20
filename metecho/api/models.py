@@ -374,15 +374,13 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=None)
 
-    def queue_create_repository(self, *, originating_user_id: str):
+    def queue_create_repository(self, *, user: User):
         from .jobs import create_repository_job
 
-        user = User.objects.get(id=originating_user_id)
-        create_repository_job.delay(
-            self, user=user, originating_user_id=originating_user_id
-        )
+        create_repository_job.delay(self, user=user)
 
-    def finalize_create_repository(self, *, error=None, originating_user_id: str):
+    def finalize_create_repository(self, *, error=None, user: User):
+        originating_user_id = str(user.id)
         if error is None:
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)

@@ -226,7 +226,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         )
         serializer.is_valid(raise_exception=True)
         project = serializer.save()
-        project.queue_create_repository(originating_user_id=str(request.user.id))
+        project.queue_create_repository(user=request.user)
         return Response(self.get_serializer(project).data)
 
     @action(detail=True, methods=["POST"])

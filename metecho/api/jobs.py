@@ -137,13 +137,14 @@ def _create_branches_on_github(
     return task_branch_name
 
 
-def create_repository(project: Project, *, user: User, originating_user_id: str):
+def create_repository(project: Project, *, user: User):
     """
     Given a local Metecho Project create the corresponding GitHub repository.
     """
     project.refresh_from_db()
 
     try:
+        # Team & repository on GitHub
         org = get_org_for_repo_creation(project.repo_owner)
         team = org.create_team(f"{project} Team")
         team.add_or_update_membership(user.username, role="maintainer")
@@ -151,15 +152,18 @@ def create_repository(project: Project, *, user: User, originating_user_id: str)
             team.add_or_update_membership(collaborator["login"], role="member")
         repo = org.create_repository(project.repo_name, private=False, team_id=team.id)
         project.repo_id = repo.id
-    except Exception as e:
-        project.finalize_create_repository(
-            error=e, originating_user_id=originating_user_id
+
+        # GitHubRepository instance for local permission checks
+        user.repositories.create(
+            repo_id=repo.id, repo_url=repo.html_url, permissions=repo.permissions
         )
+    except Exception as e:
+        project.finalize_create_repository(error=e, user=user)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        project.finalize_create_repository(originating_user_id=originating_user_id)
+        project.finalize_create_repository(user=user)
 
 
 create_repository_job = job(create_repository)
