@@ -218,7 +218,12 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         return self.queryset.filter(repo_id__in=repo_ids)
 
     def create(self, request):
-        serializer = ProjectCreateSerializer(data=request.data)
+        if not request.user.has_perm("api.add_project"):
+            raise PermissionDenied(_("You are not authorized to create projects"))
+
+        serializer = ProjectCreateSerializer(
+            data=request.data, context=self.get_serializer_context()
+        )
         serializer.is_valid(raise_exception=True)
         project = serializer.save()
         project.queue_create_repository(originating_user_id=str(request.user.id))

@@ -9,6 +9,7 @@ from rest_framework.fields import JSONField
 
 from .email_utils import get_user_facing_url
 from .fields import MarkdownField
+from .gh import gh_given_user
 from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
@@ -127,9 +128,33 @@ class GitHubOrganizationSerializer(serializers.ModelSerializer):
 
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubOrganization.objects.all(), pk_field=serializers.CharField()
+    )
+
     class Meta:
         model = Project
-        fields = ("name", "description", "repo_owner", "repo_name", "github_users")
+        fields = ("name", "description", "organization", "repo_name", "github_users")
+
+    def validate_organization(self, organization):
+        gh_user = gh_given_user(self.context["request"].user)
+        gh_user_orgs = [org.login for org in gh_user.organizations()]
+        if organization.login not in gh_user_orgs:
+            raise serializers.ValidationError(
+                _(
+                    "Either you are not a member of the %(name)s organization "
+                    "or it hasn't installed the Metecho GitHub app"
+                )
+                % {"name": organization}
+            )
+        return organization
+
+    def save(self, *args, **kwargs):
+        # `organization` is not an actual field on Project so we convert it to `repo_owner`
+        organization = self.validated_data.pop("organization", None)
+        if organization is not None:
+            kwargs.setdefault("repo_owner", organization.login)
+        return super().save(*args, **kwargs)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
