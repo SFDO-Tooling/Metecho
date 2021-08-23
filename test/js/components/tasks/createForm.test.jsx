@@ -83,7 +83,7 @@ describe('<TaskForm/>', () => {
   describe('add a single task', () => {
     test('calls createObject with data', async () => {
       const { getByText, getByLabelText } = setup();
-      const submit = getByText('Add');
+      const submit = getByText('Create');
       const nameInput = getByLabelText('*Task Name');
       const descriptionInput = getByLabelText('Description');
       const radioInput = getByLabelText('QA - This is a QA flow');
@@ -127,7 +127,7 @@ describe('<TaskForm/>', () => {
           epic: { ...defaultEpic, org_config_names: [] },
         });
 
-        const submit = getByText('Add');
+        const submit = getByText('Create');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);
@@ -159,15 +159,15 @@ describe('<TaskForm/>', () => {
           }),
         );
         const { findByText, getByText, getByLabelText } = setup();
-        const submit = getByText('Add & New');
+        const submit = getByText('Create & New');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);
 
         expect.assertions(1);
-        await findByText('A task was successfully added.');
+        await findByText('A task was successfully created.');
 
-        expect(getByText('A task was successfully added.')).toBeVisible();
+        expect(getByText('A task was successfully created.')).toBeVisible();
       });
     });
   });
@@ -183,7 +183,7 @@ describe('<TaskForm/>', () => {
           isOpenOrOrgId: org.id,
           playgroundOrg: org,
         });
-        const submit = getByText('Add');
+        const submit = getByText('Create');
         const nameInput = getByLabelText('*Task Name');
         createObject.mockReturnValueOnce(() =>
           Promise.resolve({

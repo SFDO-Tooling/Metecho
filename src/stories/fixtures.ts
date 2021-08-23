@@ -487,7 +487,7 @@ export const sampleProject1 = {
 
 export const sampleEpicSteps = [
   {
-    label: 'Add a task',
+    label: 'Create a task',
     active: true,
     complete: false,
   },
@@ -511,7 +511,7 @@ export const sampleEpicSteps = [
 
 export const sampleEpicStepsWithAction = [
   {
-    label: 'Add a task',
+    label: 'Create a task',
     active: false,
     complete: true,
   },
@@ -536,7 +536,7 @@ export const sampleEpicStepsWithAction = [
 
 export const sampleEpicStepsWithLink = [
   {
-    label: 'Add a task',
+    label: 'Create a task',
     active: false,
     complete: true,
   },

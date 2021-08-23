@@ -30,7 +30,7 @@ const EpicStatusSteps = ({
 
   const steps: Step[] = [
     {
-      label: i18n.t('Add a task'),
+      label: i18n.t('Create a task'),
       active: !hasTasks,
       complete: hasTasks || isMerged,
     },

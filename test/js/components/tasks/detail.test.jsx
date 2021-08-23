@@ -565,13 +565,13 @@ describe('<TaskDetail/>', () => {
         fireEvent.click(getByText('Contribute'));
 
         expect(
-          getByText('Add a Task to Contribute Work from Scratch Org'),
+          getByText('Create a Task to Contribute Work from Scratch Org'),
         ).toBeVisible();
 
         fireEvent.click(getByTitle('Cancel'));
 
         expect(
-          queryByText('Add a Task to Contribute Work from Scratch Org'),
+          queryByText('Create a Task to Contribute Work from Scratch Org'),
         ).toBeNull();
       });
     });

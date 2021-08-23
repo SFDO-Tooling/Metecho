@@ -31,7 +31,8 @@ export interface Task {
     name: string;
     slug: string;
     github_users: string[];
-  };
+  } | null;
+  project: string | null;
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;

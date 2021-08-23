@@ -449,7 +449,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   let taskHeader = i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name });
   if (!epicHasTasks && !epicIsMerged) {
     taskHeader = project.has_push_permission
-      ? i18n.t('Add a Task for {{epic_name}}', {
+      ? i18n.t('Create a Task for {{epic_name}}', {
           epic_name: epic.name,
         })
       : i18n.t('No Tasks for {{epic_name}}', { epic_name: epic.name });
@@ -571,8 +571,8 @@ const EpicDetail = (props: RouteComponentProps) => {
                 body={
                   <Trans i18nKey="tourEpicNextSteps">
                     The Next Steps section is designed as a quick reference to
-                    guide you through the process from adding your first Task to
-                    getting your Epic merged into the Project on GitHub. The
+                    guide you through the process from creating your first Task
+                    to getting your Epic merged into the Project on GitHub. The
                     next step is indicated with a blue ring, and completed steps
                     are checked.
                   </Trans>
@@ -670,7 +670,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             {project.has_push_permission && !epicIsMerged ? (
               <div className="slds-is-relative">
                 <Button
-                  label={i18n.t('Add a Task')}
+                  label={i18n.t('Create a Task')}
                   variant="brand"
                   onClick={openCreateModal}
                   className="slds-m-bottom_large"
@@ -678,12 +678,12 @@ const EpicDetail = (props: RouteComponentProps) => {
                 <TourPopover
                   id="tour-epic-add-task"
                   align="top left"
-                  heading={i18n.t('Add a Task to contribute')}
+                  heading={i18n.t('Create a Task to contribute')}
                   body={
-                    <Trans i18nKey="tourAddTask">
-                      To get started contributing to this Epic, add a Task. You
-                      will be asked for a name and optional description. You can
-                      chose an org type, but “dev” is recommended. Tasks
+                    <Trans i18nKey="tourCreateTask">
+                      To get started contributing to this Epic, create a Task.
+                      You will be asked for a name and optional description. You
+                      can chose an org type, but “dev” is recommended. Tasks
                       represent small changes to this Epic; each one has a
                       Developer and a Tester.
                     </Trans>

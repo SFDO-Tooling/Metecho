@@ -153,11 +153,13 @@ const CreateTaskModal = ({
 
   let heading;
   if (isContributingFromOrg) {
-    heading = i18n.t('Add a Task to Contribute Work from Scratch Org');
+    heading = i18n.t('Create a Task to Contribute Work from Scratch Org');
   } else if (epic) {
-    heading = i18n.t('Add a Task for {{epic_name}}', { epic_name: epic.name });
+    heading = i18n.t('Create a Task for {{epic_name}}', {
+      epic_name: epic.name,
+    });
   } else {
-    heading = i18n.t('Add a Task for {{project_name}}', {
+    heading = i18n.t('Create a Task for {{project_name}}', {
       project_name: project.name,
     });
   }
@@ -180,7 +182,7 @@ const CreateTaskModal = ({
               slds-p-top_xx-small
               metecho-transition-out"
           >
-            {i18n.t('A task was successfully added.')}
+            {i18n.t('A task was successfully created.')}
           </span>
         ),
         <Button
@@ -194,9 +196,9 @@ const CreateTaskModal = ({
             key="create-new"
             label={
               isSavingBatch ? (
-                <LabelWithSpinner label={i18n.t('Adding…')} />
+                <LabelWithSpinner label={i18n.t('Creating…')} />
               ) : (
-                i18n.t('Add & New')
+                i18n.t('Create & New')
               )
             }
             onClick={batchSubmitClicked}
@@ -208,9 +210,9 @@ const CreateTaskModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Adding…')} variant="inverse" />
+              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
             ) : (
-              i18n.t('Add')
+              i18n.t('Create')
             )
           }
           variant="brand"

@@ -339,7 +339,7 @@ describe('<EpicDetail/>', () => {
       },
     });
 
-    expect(getByText('Add a Task for Epic 1')).toBeVisible();
+    expect(getByText('Create a Task for Epic 1')).toBeVisible();
     expect(queryByText('Tasks for Epic 1')).toBeNull();
   });
 
@@ -789,13 +789,13 @@ describe('<EpicDetail/>', () => {
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
       const { queryByText, getByText, getByTitle } = setup();
-      fireEvent.click(getByText('Add a Task'));
+      fireEvent.click(getByText('Create a Task'));
 
-      expect(getByText('Add a Task for Epic 1')).toBeVisible();
+      expect(getByText('Create a Task for Epic 1')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
 
-      expect(queryByText('Add a Task for Epic 1')).toBeNull();
+      expect(queryByText('Create a Task for Epic 1')).toBeNull();
     });
   });
 
@@ -878,7 +878,7 @@ describe('<EpicDetail/>', () => {
         fireEvent.click(getByText('Contribute'));
 
         expect(
-          getByText('Add a Task to Contribute Work from Scratch Org'),
+          getByText('Create a Task to Contribute Work from Scratch Org'),
         ).toBeVisible();
       });
     });

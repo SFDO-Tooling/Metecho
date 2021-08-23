@@ -409,7 +409,7 @@ const ProjectDetail = (
               <>
                 <div className="slds-is-relative">
                   <Button
-                    label={i18n.t('Add a Task')}
+                    label={i18n.t('Create a Task')}
                     variant="brand"
                     onClick={openCreateTaskModal}
                     className="slds-m-bottom_large"
