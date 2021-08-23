@@ -8,9 +8,9 @@ import { Trans } from 'react-i18next';
 import CollaboratorTableCell from '@/js/components/epics/table/collaboratorCell';
 import DetailTableCell from '@/js/components/epics/table/detailCell';
 import StatusTableCell from '@/js/components/epics/table/statusCell';
+import TaskCountTableCell from '@/js/components/epics/table/taskCountCell';
 import TourPopover from '@/js/components/tour/popover';
 import { Epic } from '@/js/store/epics/reducer';
-
 export interface TableCellProps {
   [key: string]: any;
   item?: Epic;
@@ -69,9 +69,7 @@ const EpicTable = ({
         property="task_count"
         width="0"
       >
-        {
-          // @@@ Placeholder for Task Count Column
-        }
+        <TaskCountTableCell />
       </DataTableColumn>
       <DataTableColumn
         key="status"

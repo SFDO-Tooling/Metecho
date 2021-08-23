@@ -4,7 +4,7 @@ import React from 'react';
 
 import { TableCellProps } from '@/js/components/epics/table';
 
-const taskCountTableCell = ({
+const TaskCountTableCell = ({
   className,
   children,
   ...props
@@ -17,6 +17,6 @@ const taskCountTableCell = ({
   </DataTableCell>
 );
 
-taskCountTableCell.displayName = DataTableCell.displayName;
+TaskCountTableCell.displayName = DataTableCell.displayName;
 
-export default taskCountTableCell;
+export default TaskCountTableCell;
