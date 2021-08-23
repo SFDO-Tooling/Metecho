@@ -504,7 +504,7 @@ class Epic(
 
     def get_absolute_url(self):
         # See src/js/utils/routes.ts
-        return f"/projects/{self.project.slug}/{self.slug}"
+        return f"/projects/{self.project.slug}/epics/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -734,7 +734,10 @@ class Task(
     def get_absolute_url(self):
         # See src/js/utils/routes.ts
         if self.epic:
-            return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
+            return (
+                f"/projects/{self.epic.project.slug}"
+                + f"/epics/{self.epic.slug}/tasks/{self.slug}"
+            )
         return f"/projects/{self.project.slug}/tasks/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
