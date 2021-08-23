@@ -135,6 +135,7 @@ const ProjectDetail = (
   const openCreateModal = useCallback(() => {
     setCreateModalOpen(true);
     setCreateOrgModalOpen(false);
+    setCreateTaskModalOpen(false);
   }, []);
   const closeCreateModal = useCallback(() => {
     setCreateModalOpen(false);
@@ -144,6 +145,7 @@ const ProjectDetail = (
   const openCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(true);
     setCreateModalOpen(false);
+    setCreateTaskModalOpen(false);
   }, []);
   const closeCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(false);
@@ -151,6 +153,8 @@ const ProjectDetail = (
 
   const openCreateTaskModal = useCallback(() => {
     setCreateTaskModalOpen(true);
+    setCreateModalOpen(false);
+    setCreateOrgModalOpen(false);
   }, []);
 
   const closeCreateTaskModal = useCallback(() => {
@@ -407,31 +411,49 @@ const ProjectDetail = (
           >
             {tasks ? (
               <>
-                <div className="slds-is-relative">
-                  <Button
-                    label={i18n.t('Create a Task')}
-                    variant="brand"
-                    onClick={openCreateTaskModal}
-                    className="slds-m-bottom_large"
-                  />
-
-                  {tasks.length > 0 ? (
-                    <TasksTableComponent
-                      projectId={project.id}
-                      projectSlug={project.slug}
-                      tasks={tasks}
-                      githubUsers={project.github_users}
-                      canAssign={project.has_push_permission}
-                      isRefreshingUsers={
-                        project.currently_fetching_github_users
-                      }
-                      assignUserAction={doAssignUser}
-                      viewEpicsColumn
+                {project.has_push_permission && (
+                  <div className="slds-m-bottom_medium slds-is-relative">
+                    <Button
+                      label={i18n.t('Create a Task')}
+                      variant="brand"
+                      onClick={openCreateTaskModal}
                     />
-                  ) : (
-                    <p>{i18n.t('There are no Tasks for this Project.')}</p>
-                  )}
-                </div>
+                    <TourPopover
+                      id="tour-project-add-task"
+                      align="top left"
+                      heading={i18n.t('Create a Task to contribute')}
+                      body={
+                        <Trans i18nKey="tourProjectCreateTask">
+                          To get started contributing to this Project, create a
+                          Task. Tasks represent small changes to this Project;
+                          each one has a Developer and a Tester. Tasks are
+                          equivalent to GitHub branches.
+                        </Trans>
+                      }
+                    />
+                  </div>
+                )}
+                {tasks.length > 0 ? (
+                  <TasksTableComponent
+                    projectId={project.id}
+                    projectSlug={project.slug}
+                    tasks={tasks}
+                    githubUsers={project.github_users}
+                    canAssign={project.has_push_permission}
+                    isRefreshingUsers={project.currently_fetching_github_users}
+                    assignUserAction={doAssignUser}
+                    viewEpicsColumn
+                  />
+                ) : (
+                  <p>
+                    <Trans i18nKey="noTasks">
+                      Tasks in Metecho represent small changes to this Project;
+                      each one has a Developer and a Tester. Tasks are
+                      equivalent to GitHub branches. There are no Tasks for this
+                      Project.
+                    </Trans>
+                  </p>
+                )}
               </>
             ) : (
               // Fetching tasks from API
@@ -468,7 +490,6 @@ const ProjectDetail = (
         <CreateTaskModal
           project={project}
           isOpenOrOrgId={createTaskModalOpen}
-          playgroundOrg={playgroundOrg}
           closeCreateModal={closeCreateTaskModal}
         />
       </DetailPageLayout>

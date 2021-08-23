@@ -68,7 +68,7 @@ const CreateTaskModal = ({
     project: epic ? undefined : project.id,
   };
 
-  if (isContributingFromOrg && epic) {
+  if (isContributingFromOrg) {
     additionalData.dev_org = isOpenOrOrgId as string;
   }
 
