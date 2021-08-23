@@ -34,7 +34,7 @@ const TourDropdown = ({
   const match =
     useRouteMatch<{
       projectSlug?: string;
-    }>(routePatterns.project_detail()) ||
+    }>(routePatterns.project_detail) ||
     ({ params: {} } as Match<{ projectSlug?: string }>);
   const selectProjectWithProps = useCallback(selectProject, []);
   const project = useSelector((state: AppState) =>

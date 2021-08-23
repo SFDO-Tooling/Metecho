@@ -31,6 +31,6 @@ describe('routePatterns', () => {
     ['epic_detail', '/projects/:projectSlug/:epicSlug'],
     ['epic_task_detail', '/projects/:projectSlug/:epicSlug/:taskSlug'],
   ])('%s returns path', (name, expected) => {
-    expect(routePatterns[name]()).toBe(expected);
+    expect(routePatterns[name]).toBe(expected);
   });
 });
