@@ -102,7 +102,12 @@ const App = withRouter(
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.task_detail()}
+                    path={routePatterns.project_task_detail()}
+                    component={TaskDetail}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.epic_task_detail()}
                     component={TaskDetail}
                   />
                   <Route

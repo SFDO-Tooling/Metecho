@@ -121,7 +121,11 @@ const CreateTaskModal = ({
           object?.slug &&
           epic?.slug
         ) {
-          const url = routes.task_detail(project.slug, epic.slug, object.slug);
+          const url = routes.epic_task_detail(
+            project.slug,
+            epic.slug,
+            object.slug,
+          );
           history.push(url, { [RETRIEVE_CHANGES]: true });
         }
       }

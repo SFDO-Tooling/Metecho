@@ -631,7 +631,7 @@ const TaskDetail = (
   ) {
     // Redirect to most recent project/epic/task slug
     return (
-      <Redirect to={routes.task_detail(project.slug, epic.slug, task.slug)} />
+      <Redirect to={routes.epic_task_detail(project.slug, epic.slug, task.slug)} />
     );
   }
 

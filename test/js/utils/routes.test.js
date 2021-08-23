@@ -12,7 +12,7 @@ describe('routes', () => {
       '/projects/project-slug/epic-slug',
     ],
     [
-      'task_detail',
+      'epic_task_detail',
       ['project-slug', 'epic-slug', 'task-slug'],
       '/projects/project-slug/epic-slug/task-slug',
     ],
@@ -29,7 +29,7 @@ describe('routePatterns', () => {
     ['project_list', '/projects'],
     ['project_detail', '/projects/:projectSlug'],
     ['epic_detail', '/projects/:projectSlug/:epicSlug'],
-    ['task_detail', '/projects/:projectSlug/:epicSlug/:taskSlug'],
+    ['epic_task_detail', '/projects/:projectSlug/:epicSlug/:taskSlug'],
   ])('%s returns path', (name, expected) => {
     expect(routePatterns[name]()).toBe(expected);
   });

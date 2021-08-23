@@ -202,7 +202,7 @@ describe('<TaskForm/>', () => {
         );
         fireEvent.change(nameInput, { target: { value: 'Name of Org Task' } });
         fireEvent.click(submit);
-        const url = routes.task_detail(
+        const url = routes.epic_task_detail(
           defaultProject.slug,
           defaultEpic.slug,
           'name-of-task',

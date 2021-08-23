@@ -74,7 +74,7 @@ const NameTableCell = ({
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
     {projectSlug && item && (epicSlug || item.epic?.slug) && (
       <Link
-        to={routes.task_detail(
+        to={routes.epic_task_detail(
           projectSlug,
           epicSlug || item.epic?.slug,
           item.slug,

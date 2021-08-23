@@ -375,12 +375,12 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('old task slug', () => {
-    test('redirects to task_detail with new slug', () => {
+    test('redirects to epic_task_detail with new slug', () => {
       const { context } = setup({ taskSlug: 'old-slug' });
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(
-        routes.task_detail('project-1', 'epic-1', 'task-1'),
+        routes.epic_task_detail('project-1', 'epic-1', 'task-1'),
       );
     });
   });
