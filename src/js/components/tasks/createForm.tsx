@@ -65,6 +65,7 @@ const CreateTaskModal = ({
 
   const additionalData: { [key: string]: any } = {
     epic: epic?.id,
+    project: epic ? undefined : project.id,
   };
 
   if (isContributingFromOrg && epic) {
@@ -222,6 +223,14 @@ const CreateTaskModal = ({
       ]}
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
+        {epic ? (
+          ''
+        ) : (
+          <p className="slds-align_absolute-center">
+            You are creating one task for this project. To group multiple tasks
+            together, create an Epic.
+          </p>
+        )}
         <Input
           id="task-name"
           label={i18n.t('Task Name')}
