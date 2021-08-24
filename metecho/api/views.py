@@ -195,6 +195,12 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
         org.queue_get_members(user=request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @action(detail=True, methods=["POST"])
+    def check_membership(self, request, pk):
+        org: GitHubOrganization = self.get_object()
+        org.queue_check_user_membership(user=request.user)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
 
 class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     permission_classes = (IsAuthenticated,)

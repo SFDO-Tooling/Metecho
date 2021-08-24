@@ -137,6 +137,25 @@ def _create_branches_on_github(
     return task_branch_name
 
 
+def check_user_membership(organization: GitHubOrganization, *, user: User):
+    organization.refresh_from_db()
+
+    try:
+        gh_user = gh_given_user(user)
+        gh_user_orgs = [org.login for org in gh_user.organizations()]
+        result = organization.login in gh_user_orgs
+    except Exception as error:
+        organization.finalize_check_user_membership(error=error, user=user)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        organization.finalize_check_user_membership(result=result, user=user)
+
+
+check_user_membership_job = job(check_user_membership)
+
+
 def create_repository(project: Project, *, user: User):
     """
     Given a local Metecho Project create the corresponding GitHub repository.

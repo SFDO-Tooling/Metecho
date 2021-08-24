@@ -495,6 +495,26 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
             message["payload"]["message"] = str(error)
         async_to_sync(push.push_message_about_instance)(self, message)
 
+    def queue_check_user_membership(self, *, user: User):
+        from .jobs import check_user_membership_job
+
+        check_user_membership_job.delay(self, user=user)
+
+    def finalize_check_user_membership(
+        self, *, result: bool = None, error: Exception = None, user: User
+    ):
+        message = {
+            "type": "GITHUB_ORGANIZATION_MEMBERSHIP_CHECK",
+            "payload": {
+                "originating_user_id": str(user.id),
+                "message": result,
+            },
+        }
+        if error is not None:
+            message["type"] = "GITHUB_ORGANIZATION_MEMBERSHIP_CHECK_ERROR"
+            message["payload"]["message"] = str(error)
+        async_to_sync(push.push_message_about_instance)(self, message)
+
 
 class GitHubRepository(HashIdMixin, models.Model):
     user = models.ForeignKey(
