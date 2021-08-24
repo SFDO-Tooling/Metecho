@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.contrib.auth.models import Permission
 from django.urls import reverse
-from github3.exceptions import ResponseError
+from github3.exceptions import NotFoundError, ResponseError
 from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
@@ -309,6 +309,11 @@ class TestProjectViewset:
         )
 
         create_repository_job = mocker.patch("metecho.api.jobs.create_repository_job")
+        mocker.patch(
+            # Simulate the actual GH repo not existing during the first save
+            "metecho.api.models.gh.get_repo_info",
+            side_effect=NotFoundError(mocker.MagicMock()),
+        )
 
         response = client.post(
             reverse("project-list"),
