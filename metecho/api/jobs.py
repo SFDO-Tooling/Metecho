@@ -192,6 +192,18 @@ def create_repository(project: Project, *, user: User):
     project.refresh_from_db()
 
     try:
+        # Ensure the user is part of the org that owns the project
+        gh_user = gh_given_user(user)
+        user_orgs = [org.login for org in gh_user.organizations()]
+        if project.repo_owner not in user_orgs:
+            raise ValueError(
+                _(
+                    "Either you are not a member of the %(name)s organization "
+                    "or it hasn't installed the Metecho GitHub app"
+                )
+                % {"name": project.repo_owner}
+            )
+
         # Team & repository on GitHub
         org = get_org_for_repo_creation(project.repo_owner)
         team = org.create_team(f"{project} Team")

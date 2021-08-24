@@ -1204,6 +1204,10 @@ class TestCreateRepository:
 
         team = mocker.MagicMock()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user").return_value
+        gh_user.organizations.return_value = [
+            mocker.MagicMock(login=project.repo_owner),
+        ]
         gh_org = mocker.patch(f"{PATCH_ROOT}.get_org_for_repo_creation").return_value
         gh_org.create_team.return_value = team
         gh_org.create_repository.return_value = mocker.MagicMock(
@@ -1231,9 +1235,7 @@ class TestCreateRepository:
     def test_error(self, mocker, caplog, project, user_factory):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
-        mocker.patch(
-            f"{PATCH_ROOT}.get_org_for_repo_creation", side_effect=Exception("Oh no!")
-        )
+        mocker.patch(f"{PATCH_ROOT}.gh_given_user", side_effect=Exception("Oh no!"))
 
         with pytest.raises(Exception):
             create_repository(project, user=user)
@@ -1250,6 +1252,30 @@ class TestCreateRepository:
                 "payload": {
                     "originating_user_id": str(user.pk),
                     "message": "Oh no!",
+                },
+            },
+            for_list=False,
+            group_name=None,
+        )
+
+    def test_not_a_member(self, mocker, caplog, project, user_factory):
+        user = user_factory()
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user").return_value
+        gh_user.organizations.return_value = []  # No orgs
+
+        with pytest.raises(ValueError):
+            create_repository(project, user=user)
+
+        assert "you are not a member" in caplog.text
+        async_to_sync.return_value.assert_called_with(
+            project,
+            {
+                "type": "PROJECT_UPDATE_ERROR",
+                "payload": {
+                    "originating_user_id": str(user.pk),
+                    "message": f"Either you are not a member of the {project.repo_owner} "
+                    "organization or it hasn't installed the Metecho GitHub app",
                 },
             },
             for_list=False,
