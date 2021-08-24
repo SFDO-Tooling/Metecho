@@ -4,13 +4,14 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.contrib.auth.models import Permission
 from django.urls import reverse
 from github3.exceptions import ResponseError
 from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
 
-from ..models import SCRATCH_ORG_TYPES
+from ..models import SCRATCH_ORG_TYPES, Project
 
 Branch = namedtuple("Branch", ["name"])
 
@@ -67,6 +68,63 @@ class TestCurrentUserViewSet:
         assert response.status_code == 202
         assert refresh_github_repositories_for_user_job.delay.called
         assert client.user.currently_fetching_repos
+
+
+@pytest.mark.django_db
+class TestGitHubOrganizationViewset:
+    def test_list(self, client, git_hub_organization):
+        response = client.get(reverse("organization-list"))
+        data = response.json()
+        assert data["count"] == 1
+        assert data["results"][0]["id"] == str(git_hub_organization.id)
+
+    def test_retrieve(self, client, git_hub_organization):
+        response = client.get(
+            reverse("organization-detail", args=[str(git_hub_organization.id)])
+        )
+        assert tuple(response.json().keys()) == ("id", "name")
+
+    def test_members(self, client, mocker, git_hub_organization):
+        get_org_members_job = mocker.patch("metecho.api.jobs.get_org_members_job")
+        response = client.post(
+            reverse("organization-members", args=[str(git_hub_organization.id)]),
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
+        assert get_org_members_job.delay.called
+
+    def test_check_membership(self, client, mocker, git_hub_organization):
+        check_user_membership_job = mocker.patch(
+            "metecho.api.jobs.check_user_membership_job"
+        )
+        response = client.post(
+            reverse(
+                "organization-check-membership", args=[str(git_hub_organization.id)]
+            ),
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
+        assert check_user_membership_job.delay.called
+
+    def test_check_repo_name(self, client, mocker, git_hub_organization):
+        check_repo_name_job = mocker.patch("metecho.api.jobs.check_repo_name_job")
+        response = client.post(
+            reverse(
+                "organization-check-repo-name", args=[str(git_hub_organization.id)]
+            ),
+            data={"name": "abc"},
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
+        assert check_repo_name_job.delay.called
+
+    def test_check_repo_name__missing_name(self, client, mocker, git_hub_organization):
+        check_repo_name_job = mocker.patch("metecho.api.jobs.check_repo_name_job")
+        response = client.post(
+            reverse(
+                "organization-check-repo-name", args=[str(git_hub_organization.id)]
+            ),
+            data={"name": ""},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
+        assert not check_repo_name_job.delay.called
 
 
 @pytest.mark.django_db
@@ -226,6 +284,49 @@ class TestProjectViewset:
 
         data = response.json()
         assert data["count"] == 3, data
+
+    def test_create__missing_permission(self, client, git_hub_organization):
+        """
+        User lacks the required Django permission to create Projects
+        """
+        response = client.post(
+            reverse("project-list"),
+            data={
+                "organization": str(git_hub_organization.pk),
+                "name": "Foo",
+                "repo_name": "foo",
+                "github_users": [],
+            },
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
+
+    def test_create(self, client, mocker, git_hub_organization):
+        # User is not a superuser but has the required permission
+        client.user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="api", codename="add_project"
+            )
+        )
+
+        create_repository_job = mocker.patch("metecho.api.jobs.create_repository_job")
+
+        response = client.post(
+            reverse("project-list"),
+            data={
+                "organization": str(git_hub_organization.pk),
+                "name": "Foo",
+                "repo_name": "foo",
+                "github_users": '[{"id": "123"}]',
+            },
+        )
+
+        assert response.status_code == status.HTTP_200_OK, response.content
+        project = Project.objects.get()
+        assert project.name == "Foo"
+        assert project.repo_name == "foo"
+        assert project.repo_owner == git_hub_organization.login
+        assert project.github_users == [{"id": "123"}]
+        assert create_repository_job.delay.called
 
 
 @pytest.mark.django_db

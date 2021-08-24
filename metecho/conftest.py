@@ -6,7 +6,14 @@ from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
 
-from .api.models import Epic, GitHubRepository, Project, ScratchOrg, Task
+from .api.models import (
+    Epic,
+    GitHubOrganization,
+    GitHubRepository,
+    Project,
+    ScratchOrg,
+    Task,
+)
 
 User = get_user_model()
 
@@ -83,6 +90,15 @@ class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
     repo_url = "https://github.com/test/repo.git"
     repo_id = factory.Sequence(lambda n: n)
     user = factory.SubFactory(UserFactory)
+
+
+@register
+class GitHubOrganizationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GitHubOrganization
+
+    name = factory.Sequence("GH Org {}".format)
+    login = factory.Sequence("gh-org-{}".format)
 
 
 @register

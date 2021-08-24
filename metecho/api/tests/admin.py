@@ -119,6 +119,14 @@ class TestProjectAdmin:
         assert get_social_image_job.delay.called == should_fetch
 
 
+@pytest.mark.django_db
+class TestGitHubOrganizationAdmin:
+    def test_github_link(self, admin_client, git_hub_organization):
+        href = f'href="https://github.com/{git_hub_organization.login}"'
+        response = admin_client.get(reverse("admin:api_githuborganization_changelist"))
+        assert href in str(response.content)
+
+
 def test_json_widget():
     assert JSONWidget().value_from_datadict({"test": ""}, None, "test") == "{}"
 
