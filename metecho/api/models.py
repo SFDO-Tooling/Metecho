@@ -515,6 +515,28 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
             message["payload"]["message"] = str(error)
         async_to_sync(push.push_message_about_instance)(self, message)
 
+    def queue_check_repo_name(self, *, name: str, originating_user_id: str):
+        from .jobs import check_repo_name_job
+
+        check_repo_name_job.delay(
+            self, name=name, originating_user_id=originating_user_id
+        )
+
+    def finalize_check_repo_name(
+        self, *, result: bool = None, error: Exception = None, originating_user_id: str
+    ):
+        message = {
+            "type": "GITHUB_ORGANIZATION_REPO_NAME_CHECK",
+            "payload": {
+                "originating_user_id": originating_user_id,
+                "message": result,
+            },
+        }
+        if error is not None:
+            message["type"] = "GITHUB_ORGANIZATION_REPO_NAME_CHECK_ERROR"
+            message["payload"]["message"] = str(error)
+        async_to_sync(push.push_message_about_instance)(self, message)
+
 
 class GitHubRepository(HashIdMixin, models.Model):
     user = models.ForeignKey(

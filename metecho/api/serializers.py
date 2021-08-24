@@ -126,6 +126,10 @@ class GitHubOrganizationSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class CheckRepoNameSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+
 class ProjectCreateSerializer(serializers.ModelSerializer):
     organization = serializers.PrimaryKeyRelatedField(
         queryset=GitHubOrganization.objects.all(), pk_field=serializers.CharField()

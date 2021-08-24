@@ -34,6 +34,7 @@ from .models import (
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
+    CheckRepoNameSerializer,
     CommitSerializer,
     CreatePrSerializer,
     EpicCollaboratorsSerializer,
@@ -199,6 +200,17 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
     def check_membership(self, request, pk):
         org: GitHubOrganization = self.get_object()
         org.queue_check_user_membership(user=request.user)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=["POST"])
+    def check_repo_name(self, request, pk):
+        org: GitHubOrganization = self.get_object()
+        serializer = CheckRepoNameSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        org.queue_check_repo_name(
+            name=serializer.validated_data["name"],
+            originating_user_id=str(request.user.id),
+        )
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

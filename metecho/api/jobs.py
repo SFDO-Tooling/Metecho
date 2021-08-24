@@ -156,6 +156,35 @@ def check_user_membership(organization: GitHubOrganization, *, user: User):
 check_user_membership_job = job(check_user_membership)
 
 
+def check_repo_name(
+    organization: GitHubOrganization, *, name: str, originating_user_id: str
+):
+    organization.refresh_from_db()
+
+    try:
+        # result=True if the name DOES NOT exist, meaning it's available for creation
+        try:
+            get_repo_info(None, repo_owner=organization.login, repo_name=name)
+        except NotFoundError:
+            result = True
+        else:
+            result = False
+    except Exception as error:
+        organization.finalize_check_repo_name(
+            error=error, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        organization.finalize_check_repo_name(
+            result=result, originating_user_id=originating_user_id
+        )
+
+
+check_repo_name_job = job(check_repo_name)
+
+
 def create_repository(project: Project, *, user: User):
     """
     Given a local Metecho Project create the corresponding GitHub repository.
