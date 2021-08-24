@@ -41,3 +41,34 @@ Only members visible to the current user will be returned.
 .. sourcecode:: http
 
    HTTP/1.1 202 ACCEPTED
+
+Check Membership
+----------------
+
+This will queue a job to verify if the current user is a member of the GitHub organization.
+
+.. sourcecode:: http
+
+   POST /api/organizations/:id/check_membership/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
+
+
+Check Repository Name
+---------------------
+
+This will queue a job to verify a name's availability among the Organization's repositories.
+
+.. sourcecode:: http
+
+   POST /api/organizations/:id/check_repo_name/ HTTP/1.1
+
+   {
+     "name": "name-to-test"
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
