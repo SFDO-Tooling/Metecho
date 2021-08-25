@@ -174,7 +174,7 @@ pytz==2021.1
     #   -c requirements/prod.txt
     #   babel
     #   django
-regex==2021.7.6
+regex==2021.8.21
     # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in
