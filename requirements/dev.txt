@@ -214,7 +214,7 @@ sqlparse==0.4.1
     # via
     #   -c requirements/prod.txt
     #   django
-stevedore==3.3.0
+stevedore==3.4.0
     # via doc8
 termcolor==1.1.0
     # via pytest-sugar
