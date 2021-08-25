@@ -108,26 +108,24 @@ const CreateTaskModal = ({
     if (isMounted.current) {
       setIsSaving(false);
       closeModal();
-      if (isContributingFromOrg) {
-        // Redirect to newly created task, and trigger retrieve-changes from org
-        const {
-          type,
-          payload: { object, objectType },
-        } = action;
-        /* istanbul ignore else */
-        if (
-          type === 'CREATE_OBJECT_SUCCEEDED' &&
-          objectType === OBJECT_TYPES.TASK &&
-          object?.slug &&
-          epic?.slug
-        ) {
-          const url = routes.epic_task_detail(
-            project.slug,
-            epic.slug,
-            object.slug,
-          );
-          history.push(url, { [RETRIEVE_CHANGES]: true });
-        }
+      const {
+        type,
+        payload: { object, objectType },
+      } = action;
+      if (
+        type === 'CREATE_OBJECT_SUCCEEDED' &&
+        objectType === OBJECT_TYPES.TASK &&
+        object?.slug
+      ) {
+        // Redirect to newly created task
+        const url = epic
+          ? routes.epic_task_detail(project.slug, epic.slug, object.slug)
+          : routes.project_task_detail(project.slug, object.slug);
+        // Trigger retrieve-changes from org
+        const state = isContributingFromOrg
+          ? { [RETRIEVE_CHANGES]: true }
+          : undefined;
+        history.push(url, state);
       }
     }
   };
