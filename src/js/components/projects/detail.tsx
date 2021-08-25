@@ -24,13 +24,13 @@ import {
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
+  useAssignUserToTask,
   useFetchEpicsIfMissing,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
+  useFetchProjectTasksIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
-import useAssignUserToTask from '@/js/components/utils/useAssignUserToTask';
-import useFetchTasksByProject from '@/js/components/utils/useFetchTasksByProject';
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
 import { onboarded } from '@/js/store/user/actions';
@@ -64,11 +64,14 @@ const ProjectDetail = (
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
-  const { epics } = useFetchEpicsIfMissing(project, props);
-  const { orgs } = useFetchOrgsIfMissing({ project, props });
-  const { tasks, updateTask } = useFetchTasksByProject(
-    project?.id,
-    tasksTabViewed,
+  const { epics } = useFetchEpicsIfMissing({ projectId: project?.id }, props);
+  const { orgs } = useFetchOrgsIfMissing({ projectId: project?.id }, props);
+  const { tasks } = useFetchProjectTasksIfMissing(
+    {
+      projectId: project?.id,
+      tasksTabViewed,
+    },
+    props,
   );
   const assignUser = useAssignUserToTask();
   const playgroundOrg = (orgs || [])[0];
@@ -115,21 +118,6 @@ const ProjectDetail = (
       });
     }
   }, [dispatch, epics?.next, isMounted, project?.id]);
-
-  // Manually update the Task in State after it changes.
-  // @@@ The list of tasks should be moved to the Redux store...
-  /* istanbul ignore next */
-  const doAssignUser = useCallback(
-    async (args: any) => {
-      const {
-        payload: { object, objectType },
-      } = await assignUser(args);
-      if (object && objectType === OBJECT_TYPES.TASK) {
-        updateTask(object);
-      }
-    },
-    [assignUser, updateTask],
-  );
 
   // "create epic" modal related
   const openCreateModal = useCallback(() => {
@@ -441,7 +429,7 @@ const ProjectDetail = (
                     githubUsers={project.github_users}
                     canAssign={project.has_push_permission}
                     isRefreshingUsers={project.currently_fetching_github_users}
-                    assignUserAction={doAssignUser}
+                    assignUserAction={assignUser}
                     viewEpicsColumn
                   />
                 ) : (

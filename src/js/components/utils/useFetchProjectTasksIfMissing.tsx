@@ -4,31 +4,36 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { AppState, ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
-import { selectEpicsByProject } from '@/js/store/epics/selectors';
+import { selectTasksByProject } from '@/js/store/tasks/selectors';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export default (
-  { projectId }: { projectId?: string },
+  {
+    projectId,
+    tasksTabViewed,
+  }: {
+    projectId?: string;
+    tasksTabViewed: boolean;
+  },
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const selectEpicsWithProps = useCallback(selectEpicsByProject, []);
-  const epics = useSelector((state: AppState) =>
-    selectEpicsWithProps(state, routeProps),
+  const selectTasksWithProps = useCallback(selectTasksByProject, []);
+  const tasks = useSelector((state: AppState) =>
+    selectTasksWithProps(state, routeProps),
   );
 
   useEffect(() => {
-    if (projectId && !epics?.fetched) {
-      // Fetch epics from API
+    if (projectId && !tasks && tasksTabViewed) {
+      // Fetch tasks from API
       dispatch(
         fetchObjects({
-          objectType: OBJECT_TYPES.EPIC,
+          objectType: OBJECT_TYPES.TASK,
           filters: { project: projectId },
-          reset: true,
         }),
       );
     }
-  }, [dispatch, projectId, epics?.fetched]);
+  }, [dispatch, projectId, tasks, tasksTabViewed]);
 
-  return { epics };
+  return { tasks };
 };

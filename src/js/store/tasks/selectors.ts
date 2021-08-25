@@ -21,7 +21,7 @@ export const selectTasksStateByProject = createSelector(
   },
 );
 
-export const selectAllTasksByProject = createSelector(
+export const selectTasksByProject = createSelector(
   [selectTaskState, selectProject],
   (tasks, project) => {
     /* istanbul ignore else */

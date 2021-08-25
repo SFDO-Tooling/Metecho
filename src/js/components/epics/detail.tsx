@@ -32,12 +32,12 @@ import {
   PageOptions,
   SpinnerWrapper,
   SubmitModal,
+  useAssignUserToTask,
   useFetchEpicIfMissing,
+  useFetchEpicTasksIfMissing,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
-  useFetchTasksIfMissing,
 } from '@/js/components/utils';
-import useAssignUserToTask from '@/js/components/utils/useAssignUserToTask';
 import { ThunkDispatch } from '@/js/store';
 import { updateObject } from '@/js/store/actions';
 import { Org } from '@/js/store/orgs/reducer';
@@ -51,11 +51,14 @@ const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
-    project,
+    { project },
     props,
   );
-  const { tasks } = useFetchTasksIfMissing({ project, epic }, props);
-  const { orgs } = useFetchOrgsIfMissing({ epic, props });
+  const { tasks } = useFetchEpicTasksIfMissing(
+    { projectId: project?.id, epicId: epic?.id },
+    props,
+  );
+  const { orgs } = useFetchOrgsIfMissing({ epicId: epic?.id }, props);
   const assignUser = useAssignUserToTask();
   const currentUser = useSelector(selectUserState) as User;
 

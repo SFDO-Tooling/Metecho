@@ -102,12 +102,19 @@ const TaskDetail = (
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
-    project,
+    { project },
     props,
   );
   const dispatch = useDispatch<ThunkDispatch>();
-  const { task, taskSlug } = useFetchTaskIfMissing({ project, epic }, props);
-  const { orgs } = useFetchOrgsIfMissing({ task, props });
+  const { task, taskSlug } = useFetchTaskIfMissing(
+    {
+      projectId: project?.id,
+      epicId: epic?.id,
+      filterByEpic: Boolean(epicSlug),
+    },
+    props,
+  );
+  const { orgs } = useFetchOrgsIfMissing({ taskId: task?.id }, props);
   const user = useSelector(selectUserState) as User;
   const qaUser = useSelector((state: AppState) =>
     selectProjectCollaborator(state, project?.id, task?.assigned_qa),

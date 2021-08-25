@@ -3,16 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { AppState, ThunkDispatch } from '@/js/store';
-import { fetchObjects, ObjectFilters } from '@/js/store/actions';
-import { Epic } from '@/js/store/epics/reducer';
-import { Project } from '@/js/store/projects/reducer';
+import { fetchObjects } from '@/js/store/actions';
 import { selectTasksByEpic } from '@/js/store/tasks/selectors';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export default (
-  opts: {
-    project: Project | null | undefined;
-    epic: Epic | null | undefined;
+  {
+    projectId,
+    epicId,
+  }: {
+    projectId?: string;
+    epicId?: string;
   },
   routeProps: RouteComponentProps,
 ) => {
@@ -21,24 +22,18 @@ export default (
   const tasks = useSelector((state: AppState) =>
     selectTasksWithProps(state, routeProps),
   );
-  const { project, epic } = opts;
-  const filterByEpic = Object.prototype.hasOwnProperty.call(opts, 'epic');
 
   useEffect(() => {
-    if (project && !tasks && (epic || !filterByEpic)) {
-      const filters: ObjectFilters = { project: project.id };
-      if (epic) {
-        filters.epic = epic.id;
-      }
+    if (projectId && epicId && !tasks) {
       // Fetch tasks from API
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.TASK,
-          filters,
+          filters: { project: projectId, epic: epicId },
         }),
       );
     }
-  }, [dispatch, project, epic, tasks, filterByEpic]);
+  }, [dispatch, projectId, epicId, tasks]);
 
   return { tasks };
 };
