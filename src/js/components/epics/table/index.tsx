@@ -11,6 +11,7 @@ import StatusTableCell from '@/js/components/epics/table/statusCell';
 import TaskCountTableCell from '@/js/components/epics/table/taskCountCell';
 import TourPopover from '@/js/components/tour/popover';
 import { Epic } from '@/js/store/epics/reducer';
+
 export interface TableCellProps {
   [key: string]: any;
   item?: Epic;
@@ -65,7 +66,22 @@ const EpicTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="taskCount"
-        label={'Tasks'}
+        label={
+          <>
+            {i18n.t('Tasks')}
+            <TourPopover
+              id="tour-epic-tasks-column"
+              align="top"
+              heading={i18n.t('Epic tasks')}
+              body={
+                <Trans i18nKey="tourEpicTasksColumn">
+                  The Tasks column is a quick way to see how many Tasks are
+                  included in an Epic.
+                </Trans>
+              }
+            />
+          </>
+        }
         property="task_count"
         width="0"
       >
