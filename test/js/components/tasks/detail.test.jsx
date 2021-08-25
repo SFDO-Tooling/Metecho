@@ -3,7 +3,12 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import TaskDetail from '@/js/components/tasks/detail';
-import { createObject, fetchObjects, updateObject } from '@/js/store/actions';
+import {
+  createObject,
+  fetchObject,
+  fetchObjects,
+  updateObject,
+} from '@/js/store/actions';
 import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '@/js/store/orgs/reducer';
 import { refreshOrgConfigs } from '@/js/store/projects/actions';
@@ -26,6 +31,7 @@ jest.mock('@/js/store/orgs/actions');
 jest.mock('@/js/store/projects/actions');
 
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refetchOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
@@ -34,12 +40,20 @@ refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   createObject.mockClear();
+  fetchObject.mockClear();
   fetchObjects.mockClear();
   updateObject.mockClear();
   refetchOrg.mockClear();
   refreshOrg.mockClear();
   refreshOrgConfigs.mockClear();
 });
+
+const defaultEpic = {
+  id: 'epic1',
+  slug: 'epic-1',
+  name: 'Epic 1',
+  github_users: ['user-1'],
+};
 
 const defaultOrg = {
   id: 'org-id',
@@ -79,7 +93,7 @@ const defaultState = {
   projects: {
     projects: [
       {
-        id: 'r1',
+        id: 'p1',
         name: 'Project 1',
         slug: 'project-1',
         old_slugs: [],
@@ -107,19 +121,16 @@ const defaultState = {
     next: null,
   },
   epics: {
-    r1: {
+    p1: {
       epics: [
         {
-          id: 'epic1',
-          slug: 'epic-1',
-          name: 'Epic 1',
-          project: 'r1',
+          ...defaultEpic,
+          project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: [],
-          github_users: ['user-1'],
         },
       ],
       next: null,
@@ -128,23 +139,27 @@ const defaultState = {
     },
   },
   tasks: {
-    epic1: [
-      {
-        id: 'task1',
-        name: 'Task 1',
-        slug: 'task-1',
-        old_slugs: ['old-slug'],
-        epic: 'epic1',
-        branch_url: 'https://github.com/test/test-repo/tree/epic__task',
-        branch_name: 'epic__task',
-        description: 'Task Description',
-        description_rendered: '<p>Task Description</p>',
-        has_unmerged_commits: false,
-        commits: [],
-        assigned_dev: 'user-id',
-        assigned_qa: null,
-      },
-    ],
+    p1: {
+      fetched: ['epic1'],
+      notFound: ['epic1-different-task'],
+      tasks: [
+        {
+          id: 'task1',
+          name: 'Task 1',
+          slug: 'task-1',
+          old_slugs: ['old-slug'],
+          epic: defaultEpic,
+          branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+          branch_name: 'epic__task',
+          description: 'Task Description',
+          description_rendered: '<p>Task Description</p>',
+          has_unmerged_commits: false,
+          commits: [],
+          assigned_dev: 'user-id',
+          assigned_qa: null,
+        },
+      ],
+    },
   },
   orgs: {
     orgs: {
@@ -241,13 +256,16 @@ describe('<TaskDetail/>', () => {
         },
         tasks: {
           ...defaultState.tasks,
-          epic1: [
-            {
-              ...defaultState.tasks.epic1[0],
-              assigned_dev: null,
-              assigned_qa: 'user-id',
-            },
-          ],
+          p1: {
+            ...defaultState.tasks.p1,
+            tasks: [
+              {
+                ...defaultState.tasks.p1.tasks[0],
+                assigned_dev: null,
+                assigned_qa: 'user-id',
+              },
+            ],
+          },
         },
         orgs: {
           ...defaultState.orgs,
@@ -291,13 +309,16 @@ describe('<TaskDetail/>', () => {
         ...defaultState,
         tasks: {
           ...defaultState.tasks,
-          epic1: [
-            {
-              ...defaultState.tasks.epic1[0],
-              branch_diff_url: 'https://github.com/example/repo',
-              has_unmerged_commits: true,
-            },
-          ],
+          p1: {
+            ...defaultState.tasks.p1,
+            tasks: [
+              {
+                ...defaultState.tasks.p1.tasks[0],
+                branch_diff_url: 'https://github.com/example/repo',
+                has_unmerged_commits: true,
+              },
+            ],
+          },
         },
       },
     });
@@ -312,13 +333,16 @@ describe('<TaskDetail/>', () => {
         ...defaultState,
         tasks: {
           ...defaultState.tasks,
-          epic1: [
-            {
-              ...defaultState.tasks.epic1[0],
-              pr_url: 'my-pr-url',
-              pr_is_open: true,
-            },
-          ],
+          p1: {
+            ...defaultState.tasks.p1,
+            tasks: [
+              {
+                ...defaultState.tasks.p1.tasks[0],
+                pr_url: 'my-pr-url',
+                pr_is_open: true,
+              },
+            ],
+          },
         },
       },
     });
@@ -334,8 +358,12 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { epic: 'epic1' },
+      expect(fetchObject).toHaveBeenCalledWith({
+        filters: {
+          project: 'p1',
+          epic: 'epic1',
+          slug: 'task-1',
+        },
         objectType: 'task',
       });
     });
@@ -584,12 +612,15 @@ describe('<TaskDetail/>', () => {
             orgs,
             tasks: {
               ...defaultState.tasks,
-              epic1: [
-                {
-                  ...defaultState.tasks.epic1[0],
-                  assigned_dev: null,
-                },
-              ],
+              p1: {
+                ...defaultState.tasks.p1,
+                tasks: [
+                  {
+                    ...defaultState.tasks.p1.tasks[0],
+                    assigned_dev: null,
+                  },
+                ],
+              },
             },
           },
         });
@@ -624,15 +655,18 @@ describe('<TaskDetail/>', () => {
             orgs,
             tasks: {
               ...defaultState.tasks,
-              epic1: [
-                {
-                  ...defaultState.tasks.epic1[0],
-                  has_unmerged_commits: false,
-                  pr_url: 'my-pr-url',
-                  pr_is_open: false,
-                  status: TASK_STATUSES.COMPLETED,
-                },
-              ],
+              p1: {
+                ...defaultState.tasks.p1,
+                tasks: [
+                  {
+                    ...defaultState.tasks.p1.tasks[0],
+                    has_unmerged_commits: false,
+                    pr_url: 'my-pr-url',
+                    pr_is_open: false,
+                    status: TASK_STATUSES.COMPLETED,
+                  },
+                ],
+              },
             },
           },
         });
@@ -675,15 +709,18 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           tasks: {
             ...defaultState.tasks,
-            epic1: [
-              {
-                ...defaultState.tasks.epic1[0],
-                has_unmerged_commits: true,
-                pr_url: 'my-pr-url',
-                pr_is_open: false,
-                status: TASK_STATUSES.CANCELED,
-              },
-            ],
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  has_unmerged_commits: true,
+                  pr_url: 'my-pr-url',
+                  pr_is_open: false,
+                  status: TASK_STATUSES.CANCELED,
+                },
+              ],
+            },
           },
         },
       });
@@ -707,15 +744,18 @@ describe('<TaskDetail/>', () => {
           },
           tasks: {
             ...defaultState.tasks,
-            epic1: [
-              {
-                ...defaultState.tasks.epic1[0],
-                has_unmerged_commits: true,
-                pr_url: 'my-pr-url',
-                pr_is_open: false,
-                status: TASK_STATUSES.CANCELED,
-              },
-            ],
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  has_unmerged_commits: true,
+                  pr_url: 'my-pr-url',
+                  pr_is_open: false,
+                  status: TASK_STATUSES.CANCELED,
+                },
+              ],
+            },
           },
         },
       });
@@ -732,15 +772,18 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           tasks: {
             ...defaultState.tasks,
-            epic1: [
-              {
-                ...defaultState.tasks.epic1[0],
-                has_unmerged_commits: true,
-                pr_url: 'my-pr-url',
-                pr_is_open: true,
-                review_valid: true,
-              },
-            ],
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  has_unmerged_commits: true,
+                  pr_url: 'my-pr-url',
+                  pr_is_open: true,
+                  review_valid: true,
+                },
+              ],
+            },
           },
         },
       });
@@ -756,12 +799,15 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           tasks: {
             ...defaultState.tasks,
-            epic1: [
-              {
-                ...defaultState.tasks.epic1[0],
-                has_unmerged_commits: true,
-              },
-            ],
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  has_unmerged_commits: true,
+                },
+              ],
+            },
           },
         },
       });
@@ -778,13 +824,16 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           tasks: {
             ...defaultState.tasks,
-            epic1: [
-              {
-                ...defaultState.tasks.epic1[0],
-                has_unmerged_commits: true,
-                currently_creating_pr: true,
-              },
-            ],
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  has_unmerged_commits: true,
+                  currently_creating_pr: true,
+                },
+              ],
+            },
           },
         },
       });
@@ -799,13 +848,16 @@ describe('<TaskDetail/>', () => {
         ...defaultState,
         tasks: {
           ...defaultState.tasks,
-          epic1: [
-            {
-              ...defaultState.tasks.epic1[0],
-              has_unmerged_commits: true,
-              currently_creating_pr: true,
-            },
-          ],
+          p1: {
+            ...defaultState.tasks.p1,
+            tasks: [
+              {
+                ...defaultState.tasks.p1.tasks[0],
+                has_unmerged_commits: true,
+                currently_creating_pr: true,
+              },
+            ],
+          },
         },
         orgs: {
           ...defaultState.orgs,
@@ -851,17 +903,20 @@ describe('<TaskDetail/>', () => {
   describe('submitting a review', () => {
     const tasks = {
       ...defaultState.tasks,
-      epic1: [
-        {
-          ...defaultState.tasks.epic1[0],
-          pr_is_open: true,
-          assigned_qa: 'user-id',
-          commits: [],
-          origin_sha: 'parent',
-          review_submitted_at: '2019-10-16T12:58:53.721Z',
-          has_unmerged_commits: true,
-        },
-      ],
+      p1: {
+        ...defaultState.tasks.p1,
+        tasks: [
+          {
+            ...defaultState.tasks.p1.tasks[0],
+            pr_is_open: true,
+            assigned_qa: 'user-id',
+            commits: [],
+            origin_sha: 'parent',
+            review_submitted_at: '2019-10-16T12:58:53.721Z',
+            has_unmerged_commits: true,
+          },
+        ],
+      },
     };
     const orgs = {
       ...defaultState.orgs,
@@ -925,18 +980,21 @@ describe('<TaskDetail/>', () => {
             ...defaultState,
             tasks: {
               ...defaultState.tasks,
-              epic1: [
-                {
-                  ...defaultState.tasks.epic1[0],
-                  pr_is_open: true,
-                  assigned_qa: 'user-id',
-                  commits: [],
-                  origin_sha: 'parent',
-                  review_submitted_at: '2019-10-16T12:58:53.721Z',
-                  has_unmerged_commits: true,
-                  review_valid: true,
-                },
-              ],
+              p1: {
+                ...defaultState.tasks.p1,
+                tasks: [
+                  {
+                    ...defaultState.tasks.p1.tasks[0],
+                    pr_is_open: true,
+                    assigned_qa: 'user-id',
+                    commits: [],
+                    origin_sha: 'parent',
+                    review_submitted_at: '2019-10-16T12:58:53.721Z',
+                    has_unmerged_commits: true,
+                    review_valid: true,
+                  },
+                ],
+              },
             },
             orgs: {
               ...defaultState.orgs,
@@ -1116,7 +1174,7 @@ describe('<TaskDetail/>', () => {
         waitForRemoval,
       ) => {
         const task = {
-          ...defaultState.tasks.epic1[0],
+          ...defaultState.tasks.p1.tasks[0],
           ...defaultTask,
           ...taskOpts,
         };
@@ -1135,7 +1193,7 @@ describe('<TaskDetail/>', () => {
             ...defaultState,
             tasks: {
               ...defaultState.tasks,
-              epic1: [task],
+              p1: { ...defaultState.tasks.p1, tasks: [task] },
             },
             orgs: {
               ...defaultState.orgs,

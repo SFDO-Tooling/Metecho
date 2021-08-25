@@ -7,6 +7,13 @@ const epic = {
   github_users: [],
 };
 
+const epic2 = {
+  id: 'epic-2',
+  name: 'My Other Epic',
+  slug: 'epic-2',
+  github_users: [],
+};
+
 describe('reducer', () => {
   test('returns initial state if no action', () => {
     const expected = {};
@@ -28,7 +35,7 @@ describe('reducer', () => {
       const expected = {};
       const actual = reducer(
         {
-          p1: [task1],
+          p1: { tasks: [task1] },
         },
         { type: action },
       );
@@ -38,7 +45,7 @@ describe('reducer', () => {
   );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
-    test('resets task list for epic', () => {
+    test('resets task list for project', () => {
       const task1 = {
         id: 't1',
         slug: 'task-1',
@@ -51,23 +58,76 @@ describe('reducer', () => {
         slug: 'task-2',
         name: 'Task 2',
         description: 'This is another test task.',
-        epic,
+        epic2,
       };
       const expected = {
-        'epic-1': [task2],
-        'epic-2': [],
+        p1: {
+          tasks: [task1, task2],
+          fetched: true,
+        },
       };
       const actual = reducer(
         {
-          'epic-1': [task1],
-          'epic-2': [],
+          p1: {
+            tasks: [],
+            fetched: ['epic-3'],
+          },
+        },
+        {
+          type: 'FETCH_OBJECTS_SUCCEEDED',
+          payload: {
+            response: [task1, task2],
+            objectType: 'task',
+            filters: { project: 'p1' },
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('adds to task list for epic', () => {
+      const task1 = {
+        id: 't1',
+        slug: 'task-1',
+        name: 'Task 1',
+        description: 'This is a test task.',
+        epic,
+      };
+      const task2 = {
+        id: 't2',
+        slug: 'task-2',
+        name: 'Task 2',
+        description: 'This is another test task.',
+        epic2,
+      };
+      const expected = {
+        p1: {
+          tasks: [task2, task1],
+          fetched: ['epic-1', 'epic-2'],
+        },
+        p2: {
+          tasks: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {
+          p1: {
+            tasks: [task1],
+            fetched: ['epic-1'],
+          },
+          p2: {
+            tasks: [],
+            fetched: true,
+          },
         },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: [task2],
             objectType: 'task',
-            filters: { epic: 'epic-1' },
+            filters: { project: 'p1', epic: 'epic-2' },
           },
         },
       );
