@@ -287,7 +287,7 @@ class EpicSerializer(serializers.ModelSerializer):
         return data
 
     def get_task_count(self, obj) -> int:
-        return obj.tasks.count()
+        return obj.tasks.active().count()
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
         project = obj.project
