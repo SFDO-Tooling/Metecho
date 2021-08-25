@@ -435,15 +435,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
         }
-        validators = (
-            CaseInsensitiveUniqueTogetherValidator(
-                queryset=Task.objects.all(),
-                fields=("name", "epic"),
-                message=FormattableDict(
-                    "name", _("A task with this name already exists.")
-                ),
-            ),
-        )
 
     def get_root_project(self, obj) -> str:
         return str(obj.root_project.pk)

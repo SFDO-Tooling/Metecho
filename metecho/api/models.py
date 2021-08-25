@@ -689,12 +689,6 @@ class Task(
 
     class Meta:
         ordering = ("-created_at", "name")
-
-        # We enforce this in business logic, not in the database, as we
-        # need to limit this constraint only to active Tasks, and
-        # make the name column case-insensitive:
-        # unique_together = (("name", "epic"),)
-
         constraints = [
             # Ensure we always have an Epic or Project attached, but not both
             models.CheckConstraint(

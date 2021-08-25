@@ -359,21 +359,6 @@ class TestTaskSerializer:
             serializer.save()
             assert Task.objects.count() == 1
 
-    def test_create__duplicate_name(self, rf, user_factory, task_factory):
-        user = user_factory()
-        task = task_factory(name="Task abc")
-        data = {
-            "name": "Task ABC",  # Same name as existing task
-            "description": "Description.",
-            "epic": str(task.epic.id),
-            "org_config_name": "dev",
-        }
-        r = rf.get("/")
-        r.user = user
-        serializer = TaskSerializer(data=data, context={"request": r})
-        assert not serializer.is_valid()
-        assert "name" in serializer.errors, serializer.errors
-
     @pytest.mark.parametrize(
         "dev_id, assigned_dev",
         (
