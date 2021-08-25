@@ -1,3 +1,5 @@
+import { find, reject, unionBy, uniq } from 'lodash';
+
 import { ObjectsAction } from '@/js/store/actions';
 import { TaskAction } from '@/js/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
@@ -33,6 +35,7 @@ export interface Task {
     github_users: string[];
   } | null;
   project: string | null;
+  root_project: string;
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;
@@ -57,10 +60,20 @@ export interface Task {
 }
 
 export interface TaskState {
-  [key: string]: Task[];
+  [key: string]: {
+    tasks: Task[];
+    fetched: string[] | true;
+    notFound: string[];
+  };
 }
 
-const defaultState = {};
+const defaultState: TaskState = {};
+
+const defaultProjectTasks = {
+  tasks: [],
+  fetched: [],
+  notFound: [],
+};
 
 const modelIsTask = (model: any): model is Task =>
   Boolean((model as Task).epic);
@@ -77,12 +90,28 @@ const reducer = (
       const {
         response,
         objectType,
-        filters: { epic },
+        filters: { epic, project },
       } = action.payload;
-      if (objectType === OBJECT_TYPES.TASK && epic) {
+      if (objectType === OBJECT_TYPES.TASK && project) {
+        const projectTasks = tasks[project] || { ...defaultProjectTasks };
+        const fetched = projectTasks.fetched;
+        if (epic) {
+          return {
+            ...tasks,
+            [project]: {
+              ...projectTasks,
+              tasks: unionBy(response as Task[], projectTasks.tasks, 'id'),
+              fetched: fetched === true ? fetched : uniq([...fetched, epic]),
+            },
+          };
+        }
         return {
           ...tasks,
-          [epic]: response,
+          [project]: {
+            ...projectTasks,
+            tasks: response,
+            fetched: true,
+          },
         };
       }
       return tasks;
@@ -93,13 +122,19 @@ const reducer = (
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {
-            const epicTasks = tasks[object.epic.id] || [];
+            const projectTasks = tasks[object.root_project] || {
+              ...defaultProjectTasks,
+            };
+            const existingTask = find(projectTasks.tasks, ['id', object.id]);
             // Do not store if (somehow) we already know about this task
-            if (!epicTasks.filter((t) => object.id === t.id).length) {
+            if (!existingTask) {
               return {
                 ...tasks,
-                // Prepend new task (tasks are ordered by `-created_at`)
-                [object.epic.id]: [object, ...epicTasks],
+                [object.root_project]: {
+                  ...projectTasks,
+                  // Prepend new task (tasks are ordered by `-created_at`)
+                  tasks: [object, ...projectTasks.tasks],
+                },
               };
             }
           }
@@ -107,27 +142,80 @@ const reducer = (
         }
         case OBJECT_TYPES.TASK_PR: {
           if (object) {
-            const epicTasks = tasks[object.epic.id] || [];
             const newTask = { ...object, currently_creating_pr: true };
-            const existingTask = epicTasks.find((t) => t.id === object.id);
+            const projectTasks = tasks[object.root_project] || {
+              ...defaultProjectTasks,
+            };
+            const existingTask = find(projectTasks.tasks, ['id', object.id]);
             if (existingTask) {
               return {
                 ...tasks,
-                [object.epic.id]: epicTasks.map((t) => {
-                  if (t.id === object.id) {
-                    return newTask;
-                  }
-                  return t;
-                }),
+                [object.root_project]: {
+                  ...projectTasks,
+                  tasks: projectTasks.tasks.map((t) => {
+                    if (t.id === object.id) {
+                      return newTask;
+                    }
+                    return t;
+                  }),
+                },
               };
             }
             return {
               ...tasks,
-              [object.epic.id]: [newTask, ...epicTasks],
+              [object.root_project]: {
+                ...projectTasks,
+                tasks: [newTask, ...projectTasks.tasks],
+              },
             };
           }
           return tasks;
         }
+      }
+      return tasks;
+    }
+    case 'FETCH_OBJECT_SUCCEEDED': {
+      const {
+        object,
+        filters: { project, epic, slug },
+        objectType,
+      } = action.payload;
+      if (objectType === OBJECT_TYPES.TASK && project) {
+        const projectTasks = tasks[project] || { ...defaultProjectTasks };
+        if (!object) {
+          return {
+            ...tasks,
+            [project]: {
+              ...projectTasks,
+              notFound: [
+                ...projectTasks.notFound,
+                epic ? `${epic}-${slug}` : slug,
+              ],
+            },
+          };
+        }
+        const existingTask = find(projectTasks.tasks, ['id', object.id]);
+        if (existingTask) {
+          return {
+            ...tasks,
+            [project]: {
+              ...projectTasks,
+              tasks: projectTasks.tasks.map((t) => {
+                if (t.id === object.id) {
+                  return { ...object };
+                }
+                return t;
+              }),
+            },
+          };
+        }
+        return {
+          ...tasks,
+          [project]: {
+            ...projectTasks,
+            tasks: [object, ...projectTasks.tasks],
+          },
+        };
       }
       return tasks;
     }
@@ -150,37 +238,50 @@ const reducer = (
         return tasks;
       }
       const task = maybeTask;
-      const epicTasks = tasks[task.epic.id] || [];
-      const existingTask = epicTasks.find((t) => t.id === task.id);
+      const projectTasks = tasks[task.root_project] || {
+        ...defaultProjectTasks,
+      };
+      const existingTask = find(projectTasks.tasks, ['id', task.id]);
       if (existingTask) {
         return {
           ...tasks,
-          [task.epic.id]: epicTasks.map((t) => {
-            if (t.id === task.id) {
-              return { ...task };
-            }
-            return t;
-          }),
+          [task.root_project]: {
+            ...projectTasks,
+            tasks: projectTasks.tasks.map((t) => {
+              if (t.id === task.id) {
+                return { ...task };
+              }
+              return t;
+            }),
+          },
         };
       }
       return {
         ...tasks,
-        [task.epic.id]: [task, ...epicTasks],
+        [task.root_project]: {
+          ...projectTasks,
+          tasks: [task, ...projectTasks.tasks],
+        },
       };
     }
     case 'TASK_CREATE_PR_FAILED': {
       const task = action.payload;
-      const epicTasks = tasks[task.epic.id] || [];
-      const existingTask = epicTasks.find((t) => t.id === task.id);
+      const projectTasks = tasks[task.root_project] || {
+        ...defaultProjectTasks,
+      };
+      const existingTask = find(projectTasks.tasks, ['id', task.id]);
       if (existingTask) {
         return {
           ...tasks,
-          [task.epic.id]: epicTasks.map((t) => {
-            if (t.id === task.id) {
-              return { ...task, currently_creating_pr: false };
-            }
-            return t;
-          }),
+          [task.root_project]: {
+            ...projectTasks,
+            tasks: projectTasks.tasks.map((t) => {
+              if (t.id === task.id) {
+                return { ...task, currently_creating_pr: false };
+              }
+              return t;
+            }),
+          },
         };
       }
       return tasks;
@@ -205,10 +306,15 @@ const reducer = (
       }
       const task = maybeTask;
       /* istanbul ignore next */
-      const epicTasks = tasks[task.epic.id] || [];
+      const projectTasks = tasks[task.root_project] || {
+        ...defaultProjectTasks,
+      };
       return {
         ...tasks,
-        [task.epic.id]: epicTasks.filter((t) => t.id !== task.id),
+        [task.root_project]: {
+          ...projectTasks,
+          tasks: reject(projectTasks.tasks, ['id', task.id]),
+        },
       };
     }
   }

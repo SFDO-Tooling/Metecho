@@ -20,6 +20,7 @@ export { default as useFetchEpicIfMissing } from './useFetchEpicIfMissing';
 export { default as useFetchEpicsIfMissing } from './useFetchEpicsIfMissing';
 export { default as useFetchOrgsIfMissing } from './useFetchOrgsIfMissing';
 export { default as useFetchProjectIfMissing } from './useFetchProjectIfMissing';
+export { default as useFetchTaskIfMissing } from './useFetchTaskIfMissing';
 export { default as useFetchTasksIfMissing } from './useFetchTasksIfMissing';
 export { default as useForm } from './useForm';
 export type { UseFormProps } from './useForm';

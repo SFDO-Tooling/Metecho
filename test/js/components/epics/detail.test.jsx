@@ -447,11 +447,11 @@ describe('<EpicDetail/>', () => {
       });
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
-      expect(getByText('GitHub Users')).toBeVisible();
+      expect(getByText('GitHub Collaborators')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
 
-      expect(queryByText('GitHub Users')).toBeNull();
+      expect(queryByText('GitHub Collaborators')).toBeNull();
     });
 
     test('updates users', () => {

@@ -35,7 +35,7 @@ exports[`<EpicStatusSteps /> renders steps: dev assigned 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Add a task
+          Create a task
         </div>
       </li>
       <li
@@ -145,7 +145,7 @@ exports[`<EpicStatusSteps /> renders steps: epic with commits 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Add a task
+          Create a task
         </div>
       </li>
       <li
@@ -273,7 +273,7 @@ exports[`<EpicStatusSteps /> renders steps: epic with pr 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Add a task
+          Create a task
         </div>
       </li>
       <li
@@ -426,7 +426,7 @@ exports[`<EpicStatusSteps /> renders steps: merged epic 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Add a task
+          Create a task
         </div>
       </li>
       <li
@@ -562,7 +562,7 @@ exports[`<EpicStatusSteps /> renders steps: planned, no tasks 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Add a task
+          Create a task
         </div>
       </li>
       <li
@@ -653,7 +653,7 @@ exports[`<EpicStatusSteps /> renders steps: task created, no assigned dev 1`] = 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Add a task
+          Create a task
         </div>
       </li>
       <li

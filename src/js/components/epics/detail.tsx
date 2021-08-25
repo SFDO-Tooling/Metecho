@@ -54,7 +54,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     project,
     props,
   );
-  const { tasks } = useFetchTasksIfMissing(epic, props);
+  const { tasks } = useFetchTasksIfMissing({ project, epic }, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
   const assignUser = useAssignUserToTask();
   const currentUser = useSelector(selectUserState) as User;
@@ -697,7 +697,6 @@ const EpicDetail = (props: RouteComponentProps) => {
                 <TaskTable
                   projectId={project.id}
                   projectSlug={project.slug}
-                  epicSlug={epic.slug}
                   tasks={tasks}
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}

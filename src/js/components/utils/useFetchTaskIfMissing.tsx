@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { AppState, ThunkDispatch } from '@/js/store';
-import { fetchObjects, ObjectFilters } from '@/js/store/actions';
+import { fetchObject, ObjectFilters } from '@/js/store/actions';
 import { Epic } from '@/js/store/epics/reducer';
 import { Project } from '@/js/store/projects/reducer';
-import { selectTasksByEpic } from '@/js/store/tasks/selectors';
+import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export default (
@@ -17,28 +17,32 @@ export default (
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const selectTasksWithProps = useCallback(selectTasksByEpic, []);
-  const tasks = useSelector((state: AppState) =>
-    selectTasksWithProps(state, routeProps),
+  const selectTaskWithProps = useCallback(selectTask, []);
+  const selectTaskSlugWithProps = useCallback(selectTaskSlug, []);
+  const task = useSelector((state: AppState) =>
+    selectTaskWithProps(state, routeProps),
+  );
+  const taskSlug = useSelector((state: AppState) =>
+    selectTaskSlugWithProps(state, routeProps),
   );
   const { project, epic } = opts;
   const filterByEpic = Object.prototype.hasOwnProperty.call(opts, 'epic');
 
   useEffect(() => {
-    if (project && !tasks && (epic || !filterByEpic)) {
-      const filters: ObjectFilters = { project: project.id };
+    if (project && (epic || !filterByEpic) && taskSlug && task === undefined) {
+      const filters: ObjectFilters = { project: project.id, slug: taskSlug };
       if (epic) {
         filters.epic = epic.id;
       }
-      // Fetch tasks from API
+      // Fetch task from API
       dispatch(
-        fetchObjects({
+        fetchObject({
           objectType: OBJECT_TYPES.TASK,
           filters,
         }),
       );
     }
-  }, [dispatch, project, epic, tasks, filterByEpic]);
+  }, [dispatch, project, epic, task, filterByEpic, taskSlug]);
 
-  return { tasks };
+  return { task, taskSlug };
 };

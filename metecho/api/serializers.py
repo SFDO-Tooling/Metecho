@@ -369,6 +369,7 @@ class TaskSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    root_project = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -395,6 +396,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "currently_creating_branch",
             "currently_creating_pr",
             "branch_name",
+            "root_project",
             "branch_url",
             "commits",
             "origin_sha",
@@ -418,6 +420,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "has_unmerged_commits": {"read_only": True},
             "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
+            "root_project": {"read_only": True},
             "branch_url": {"read_only": True},
             "commits": {"read_only": True},
             "origin_sha": {"read_only": True},
@@ -441,6 +444,9 @@ class TaskSerializer(serializers.ModelSerializer):
                 ),
             ),
         )
+
+    def get_root_project(self, obj) -> str:
+        return str(obj.root_project.pk)
 
     def get_branch_url(self, obj) -> Optional[str]:
         project = obj.root_project

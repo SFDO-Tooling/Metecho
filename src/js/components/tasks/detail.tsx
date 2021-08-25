@@ -40,7 +40,7 @@ import {
   useFetchEpicIfMissing,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
-  useFetchTasksIfMissing,
+  useFetchTaskIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
 import { AppState, ThunkDispatch } from '@/js/store';
@@ -48,7 +48,6 @@ import { createObject, updateObject } from '@/js/store/actions';
 import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
 import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
 import { selectProjectCollaborator } from '@/js/store/projects/selectors';
-import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
 import {
@@ -107,15 +106,7 @@ const TaskDetail = (
     props,
   );
   const dispatch = useDispatch<ThunkDispatch>();
-  useFetchTasksIfMissing(epic, props);
-  const selectTaskWithProps = useCallback(selectTask, []);
-  const selectTaskSlugWithProps = useCallback(selectTaskSlug, []);
-  const task = useSelector((state: AppState) =>
-    selectTaskWithProps(state, props),
-  );
-  const taskSlug = useSelector((state: AppState) =>
-    selectTaskSlugWithProps(state, props),
-  );
+  const { task, taskSlug } = useFetchTaskIfMissing({ project, epic }, props);
   const { orgs } = useFetchOrgsIfMissing({ task, props });
   const user = useSelector(selectUserState) as User;
   const qaUser = useSelector((state: AppState) =>
@@ -631,7 +622,9 @@ const TaskDetail = (
   ) {
     // Redirect to most recent project/epic/task slug
     return (
-      <Redirect to={routes.epic_task_detail(project.slug, epic.slug, task.slug)} />
+      <Redirect
+        to={routes.epic_task_detail(project.slug, epic.slug, task.slug)}
+      />
     );
   }
 
