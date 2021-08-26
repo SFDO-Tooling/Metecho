@@ -724,7 +724,7 @@ class Task(
             self.epic.save()
 
         # Notify epic about new status or new task count
-        if save_epic or is_new:
+        if self.epic and (save_epic or is_new):
             self.epic.notify_changed(originating_user_id=None)
 
         # Notify all users about the new task
