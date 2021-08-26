@@ -459,8 +459,8 @@ describe('<ProjectDetail />', () => {
 
   describe('Tasks tab', () => {
     test('fetches tasks list', () => {
-      const { getByText } = setup();
-      fireEvent.click(getByText('Tasks'));
+      const { getAllByText } = setup();
+      fireEvent.click(getAllByText('Tasks')[0]);
 
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'p1' },
@@ -469,7 +469,7 @@ describe('<ProjectDetail />', () => {
     });
 
     test('renders tasks list', async () => {
-      const { getByText, findByText } = setup({
+      const { getAllByText, findByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
@@ -483,14 +483,14 @@ describe('<ProjectDetail />', () => {
       });
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const task = await findByText('Task 2');
 
       expect(task).toBeVisible();
     });
 
     test('renders empty tasks list', async () => {
-      const { getByText, findByText } = setup({
+      const { getAllByText, findByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
@@ -504,7 +504,7 @@ describe('<ProjectDetail />', () => {
       });
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const msg = await findByText('There are no Tasks for this Project.', {
         exact: false,
       });
@@ -515,19 +515,20 @@ describe('<ProjectDetail />', () => {
     describe('<CreateTaskModal />', () => {
       test('opens/closes form', async () => {
         expect.assertions(2);
-        const { queryByText, findByText, getByText, getByTitle } = setup({
-          initialState: {
-            ...defaultState,
-            tasks: {
-              p1: {
-                fetched: true,
-                notFound: [],
-                tasks: [],
+        const { queryByText, findByText, getByText, getAllByText, getByTitle } =
+          setup({
+            initialState: {
+              ...defaultState,
+              tasks: {
+                p1: {
+                  fetched: true,
+                  notFound: [],
+                  tasks: [],
+                },
               },
             },
-          },
-        });
-        fireEvent.click(getByText('Tasks'));
+          });
+        fireEvent.click(getAllByText('Tasks')[0]);
         fireEvent.click(await findByText('Create a Task'));
 
         expect(getByText('Create a Task for Project 1')).toBeVisible();

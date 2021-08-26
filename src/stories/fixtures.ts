@@ -145,6 +145,7 @@ export const sampleEpic1 = {
   github_users: [sampleGitHubUser2.id],
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
+  task_count: 6,
 };
 
 export const sampleEpic2 = {
@@ -175,6 +176,7 @@ export const sampleEpic2 = {
   ],
   status: EPIC_STATUSES.IN_PROGRESS,
   latest_sha: 'abc123',
+  task_count: 1,
 };
 
 export const sampleEpic3 = {
@@ -197,6 +199,7 @@ export const sampleEpic3 = {
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
+  task_count: 0,
 };
 
 export const sampleEpic4 = {
@@ -220,6 +223,7 @@ export const sampleEpic4 = {
   github_users: [],
   status: EPIC_STATUSES.MERGED,
   latest_sha: 'abc123',
+  task_count: 5,
 };
 
 export const sampleEpic5 = {
@@ -243,6 +247,7 @@ export const sampleEpic5 = {
   github_users: [sampleGitHubUser1.id, sampleGitHubUser2.id],
   status: EPIC_STATUSES.REVIEW,
   latest_sha: 'abc123',
+  task_count: 3,
 };
 
 export const sampleTask1 = {
