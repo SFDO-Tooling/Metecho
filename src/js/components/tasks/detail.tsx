@@ -595,30 +595,34 @@ const TaskDetail = (
     return projectLoadingOrNotFound;
   }
 
-  const epicLoadingOrNotFound = getEpicLoadingOrNotFound({
-    project,
-    epic,
-    epicSlug,
-  });
+  if (epicSlug) {
+    const epicLoadingOrNotFound = getEpicLoadingOrNotFound({
+      project,
+      epic,
+      epicSlug,
+    });
 
-  if (epicLoadingOrNotFound !== false) {
-    return epicLoadingOrNotFound;
+    if (epicLoadingOrNotFound !== false) {
+      return epicLoadingOrNotFound;
+    }
   }
 
-  const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
-    project,
-    epic,
-    task,
-    taskSlug,
-  });
+  if (epic) {
+    const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
+      project,
+      epic,
+      task,
+      taskSlug,
+    });
 
-  if (taskLoadingOrNotFound !== false) {
-    return taskLoadingOrNotFound;
+    if (taskLoadingOrNotFound !== false) {
+      return taskLoadingOrNotFound;
+    }
   }
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!project || !epic || !task) {
+  if (!project || !task) {
     return <FourOhFour />;
   }
 
@@ -843,7 +847,7 @@ const TaskDetail = (
             url: routes.project_detail(project.slug),
           },
           {
-            name: epic.name,
+            name: epic?.name,
             url: epicUrl,
           },
           { name: task.name },
