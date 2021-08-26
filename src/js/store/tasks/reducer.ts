@@ -101,7 +101,7 @@ const reducer = (
             [project]: {
               ...projectTasks,
               tasks: unionBy(response as Task[], projectTasks.tasks, 'id'),
-              fetched: fetched === true ? fetched : uniq([...fetched, epic]),
+              fetched: fetched === true || uniq([...fetched, epic]),
             },
           };
         }

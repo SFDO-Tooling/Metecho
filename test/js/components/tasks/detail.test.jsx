@@ -351,8 +351,8 @@ describe('<TaskDetail/>', () => {
     expect(getByText('View Pull Request')).toBeVisible();
   });
 
-  describe('tasks not found', () => {
-    test('fetches tasks from API', () => {
+  describe('task not found', () => {
+    test('fetches task from API', () => {
       const { queryByText } = setup({
         initialState: { ...defaultState, tasks: {} },
       });
@@ -362,6 +362,31 @@ describe('<TaskDetail/>', () => {
         filters: {
           project: 'p1',
           epic: 'epic1',
+          slug: 'task-1',
+        },
+        objectType: 'task',
+      });
+    });
+
+    test('fetches epic-less task from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              tasks: [],
+              fetched: [],
+              notFound: [],
+            },
+          },
+        },
+        epicSlug: undefined,
+      });
+
+      expect(queryByText('Task 1')).toBeNull();
+      expect(fetchObject).toHaveBeenCalledWith({
+        filters: {
+          project: 'p1',
           slug: 'task-1',
         },
         objectType: 'task',
