@@ -735,7 +735,8 @@ class Task(
 
     def delete(self, *args, **kwargs):
         # Notify epic about new task count
-        self.epic.notify_changed(originating_user_id=None)
+        if self.epic:
+            self.epic.notify_changed(originating_user_id=None)
         return super().delete(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
