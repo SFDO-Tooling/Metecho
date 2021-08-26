@@ -224,6 +224,7 @@ class EpicSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     project = HashidPrimaryKeyRelatedField(queryset=Project.objects.all())
+    task_count = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -241,6 +242,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "project",
+            "task_count",
             "branch_url",
             "branch_diff_url",
             "branch_name",
@@ -258,6 +260,7 @@ class EpicSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "slug": {"read_only": True},
             "old_slugs": {"read_only": True},
+            "task_count": {"read_only": True},
             "branch_url": {"read_only": True},
             "branch_diff_url": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
@@ -333,6 +336,9 @@ class EpicSerializer(serializers.ModelSerializer):
                 )
 
         return data
+
+    def get_task_count(self, obj) -> int:
+        return obj.tasks.active().count()
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
         project = obj.project
