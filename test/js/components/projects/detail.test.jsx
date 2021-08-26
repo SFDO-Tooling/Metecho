@@ -448,10 +448,10 @@ describe('<ProjectDetail />', () => {
     });
 
     test('fetches and renders tasks list', async () => {
-      const { getByText, findByText } = setup();
+      const { getAllByText, findByText } = setup();
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const task = await findByText('Task 2');
 
       expect(task).toBeVisible();
@@ -459,10 +459,10 @@ describe('<ProjectDetail />', () => {
 
     test('renders empty tasks list', async () => {
       fetchMock.getOnce(url, [], { overwriteRoutes: true });
-      const { getByText, findByText } = setup();
+      const { getAllByText, findByText } = setup();
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const msg = await findByText('There are no Tasks for this Project.');
 
       expect(msg).toBeVisible();
