@@ -927,6 +927,7 @@ class TestProjectDependency:
         org = project_dependency_factory(name="Dep ABC")
         assert str(org) == "Dep ABC"
 
+
 @pytest.mark.django_db
 class TestGitHubOrganization:
     def test_str(self, git_hub_organization_factory):
