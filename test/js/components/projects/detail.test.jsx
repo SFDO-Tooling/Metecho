@@ -242,7 +242,7 @@ describe('<ProjectDetail />', () => {
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(
-      getByText('You can create a new epic', { exact: false }),
+      getByText('You can create a new Epic', { exact: false }),
     ).toBeVisible();
   });
 

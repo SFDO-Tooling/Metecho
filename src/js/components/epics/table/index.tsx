@@ -72,7 +72,7 @@ const EpicTable = ({
             <TourPopover
               id="tour-epic-tasks-column"
               align="top"
-              heading={i18n.t('Epic tasks')}
+              heading={i18n.t('Epic Tasks')}
               body={
                 <Trans i18nKey="tourEpicTasksColumn">
                   The Tasks column is a quick way to see how many Tasks are

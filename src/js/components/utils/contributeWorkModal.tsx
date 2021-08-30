@@ -146,10 +146,10 @@ const ContributeWorkModal = ({
         <Trans i18nKey="contributeWorkFromEpic">
           <p>
             <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
-            you’ll start by creating a new task.
+            you’ll start by creating a new Task.
           </p>
           <p>
-            Your Scratch Org will become the Dev Org for the newly created task.
+            Your Scratch Org will become the Dev Org for the newly created Task.
           </p>
         </Trans>
       );
