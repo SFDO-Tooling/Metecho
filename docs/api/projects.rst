@@ -83,7 +83,8 @@ Create
           "name": "Full Name",
           "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
         }
-      ]
+      ],
+      "dependencies": ["zVQYrye", "JOiwidA"]
    }
 
 Refresh GitHub Users
