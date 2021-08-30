@@ -101,13 +101,64 @@ describe('<TaskForm/>', () => {
           data: {
             name: 'Name of Task',
             description: 'This is the description',
-            epic: 'e1',
+            epic: defaultEpic.id,
+            project: undefined,
             org_config_name: 'qa',
           },
           hasForm: true,
           shouldSubscribeToObject: true,
         }),
       );
+    });
+
+    describe('success', () => {
+      test('redirects to task-detail page', async () => {
+        const { context, getByText, getByLabelText } = setup({
+          epic: undefined,
+        });
+        const submit = getByText('Create');
+        const nameInput = getByLabelText('*Task Name');
+        createObject.mockReturnValueOnce(() =>
+          Promise.resolve({
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'task',
+              object: {
+                id: 'task1',
+                slug: 'name-of-task',
+                name: 'Name of Task',
+                description: '',
+                epic: null,
+                project: defaultProject.id,
+              },
+            },
+          }),
+        );
+        fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
+        fireEvent.click(submit);
+        const url = routes.project_task_detail(
+          defaultProject.slug,
+          'name-of-task',
+        );
+
+        expect.assertions(3);
+        await waitFor(() =>
+          expect(createObject).toHaveBeenCalledWith({
+            objectType: 'task',
+            data: {
+              name: 'Name of Task',
+              description: '',
+              org_config_name: 'dev',
+              epic: undefined,
+              project: defaultProject.id,
+            },
+            hasForm: true,
+            shouldSubscribeToObject: true,
+          }),
+        );
+        expect(context.action).toEqual('PUSH');
+        expect(context.url).toEqual(url);
+      });
     });
 
     describe('error', () => {
@@ -153,7 +204,7 @@ describe('<TaskForm/>', () => {
                 slug: 'name-of-task',
                 name: 'Name of Task',
                 description: '',
-                epic: 'e1',
+                epic: defaultEpic,
               },
             },
           }),
@@ -195,7 +246,7 @@ describe('<TaskForm/>', () => {
                 slug: 'name-of-task',
                 name: 'Name of Task',
                 description: '',
-                epic: 'e1',
+                epic: defaultEpic,
               },
             },
           }),
@@ -216,7 +267,7 @@ describe('<TaskForm/>', () => {
               dev_org: org.id,
               name: 'Name of Org Task',
               description: '',
-              epic: 'e1',
+              epic: defaultEpic.id,
               org_config_name: 'qa',
             },
             hasForm: true,

@@ -157,7 +157,7 @@ const tasks = [
     },
     project: null,
     root_project: 'p1',
-    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    branch_url: 'https://github.com/test/test-repo/tree/feature/epic-1__task-1',
     branch_name: 'feature/epic-1__task-1',
     description: 'Task Description',
     description_rendered: '<p>Task Description</p>',
@@ -179,7 +179,7 @@ const tasks = [
     },
     project: null,
     root_project: 'p1',
-    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    branch_url: 'https://github.com/test/test-repo/tree/feature/epic-2__task-2',
     branch_name: 'feature/epic-2__task-2',
     description: 'Task Description',
     description_rendered: '<p>Task Description</p>',
@@ -187,6 +187,23 @@ const tasks = [
     commits: [],
     assigned_dev: null,
     assigned_qa: 'my-user',
+  },
+  {
+    id: 'task3',
+    name: 'Task 3',
+    slug: 'task-3',
+    old_slugs: [],
+    epic: null,
+    project: 'p1',
+    root_project: 'p1',
+    branch_url: 'https://github.com/test/test-repo/tree/feature/task-3',
+    branch_name: 'feature/task-3',
+    description: 'Task Description',
+    description_rendered: '<p>Task Description</p>',
+    has_unmerged_commits: false,
+    commits: [],
+    assigned_dev: null,
+    assigned_qa: null,
   },
 ];
 
@@ -442,8 +459,8 @@ describe('<ProjectDetail />', () => {
 
   describe('Tasks tab', () => {
     test('fetches tasks list', () => {
-      const { getByText } = setup();
-      fireEvent.click(getByText('Tasks'));
+      const { getAllByText } = setup();
+      fireEvent.click(getAllByText('Tasks')[0]);
 
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'p1' },
@@ -452,7 +469,7 @@ describe('<ProjectDetail />', () => {
     });
 
     test('renders tasks list', async () => {
-      const { getByText, findByText } = setup({
+      const { getAllByText, findByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
@@ -466,14 +483,14 @@ describe('<ProjectDetail />', () => {
       });
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const task = await findByText('Task 2');
 
       expect(task).toBeVisible();
     });
 
     test('renders empty tasks list', async () => {
-      const { getByText, findByText } = setup({
+      const { getAllByText, findByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
@@ -487,12 +504,39 @@ describe('<ProjectDetail />', () => {
       });
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const msg = await findByText('There are no Tasks for this Project.', {
         exact: false,
       });
 
       expect(msg).toBeVisible();
+    });
+
+    describe('<CreateTaskModal />', () => {
+      test('opens/closes form', async () => {
+        expect.assertions(2);
+        const { queryByText, findByText, getByText, getAllByText, getByTitle } =
+          setup({
+            initialState: {
+              ...defaultState,
+              tasks: {
+                p1: {
+                  fetched: true,
+                  notFound: [],
+                  tasks: [],
+                },
+              },
+            },
+          });
+        fireEvent.click(getAllByText('Tasks')[0]);
+        fireEvent.click(await findByText('Create a Task'));
+
+        expect(getByText('Create a Task for Project 1')).toBeVisible();
+
+        fireEvent.click(getByTitle('Cancel'));
+
+        expect(queryByText('Create a Task for Project 1')).toBeNull();
+      });
     });
   });
 

@@ -715,12 +715,29 @@ class Task(
         return self.project
 
     def save(self, *args, force_epic_save=False, **kwargs):
+        is_new = self.pk is None
         ret = super().save(*args, **kwargs)
-        # To update the epic's status:
-        if self.epic and (force_epic_save or self.epic.should_update_status()):
+        save_epic = self.epic and (force_epic_save or self.epic.should_update_status())
+
+        # To update the epic's status
+        if save_epic:
             self.epic.save()
+
+        # Notify epic about new status or new task count
+        if self.epic and (save_epic or is_new):
             self.epic.notify_changed(originating_user_id=None)
+
+        # Notify all users about the new task
+        if is_new:
+            self.notify_changed(type_="TASK_CREATE", originating_user_id=None)
+
         return ret
+
+    def delete(self, *args, **kwargs):
+        # Notify epic about new task count
+        if self.epic:
+            self.epic.notify_changed(originating_user_id=None)
+        return super().delete(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

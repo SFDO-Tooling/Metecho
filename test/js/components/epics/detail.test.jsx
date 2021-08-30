@@ -431,6 +431,28 @@ describe('<EpicDetail/>', () => {
     });
   });
 
+  describe('only some tasks have been fetched', () => {
+    test('fetches all epic tasks from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              ...defaultState.tasks.p1,
+              fetched: [],
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Tasks for Epic 1')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'p1', epic: 'epic1' },
+        objectType: 'task',
+      });
+    });
+  });
+
   describe('<AssignEpicCollaboratorsModal />', () => {
     test('opens and closes', () => {
       const { getByText, getByTitle, queryByText } = setup({
