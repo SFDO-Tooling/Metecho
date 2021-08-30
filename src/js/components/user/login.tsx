@@ -108,7 +108,7 @@ const Login = () => {
           </h2>
           <p className="slds-p-bottom_xx-large">
             {i18n.t(
-              'Metecho is a tool to help collaborate on sharable Salesforce projects.',
+              'Metecho is a tool to help collaborate on sharable Salesforce Projects.',
             )}
           </p>
           <h3 className="slds-text-heading_small slds-p-bottom_small">

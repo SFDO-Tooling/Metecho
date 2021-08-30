@@ -168,8 +168,8 @@ const AssignEpicCollaboratorsModal = ({
               message={
                 <Trans i18nKey="noGitHubUsers">
                   We couldn’t find any GitHub users who have access to this
-                  project. Try re-syncing the list of available collaborators,
-                  or contact an admin for this project on GitHub.
+                  Project. Try re-syncing the list of available collaborators,
+                  or contact an admin for this Project on GitHub.
                 </Trans>
               }
             />
