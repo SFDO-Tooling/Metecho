@@ -34,7 +34,7 @@ export const createTaskPR =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Successfully submitted Task for testing: “{{task_name}}.”',
+            'Successfully submitted Task for testing: "{{task_name}}."',
             { task_name: model.name },
           ),
           linkText: model.pr_url ? i18n.t('View pull request.') : undefined,

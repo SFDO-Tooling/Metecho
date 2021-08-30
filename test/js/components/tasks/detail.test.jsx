@@ -1065,7 +1065,7 @@ describe('<TaskDetail/>', () => {
         {},
         null,
         'Submit changes for testing',
-        'Submit this task for testing',
+        'Submit this Task for testing',
         false,
       ],
       [

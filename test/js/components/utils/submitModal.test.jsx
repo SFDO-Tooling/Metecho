@@ -47,7 +47,7 @@ describe('<SubmitModal/>', () => {
     test('closes modal', () => {
       const { getByText, getByTitle, toggleModal } = setup();
 
-      expect(getByText('Submit this task for testing')).toBeVisible();
+      expect(getByText('Submit this Task for testing')).toBeVisible();
       expect(getByTitle('Cancel')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
