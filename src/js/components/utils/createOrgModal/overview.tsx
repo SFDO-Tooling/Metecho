@@ -36,7 +36,7 @@ const Overview = ({
   const help = (
     <Trans i18nKey="createScratchOrgHelp">
       <h3 className="slds-text-title_bold">
-        You are creating a Scratch Org for {{ type }} “{{ name }}”.
+        You are creating a Scratch Org for {{ type }} “{{ name }}.”
       </h3>
       <p>
         Your new org will expire in 30 days.

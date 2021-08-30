@@ -74,7 +74,7 @@ const SubmitModal = ({
         objectType: OBJECT_TYPES.EPIC_PR,
         url: window.api_urls.epic_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this epic for review on GitHub');
+      heading = i18n.t('Submit this Epic for review on GitHub');
       submittingLabel = i18n.t('Submitting Epic for Review on GitHub…');
       toSubmitLabel = i18n.t('Submit Epic for Review on GitHub');
       break;

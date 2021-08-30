@@ -502,7 +502,7 @@ export const sampleEpicSteps = [
     complete: false,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: false,
     complete: false,
   },
@@ -526,7 +526,7 @@ export const sampleEpicStepsWithAction = [
     complete: true,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: true,
     complete: false,
     action: 'submit',
@@ -551,7 +551,7 @@ export const sampleEpicStepsWithLink = [
     complete: true,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: false,
     complete: true,
     action: 'submit',

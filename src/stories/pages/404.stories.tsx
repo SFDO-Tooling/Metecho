@@ -22,8 +22,8 @@ export const Custom404 = Template.bind({});
 Custom404.args = {
   message: (
     <>
-      We can’t find the epic you’re looking for. Try another epic from{' '}
-      <a href="#">this project</a>.
+      We can’t find the Epic you’re looking for. Try another Epic from{' '}
+      <a href="#">this Project</a>.
     </>
   ),
 };

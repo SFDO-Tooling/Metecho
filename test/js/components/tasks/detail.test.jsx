@@ -359,7 +359,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('another epic')).toBeVisible();
+      expect(getByText('another Epic')).toBeVisible();
     });
   });
 

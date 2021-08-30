@@ -20,7 +20,7 @@ const TaskNotFound = ({ project, epic }: Props) => (
         <Link to={routes.epic_detail(project.slug, epic.slug)}>
           another Task
         </Link>{' '}
-        from that epic?
+        from that Epic?
       </Trans>
     }
   />

@@ -373,7 +373,7 @@ describe('<EpicDetail/>', () => {
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('another epic')).toBeVisible();
+      expect(getByText('another Epic')).toBeVisible();
     });
   });
 
