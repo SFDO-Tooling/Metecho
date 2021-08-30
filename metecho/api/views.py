@@ -28,6 +28,7 @@ from .models import (
     Epic,
     GitHubOrganization,
     Project,
+    ProjectDependency,
     ScratchOrg,
     Task,
 )
@@ -43,6 +44,7 @@ from .serializers import (
     GitHubOrganizationSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
+    ProjectDependencySerializer,
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
@@ -182,6 +184,13 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     serializer_class = MinimalUserSerializer
     pagination_class = CustomPaginator
     queryset = User.objects.all()
+
+
+class ProjectDependencyViewSet(ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ProjectDependencySerializer
+    pagination_class = CustomPaginator
+    queryset = ProjectDependency.objects.all()
 
 
 class GitHubOrganizationViewSet(ReadOnlyModelViewSet):

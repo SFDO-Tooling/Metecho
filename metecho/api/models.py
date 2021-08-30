@@ -460,6 +460,18 @@ class Project(
             return None
 
 
+class ProjectDependency(HashIdMixin, TimestampsMixin):
+    name = StringField()
+    recommended = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("project dependency")
+        verbose_name_plural = _("project dependencies")
+
+
 class GitHubOrganization(HashIdMixin, TimestampsMixin):
     name = StringField()
     login = StringField(unique=True, help_text="Organization's 'username' on GitHub")

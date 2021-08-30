@@ -40,4 +40,27 @@ class Migration(migrations.Migration):
                 "ordering": ("name",),
             },
         ),
+        migrations.CreateModel(
+            name="ProjectDependency",
+            fields=[
+                (
+                    "id",
+                    hashid_field.field.HashidAutoField(
+                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",  # noqa
+                        min_length=7,
+                        prefix="",
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("edited_at", models.DateTimeField(auto_now=True)),
+                ("name", sfdo_template_helpers.fields.string.StringField()),
+                ("recommended", models.BooleanField(default=False)),
+            ],
+            options={
+                "verbose_name": "project dependency",
+                "verbose_name_plural": "project dependencies",
+            },
+        ),
     ]

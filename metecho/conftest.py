@@ -11,6 +11,7 @@ from .api.models import (
     GitHubOrganization,
     GitHubRepository,
     Project,
+    ProjectDependency,
     ScratchOrg,
     Task,
 )
@@ -80,6 +81,14 @@ class ProjectFactory(factory.django.DjangoModelFactory):
     repo_id = factory.Sequence(lambda n: n)
     branch_name = "main"
     latest_sha = "abcd1234"
+
+
+@register
+class ProjectDependencyFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProjectDependency
+
+    name = factory.Sequence("Dependency {}".format)
 
 
 @register

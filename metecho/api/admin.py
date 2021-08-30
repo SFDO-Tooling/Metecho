@@ -15,6 +15,7 @@ from .models import (
     GitHubOrganization,
     GitHubRepository,
     Project,
+    ProjectDependency,
     ProjectSlug,
     ScratchOrg,
     SiteProfile,
@@ -108,6 +109,13 @@ class ProjectSlugAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     list_select_related = ("parent",)
     search_fields = ("slug",)
+
+
+@admin.register(ProjectDependency)
+class ProjectDependencyAdmin(admin.ModelAdmin):
+    list_display = ("name", "recommended")
+    list_filter = ("recommended",)
+    search_fields = ("name",)
 
 
 @admin.register(GitHubOrganization)

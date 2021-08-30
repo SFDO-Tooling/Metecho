@@ -15,6 +15,7 @@ from .models import (
     Epic,
     GitHubOrganization,
     Project,
+    ProjectDependency,
     ScratchOrg,
     SiteProfile,
     Task,
@@ -118,6 +119,14 @@ class MinimalUserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "avatar_url")
 
 
+class ProjectDependencySerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = ProjectDependency
+        fields = ("id", "name", "recommended")
+
+
 class GitHubOrganizationSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
 
@@ -134,16 +143,32 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
     organization = serializers.PrimaryKeyRelatedField(
         queryset=GitHubOrganization.objects.all(), pk_field=serializers.CharField()
     )
+    dependencies = serializers.PrimaryKeyRelatedField(
+        many=True,
+        pk_field=serializers.CharField(),
+        queryset=ProjectDependency.objects.all(),
+    )
 
     class Meta:
         model = Project
-        fields = ("name", "description", "organization", "repo_name", "github_users")
+        fields = (
+            "name",
+            "description",
+            "organization",
+            "repo_name",
+            "github_users",
+            "dependencies",
+        )
 
     def save(self, *args, **kwargs):
         # `organization` is not an actual field on Project so we convert it to `repo_owner`
         organization = self.validated_data.pop("organization", None)
         if organization is not None:
             kwargs.setdefault("repo_owner", organization.login)
+
+        # TODO: do something with dependencies
+        self.validated_data.pop("dependencies", None)
+
         return super().save(*args, **kwargs)
 
 

@@ -922,6 +922,12 @@ class TestScratchOrg:
 
 
 @pytest.mark.django_db
+class TestProjectDependency:
+    def test_str(self, project_dependency_factory):
+        org = project_dependency_factory(name="Dep ABC")
+        assert str(org) == "Dep ABC"
+
+@pytest.mark.django_db
 class TestGitHubOrganization:
     def test_str(self, git_hub_organization_factory):
         org = git_hub_organization_factory(name="Foo Org")

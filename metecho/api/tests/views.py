@@ -71,6 +71,21 @@ class TestCurrentUserViewSet:
 
 
 @pytest.mark.django_db
+class TestProjectDependencyViewset:
+    def test_list(self, client, project_dependency):
+        response = client.get(reverse("dependency-list"))
+        data = response.json()
+        assert data["count"] == 1
+        assert data["results"][0]["id"] == str(project_dependency.id)
+
+    def test_retrieve(self, client, project_dependency):
+        response = client.get(
+            reverse("dependency-detail", args=[str(project_dependency.id)])
+        )
+        assert tuple(response.json().keys()) == ("id", "name", "recommended")
+
+
+@pytest.mark.django_db
 class TestGitHubOrganizationViewset:
     def test_list(self, client, git_hub_organization):
         response = client.get(reverse("organization-list"))
@@ -300,13 +315,18 @@ class TestProjectViewset:
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
 
-    def test_create(self, client, mocker, git_hub_organization):
+    def test_create(
+        self, client, mocker, git_hub_organization, project_dependency_factory
+    ):
         # User is not a superuser but has the required permission
         client.user.user_permissions.add(
             Permission.objects.get(
                 content_type__app_label="api", codename="add_project"
             )
         )
+
+        dep1 = project_dependency_factory()
+        dep2 = project_dependency_factory()
 
         create_repository_job = mocker.patch("metecho.api.jobs.create_repository_job")
         mocker.patch(
@@ -321,8 +341,10 @@ class TestProjectViewset:
                 "organization": str(git_hub_organization.pk),
                 "name": "Foo",
                 "repo_name": "foo",
-                "github_users": '[{"id": "123"}]',
+                "github_users": [{"id": "123"}],
+                "dependencies": [str(dep1.id), str(dep2.id)],
             },
+            format="json",
         )
 
         assert response.status_code == status.HTTP_200_OK, response.content
