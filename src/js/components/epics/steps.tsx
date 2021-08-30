@@ -46,8 +46,8 @@ const EpicStatusSteps = ({
     },
     {
       label: currentlySubmitting
-        ? i18n.t('Submitting epic for review on GitHub…')
-        : i18n.t('Submit this epic for review on GitHub'),
+        ? i18n.t('Submitting Epic for review on GitHub…')
+        : i18n.t('Submit this Epic for review on GitHub'),
       active: readyToSubmit,
       complete: epic.pr_is_open || isMerged,
       action: canSubmit && !currentlySubmitting ? 'submit' : undefined,

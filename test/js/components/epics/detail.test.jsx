@@ -669,7 +669,7 @@ describe('<EpicDetail/>', () => {
     });
   });
 
-  describe('"Submit this epic for review on GitHub" step click', () => {
+  describe('"Submit this Epic for review on GitHub" step click', () => {
     test('opens modal', () => {
       const { getByText, getByLabelText } = setup({
         initialState: {
@@ -687,7 +687,7 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByText('Submit this epic for review on GitHub'));
+      fireEvent.click(getByText('Submit this Epic for review on GitHub'));
 
       expect(getByLabelText('Developer notes')).toBeVisible();
     });

@@ -286,7 +286,7 @@ const CreateEpicModal = ({
               onBlur: handleBranchBlur,
             }}
             labels={{
-              label: i18n.t('Select a branch to use for this epic'),
+              label: i18n.t('Select a branch to use for this Epic'),
               noOptionsFound: noOptionsFoundText,
             }}
             menuItemVisibleLength={5}

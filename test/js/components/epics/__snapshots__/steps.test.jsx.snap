@@ -90,7 +90,7 @@ exports[`<EpicStatusSteps /> renders steps: dev assigned 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit this epic for review on GitHub
+          Submit this Epic for review on GitHub
         </div>
       </li>
       <li
@@ -217,7 +217,7 @@ exports[`<EpicStatusSteps /> renders steps: epic with commits 1`] = `
             class="slds-button_reset slds-text-link"
             type="button"
           >
-            Submit this epic for review on GitHub
+            Submit this Epic for review on GitHub
           </button>
         </div>
       </li>
@@ -348,7 +348,7 @@ exports[`<EpicStatusSteps /> renders steps: epic with pr 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit this epic for review on GitHub
+          Submit this Epic for review on GitHub
         </div>
       </li>
       <li
@@ -501,7 +501,7 @@ exports[`<EpicStatusSteps /> renders steps: merged epic 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit this epic for review on GitHub
+          Submit this Epic for review on GitHub
         </div>
       </li>
       <li
@@ -598,7 +598,7 @@ exports[`<EpicStatusSteps /> renders steps: planned, no tasks 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit this epic for review on GitHub
+          Submit this Epic for review on GitHub
         </div>
       </li>
       <li
@@ -695,7 +695,7 @@ exports[`<EpicStatusSteps /> renders steps: task created, no assigned dev 1`] = 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit this epic for review on GitHub
+          Submit this Epic for review on GitHub
         </div>
       </li>
       <li
