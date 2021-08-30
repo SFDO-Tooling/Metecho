@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import Footer from '~js/components/footer';
+import Footer from '@/js/components/footer';
 
 import { renderWithRedux } from './../utils';
 

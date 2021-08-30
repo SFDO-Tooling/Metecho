@@ -2,8 +2,8 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import FourOhFour from '~js/components/404';
-import routes from '~js/utils/routes';
+import FourOhFour from '@/js/components/404';
+import routes from '@/js/utils/routes';
 
 const ProjectNotFound = () => (
   <FourOhFour

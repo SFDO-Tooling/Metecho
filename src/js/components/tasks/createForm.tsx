@@ -8,23 +8,23 @@ import React, { useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
-import SelectFlowType from '~js/components/tasks/selectFlowType';
+import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
   useTransientMessage,
-} from '~js/components/utils';
-import { Epic } from '~js/store/epics/reducer';
-import { Org } from '~js/store/orgs/reducer';
-import { Project } from '~js/store/projects/reducer';
+} from '@/js/components/utils';
+import { Epic } from '@/js/store/epics/reducer';
+import { Org } from '@/js/store/orgs/reducer';
+import { Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
   RETRIEVE_CHANGES,
-} from '~js/utils/constants';
-import routes from '~js/utils/routes';
+} from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface Props {
   project: Project;

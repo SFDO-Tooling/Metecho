@@ -2,12 +2,12 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import Terms from '~js/components/terms';
-import { agreeToTerms, logout } from '~js/store/user/actions';
+import Terms from '@/js/components/terms';
+import { agreeToTerms, logout } from '@/js/store/user/actions';
 
 import { renderWithRedux, storeWithThunk } from './../utils';
 
-jest.mock('~js/store/user/actions');
+jest.mock('@/js/store/user/actions');
 
 agreeToTerms.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

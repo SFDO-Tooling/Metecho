@@ -4,8 +4,8 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { UserCard } from '~js/components/githubUsers/cards';
-import { GitHubUser } from '~js/store/user/reducer';
+import { UserCard } from '@/js/components/githubUsers/cards';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 const ConfirmRemoveUserModal = ({
   confirmRemoveUsers,

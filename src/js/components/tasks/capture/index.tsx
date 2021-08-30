@@ -6,22 +6,22 @@ import i18n from 'i18next';
 import React, { ReactNode, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import ChangesForm from '~js/components/tasks/capture/changes';
-import TargetDirectoriesForm from '~js/components/tasks/capture/directories';
-import CommitMessageForm from '~js/components/tasks/capture/message';
+import ChangesForm from '@/js/components/tasks/capture/changes';
+import TargetDirectoriesForm from '@/js/components/tasks/capture/directories';
+import CommitMessageForm from '@/js/components/tasks/capture/message';
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
   useTransientMessage,
-} from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { updateObject } from '~js/store/actions';
-import { Changeset, Org } from '~js/store/orgs/reducer';
-import { ApiError } from '~js/utils/api';
-import { OBJECT_TYPES } from '~js/utils/constants';
-import { mergeChangesets, splitChangeset } from '~js/utils/helpers';
+} from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { updateObject } from '@/js/store/actions';
+import { Changeset, Org } from '@/js/store/orgs/reducer';
+import { ApiError } from '@/js/utils/api';
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 
 interface Props {
   org: Org;

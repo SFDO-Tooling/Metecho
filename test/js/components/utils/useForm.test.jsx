@@ -1,11 +1,11 @@
 import { act } from '@testing-library/react-hooks';
 
-import { useForm } from '~js/components/utils';
-import { createObject } from '~js/store/actions';
+import { useForm } from '@/js/components/utils';
+import { createObject } from '@/js/store/actions';
 
 import { renderHookWithRedux } from './../../utils';
 
-jest.mock('~js/store/actions');
+jest.mock('@/js/store/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

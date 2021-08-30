@@ -1,6 +1,6 @@
 import React from 'react';
 
-import EpicProgress from '~js/components/epics/progress';
+import EpicProgress from '@/js/components/epics/progress';
 
 import { renderWithRedux } from './../../utils';
 

@@ -7,16 +7,16 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import GitHubUserAvatar from '~js/components/githubUsers/avatar';
+import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import {
   ExternalLink,
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
-} from '~js/components/utils';
-import { GitHubUser } from '~js/store/user/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
+} from '@/js/components/utils';
+import { GitHubUser } from '@/js/store/user/reducer';
+import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 interface Props {
   instanceId: string;

@@ -1,12 +1,12 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import Errors from '~js/components/apiErrors';
-import { removeError } from '~js/store/errors/actions';
+import Errors from '@/js/components/apiErrors';
+import { removeError } from '@/js/store/errors/actions';
 
 import { renderWithRedux } from './../utils';
 
-jest.mock('~js/store/errors/actions');
+jest.mock('@/js/store/errors/actions');
 
 removeError.mockReturnValue({ type: 'TEST' });
 

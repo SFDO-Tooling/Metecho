@@ -1,8 +1,8 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicTableComponent from '~js/components/epics/table';
-import { Epic } from '~js/store/epics/reducer';
+import EpicTableComponent from '@/js/components/epics/table';
+import { Epic } from '@/js/store/epics/reducer';
 
 import { withRedux } from '../../decorators';
 import {
@@ -40,11 +40,11 @@ const Template = ({ epics, ...rest }: StoryProps) => (
 
 export const EpicTable: Story<StoryProps> = Template.bind({});
 EpicTable.args = {
+  epics: Object.keys(sampleEpics),
   projectSlug: 'my-project',
 };
 EpicTable.argTypes = {
   epics: {
-    defaultValue: Object.keys(sampleEpics),
     options: Object.keys(sampleEpics),
     control: {
       type: 'multi-select',

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, OrderedDict
 
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
@@ -46,6 +46,34 @@ class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         if self.pk_field is not None:
             return self.pk_field.to_representation(value.pk)
         return str(value.pk)
+
+
+class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def __init__(self, serializer, **kwargs):
+        """
+        On read display a complete nested representation of the object(s)
+        On write only require the PK (not an entire object) as value
+        """
+        self.serializer = serializer
+        super().__init__(**kwargs)
+
+    def use_pk_only_optimization(self):
+        # Required when serializing single objects (`many=False`)
+        return False  # pragma: nocover
+
+    def to_representation(self, obj):
+        return self.serializer(obj, context=self.context).to_representation(obj)
+
+    def get_choices(self, cutoff=None):  # pragma: nocover
+        # Minor tweaks to make this compatible with DRF's HTML view
+        queryset = self.get_queryset()
+        if queryset is None:
+            return {}  # pragma: nocover
+
+        if cutoff is not None:
+            queryset = queryset[:cutoff]
+
+        return OrderedDict(((item.pk, self.display_value(item)) for item in queryset))
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -115,11 +143,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repo_image_url",
             "org_config_names",
             "currently_fetching_org_config_names",
+            "currently_fetching_github_users",
             "latest_sha",
         )
         extra_kwargs = {
             "org_config_names": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
+            "currently_fetching_github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
         }
 
@@ -133,12 +163,22 @@ class ProjectSerializer(serializers.ModelSerializer):
         return obj.has_push_permission(self.context["request"].user)
 
 
+class EpicMinimalSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Epic
+        read_only_fields = ("id", "name", "slug", "github_users")
+        fields = read_only_fields
+
+
 class EpicSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
+    task_count = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -153,6 +193,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "project",
+            "task_count",
             "branch_url",
             "branch_diff_url",
             "branch_name",
@@ -169,6 +210,7 @@ class EpicSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "slug": {"read_only": True},
             "old_slugs": {"read_only": True},
+            "task_count": {"read_only": True},
             "branch_url": {"read_only": True},
             "branch_diff_url": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
@@ -244,6 +286,9 @@ class EpicSerializer(serializers.ModelSerializer):
 
         return data
 
+    def get_task_count(self, obj) -> int:
+        return obj.tasks.active().count()
+
     def get_branch_diff_url(self, obj) -> Optional[str]:
         project = obj.project
         repo_owner = project.repo_owner
@@ -317,8 +362,10 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
-    epic = serializers.PrimaryKeyRelatedField(
-        queryset=Epic.objects.all(), pk_field=serializers.CharField()
+    epic = NestedPrimaryKeyRelatedField(
+        queryset=Epic.objects.all(),
+        pk_field=serializers.CharField(),
+        serializer=EpicMinimalSerializer,
     )
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
@@ -499,7 +546,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
         if "assigned_qa" in data:
             self._handle_reassign("qa", task, data, user, originating_user_id=user_id)
             task.assigned_qa = data["assigned_qa"]
-        task.save()
+        task.finalize_task_update(originating_user_id=user_id)
         return task
 
     def _handle_reassign(

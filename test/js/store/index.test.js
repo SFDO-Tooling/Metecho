@@ -1,4 +1,4 @@
-import reducer from '~js/store';
+import reducer from '@/js/store';
 
 describe('reducer', () => {
   test('combines child reducers', () => {

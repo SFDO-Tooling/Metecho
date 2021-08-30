@@ -9,20 +9,20 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '~js/components/404';
-import CommitList from '~js/components/commits/list';
-import SubmitReviewModal from '~js/components/orgs/cards/submitReview';
-import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
+import FourOhFour from '@/js/components/404';
+import CommitList from '@/js/components/commits/list';
+import SubmitReviewModal from '@/js/components/orgs/cards/submitReview';
+import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import TaskOrgCards, {
   ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
-} from '~js/components/orgs/taskOrgCards';
-import { Step } from '~js/components/steps/stepsItem';
-import CaptureModal from '~js/components/tasks/capture';
-import CreateTaskModal from '~js/components/tasks/createForm';
-import TaskStatusPath from '~js/components/tasks/path';
-import TaskStatusSteps from '~js/components/tasks/steps';
-import TourPopover from '~js/components/tour/popover';
+} from '@/js/components/orgs/taskOrgCards';
+import { Step } from '@/js/components/steps/stepsItem';
+import CaptureModal from '@/js/components/tasks/capture';
+import CreateTaskModal from '@/js/components/tasks/createForm';
+import TaskStatusPath from '@/js/components/tasks/path';
+import TaskStatusSteps from '@/js/components/tasks/steps';
+import TourPopover from '@/js/components/tour/popover';
 import {
   ContributeWorkModal,
   CreateOrgModal,
@@ -42,15 +42,15 @@ import {
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
   useIsMounted,
-} from '~js/components/utils';
-import { AppState, ThunkDispatch } from '~js/store';
-import { createObject, updateObject } from '~js/store/actions';
-import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
-import { Org, OrgsByParent } from '~js/store/orgs/reducer';
-import { selectProjectCollaborator } from '~js/store/projects/selectors';
-import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
-import { User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
+} from '@/js/components/utils';
+import { AppState, ThunkDispatch } from '@/js/store';
+import { createObject, updateObject } from '@/js/store/actions';
+import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
+import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
+import { selectProjectCollaborator } from '@/js/store/projects/selectors';
+import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
@@ -59,9 +59,9 @@ import {
   RETRIEVE_CHANGES,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '~js/utils/constants';
-import { getBranchLink, getTaskCommits } from '~js/utils/helpers';
-import routes from '~js/utils/routes';
+} from '@/js/utils/constants';
+import { getBranchLink, getTaskCommits } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 const ResubmitButton = ({
   canSubmit,
@@ -424,32 +424,37 @@ const TaskDetail = (
   const doContributeFromScratchOrg = useCallback(
     ({ id, useExistingTask }: { id: string; useExistingTask: boolean }) => {
       closeContributeModal();
+      // eslint-disable-next-line no-negated-condition
       if (!useExistingTask) {
         openCreateModal(id);
-      } /* istanbul ignore else */ else if (!devOrg) {
+      } else {
         /* istanbul ignore else */
-        if (!userIsAssignedDev) {
-          // Assign current user as Dev
+        // eslint-disable-next-line no-lonely-if
+        if (!devOrg) {
+          /* istanbul ignore else */
+          if (!userIsAssignedDev) {
+            // Assign current user as Dev
+            dispatch(
+              updateObject({
+                objectType: OBJECT_TYPES.TASK,
+                url: window.api_urls.task_assignees(task?.id),
+                data: {
+                  assigned_dev: user.github_id,
+                },
+              }),
+            );
+          }
+          // Convert Scratch Org to Dev Org
           dispatch(
             updateObject({
-              objectType: OBJECT_TYPES.TASK,
-              url: window.api_urls.task_assignees(task?.id),
-              data: {
-                assigned_dev: user.github_id,
-              },
+              objectType: OBJECT_TYPES.ORG,
+              url: window.api_urls.scratch_org_detail(id),
+              data: { org_type: ORG_TYPES.DEV },
+              patch: true,
             }),
           );
+          history.replace({ state: { [RETRIEVE_CHANGES]: true } });
         }
-        // Convert Scratch Org to Dev Org
-        dispatch(
-          updateObject({
-            objectType: OBJECT_TYPES.ORG,
-            url: window.api_urls.scratch_org_detail(id),
-            data: { org_type: ORG_TYPES.DEV },
-            patch: true,
-          }),
-        );
-        history.replace({ state: { [RETRIEVE_CHANGES]: true } });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -653,6 +658,7 @@ const TaskDetail = (
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
+            id="tour-task-edit"
             align="left"
             heading={i18n.t('Edit or delete this Task')}
             body={
@@ -701,6 +707,7 @@ const TaskDetail = (
           disabled={currentlySubmitting}
         />
         <TourPopover
+          id="tour-task-submit"
           align="top left"
           heading={i18n.t('Submit changes for testing')}
           body={
@@ -772,6 +779,7 @@ const TaskDetail = (
           }
         />
         <TourPopover
+          id="tour-task-retrieve"
           align="right"
           heading={i18n.t('Retrieve changes')}
           body={
@@ -813,6 +821,7 @@ const TaskDetail = (
         title={task.name}
         titlePopover={
           <TourPopover
+            id="tour-task-name"
             align="bottom left"
             heading={i18n.t('Task name & GitHub link')}
             body={
@@ -849,6 +858,7 @@ const TaskDetail = (
             >
               <TaskStatusPath task={task} />
               <TourPopover
+                id="tour-task-path"
                 align="left"
                 heading={i18n.t('Task progress path')}
                 body={
@@ -908,6 +918,7 @@ const TaskDetail = (
                       handleAction={handleStepAction}
                     />
                     <TourPopover
+                      id="tour-task-next-steps"
                       align="top"
                       heading={i18n.t('Wondering what to do next?')}
                       body={
@@ -947,7 +958,7 @@ const TaskDetail = (
             openCaptureModal={openCaptureModal}
             assignUserModalOpen={assignUserModalOpen}
             isCreatingOrg={isCreatingOrg}
-            isRefreshingUsers={Boolean(project.currently_refreshing_gh_users)}
+            isRefreshingUsers={project.currently_fetching_github_users}
             openAssignUserModal={openAssignUserModal}
             closeAssignUserModal={closeAssignUserModal}
             openSubmitReviewModal={openSubmitReviewModal}
@@ -962,6 +973,7 @@ const TaskDetail = (
         )}
         <div className="slds-m-vertical_large slds-is-relative heading">
           <TourPopover
+            id="tour-task-scratch-org"
             align="top left"
             heading={i18n.t('View & play with a Task')}
             body={

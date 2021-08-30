@@ -4,9 +4,9 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { removeToast } from '~js/store/toasts/actions';
-import { ToastType } from '~js/store/toasts/reducer';
-import { selectToasts } from '~js/store/toasts/selectors';
+import { removeToast } from '@/js/store/toasts/actions';
+import { ToastType } from '@/js/store/toasts/reducer';
+import { selectToasts } from '@/js/store/toasts/selectors';
 
 const ToastMessage = withRouter(
   ({ toast, history }: { toast: ToastType } & RouteComponentProps) => {

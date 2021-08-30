@@ -1,8 +1,8 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import ConnectModal from '~js/components/user/connect';
-import { addUrlParams } from '~js/utils/api';
+import ConnectModal from '@/js/components/user/connect';
+import { addUrlParams } from '@/js/utils/api';
 
 import { render } from './../../utils';
 

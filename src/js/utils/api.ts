@@ -1,8 +1,8 @@
 import cookies from 'js-cookie';
 import { ThunkDispatch } from 'redux-thunk';
 
-import { addError } from '~js/store/errors/actions';
-import { logError } from '~js/utils/logging';
+import { addError } from '@/js/store/errors/actions';
+import { logError } from '@/js/utils/logging';
 
 export interface UrlParams {
   [key: string]: string | number | boolean;
@@ -45,7 +45,7 @@ const apiFetch = async ({
   hasForm = false,
 }: {
   url: string;
-  dispatch: ThunkDispatch<any, any, any>;
+  dispatch?: ThunkDispatch<any, any, any>;
   opts?: { [key: string]: any };
   suppressErrorsOn?: number[];
   hasForm?: boolean;
@@ -84,7 +84,7 @@ const apiFetch = async ({
       hasForm &&
       ['POST', 'PUT'].includes(options.method) &&
       response.status === 400;
-    if (!suppressGlobalError) {
+    if (dispatch && !suppressGlobalError) {
       dispatch(addError(msg));
     }
     const error: ApiError = new Error(msg);

@@ -1,12 +1,12 @@
 import fetchMock from 'fetch-mock';
 
-import { fetchObjects } from '~js/store/actions';
-import * as actions from '~js/store/projects/actions';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import { fetchObjects } from '@/js/store/actions';
+import * as actions from '@/js/store/projects/actions';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 import { storeWithThunk } from './../../utils';
 
-jest.mock('~js/store/actions');
+jest.mock('@/js/store/actions');
 
 fetchObjects.mockReturnValue({ type: 'TEST', payload: {} });
 
@@ -95,6 +95,30 @@ describe('projectsRefreshed', () => {
       objectType: OBJECT_TYPES.PROJECT,
       reset: true,
     });
+  });
+});
+
+describe('projectsRefreshError', () => {
+  test('dispatches REFRESH_PROJECTS_ERROR action', async () => {
+    const store = storeWithThunk({});
+    const event = { type: 'REFRESH_PROJECTS_ERROR' };
+
+    expect.assertions(5);
+    try {
+      await store.dispatch(actions.projectsRefreshError('error msg'));
+    } catch (error) {
+      // ignore errors
+    } finally {
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toMatch(
+        'Uh oh. There was an error re-syncing Projects.',
+      );
+      expect(allActions[0].payload.details).toEqual('error msg');
+      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[1]).toEqual(event);
+    }
   });
 });
 

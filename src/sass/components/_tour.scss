@@ -32,7 +32,7 @@
 
 // Override background image
 .slds-popover_walkthrough .slds-popover__header {
-  background-image: url('~img/popover-header.png');
+  background-image: url('~@/img/popover-header.png');
 }
 
 .popover-wrapper {
@@ -100,18 +100,27 @@
     fill: currentColor;
   }
 
+  &.is-viewed {
+    border: 1px solid $palette-green-90;
+    box-shadow: 0 0 2px $palette-green-70;
+    color: $palette-green-70;
+  }
+
   // Hover/Focus styles should only apply if on interactive element
   &[aria-haspopup]:hover,
   &[aria-haspopup]:focus {
     box-shadow: var(--sds-c-button-shadow-focus, 0 0 2px $color-brand-dark),
       0 0 2px $color-text-link-focus;
+    color: $brand-background-dark;
   }
 }
 
 // Keep text from being truncated in table and page header
 .slds-popover {
+  cursor: auto;
   font-size: $font-size-3;
   font-weight: normal;
+  line-height: $line-height-text;
   text-align: left;
   white-space: initial;
 }

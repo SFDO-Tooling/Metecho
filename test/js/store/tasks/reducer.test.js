@@ -1,4 +1,11 @@
-import reducer from '~js/store/tasks/reducer';
+import reducer from '@/js/store/tasks/reducer';
+
+const epic = {
+  id: 'epic-1',
+  name: 'My Epic',
+  slug: 'epic-1',
+  github_users: [],
+};
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {
@@ -16,7 +23,7 @@ describe('reducer', () => {
         slug: 'task-1',
         name: 'Task 1',
         description: 'This is a test task.',
-        epic: 'p1',
+        epic,
       };
       const expected = {};
       const actual = reducer(
@@ -37,14 +44,14 @@ describe('reducer', () => {
         slug: 'task-1',
         name: 'Task 1',
         description: 'This is a test task.',
-        epic: 'epic-1',
+        epic,
       };
       const task2 = {
         id: 't2',
         slug: 'task-2',
         name: 'Task 2',
         description: 'This is another test task.',
-        epic: 'epic-1',
+        epic,
       };
       const expected = {
         'epic-1': [task2],
@@ -73,7 +80,7 @@ describe('reducer', () => {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
-        epic: 'epic-1',
+        epic,
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -96,7 +103,7 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          epic: 'epic-1',
+          epic,
         };
         const expected = {
           'epic-1': [task],
@@ -120,7 +127,7 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          epic: 'epic-1',
+          epic,
         };
         const expected = {
           'epic-1': [task],
@@ -157,12 +164,12 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          epic: 'epic-1',
+          epic,
           currently_creating_pr: false,
         };
         const task2 = {
           id: 't2',
-          epic: 'epic-1',
+          epic,
         };
         const expected = {
           'epic-1': [{ ...task, currently_creating_pr: true }, task2],
@@ -186,7 +193,7 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          epic: 'epic-1',
+          epic,
           currently_creating_pr: false,
         };
         const expected = {
@@ -241,7 +248,7 @@ describe('reducer', () => {
     test('adds new task to list', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
       };
       const expected = {
         'epic-1': [task],
@@ -260,12 +267,12 @@ describe('reducer', () => {
     test('updates existing task', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
@@ -289,12 +296,12 @@ describe('reducer', () => {
     test('updates existing task', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
@@ -316,12 +323,12 @@ describe('reducer', () => {
     test('ignores if unknown objectType', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
@@ -347,12 +354,12 @@ describe('reducer', () => {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
-        epic: 'epic-1',
+        epic,
         currently_creating_pr: true,
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const expected = {
         'epic-1': [{ ...task, currently_creating_pr: false }, task2],
@@ -373,7 +380,7 @@ describe('reducer', () => {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
-        epic: 'epic-1',
+        epic,
         currently_creating_pr: true,
       };
       const actual = reducer(
@@ -392,12 +399,12 @@ describe('reducer', () => {
     test('removes task', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const actual = reducer(
         { 'epic-1': [task, task2] },
@@ -413,12 +420,12 @@ describe('reducer', () => {
     test('ignores if unknown objectType', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const initial = { 'epic-1': [task, task2] };
       const actual = reducer(initial, {
@@ -434,12 +441,12 @@ describe('reducer', () => {
     test('removes task', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const actual = reducer(
         { 'epic-1': [task, task2] },
@@ -455,12 +462,12 @@ describe('reducer', () => {
     test('ignores if payload is not a task', () => {
       const task = {
         id: 't1',
-        epic: 'epic-1',
+        epic,
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        epic: 'epic-1',
+        epic,
       };
       const initial = { 'epic-1': [task, task2] };
       const actual = reducer(initial, {

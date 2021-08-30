@@ -1,7 +1,7 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { DetailPageLayout } from '~js/components/utils';
+import { DetailPageLayout } from '@/js/components/utils';
 
 import { renderWithRedux } from './../../utils';
 

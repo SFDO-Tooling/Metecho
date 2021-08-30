@@ -6,15 +6,15 @@ import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import Alerts from '~js/components/alerts';
-import Errors from '~js/components/apiErrors';
-import Toasts from '~js/components/toasts';
-import TourDropdown from '~js/components/tour/dropdown';
-import TourPopover from '~js/components/tour/popover';
-import UserInfo from '~js/components/user/info';
-import { ExternalLink } from '~js/components/utils';
-import { selectUserState } from '~js/store/user/selectors';
-import routes from '~js/utils/routes';
+import Alerts from '@/js/components/alerts';
+import Errors from '@/js/components/apiErrors';
+import Toasts from '@/js/components/toasts';
+import TourDropdown from '@/js/components/tour/dropdown';
+import TourPopover from '@/js/components/tour/popover';
+import UserInfo from '@/js/components/user/info';
+import { ExternalLink } from '@/js/components/utils';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 const Header = () => {
   const user = useSelector(selectUserState);
@@ -27,6 +27,7 @@ const Header = () => {
       <div className="slds-is-relative">
         <UserInfo />
         <TourPopover
+          id="tour-user"
           align="bottom right"
           heading={i18n.t('Account & connection info')}
           body={
@@ -51,6 +52,7 @@ const Header = () => {
       <Toasts />
       <div className="slds-is-relative logo-popover">
         <TourPopover
+          id="tour-metecho-name"
           align="bottom left"
           heading={i18n.t('What’s in a name?')}
           body={

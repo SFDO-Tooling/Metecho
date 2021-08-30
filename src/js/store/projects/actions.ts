@@ -1,12 +1,12 @@
 import i18n from 'i18next';
 
-import { ThunkResult } from '~js/store';
-import { fetchObjects, FetchObjectsSucceeded } from '~js/store/actions';
-import { isCurrentUser } from '~js/store/helpers';
-import { Project } from '~js/store/projects/reducer';
-import { addToast } from '~js/store/toasts/actions';
-import apiFetch from '~js/utils/api';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import { ThunkResult } from '@/js/store';
+import { fetchObjects, FetchObjectsSucceeded } from '@/js/store/actions';
+import { isCurrentUser } from '@/js/store/helpers';
+import { Project } from '@/js/store/projects/reducer';
+import { addToast } from '@/js/store/toasts/actions';
+import apiFetch from '@/js/utils/api';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 interface ProjectUpdated {
   type: 'PROJECT_UPDATE';
@@ -30,6 +30,9 @@ interface ProjectsRefreshing {
 }
 export interface ProjectsRefreshed {
   type: 'PROJECTS_REFRESHED';
+}
+export interface ProjectsRefreshError {
+  type: 'REFRESH_PROJECTS_ERROR';
 }
 interface RefreshGitHubUsersRequested {
   type: 'REFRESH_GH_USERS_REQUESTED';
@@ -59,6 +62,7 @@ export type ProjectsAction =
   | RefreshProjectsRejected
   | ProjectsRefreshing
   | ProjectsRefreshed
+  | ProjectsRefreshError
   | RefreshGitHubUsersRequested
   | RefreshGitHubUsersAccepted
   | RefreshGitHubUsersRejected
@@ -97,6 +101,19 @@ export const projectsRefreshed =
         reset: true,
       }),
     );
+  };
+
+export const projectsRefreshError =
+  (message?: string): ThunkResult<ProjectsRefreshError> =>
+  (dispatch) => {
+    dispatch(
+      addToast({
+        heading: i18n.t('Uh oh. There was an error re-syncing Projects.'),
+        details: message,
+        variant: 'error',
+      }),
+    );
+    return dispatch({ type: 'REFRESH_PROJECTS_ERROR' });
   };
 
 export const refreshGitHubUsers =

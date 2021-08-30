@@ -2,8 +2,8 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import Steps from '~js/components/steps';
-import { Step } from '~js/components/steps/stepsItem';
+import Steps from '@/js/components/steps';
+import { Step } from '@/js/components/steps/stepsItem';
 
 import {
   sampleEpicSteps,
@@ -39,12 +39,12 @@ const EpicTemplate = ({ steps, ...rest }: StoryProps) => (
 );
 export const EpicSteps: Story<StoryProps> = EpicTemplate.bind({});
 EpicSteps.args = {
+  steps: 'Initial steps',
   title: 'Next Steps for this Epic',
   handleAction: action('handleAction'),
 };
 EpicSteps.argTypes = {
   steps: {
-    defaultValue: 'Initial steps',
     options: Object.keys(epicSteps),
     control: {
       type: 'select',
@@ -58,12 +58,12 @@ const TaskTemplate = ({ steps, ...rest }: StoryProps) => (
 );
 export const TaskSteps: Story<StoryProps> = TaskTemplate.bind({});
 TaskSteps.args = {
+  steps: 'Initial steps',
   title: 'Next Steps for this Task',
   handleAction: action('handleAction'),
 };
 TaskSteps.argTypes = {
   steps: {
-    defaultValue: 'Initial steps',
     options: Object.keys(taskSteps),
     control: {
       type: 'select',

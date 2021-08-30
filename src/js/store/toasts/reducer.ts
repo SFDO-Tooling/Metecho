@@ -1,4 +1,4 @@
-import { ToastAction } from '~js/store/toasts/actions';
+import { ToastAction } from '@/js/store/toasts/actions';
 
 export interface ToastType {
   id?: string;

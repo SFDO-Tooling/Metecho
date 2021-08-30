@@ -6,9 +6,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-import TourDropdown from '~js/components/tour/dropdown';
-import { selectSocketState } from '~js/store/socket/selectors';
-import { selectUserState } from '~js/store/user/selectors';
+import TourDropdown from '@/js/components/tour/dropdown';
+import { selectSocketState } from '@/js/store/socket/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
 
 const reloadPage = () => {
   window.location.reload();
@@ -60,6 +60,7 @@ const TourAlert = () => {
       icon={<Icon category="utility" name="info" className="popover-button" />}
       className="tour-alert"
       dismissible
+      variant="info"
       onRequestClose={hideAlert}
     />
   ) : null;

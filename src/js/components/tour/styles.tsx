@@ -1,6 +1,6 @@
 import { Styles } from 'react-joyride';
 
-import popoverHeaderImg from '~img/popover-header.png';
+import popoverHeaderImg from '@/img/popover-header.png';
 
 const tourStyles: Styles = {
   options: {

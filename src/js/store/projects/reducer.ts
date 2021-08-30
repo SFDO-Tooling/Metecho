@@ -1,8 +1,8 @@
-import { ObjectsAction, PaginatedObjectResponse } from '~js/store/actions';
-import { ProjectsAction } from '~js/store/projects/actions';
-import { LogoutAction } from '~js/store/user/actions';
-import { GitHubUser } from '~js/store/user/reducer';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
+import { ProjectsAction } from '@/js/store/projects/actions';
+import { LogoutAction } from '@/js/store/user/actions';
+import { GitHubUser } from '@/js/store/user/reducer';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export interface OrgConfig {
   key: string;
@@ -23,10 +23,10 @@ export interface Project {
   is_managed: boolean;
   branch_prefix: string;
   github_users: GitHubUser[];
-  currently_refreshing_gh_users?: boolean;
   repo_image_url: string;
   org_config_names: OrgConfig[];
   currently_fetching_org_config_names: boolean;
+  currently_fetching_github_users: boolean;
   latest_sha: string;
   has_push_permission: boolean;
 }
@@ -53,10 +53,14 @@ const reducer = (
       return { ...defaultState };
     case 'REFRESH_PROJECTS_REQUESTED':
     case 'REFRESHING_PROJECTS':
-    case 'REFRESH_PROJECTS_REJECTED': {
+    case 'REFRESH_PROJECTS_REJECTED':
+    case 'REFRESH_PROJECTS_ERROR': {
       return {
         ...projects,
-        refreshing: action.type !== 'REFRESH_PROJECTS_REJECTED',
+        refreshing: [
+          'REFRESH_PROJECTS_REQUESTED',
+          'REFRESHING_PROJECTS',
+        ].includes(action.type),
       };
     }
     case 'FETCH_OBJECTS_SUCCEEDED': {
@@ -117,7 +121,7 @@ const reducer = (
             if (project.id === projectId) {
               return {
                 ...project,
-                currently_refreshing_gh_users:
+                currently_fetching_github_users:
                   action.type === 'REFRESH_GH_USERS_REQUESTED',
               };
             }

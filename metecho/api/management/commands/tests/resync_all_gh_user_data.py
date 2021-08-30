@@ -12,9 +12,9 @@ def test_resync_all_gh_user_data(project_factory):
     with ExitStack() as stack:
         project_factory(repo_id=1234)
 
-        populate_github_users = stack.enter_context(
-            patch(f"{module_name}.populate_github_users")
+        refresh_github_users = stack.enter_context(
+            patch(f"{module_name}.refresh_github_users")
         )
         call_command("resync_all_gh_user_data")
 
-        assert populate_github_users.called
+        assert refresh_github_users.called

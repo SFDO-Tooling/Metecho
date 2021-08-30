@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '~js/store/user/actions';
+import * as actions from '@/js/store/user/actions';
 
 import { storeWithThunk } from './../../utils';
 
@@ -245,7 +245,7 @@ describe('disconnect', () => {
   });
 });
 
-describe('refreshDevHubStatus', () => {
+describe('refreshUser', () => {
   let url;
 
   beforeAll(() => {
@@ -257,26 +257,26 @@ describe('refreshDevHubStatus', () => {
       const store = storeWithThunk({});
       const user = { id: 'me' };
       fetchMock.getOnce(url, user);
-      const started = { type: 'DEV_HUB_STATUS_REQUESTED' };
-      const succeeded = { type: 'DEV_HUB_STATUS_SUCCEEDED', payload: user };
+      const started = { type: 'USER_REFRESH_REQUESTED' };
+      const succeeded = { type: 'USER_REFRESH_SUCCEEDED', payload: user };
 
       expect.assertions(1);
-      return store.dispatch(actions.refreshDevHubStatus()).then(() => {
+      return store.dispatch(actions.refreshUser()).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
   });
 
   describe('error', () => {
-    test('dispatches DEV_HUB_STATUS_FAILED action', async () => {
+    test('dispatches USER_REFRESH_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.getOnce(url, 500);
-      const started = { type: 'DEV_HUB_STATUS_REQUESTED' };
-      const failed = { type: 'DEV_HUB_STATUS_FAILED' };
+      const started = { type: 'USER_REFRESH_REQUESTED' };
+      const failed = { type: 'USER_REFRESH_FAILED' };
 
       expect.assertions(4);
       try {
-        await store.dispatch(actions.refreshDevHubStatus());
+        await store.dispatch(actions.refreshUser());
       } catch (error) {
         // ignore errors
       } finally {
@@ -397,6 +397,22 @@ describe('updateTour', () => {
     test('sets self_guided_tour_enabled', () => {
       const store = storeWithThunk({});
       const user = { id: 'testuser', self_guided_tour_enabled: true };
+      fetchMock.postOnce(url, user);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const succeeded = {
+        type: 'TOUR_UPDATE_SUCCEEDED',
+        payload: user,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.updateTour()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+
+    test('sets self_guided_tour_state', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'testuser', self_guided_tour_state: ['123'] };
       fetchMock.postOnce(url, user);
       const started = { type: 'TOUR_UPDATE_REQUESTED' };
       const succeeded = {

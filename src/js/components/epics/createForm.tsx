@@ -13,13 +13,13 @@ import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
-import { LabelWithSpinner, useForm, useIsMounted } from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { Project } from '~js/store/projects/reducer';
-import { User } from '~js/store/user/reducer';
-import apiFetch from '~js/utils/api';
-import { OBJECT_TYPES } from '~js/utils/constants';
-import routes from '~js/utils/routes';
+import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { Project } from '@/js/store/projects/reducer';
+import { User } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface ComboboxOption {
   id: string;

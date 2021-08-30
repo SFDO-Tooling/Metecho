@@ -3,26 +3,26 @@ import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import Footer from '~js/components/orgs/cards/footer';
-import OrgActions from '~js/components/orgs/cards/orgActions';
-import OrgIcon from '~js/components/orgs/cards/orgIcon';
-import OrgInfo from '~js/components/orgs/cards/orgInfo';
-import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
-import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
-import { useIsMounted } from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { deleteObject } from '~js/store/actions';
-import { Epic } from '~js/store/epics/reducer';
-import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
-import { Org } from '~js/store/orgs/reducer';
-import { Project } from '~js/store/projects/reducer';
-import { Task } from '~js/store/tasks/reducer';
+import Footer from '@/js/components/orgs/cards/footer';
+import OrgActions from '@/js/components/orgs/cards/orgActions';
+import OrgIcon from '@/js/components/orgs/cards/orgIcon';
+import OrgInfo from '@/js/components/orgs/cards/orgInfo';
+import OrgSpinner from '@/js/components/orgs/cards/orgSpinner';
+import ConfirmDeleteModal from '@/js/components/tasks/confirmDeleteModal';
+import { useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { deleteObject } from '@/js/store/actions';
+import { Epic } from '@/js/store/epics/reducer';
+import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
+import { Org } from '@/js/store/orgs/reducer';
+import { Project } from '@/js/store/projects/reducer';
+import { Task } from '@/js/store/tasks/reducer';
 import {
   CONFIRM_ORG_TRACKER,
   ConfirmOrgTracker,
   OBJECT_TYPES,
-} from '~js/utils/constants';
-import { getTaskCommits } from '~js/utils/helpers';
+} from '@/js/utils/constants';
+import { getTaskCommits } from '@/js/utils/helpers';
 
 interface PlaygroundCardProps {
   org: Org;

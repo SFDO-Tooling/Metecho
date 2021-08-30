@@ -1,6 +1,6 @@
 import React from 'react';
 
-import StepsItem, { Step } from '~js/components/steps/stepsItem';
+import StepsItem, { Step } from '@/js/components/steps/stepsItem';
 
 const Steps = ({
   steps,

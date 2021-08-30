@@ -1,13 +1,13 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { removeObject } from '~js/store/actions';
+import { removeObject } from '@/js/store/actions';
 import {
   createEpicPR,
   createEpicPRFailed,
   updateEpic,
-} from '~js/store/epics/actions';
-import { Epic } from '~js/store/epics/reducer';
+} from '@/js/store/epics/actions';
+import { Epic } from '@/js/store/epics/reducer';
 import {
   commitFailed,
   commitSucceeded,
@@ -24,29 +24,30 @@ import {
   refreshError,
   updateFailed,
   updateOrg,
-} from '~js/store/orgs/actions';
-import { MinimalOrg, Org } from '~js/store/orgs/reducer';
+} from '@/js/store/orgs/actions';
+import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
 import {
   projectError,
   projectsRefreshed,
+  projectsRefreshError,
   updateProject,
-} from '~js/store/projects/actions';
-import { Project } from '~js/store/projects/reducer';
-import { connectSocket, disconnectSocket } from '~js/store/socket/actions';
+} from '@/js/store/projects/actions';
+import { Project } from '@/js/store/projects/reducer';
+import { connectSocket, disconnectSocket } from '@/js/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
   submitReview,
   submitReviewFailed,
   updateTask,
-} from '~js/store/tasks/actions';
-import { Task } from '~js/store/tasks/reducer';
+} from '@/js/store/tasks/actions';
+import { Task } from '@/js/store/tasks/reducer';
 import {
   ObjectTypes,
   WEBSOCKET_ACTIONS,
   WebsocketActions,
-} from '~js/utils/constants';
-import { log } from '~js/utils/logging';
+} from '@/js/utils/constants';
+import { log } from '@/js/utils/logging';
 
 export interface Socket {
   subscribe: (payload: Subscription) => void;
@@ -70,6 +71,12 @@ interface ErrorEvent {
 }
 interface ReposRefreshedEvent {
   type: 'USER_REPOS_REFRESH';
+}
+interface ReposRefreshErrorEvent {
+  type: 'USER_REPOS_ERROR';
+  payload: {
+    message?: string;
+  };
 }
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
@@ -304,7 +311,8 @@ type EventType =
   | SubscriptionEvent
   | ModelEvent
   | ErrorEvent
-  | ReposRefreshedEvent;
+  | ReposRefreshedEvent
+  | ReposRefreshErrorEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -318,6 +326,8 @@ export const getAction = (event: EventType) => {
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
       return projectsRefreshed();
+    case 'USER_REPOS_ERROR':
+      return projectsRefreshError(event.payload.message);
     case 'PROJECT_UPDATE':
       return hasModel(event) && updateProject(event.payload.model);
     case 'PROJECT_UPDATE_ERROR':

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import CommitList from '~js/components/commits/list';
+import CommitList from '@/js/components/commits/list';
 
 import { renderWithRedux } from './../../utils';
 

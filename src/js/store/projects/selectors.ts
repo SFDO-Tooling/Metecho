@@ -1,9 +1,9 @@
 import { match } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '~js/store';
-import { Project, ProjectsState } from '~js/store/projects/reducer';
-import { GitHubUser } from '~js/store/user/reducer';
+import { AppState } from '@/js/store';
+import { Project, ProjectsState } from '@/js/store/projects/reducer';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 export const selectProjectsState = (appState: AppState): ProjectsState =>
   appState.projects;

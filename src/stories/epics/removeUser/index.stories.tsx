@@ -2,7 +2,7 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import ConfirmRemoveUserModal from '~js/components/epics/confirmRemoveUserModal';
+import ConfirmRemoveUserModal from '@/js/components/epics/confirmRemoveUserModal';
 
 import { sampleGitHubUser1, sampleGitHubUser2 } from '../../fixtures';
 

@@ -3,7 +3,7 @@ import i18n from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { logout } from '~js/store/user/actions';
+import { logout } from '@/js/store/user/actions';
 
 const Logout = (props: any) => {
   const dispatch = useDispatch();

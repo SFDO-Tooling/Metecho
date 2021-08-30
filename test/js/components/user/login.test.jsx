@@ -2,9 +2,9 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, StaticRouter } from 'react-router-dom';
 
-import Login, { LoginButton } from '~js/components/user/login';
-import { addUrlParams } from '~js/utils/api';
-import routes from '~js/utils/routes';
+import Login, { LoginButton } from '@/js/components/user/login';
+import { addUrlParams } from '@/js/utils/api';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux } from './../../utils';
 

@@ -2,16 +2,16 @@ import i18n from 'i18next';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { OrgTypeTracker } from '~js/components/orgs/taskOrgCards';
-import Steps from '~js/components/steps';
-import { Step } from '~js/components/steps/stepsItem';
-import { AppState } from '~js/store';
-import { OrgsByParent } from '~js/store/orgs/reducer';
-import { selectProjectCollaborator } from '~js/store/projects/selectors';
-import { Task } from '~js/store/tasks/reducer';
-import { User } from '~js/store/user/reducer';
-import { ORG_TYPES, REVIEW_STATUSES } from '~js/utils/constants';
-import { getTaskCommits } from '~js/utils/helpers';
+import { OrgTypeTracker } from '@/js/components/orgs/taskOrgCards';
+import Steps from '@/js/components/steps';
+import { Step } from '@/js/components/steps/stepsItem';
+import { AppState } from '@/js/store';
+import { OrgsByParent } from '@/js/store/orgs/reducer';
+import { selectProjectCollaborator } from '@/js/store/projects/selectors';
+import { Task } from '@/js/store/tasks/reducer';
+import { User } from '@/js/store/user/reducer';
+import { ORG_TYPES, REVIEW_STATUSES } from '@/js/utils/constants';
+import { getTaskCommits } from '@/js/utils/helpers';
 
 interface TaskStatusStepsProps {
   task: Task;

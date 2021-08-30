@@ -1,4 +1,4 @@
-import reducer from '~js/store/errors/reducer';
+import reducer from '@/js/store/errors/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {

@@ -4,9 +4,9 @@ import i18n from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { removeError } from '~js/store/errors/actions';
-import { ErrorType } from '~js/store/errors/reducer';
-import { selectErrors } from '~js/store/errors/selectors';
+import { removeError } from '@/js/store/errors/actions';
+import { ErrorType } from '@/js/store/errors/reducer';
+import { selectErrors } from '@/js/store/errors/selectors';
 
 const reloadPage = (): void => {
   window.location.reload();

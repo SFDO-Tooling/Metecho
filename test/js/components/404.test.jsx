@@ -1,7 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import FourOhFour from '~js/components/404';
+import FourOhFour from '@/js/components/404';
 
 import { render } from './../utils';
 

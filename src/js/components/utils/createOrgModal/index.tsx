@@ -8,17 +8,17 @@ import {
   useForm,
   useFormDefaults,
   useIsMounted,
-} from '~js/components/utils';
-import CreateOrgForm from '~js/components/utils/createOrgModal/form';
-import Overview from '~js/components/utils/createOrgModal/overview';
-import { Epic } from '~js/store/epics/reducer';
-import { Project } from '~js/store/projects/reducer';
-import { Task } from '~js/store/tasks/reducer';
+} from '@/js/components/utils';
+import CreateOrgForm from '@/js/components/utils/createOrgModal/form';
+import Overview from '@/js/components/utils/createOrgModal/overview';
+import { Epic } from '@/js/store/epics/reducer';
+import { Project } from '@/js/store/projects/reducer';
+import { Task } from '@/js/store/tasks/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
   ORG_TYPES,
-} from '~js/utils/constants';
+} from '@/js/utils/constants';
 
 interface Props {
   project: Project;

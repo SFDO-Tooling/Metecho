@@ -1,8 +1,8 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { PrivateRoute } from '~js/components/utils';
-import routes from '~js/utils/routes';
+import { PrivateRoute } from '@/js/components/utils';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux } from './../../utils';
 

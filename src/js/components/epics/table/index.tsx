@@ -5,11 +5,12 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import CollaboratorTableCell from '~js/components/epics/table/collaboratorCell';
-import DetailTableCell from '~js/components/epics/table/detailCell';
-import StatusTableCell from '~js/components/epics/table/statusCell';
-import TourPopover from '~js/components/tour/popover';
-import { Epic } from '~js/store/epics/reducer';
+import CollaboratorTableCell from '@/js/components/epics/table/collaboratorCell';
+import DetailTableCell from '@/js/components/epics/table/detailCell';
+import StatusTableCell from '@/js/components/epics/table/statusCell';
+import TaskCountTableCell from '@/js/components/epics/table/taskCountCell';
+import TourPopover from '@/js/components/tour/popover';
+import { Epic } from '@/js/store/epics/reducer';
 
 export interface TableCellProps {
   [key: string]: any;
@@ -34,7 +35,7 @@ const EpicTable = ({
       items={items}
       id="project-epics-table"
       noRowHover
-      className="slds-is-relative"
+      className="slds-is-relative outdented_medium"
     >
       <DataTableColumn
         key="details"
@@ -42,6 +43,7 @@ const EpicTable = ({
           <>
             {i18n.t('Epic')}
             <TourPopover
+              id="tour-epic-name-column"
               align="top left"
               heading={i18n.t('Epic names')}
               body={
@@ -63,11 +65,35 @@ const EpicTable = ({
         <DetailTableCell projectSlug={projectSlug} />
       </DataTableColumn>
       <DataTableColumn
+        key="taskCount"
+        label={
+          <>
+            {i18n.t('Tasks')}
+            <TourPopover
+              id="tour-epic-tasks-column"
+              align="top"
+              heading={i18n.t('Epic tasks')}
+              body={
+                <Trans i18nKey="tourEpicTasksColumn">
+                  The Tasks column is a quick way to see how many Tasks are
+                  included in an Epic.
+                </Trans>
+              }
+            />
+          </>
+        }
+        property="task_count"
+        width="0"
+      >
+        <TaskCountTableCell />
+      </DataTableColumn>
+      <DataTableColumn
         key="status"
         label={
           <>
             {i18n.t('Status')}
             <TourPopover
+              id="tour-epic-status-column"
               align="top"
               heading={i18n.t('Epic statuses')}
               body={
@@ -102,6 +128,7 @@ const EpicTable = ({
               title={i18n.t('Collaborators')}
             />
             <TourPopover
+              id="tour-epic-collaborators-column"
               align="top"
               heading={i18n.t('Epic Collaborators')}
               body={

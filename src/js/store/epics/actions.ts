@@ -1,9 +1,9 @@
 import i18n from 'i18next';
 
-import { ThunkResult } from '~js/store';
-import { Epic } from '~js/store/epics/reducer';
-import { isCurrentUser } from '~js/store/helpers';
-import { addToast } from '~js/store/toasts/actions';
+import { ThunkResult } from '@/js/store';
+import { Epic } from '@/js/store/epics/reducer';
+import { isCurrentUser } from '@/js/store/helpers';
+import { addToast } from '@/js/store/toasts/actions';
 
 interface EpicUpdated {
   type: 'EPIC_UPDATE';

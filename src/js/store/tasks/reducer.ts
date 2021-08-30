@@ -1,12 +1,12 @@
-import { ObjectsAction } from '~js/store/actions';
-import { TaskAction } from '~js/store/tasks/actions';
-import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
+import { ObjectsAction } from '@/js/store/actions';
+import { TaskAction } from '@/js/store/tasks/actions';
+import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
   ReviewStatuses,
   TaskStatuses,
-} from '~js/utils/constants';
+} from '@/js/utils/constants';
 
 export interface Commit {
   id: string;
@@ -26,7 +26,12 @@ export interface Task {
   name: string;
   slug: string;
   old_slugs: string[];
-  epic: string;
+  epic: {
+    id: string;
+    name: string;
+    slug: string;
+    github_users: string[];
+  };
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;
@@ -87,13 +92,13 @@ const reducer = (
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {
-            const epicTasks = tasks[object.epic] || [];
+            const epicTasks = tasks[object.epic.id] || [];
             // Do not store if (somehow) we already know about this task
             if (!epicTasks.filter((t) => object.id === t.id).length) {
               return {
                 ...tasks,
                 // Prepend new task (tasks are ordered by `-created_at`)
-                [object.epic]: [object, ...epicTasks],
+                [object.epic.id]: [object, ...epicTasks],
               };
             }
           }
@@ -101,13 +106,13 @@ const reducer = (
         }
         case OBJECT_TYPES.TASK_PR: {
           if (object) {
-            const epicTasks = tasks[object.epic] || [];
+            const epicTasks = tasks[object.epic.id] || [];
             const newTask = { ...object, currently_creating_pr: true };
             const existingTask = epicTasks.find((t) => t.id === object.id);
             if (existingTask) {
               return {
                 ...tasks,
-                [object.epic]: epicTasks.map((t) => {
+                [object.epic.id]: epicTasks.map((t) => {
                   if (t.id === object.id) {
                     return newTask;
                   }
@@ -117,7 +122,7 @@ const reducer = (
             }
             return {
               ...tasks,
-              [object.epic]: [newTask, ...epicTasks],
+              [object.epic.id]: [newTask, ...epicTasks],
             };
           }
           return tasks;
@@ -144,12 +149,12 @@ const reducer = (
         return tasks;
       }
       const task = maybeTask;
-      const epicTasks = tasks[task.epic] || [];
+      const epicTasks = tasks[task.epic.id] || [];
       const existingTask = epicTasks.find((t) => t.id === task.id);
       if (existingTask) {
         return {
           ...tasks,
-          [task.epic]: epicTasks.map((t) => {
+          [task.epic.id]: epicTasks.map((t) => {
             if (t.id === task.id) {
               return { ...task };
             }
@@ -159,17 +164,17 @@ const reducer = (
       }
       return {
         ...tasks,
-        [task.epic]: [task, ...epicTasks],
+        [task.epic.id]: [task, ...epicTasks],
       };
     }
     case 'TASK_CREATE_PR_FAILED': {
       const task = action.payload;
-      const epicTasks = tasks[task.epic] || [];
+      const epicTasks = tasks[task.epic.id] || [];
       const existingTask = epicTasks.find((t) => t.id === task.id);
       if (existingTask) {
         return {
           ...tasks,
-          [task.epic]: epicTasks.map((t) => {
+          [task.epic.id]: epicTasks.map((t) => {
             if (t.id === task.id) {
               return { ...task, currently_creating_pr: false };
             }
@@ -199,10 +204,10 @@ const reducer = (
       }
       const task = maybeTask;
       /* istanbul ignore next */
-      const epicTasks = tasks[task.epic] || [];
+      const epicTasks = tasks[task.epic.id] || [];
       return {
         ...tasks,
-        [task.epic]: epicTasks.filter((t) => t.id !== task.id),
+        [task.epic.id]: epicTasks.filter((t) => t.id !== task.id),
       };
     }
   }

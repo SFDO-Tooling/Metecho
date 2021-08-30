@@ -1,4 +1,4 @@
-import * as actions from '~js/store/epics/actions';
+import * as actions from '@/js/store/epics/actions';
 
 import { storeWithThunk } from './../../utils';
 

@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import { SpinnerWrapper } from '~js/components/utils';
+import { SpinnerWrapper } from '@/js/components/utils';
 
 // For use as a "loading" button label
 const LabelWithSpinner = ({
@@ -10,8 +10,8 @@ const LabelWithSpinner = ({
   size = 'x-small',
 }: {
   label?: string;
-  variant?: string;
-  size?: string;
+  variant?: 'base' | 'brand' | 'inverse';
+  size?: 'small' | 'xx-small' | 'x-small' | 'medium' | 'large';
 }) => (
   <>
     <span className="slds-is-relative slds-m-right_large">

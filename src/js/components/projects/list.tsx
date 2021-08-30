@@ -7,23 +7,23 @@ import { ScrollProps, withScroll } from 'react-fns';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { EmptyIllustration } from '~js/components/404';
-import ProjectListItem from '~js/components/projects/listItem';
-import TourPopover from '~js/components/tour/popover';
+import { EmptyIllustration } from '@/js/components/404';
+import ProjectListItem from '@/js/components/projects/listItem';
+import TourPopover from '@/js/components/tour/popover';
 import {
   LabelWithSpinner,
   SpinnerWrapper,
   useIsMounted,
-} from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { fetchObjects } from '~js/store/actions';
-import { refreshProjects } from '~js/store/projects/actions';
+} from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
+import { refreshProjects } from '@/js/store/projects/actions';
 import {
   selectNextUrl,
   selectProjects,
   selectProjectsRefreshing,
-} from '~js/store/projects/selectors';
-import { OBJECT_TYPES } from '~js/utils/constants';
+} from '@/js/store/projects/selectors';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 const ProjectList = withScroll(({ y }: ScrollProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
@@ -104,6 +104,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             project-list"
         >
           <TourPopover
+            id="tour-projects-list"
             align="top left"
             heading={i18n.t('Metecho Project')}
             body={
@@ -129,6 +130,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
       <>
         <div className="slds-is-relative page-title">
           <TourPopover
+            id="tour-projects-select-project"
             align="bottom left"
             heading={i18n.t('Begin exploring projects')}
             body={
@@ -193,6 +195,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                     onClick={doRefreshProjects}
                   />
                   <TourPopover
+                    id="tour-projects-resync-list"
                     align="left"
                     heading={i18n.t('View an updated Project list')}
                     body={

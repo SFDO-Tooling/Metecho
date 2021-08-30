@@ -1,13 +1,13 @@
 import fetchMock from 'fetch-mock';
 
-import { addError } from '~js/store/errors/actions';
+import { addError } from '@/js/store/errors/actions';
 import apiFetch, {
   addUrlParams,
   getUrlParam,
   removeUrlParam,
-} from '~js/utils/api';
+} from '@/js/utils/api';
 
-jest.mock('~js/store/errors/actions');
+jest.mock('@/js/store/errors/actions');
 
 addError.mockReturnValue({ type: 'TEST' });
 const dispatch = jest.fn();

@@ -1,4 +1,4 @@
-import * as actions from '~js/store/toasts/actions';
+import * as actions from '@/js/store/toasts/actions';
 
 describe('addToast', () => {
   test('returns AddToastAction', () => {

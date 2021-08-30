@@ -4,9 +4,9 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 
-import GitHubUserAvatar from '~js/components/githubUsers/avatar';
-import ReadonlyBadge from '~js/components/githubUsers/readonlyBadge';
-import { GitHubUser } from '~js/store/user/reducer';
+import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
+import ReadonlyBadge from '@/js/components/githubUsers/readonlyBadge';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 export const UserCard = ({
   user,

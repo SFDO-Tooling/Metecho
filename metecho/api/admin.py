@@ -92,6 +92,13 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "repo_owner", "repo_name", "created_at")
     search_fields = ("name", "repo_owner", "repo_name")
 
+    def save_model(self, request, obj, form, change):
+        if not obj.repo_image_url:
+            from .jobs import get_social_image_job
+
+            get_social_image_job.delay(project=obj)
+        return super().save_model(request, obj, form, change)
+
 
 @admin.register(ProjectSlug)
 class ProjectSlugAdmin(admin.ModelAdmin):
@@ -134,13 +141,16 @@ class TaskAdmin(admin.ModelAdmin):
         ("name", "epic"),
         "description",
         ("branch_name", "org_config_name"),
-        "commits",
+        ("commits", "get_all_users_in_commits"),
         "origin_sha",
         "metecho_commits",
         "has_unmerged_commits",
-        ("pr_number", "pr_is_open"),
-        ("review_submitted_at", "review_valid", "review_status", "review_sha"),
-        ("reviewers", "get_all_users_in_commits"),
+        ("currently_creating_branch", "currently_creating_pr"),
+        ("pr_is_open", "pr_number"),
+        "currently_submitting_review",
+        "review_submitted_at",
+        ("review_valid", "review_status", "review_sha"),
+        ("reviewers"),
         "status",
         ("assigned_dev", "assigned_qa"),
     )

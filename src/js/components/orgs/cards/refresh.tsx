@@ -4,8 +4,8 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { ExternalLink } from '~js/components/utils';
-import { getOrgBehindLatestMsg } from '~js/utils/helpers';
+import { ExternalLink } from '@/js/components/utils';
+import { getOrgBehindLatestMsg } from '@/js/utils/helpers';
 
 const RefreshOrgModal = ({
   orgUrl,

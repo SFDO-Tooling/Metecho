@@ -1,5 +1,8 @@
-import { ProjectsRefreshed } from '~js/store/projects/actions';
-import { UserAction } from '~js/store/user/actions';
+import {
+  ProjectsRefreshed,
+  ProjectsRefreshError,
+} from '@/js/store/projects/actions';
+import { UserAction } from '@/js/store/user/actions';
 
 export interface GitHubUser {
   id: string;
@@ -36,12 +39,12 @@ export interface User {
 
 const reducer = (
   user: User | null = null,
-  action: UserAction | ProjectsRefreshed,
+  action: UserAction | ProjectsRefreshed | ProjectsRefreshError,
 ): User | null => {
   switch (action.type) {
     case 'USER_LOGGED_IN':
     case 'USER_DISCONNECT_SUCCEEDED':
-    case 'DEV_HUB_STATUS_SUCCEEDED':
+    case 'USER_REFRESH_SUCCEEDED':
     case 'AGREE_TO_TERMS_SUCCEEDED':
     case 'ONBOARDING_SUCCEEDED':
     case 'TOUR_UPDATE_SUCCEEDED':
@@ -49,6 +52,7 @@ const reducer = (
     case 'USER_LOGGED_OUT':
       return null;
     case 'PROJECTS_REFRESHED':
+    case 'REFRESH_PROJECTS_ERROR':
       return user ? { ...user, currently_fetching_repos: false } : user;
   }
   return user;

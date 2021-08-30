@@ -3,8 +3,8 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import TourPopover from '~js/components/tour/popover';
-import { getPercentage } from '~js/utils/helpers';
+import TourPopover from '@/js/components/tour/popover';
+import { getPercentage } from '@/js/utils/helpers';
 
 interface Props {
   range: [number, number];
@@ -21,6 +21,7 @@ const EpicProgress = ({ range }: Props) => {
             {{ complete }} of {{ total }} Complete
           </Trans>
           <TourPopover
+            id="tour-epic-progress-bar"
             align="top"
             heading={i18n.t('Task progress bar')}
             body={

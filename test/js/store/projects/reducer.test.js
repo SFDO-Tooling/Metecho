@@ -1,4 +1,4 @@
-import reducer from '~js/store/projects/reducer';
+import reducer from '@/js/store/projects/reducer';
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {
@@ -307,10 +307,10 @@ describe('reducer', () => {
       name: 'Project 2',
     };
 
-    test('sets currently_refreshing_gh_users: true', () => {
+    test('sets currently_fetching_github_users: true', () => {
       const expected = {
         projects: [
-          { ...project, currently_refreshing_gh_users: true },
+          { ...project, currently_fetching_github_users: true },
           project2,
         ],
       };
@@ -338,7 +338,7 @@ describe('reducer', () => {
       id: 'p1',
       slug: 'project-1',
       name: 'Project 1',
-      currently_refreshing_gh_users: true,
+      currently_fetching_github_users: true,
     };
     const project2 = {
       id: 'p2',
@@ -346,10 +346,10 @@ describe('reducer', () => {
       name: 'Project 2',
     };
 
-    test('sets currently_refreshing_gh_users: false', () => {
+    test('sets currently_fetching_github_users: false', () => {
       const expected = {
         projects: [
-          { ...project, currently_refreshing_gh_users: false },
+          { ...project, currently_fetching_github_users: false },
           project2,
         ],
       };

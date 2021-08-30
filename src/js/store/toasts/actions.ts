@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { ToastType } from '~js/store/toasts/reducer';
+import { ToastType } from '@/js/store/toasts/reducer';
 
 interface AddToastAction {
   type: 'TOAST_ADDED';

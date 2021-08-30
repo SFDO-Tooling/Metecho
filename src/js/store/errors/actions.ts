@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { ErrorType } from '~js/store/errors/reducer';
+import { ErrorType } from '@/js/store/errors/reducer';
 
 interface AddErrorAction {
   type: 'ERROR_ADDED';

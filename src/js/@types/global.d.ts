@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/browser';
 
-import { Socket } from '~js/utils/websockets';
+import { Socket } from '@/js/utils/websockets';
 
 declare global {
   interface Window {

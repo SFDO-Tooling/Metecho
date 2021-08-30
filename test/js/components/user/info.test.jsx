@@ -2,19 +2,19 @@ import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import UserDropdown, { ConnectionInfoModal } from '~js/components/user/info';
-import { disconnect, refreshDevHubStatus } from '~js/store/user/actions';
+import UserDropdown, { ConnectionInfoModal } from '@/js/components/user/info';
+import { disconnect, refreshUser } from '@/js/store/user/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('~js/store/user/actions');
+jest.mock('@/js/store/user/actions');
 
 disconnect.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-refreshDevHubStatus.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshUser.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   disconnect.mockClear();
-  refreshDevHubStatus.mockClear();
+  refreshUser.mockClear();
 });
 
 describe('<ConnectionInfoModal />', () => {
@@ -133,11 +133,11 @@ describe('<UserDropdown />', () => {
       });
 
       describe('"check again" click', () => {
-        test('calls refreshDevHubStatus', async () => {
+        test('calls refreshUser', async () => {
           const { getByText, container } = result;
           fireEvent.click(getByText('Check Again'));
 
-          expect(refreshDevHubStatus).toHaveBeenCalledTimes(1);
+          expect(refreshUser).toHaveBeenCalledTimes(1);
           await waitForElementToBeRemoved(
             container.querySelector('.spinner-container'),
           );

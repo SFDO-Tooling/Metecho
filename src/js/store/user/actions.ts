@@ -1,11 +1,11 @@
-import { ThunkResult } from '~js/store';
+import { ThunkResult } from '@/js/store';
 import {
   projectsRefreshed,
   projectsRefreshing,
-} from '~js/store/projects/actions';
-import { User } from '~js/store/user/reducer';
-import apiFetch from '~js/utils/api';
-import { LIST_CHANNEL_ID, OBJECT_TYPES } from '~js/utils/constants';
+} from '@/js/store/projects/actions';
+import { User } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
+import { LIST_CHANNEL_ID, OBJECT_TYPES } from '@/js/utils/constants';
 
 interface LoginAction {
   type: 'USER_LOGGED_IN';
@@ -27,12 +27,12 @@ interface DisconnectSucceeded {
 interface DisconnectAction {
   type: 'USER_DISCONNECT_REQUESTED' | 'USER_DISCONNECT_FAILED';
 }
-interface RefreshDevHubSucceeded {
-  type: 'DEV_HUB_STATUS_SUCCEEDED';
+interface RefreshUserSucceeded {
+  type: 'USER_REFRESH_SUCCEEDED';
   payload: User;
 }
-interface RefreshDevHubAction {
-  type: 'DEV_HUB_STATUS_REQUESTED' | 'DEV_HUB_STATUS_FAILED';
+interface RefreshUserAction {
+  type: 'USER_REFRESH_REQUESTED' | 'USER_REFRESH_FAILED';
 }
 interface AgreeToTermsAction {
   type: 'AGREE_TO_TERMS_REQUESTED' | 'AGREE_TO_TERMS_FAILED';
@@ -62,8 +62,8 @@ export type UserAction =
   | RefetchDataAction
   | DisconnectAction
   | DisconnectSucceeded
-  | RefreshDevHubAction
-  | RefreshDevHubSucceeded
+  | RefreshUserAction
+  | RefreshUserSucceeded
   | AgreeToTermsAction
   | AgreeToTermsSucceeded
   | OnboardingAction
@@ -156,20 +156,20 @@ export const disconnect =
     }
   };
 
-export const refreshDevHubStatus =
-  (): ThunkResult<Promise<RefreshDevHubSucceeded>> => async (dispatch) => {
-    dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
+export const refreshUser =
+  (): ThunkResult<Promise<RefreshUserSucceeded>> => async (dispatch) => {
+    dispatch({ type: 'USER_REFRESH_REQUESTED' });
     try {
       const payload = await apiFetch({
         url: window.api_urls.current_user_detail(),
         dispatch,
       });
       return dispatch({
-        type: 'DEV_HUB_STATUS_SUCCEEDED' as const,
+        type: 'USER_REFRESH_SUCCEEDED' as const,
         payload,
       });
     } catch (err) {
-      dispatch({ type: 'DEV_HUB_STATUS_FAILED' });
+      dispatch({ type: 'USER_REFRESH_FAILED' });
       throw err;
     }
   };

@@ -1,4 +1,4 @@
-import reducer from '~js/store/user/reducer';
+import reducer from '@/js/store/user/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {
@@ -30,11 +30,11 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles DEV_HUB_STATUS_SUCCEEDED action', () => {
+  test('handles USER_REFRESH_SUCCEEDED action', () => {
     const initial = null;
     const expected = { username: 'Test User' };
     const actual = reducer(initial, {
-      type: 'DEV_HUB_STATUS_SUCCEEDED',
+      type: 'USER_REFRESH_SUCCEEDED',
       payload: expected,
     });
 

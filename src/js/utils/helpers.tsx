@@ -3,15 +3,15 @@ import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import TourPopover from '~js/components/tour/popover';
-import { Epic } from '~js/store/epics/reducer';
-import { Changeset, Org } from '~js/store/orgs/reducer';
-import { Task } from '~js/store/tasks/reducer';
+import TourPopover from '@/js/components/tour/popover';
+import { Epic } from '@/js/store/epics/reducer';
+import { Changeset, Org } from '@/js/store/orgs/reducer';
+import { Task } from '@/js/store/tasks/reducer';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
   TASK_STATUSES,
-} from '~js/utils/constants';
+} from '@/js/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
@@ -64,6 +64,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
+          id="tour-epic-pull-request"
           align="bottom right"
           heading={heading}
           body={
@@ -78,6 +79,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         />
       ) : (
         <TourPopover
+          id="tour-task-pull-request"
           align="bottom right"
           heading={heading}
           body={
@@ -98,6 +100,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
+          id="tour-epic-changes"
           align="bottom right"
           heading={heading}
           body={
@@ -110,6 +113,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         />
       ) : (
         <TourPopover
+          id="tour-task-changes"
           align="bottom right"
           heading={heading}
           body={
@@ -127,6 +131,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
+          id="tour-epic-branch"
           align="bottom right"
           heading={i18n.t('View GitHub branch for this Epic')}
           body={
@@ -141,6 +146,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         />
       ) : (
         <TourPopover
+          id="tour-task-branch"
           align="bottom right"
           heading={i18n.t('View GitHub branch for this Task')}
           body={

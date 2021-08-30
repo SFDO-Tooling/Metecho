@@ -1,11 +1,11 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicStatusPath from '~js/components/epics/path';
-import Path from '~js/components/path';
-import TaskStatusPath from '~js/components/tasks/path';
-import { Task } from '~js/store/tasks/reducer';
-import { EPIC_STATUSES } from '~js/utils/constants';
+import EpicStatusPath from '@/js/components/epics/path';
+import Path from '@/js/components/path';
+import TaskStatusPath from '@/js/components/tasks/path';
+import { Task } from '@/js/store/tasks/reducer';
+import { EPIC_STATUSES } from '@/js/utils/constants';
 
 import {
   sampleTask1,
@@ -38,9 +38,11 @@ const TaskTemplate = ({ status, ...rest }: TaskStoryProps) => (
   <TaskStatusPath task={sampleTaskStatuses[status]} {...rest} />
 );
 export const TaskPath: Story<TaskStoryProps> = TaskTemplate.bind({});
+TaskPath.args = {
+  status: 'Planned',
+};
 TaskPath.argTypes = {
   status: {
-    defaultValue: 'Planned',
     options: Object.keys(sampleTaskStatuses),
     control: {
       type: 'select',
@@ -70,9 +72,11 @@ const EpicTemplate = ({ status, ...rest }: EpicStoryProps) => (
   />
 );
 export const EpicPath: Story<EpicStoryProps> = EpicTemplate.bind({});
+EpicPath.args = {
+  status: 'Planned',
+};
 EpicPath.argTypes = {
   status: {
-    defaultValue: 'Planned',
     options: Object.keys(sampleEpicStatuses),
     control: {
       type: 'select',
