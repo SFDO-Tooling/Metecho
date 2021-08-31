@@ -39,9 +39,9 @@ const Overview = ({
         You are creating a Scratch Org for {{ type }} “{{ name }}.”
       </h3>
       <p>
-        Your new org will expire in 30 days.
+        Your new Org will expire in 30 days.
         <br />
-        You will be able to access your org from this {{ type }} page.
+        You will be able to access your Org from this {{ type }} page.
       </p>
     </Trans>
   );

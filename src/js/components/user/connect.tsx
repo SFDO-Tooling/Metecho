@@ -116,10 +116,10 @@ const ConnectModal = ({
       assistiveText={{ closeButton: i18n.t('Close') }}
       tagline={
         <Trans i18nKey="devHubInfo">
-          Connection to a Salesforce org with Dev Hub enabled is required to
+          Connection to a Salesforce Org with Dev Hub enabled is required to
           create a Dev, Test, or Scratch Org. Learn how to{' '}
           <ExternalLink url="https://developer.salesforce.com/signup">
-            create a Developer Edition org
+            create a Developer Edition Org
           </ExternalLink>{' '}
           and{' '}
           <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
