@@ -822,9 +822,13 @@ const TaskDetail = (
 
   return (
     <DocumentTitle
-      title={` ${task.name} | ${epic?.name} | ${project.name} | ${i18n.t(
-        'Metecho',
-      )}`}
+      title={
+        epic
+          ? `${task.name} | ${epic.name} | ${project.name} | ${i18n.t(
+              'Metecho',
+            )}`
+          : `${task.name} | ${project.name} | ${i18n.t('Metecho')}`
+      }
     >
       <DetailPageLayout
         type={OBJECT_TYPES.TASK}
