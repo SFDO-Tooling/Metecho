@@ -28,7 +28,7 @@ import routes from '@/js/utils/routes';
 
 interface Props {
   project: Project;
-  epic?: Epic;
+  epic?: Epic | null;
   isOpenOrOrgId: boolean | string | null;
   playgroundOrg?: Org;
   closeCreateModal: () => void;
@@ -228,7 +228,7 @@ const CreateTaskModal = ({
         {!epic && (
           <p className="slds-align_absolute-center slds-m-bottom_small">
             {i18n.t(
-              'You are creating one Task for this Project. To group multiple Tasks together, create an Epic.',
+              'You are creating a Task for this Project. To group multiple Tasks together, create an Epic.',
             )}
           </p>
         )}

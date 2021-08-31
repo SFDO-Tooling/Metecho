@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
@@ -84,6 +86,7 @@ const ResubmitButton = ({
 const TaskDetail = (
   props: RouteComponentProps<any, any, { [RETRIEVE_CHANGES]?: boolean }>,
 ) => {
+  const dispatch = useDispatch<ThunkDispatch>();
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -105,12 +108,12 @@ const TaskDetail = (
     { project },
     props,
   );
-  const dispatch = useDispatch<ThunkDispatch>();
+  const hasEpic = Boolean(epicSlug);
   const { task, taskSlug } = useFetchTaskIfMissing(
     {
       projectId: project?.id,
       epicId: epic?.id,
-      filterByEpic: Boolean(epicSlug),
+      filterByEpic: hasEpic,
     },
     props,
   );
@@ -595,47 +598,48 @@ const TaskDetail = (
     return projectLoadingOrNotFound;
   }
 
-  if (epicSlug) {
-    const epicLoadingOrNotFound = getEpicLoadingOrNotFound({
+  const epicLoadingOrNotFound =
+    hasEpic &&
+    getEpicLoadingOrNotFound({
       project,
       epic,
       epicSlug,
     });
 
-    if (epicLoadingOrNotFound !== false) {
-      return epicLoadingOrNotFound;
-    }
+  if (epicLoadingOrNotFound !== false) {
+    return epicLoadingOrNotFound;
   }
 
-  if (epic) {
-    const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
-      project,
-      epic,
-      task,
-      taskSlug,
-    });
+  const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
+    project,
+    epic,
+    epicSlug,
+    task,
+    taskSlug,
+  });
 
-    if (taskLoadingOrNotFound !== false) {
-      return taskLoadingOrNotFound;
-    }
+  if (taskLoadingOrNotFound !== false) {
+    return taskLoadingOrNotFound;
   }
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!project || !task) {
+  if (!project || (hasEpic && !epic) || !task) {
     return <FourOhFour />;
   }
 
   if (
-    ((projectSlug && projectSlug !== project.slug) ||
-      (taskSlug && taskSlug !== task.slug)) &&
-    epic
+    (projectSlug && projectSlug !== project.slug) ||
+    (epicSlug && epicSlug !== epic?.slug) ||
+    (taskSlug && taskSlug !== task.slug)
   ) {
     // Redirect to most recent project/epic/task slug
-    return (
+    return epic ? (
       <Redirect
         to={routes.epic_task_detail(project.slug, epic.slug, task.slug)}
       />
+    ) : (
+      <Redirect to={routes.project_task_detail(project.slug, task.slug)} />
     );
   }
 
@@ -800,31 +804,20 @@ const TaskDetail = (
     );
   }
 
-  let headerUrl, headerUrlText, epicUrl; // eslint-disable-line one-var
+  const projectUrl = routes.project_detail(project.slug);
+  const epicUrl = epic ? routes.epic_detail(project.slug, epic.slug) : null;
+  let headerUrl, headerUrlText; // eslint-disable-line one-var
 
   /* istanbul ignore else */
   if (task.branch_url && task.branch_name) {
     headerUrl = task.branch_url;
     headerUrlText = task.branch_name;
+  } else if (epic?.branch_url && epic?.branch_name) {
+    headerUrl = epic.branch_url;
+    headerUrlText = epic.branch_name;
   } else {
     headerUrl = project.repo_url;
     headerUrlText = `${project.repo_owner}/${project.repo_name}`;
-  }
-
-  if (epic) {
-    epicUrl = routes.epic_detail(project.slug, epic.slug);
-
-    /* istanbul ignore else */
-    if (task.branch_url && task.branch_name) {
-      headerUrl = task.branch_url;
-      headerUrlText = task.branch_name;
-    } else if (epic.branch_url && epic.branch_name) {
-      headerUrl = epic.branch_url;
-      headerUrlText = epic.branch_name;
-    } else {
-      headerUrl = project.repo_url;
-      headerUrlText = `${project.repo_owner}/${project.repo_name}`;
-    }
   }
 
   return (
@@ -854,27 +847,22 @@ const TaskDetail = (
         description={task.description_rendered}
         headerUrl={headerUrl}
         headerUrlText={headerUrlText}
-        breadcrumb={
+        breadcrumb={[
+          {
+            name: project.name,
+            url: routes.project_detail(project.slug),
+          },
           epic
-            ? [
-                {
-                  name: project.name,
-                  url: routes.project_detail(project.slug),
-                },
-                {
-                  name: epic.name,
-                  url: epicUrl,
-                },
-                { name: task.name },
-              ]
-            : [
-                {
-                  name: project.name,
-                  url: routes.project_detail(project.slug),
-                },
-                { name: task.name },
-              ]
-        }
+            ? {
+                name: epic.name,
+                url: epicUrl as string,
+              }
+            : {
+                name: i18n.t('no epic'),
+                emphasis: true,
+              },
+          { name: task.name },
+        ]}
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
@@ -975,12 +963,11 @@ const TaskDetail = (
           <TaskOrgCards
             orgs={taskOrgs}
             task={task}
-            epicUrl={epic ? epicUrl : null}
             projectId={project.id}
             userHasPermissions={project.has_push_permission}
             epicUsers={epicCollaborators}
             githubUsers={project.github_users}
-            epicCreatingBranch={epic ? epic.currently_creating_branch : null}
+            epicCreatingBranch={Boolean(epic?.currently_creating_branch)}
             repoUrl={project.repo_url}
             openCaptureModal={openCaptureModal}
             assignUserModalOpen={assignUserModalOpen}
@@ -1042,7 +1029,7 @@ const TaskDetail = (
                   label={i18n.t('Create Scratch Org')}
                   variant="outline-brand"
                   onClick={openCreateOrgModal}
-                  disabled={epic?.currently_creating_branch}
+                  disabled={Boolean(epic?.currently_creating_branch)}
                 />
               )}
             </>
@@ -1093,7 +1080,7 @@ const TaskDetail = (
               model={task}
               modelType={OBJECT_TYPES.TASK}
               isOpen={deleteModalOpen}
-              redirect={epic ? epicUrl : null}
+              redirect={epicUrl || projectUrl}
               handleClose={closeDeleteModal}
             />
           </>
@@ -1126,7 +1113,7 @@ const TaskDetail = (
             />
             <CreateTaskModal
               project={project}
-              epic={epic ? epicUrl : null}
+              epic={epic}
               isOpenOrOrgId={createModalOrgId}
               playgroundOrg={playgroundOrg}
               closeCreateModal={closeCreateModal}

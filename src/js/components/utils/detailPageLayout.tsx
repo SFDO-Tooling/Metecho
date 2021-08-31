@@ -13,6 +13,7 @@ import routes from '@/js/utils/routes';
 interface Crumb {
   name: string;
   url?: string;
+  emphasis?: boolean;
 }
 
 const DetailPageLayout = ({
@@ -128,13 +129,13 @@ const DetailPageLayout = ({
                 if (crumb.url) {
                   return (
                     <Link to={crumb.url} key={idx}>
-                      {crumb.name}
+                      {crumb.emphasis ? <em>{crumb.name}</em> : crumb.name}
                     </Link>
                   );
                 }
                 return (
                   <div className="slds-p-horizontal_x-small" key={idx}>
-                    {crumb.name}
+                    {crumb.emphasis ? <em>{crumb.name}</em> : crumb.name}
                   </div>
                 );
               }),
