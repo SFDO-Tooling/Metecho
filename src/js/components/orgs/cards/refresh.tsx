@@ -51,7 +51,7 @@ const RefreshOrgModal = ({
         />
         <hr className="slds-m-vertical_large" />
         <Trans i18nKey="viewOutdatedOrg">
-          You may proceed with the outdated org, but be aware that you will not
+          You may proceed with the outdated Org, but be aware that you will not
           be testing the latest changes.
         </Trans>
         <ExternalLink
