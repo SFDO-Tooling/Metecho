@@ -225,12 +225,11 @@ const CreateTaskModal = ({
       ]}
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
-        {epic ? (
-          ''
-        ) : (
-          <p className="slds-align_absolute-center">
-            You are creating one task for this project. To group multiple tasks
-            together, create an Epic.
+        {!epic && (
+          <p className="slds-align_absolute-center slds-m-bottom_small">
+            {i18n.t(
+              'You are creating one Task for this Project. To group multiple Tasks together, create an Epic.',
+            )}
           </p>
         )}
         <Input

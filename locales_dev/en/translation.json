@@ -370,6 +370,7 @@
   "What is Metecho?": "What is Metecho?",
   "What’s in a name?": "What’s in a name?",
   "Wondering what to do next?": "Wondering what to do next?",
+  "You are creating one Task for this Project. To group multiple Tasks together, create an Epic.": "You are creating one Task for this Project. To group multiple Tasks together, create an Epic.",
   "You are in offline mode. We are trying to reconnect, but you may need to": "You are in offline mode. We are trying to reconnect, but you may need to",
   "anErrorOccurred": "An error occurred. Try the <1>home page</1>?",
   "assignUserHelper": "Assign any user to this role, and they will also be added as an Epic Collaborator.",
