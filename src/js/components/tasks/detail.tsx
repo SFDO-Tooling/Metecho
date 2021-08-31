@@ -801,6 +801,16 @@ const TaskDetail = (
   }
 
   let headerUrl, headerUrlText, epicUrl; // eslint-disable-line one-var
+
+  /* istanbul ignore else */
+  if (task.branch_url && task.branch_name) {
+    headerUrl = task.branch_url;
+    headerUrlText = task.branch_name;
+  } else {
+    headerUrl = project.repo_url;
+    headerUrlText = `${project.repo_owner}/${project.repo_name}`;
+  }
+
   if (epic) {
     epicUrl = routes.epic_detail(project.slug, epic.slug);
 
@@ -815,13 +825,8 @@ const TaskDetail = (
       headerUrl = project.repo_url;
       headerUrlText = `${project.repo_owner}/${project.repo_name}`;
     }
-  } else if (task.branch_url && task.branch_name) {
-    headerUrl = task.branch_url;
-    headerUrlText = task.branch_name;
-  } else {
-    headerUrl = project.repo_url;
-    headerUrlText = `${project.repo_owner}/${project.repo_name}`;
   }
+
   return (
     <DocumentTitle
       title={` ${task.name} | ${epic?.name} | ${project.name} | ${i18n.t(
