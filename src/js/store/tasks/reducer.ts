@@ -4,6 +4,7 @@ import { ObjectsAction } from '@/js/store/actions';
 import { TaskAction } from '@/js/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
 import {
+  NULL_FILTER_VALUE,
   OBJECT_TYPES,
   ObjectTypes,
   ReviewStatuses,
@@ -189,6 +190,7 @@ const reducer = (
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
         const projectTasks = tasks[project] || { ...defaultProjectTasks };
+        const hasEpic = Boolean(epic && epic !== NULL_FILTER_VALUE);
         if (!object) {
           return {
             ...tasks,
@@ -196,7 +198,7 @@ const reducer = (
               ...projectTasks,
               notFound: [
                 ...projectTasks.notFound,
-                epic ? `${epic}-${slug}` : slug,
+                hasEpic ? `${epic}-${slug}` : slug,
               ],
             },
           };

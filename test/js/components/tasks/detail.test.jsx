@@ -13,6 +13,7 @@ import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '@/js/store/orgs/reducer';
 import { refreshOrgConfigs } from '@/js/store/projects/actions';
 import {
+  NULL_FILTER_VALUE,
   OBJECT_TYPES,
   ORG_TYPES,
   RETRIEVE_CHANGES,
@@ -141,7 +142,7 @@ const defaultState = {
   tasks: {
     p1: {
       fetched: ['epic1'],
-      notFound: ['epic1-different-task'],
+      notFound: ['epic1-different-task', 'different-task'],
       tasks: [
         {
           id: 'task1',
@@ -416,6 +417,7 @@ describe('<TaskDetail/>', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: {
           project: 'p1',
+          epic: NULL_FILTER_VALUE,
           slug: 'task-1',
         },
         objectType: 'task',
@@ -457,11 +459,12 @@ describe('<TaskDetail/>', () => {
 
     test('renders <TaskNotFound /> for task without epic', () => {
       const { getByText, queryByText } = setup({
-        taskSlug: 'different-task-2',
-        epicSlug: null,
+        epicSlug: undefined,
+        taskSlug: 'different-task',
       });
 
       expect(queryByText('Task 1')).toBeNull();
+      expect(queryByText('Task 2')).toBeNull();
       expect(getByText('another task')).toBeVisible();
     });
   });
@@ -477,10 +480,13 @@ describe('<TaskDetail/>', () => {
     });
 
     test('redirects to project_task_detail with new slug', () => {
-      const { context } = setup({ epicSlug: undefined, taskSlug: 'old-slug' });
+      const { context } = setup({
+        epicSlug: undefined,
+        taskSlug: 'old-slug-2',
+      });
 
       expect(context.action).toEqual('REPLACE');
-      expect('/projects/project-1/tasks/task-2').toEqual(
+      expect(context.url).toEqual(
         routes.project_task_detail('project-1', 'task-2'),
       );
     });

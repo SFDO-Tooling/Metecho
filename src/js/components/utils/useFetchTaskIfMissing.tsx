@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { AppState, ThunkDispatch } from '@/js/store';
-import { fetchObject, ObjectFilters } from '@/js/store/actions';
+import { fetchObject } from '@/js/store/actions';
 import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { NULL_FILTER_VALUE, OBJECT_TYPES } from '@/js/utils/constants';
 
 export default (
   {
@@ -36,15 +36,15 @@ export default (
       taskSlug &&
       task === undefined
     ) {
-      const filters: ObjectFilters = { project: projectId, slug: taskSlug };
-      if (epicId) {
-        filters.epic = epicId;
-      }
       // Fetch task from API
       dispatch(
         fetchObject({
           objectType: OBJECT_TYPES.TASK,
-          filters,
+          filters: {
+            project: projectId,
+            epic: epicId || NULL_FILTER_VALUE,
+            slug: taskSlug,
+          },
         }),
       );
     }

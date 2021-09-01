@@ -26,6 +26,7 @@ class EpicFilter(filters.FilterSet):
 
 class TaskFilter(filters.FilterSet):
     slug = filters.CharFilter(field_name="slugs", method=slug_is_active)
+    epic = filters.ModelChoiceFilter(queryset=Epic.objects.all(), null_label="None")
     project = filters.ModelChoiceFilter(
         queryset=Project.objects.all(), method="filter_project"
     )

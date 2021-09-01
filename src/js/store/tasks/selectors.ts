@@ -60,7 +60,7 @@ export const selectTask = createSelector(
     const task = tasks.tasks.find(
       (t) => t.slug === taskSlug || t.old_slugs.includes(taskSlug),
     );
-    if (task && !(epic && task.epic?.id !== epic.id)) {
+    if (task && !(task.epic && task.epic.id !== epic?.id)) {
       return task;
     }
     const notFoundSlug = epic ? `${epic.id}-${taskSlug}` : taskSlug;

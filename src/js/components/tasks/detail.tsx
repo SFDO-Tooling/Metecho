@@ -634,7 +634,7 @@ const TaskDetail = (
     (taskSlug && taskSlug !== task.slug)
   ) {
     // Redirect to most recent project/epic/task slug
-    return epic ? (
+    return hasEpic && epic ? (
       <Redirect
         to={routes.epic_task_detail(project.slug, epic.slug, task.slug)}
       />
