@@ -85,7 +85,7 @@ inflection==0.5.1
     # via pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
-ipython==7.25.0
+ipython==7.27.0
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
