@@ -50,6 +50,7 @@
     "remote.extensionKind": {
       "ms-azuretools.vscode-docker": "workspace"
     },
+    "typescript.tsdk": "node_modules/typescript/lib",
     "[javascript]": {
       "editor.rulers": [80]
     },
