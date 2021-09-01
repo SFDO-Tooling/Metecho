@@ -4,7 +4,7 @@ import ProjectNotFound from '@/js/components/projects/project404';
 import { SpinnerWrapper } from '@/js/components/utils';
 import { Project } from '@/js/store/projects/reducer';
 
-export default ({
+const getProjectLoadingOrNotFound = ({
   project,
   projectSlug,
 }: {
@@ -20,3 +20,5 @@ export default ({
   }
   return false;
 };
+
+export default getProjectLoadingOrNotFound;

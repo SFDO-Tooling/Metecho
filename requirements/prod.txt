@@ -96,7 +96,7 @@ deprecated==1.2.12
     #   jwcrypto
 dj-database-url==0.5.0
     # via -r requirements/prod.in
-django==3.2.6
+django==3.2.7
     # via
     #   -r requirements/prod.in
     #   channels
