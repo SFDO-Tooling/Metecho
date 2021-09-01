@@ -156,7 +156,7 @@ initializeI18n((i18nError?: string) => {
       if (globalsEl?.textContent) {
         GLOBALS = JSON.parse(globalsEl.textContent);
       }
-    } catch (err) {
+    } catch (err: any) {
       logError(err);
     }
     window.GLOBALS = GLOBALS;
