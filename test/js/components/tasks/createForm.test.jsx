@@ -112,7 +112,7 @@ describe('<TaskForm/>', () => {
     });
 
     describe('success', () => {
-      test('redirects to task-detail page', async () => {
+      test('redirects to epic task-detail page', async () => {
         const { context, getByText, getByLabelText } = setup({
           epic: undefined,
         });

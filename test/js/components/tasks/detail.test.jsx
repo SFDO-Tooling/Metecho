@@ -446,9 +446,19 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('task does not exist', () => {
-    test('renders <TaskNotFound />', () => {
+    test('renders <TaskNotFound /> for task with epic', () => {
       const { getByText, queryByText } = setup({
         taskSlug: 'different-task',
+      });
+
+      expect(queryByText('Task 1')).toBeNull();
+      expect(getByText('another task')).toBeVisible();
+    });
+
+    test('renders <TaskNotFound /> for task without epic', () => {
+      const { getByText, queryByText } = setup({
+        taskSlug: 'different-task-2',
+        epicSlug: null,
       });
 
       expect(queryByText('Task 1')).toBeNull();
@@ -463,6 +473,15 @@ describe('<TaskDetail/>', () => {
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(
         routes.epic_task_detail('project-1', 'epic-1', 'task-1'),
+      );
+    });
+
+    test('redirects to project_task_detail with new slug', () => {
+      const { context } = setup({ epicSlug: undefined, taskSlug: 'old-slug' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect('/projects/project-1/tasks/task-2').toEqual(
+        routes.project_task_detail('project-1', 'task-2'),
       );
     });
   });
