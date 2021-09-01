@@ -74,7 +74,7 @@ class Command(BaseCommand):
             repo_name="Metecho-Test",
             description=(
                 "# Welcome to Metecho!\n\n"
-                "This is a description of the project. "
+                "This is a description of the Project. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
         )
