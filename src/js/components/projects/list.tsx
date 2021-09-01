@@ -200,11 +200,11 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                     heading={i18n.t('View an updated Project list')}
                     body={
                       <Trans i18nKey="tourUpdateProject">
-                        If you have recently been added as a collaborator on
-                        GitHub, you may not yet see your new Project in this
-                        list. First, make sure you are logged in with the
-                        correct GitHub account. Next, use the re-sync button to
-                        get an updated list of Projects.
+                        If you have recently been added to a Project on GitHub,
+                        you may not yet see your new Project in this list.
+                        First, make sure you are logged in with the correct
+                        GitHub account. Next, use the re-sync button to get an
+                        updated list of Projects.
                       </Trans>
                     }
                   />

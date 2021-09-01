@@ -127,7 +127,7 @@ const AssignEpicCollaboratorsModal = ({
             <Trans i18nKey="epicCollaborators">
               Only users who have access to the GitHub repository for this Epic
               will appear in the list below. Visit GitHub to invite additional
-              collaborators.
+              Collaborators.
             </Trans>
           </p>
         </div>
@@ -168,7 +168,7 @@ const AssignEpicCollaboratorsModal = ({
               message={
                 <Trans i18nKey="noGitHubUsers">
                   We couldn’t find any GitHub users who have access to this
-                  Project. Try re-syncing the list of available collaborators,
+                  Project. Try re-syncing the list of available Collaborators,
                   or contact an admin for this Project on GitHub.
                 </Trans>
               }

@@ -102,7 +102,7 @@ const ContributeWorkModal = ({
             <Trans i18nKey="contributeWorkFromTask">
               <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
               you’ll start by making this Org the Dev Org for <em>this</em> Task
-              or a <em>new</em> task.
+              or a <em>new</em> Task.
             </Trans>
           </p>
         )}
