@@ -330,7 +330,7 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     @action(detail=True, methods=["POST", "PUT"])
     def assignees(self, request, pk=None):
         """
-        Edit the assigned developer and tester on a Task. Exposed as a separate endpoint
+        Edit the assigned Developer and Tester on a Task. Exposed as a separate endpoint
         for users without write access to Tasks.
         """
         task = self.get_object()
