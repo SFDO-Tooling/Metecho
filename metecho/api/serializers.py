@@ -366,7 +366,16 @@ class TaskSerializer(serializers.ModelSerializer):
         queryset=Epic.objects.all(),
         pk_field=serializers.CharField(),
         serializer=EpicMinimalSerializer,
+        required=False,
+        allow_null=True,
     )
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),
+        pk_field=serializers.CharField(),
+        required=False,
+        allow_null=True,
+    )
+    root_project = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -386,12 +395,14 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "description_rendered",
             "epic",
+            "project",
             "slug",
             "old_slugs",
             "has_unmerged_commits",
             "currently_creating_branch",
             "currently_creating_pr",
             "branch_name",
+            "root_project",
             "branch_url",
             "commits",
             "origin_sha",
@@ -415,6 +426,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "has_unmerged_commits": {"read_only": True},
             "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
+            "root_project": {"read_only": True},
             "branch_url": {"read_only": True},
             "commits": {"read_only": True},
             "origin_sha": {"read_only": True},
@@ -429,18 +441,12 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
         }
-        validators = (
-            CaseInsensitiveUniqueTogetherValidator(
-                queryset=Task.objects.all(),
-                fields=("name", "epic"),
-                message=FormattableDict(
-                    "name", _("A task with this name already exists.")
-                ),
-            ),
-        )
+
+    def get_root_project(self, obj) -> str:
+        return str(obj.root_project.pk)
 
     def get_branch_url(self, obj) -> Optional[str]:
-        project = obj.epic.project
+        project = obj.root_project
         repo_owner = project.repo_owner
         repo_name = project.repo_name
         branch = obj.branch_name
@@ -449,27 +455,39 @@ class TaskSerializer(serializers.ModelSerializer):
         return None
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
-        epic = obj.epic
-        epic_branch = epic.branch_name
-        project = epic.project
+        base_branch = obj.get_base()
+        project = obj.root_project
         repo_owner = project.repo_owner
         repo_name = project.repo_name
         branch = obj.branch_name
-        if repo_owner and repo_name and epic_branch and branch:
+        if repo_owner and repo_name and base_branch and branch:
             return (
                 f"https://github.com/{repo_owner}/{repo_name}/compare/"
-                f"{epic_branch}...{branch}"
+                f"{base_branch}...{branch}"
             )
         return None
 
     def get_pr_url(self, obj) -> Optional[str]:
-        project = obj.epic.project
+        project = obj.root_project
         repo_owner = project.repo_owner
         repo_name = project.repo_name
         pr_number = obj.pr_number
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
+
+    def validate(self, data: dict) -> dict:
+        project = data.get("project", getattr(self.instance, "project", None))
+        epic = data.get("epic", getattr(self.instance, "epic", None))
+        if project and epic:
+            raise serializers.ValidationError(
+                _("Task can be attached to a Project or Epic, but not both")
+            )
+        if not (project or epic):
+            raise serializers.ValidationError(
+                _("Task must be attached to a Project or Epic")
+            )
+        return data
 
     def create(self, validated_data):
         dev_org = validated_data.pop("dev_org", None)
@@ -510,7 +528,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 _("You don't have permissions to change the assigned developer")
             )
-        collaborator = task.epic.project.get_collaborator(new_dev)
+        collaborator = task.root_project.get_collaborator(new_dev)
         if new_dev and not collaborator:
             raise serializers.ValidationError(
                 _(f"User is not a valid GitHub collaborator: {new_dev}")
@@ -531,7 +549,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     _("You can only assign/remove yourself as a tester")
                 )
-        if new_qa and not task.epic.project.get_collaborator(new_qa):
+        if new_qa and not task.root_project.get_collaborator(new_qa):
             raise serializers.ValidationError(
                 _(f"User is not valid GitHub collaborator: {new_qa}")
             )
@@ -552,6 +570,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
     def _handle_reassign(
         self, type_, instance, validated_data, user, originating_user_id
     ):
+        epic = instance.epic
         new_assignee = validated_data.get(f"assigned_{type_}")
         existing_assignee = getattr(instance, f"assigned_{type_}")
         assigned_user_has_changed = new_assignee != existing_assignee
@@ -559,11 +578,10 @@ class TaskAssigneeSerializer(serializers.Serializer):
         org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
-            collaborators = instance.epic.github_users
-            if new_assignee not in collaborators:
-                instance.epic.github_users.append(new_assignee)
-                instance.epic.save()
-                instance.epic.notify_changed(originating_user_id=None)
+            if epic and new_assignee not in epic.github_users:
+                epic.github_users.append(new_assignee)
+                epic.save()
+                epic.notify_changed(originating_user_id=None)
 
             if validated_data.get(f"should_alert_{type_}"):
                 self.try_send_assignment_emails(instance, type_, validated_data, user)
@@ -614,19 +632,13 @@ class TaskAssigneeSerializer(serializers.Serializer):
         assigned_user = self.get_matching_assigned_user(type_, validated_data)
         if assigned_user:
             task = instance
-            epic = task.epic
-            project = epic.project
-            metecho_link = get_user_facing_url(
-                path=["projects", project.slug, epic.slug, task.slug]
-            )
+            metecho_link = get_user_facing_url(path=task.get_absolute_url())
             subject = _("Metecho Task Assigned to You")
             body = render_to_string(
                 "user_assigned_to_task.txt",
                 {
                     "role": "Tester" if type_ == "qa" else "Developer",
-                    "task_name": task.name,
-                    "epic_name": epic.name,
-                    "project_name": project.name,
+                    "task_name": task.full_name,
                     "assigned_user_name": assigned_user.username,
                     "user_name": user.username if user else None,
                     "metecho_link": metecho_link,

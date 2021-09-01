@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models.query_utils import Q
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
@@ -61,17 +62,29 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
         pr_head_ref = self.validated_data["pull_request"]["head"]["ref"]
         pr_base_ref = self.validated_data["pull_request"]["base"]["ref"]
         return (
-            Task.objects.filter(epic__project=project, pr_number=pr_number).first()
-            or Epic.objects.filter(project=project, pr_number=pr_number).first()
-            or Task.objects.filter(
-                epic__project=project,
-                branch_name=pr_head_ref,
-                epic__branch_name=pr_base_ref,
+            Task.objects.filter(
+                # Tasks with Epics
+                Q(epic__project=project, pr_number=pr_number)
+                | Q(
+                    epic__project=project,
+                    branch_name=pr_head_ref,
+                    epic__branch_name=pr_base_ref,
+                )
+                # Tasks with Projects
+                | Q(project=project, pr_number=pr_number)
+                | Q(
+                    project=project,
+                    branch_name=pr_head_ref,
+                    project__branch_name=pr_base_ref,
+                )
             ).first()
             or Epic.objects.filter(
-                project=project,
-                branch_name=pr_head_ref,
-                project__branch_name=pr_base_ref,
+                Q(project=project, pr_number=pr_number)
+                | Q(
+                    project=project,
+                    branch_name=pr_head_ref,
+                    project__branch_name=pr_base_ref,
+                )
             ).first()
         )
 
@@ -159,7 +172,12 @@ class PrReviewHookSerializer(HookSerializerMixin, serializers.Serializer):
             raise NotFound("No matching project.")
 
         pr_number = self.validated_data["pull_request"]["number"]
-        task = Task.objects.filter(epic__project=project, pr_number=pr_number).first()
+        task = Task.objects.filter(
+            # Tasks with Epic
+            Q(epic__project=project, pr_number=pr_number)
+            # Tasks with Project
+            | Q(project=project, pr_number=pr_number)
+        ).first()
         if not task:
             raise NotFound("No matching task.")
 

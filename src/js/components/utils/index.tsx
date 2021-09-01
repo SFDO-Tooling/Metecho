@@ -16,11 +16,14 @@ export { default as getEpicLoadingOrNotFound } from './getEpicLoadingOrNotFound'
 export { default as getProjectLoadingOrNotFound } from './getProjectLoadingOrNotFound';
 export { default as getTaskLoadingOrNotFound } from './getTaskLoadingOrNotFound';
 
+export { default as useAssignUserToTask } from './useAssignUserToTask';
 export { default as useFetchEpicIfMissing } from './useFetchEpicIfMissing';
 export { default as useFetchEpicsIfMissing } from './useFetchEpicsIfMissing';
 export { default as useFetchOrgsIfMissing } from './useFetchOrgsIfMissing';
 export { default as useFetchProjectIfMissing } from './useFetchProjectIfMissing';
-export { default as useFetchTasksIfMissing } from './useFetchTasksIfMissing';
+export { default as useFetchTaskIfMissing } from './useFetchTaskIfMissing';
+export { default as useFetchEpicTasksIfMissing } from './useFetchEpicTasksIfMissing';
+export { default as useFetchProjectTasksIfMissing } from './useFetchProjectTasksIfMissing';
 export { default as useForm } from './useForm';
 export type { UseFormProps } from './useForm';
 export { default as useFormDefaults } from './useFormDefaults';
