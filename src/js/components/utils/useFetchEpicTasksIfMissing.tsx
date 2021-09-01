@@ -29,6 +29,8 @@ export default (
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.TASK,
+          // Filtering by `project` would not strictly be necessary for the API,
+          // but Redux uses it to know what project this epic belongs to.
           filters: { project: projectId, epic: epicId },
         }),
       );

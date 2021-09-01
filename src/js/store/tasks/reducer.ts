@@ -60,9 +60,16 @@ export interface Task {
 }
 
 export interface TaskState {
+  // `key` is a `project.id`
   [key: string]: {
+    // list of all (fetched) tasks for this project
     tasks: Task[];
+    // - `true` means that all tasks for this entire project have been fetched
+    // - `string[]` is a list of all `epic.id` where tasks have been fetched
     fetched: string[] | true;
+    // list of any task slugs that have been fetched and do not exist (404)
+    // - epic-less tasks are stored as raw slugs
+    // - tasks with epics are stored as `epic.id`-`slug`
     notFound: string[];
   };
 }
