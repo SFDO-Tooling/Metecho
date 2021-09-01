@@ -31,7 +31,7 @@ const getResponse = (resp: Response): Promise<any> =>
     })
     .catch(
       /* istanbul ignore next */
-      (err) => {
+      (err: any) => {
         logError(err);
         throw err;
       },
@@ -91,7 +91,7 @@ const apiFetch = async ({
     error.response = response;
     error.body = body;
     throw error;
-  } catch (err) {
+  } catch (err: any) {
     logError(err);
     throw err;
   }
