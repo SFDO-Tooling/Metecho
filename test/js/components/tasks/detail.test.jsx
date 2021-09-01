@@ -149,6 +149,8 @@ const defaultState = {
           slug: 'task-1',
           old_slugs: ['old-slug'],
           epic: defaultEpic,
+          project: null,
+          root_project: 'p1',
           branch_url: 'https://github.com/test/test-repo/tree/epic__task',
           branch_name: 'epic__task',
           description: 'Task Description',
@@ -164,6 +166,8 @@ const defaultState = {
           slug: 'task-2',
           old_slugs: ['old-slug-2'],
           epic: null,
+          project: 'p1',
+          root_project: 'p1',
           branch_url: 'https://github.com/test/test-repo/tree/epicless__task',
           branch_name: 'epicless__task',
           description: 'Task Description',
@@ -225,33 +229,6 @@ describe('<TaskDetail/>', () => {
     };
   };
 
-  test('renders epicless task detail', () => {
-    const { getByText } = setup({
-      initialState: {
-        ...defaultState,
-        projects: {
-          ...defaultState.projects,
-          tasks: {
-            ...defaultState.tasks,
-            p1: {
-              ...defaultState.tasks.p1,
-              tasks: [
-                {
-                  ...defaultState.tasks.p1.tasks[1],
-                },
-              ],
-            },
-          },
-          epicSlug: undefined,
-          taskSlug: 'task-2',
-        },
-      },
-    });
-
-    expect(getByText('Task 2')).toBeVisible();
-    expect(getByText('no epic')).toBeVisible();
-  });
-
   test('renders task detail with org', () => {
     const { getByText, getByTitle, queryByText } = setup();
 
@@ -260,6 +237,16 @@ describe('<TaskDetail/>', () => {
     expect(queryByText('View Branch')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Team & Orgs')).toBeVisible();
+  });
+
+  test('renders epicless task detail', () => {
+    const { getByText, getByTitle } = setup({
+      epicSlug: undefined,
+      taskSlug: 'task-2',
+    });
+
+    expect(getByTitle('Task 2')).toBeVisible();
+    expect(getByText('no epic')).toBeVisible();
   });
 
   test('renders readonly task detail with dev org', () => {
