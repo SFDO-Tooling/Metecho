@@ -87,8 +87,6 @@ iniconfig==1.1.1
     # via pytest
 ipython==7.25.0
     # via -r requirements/dev.in
-ipython-genutils==0.2.0
-    # via traitlets
 isort==5.9.2
     # via -r requirements/dev.in
 jedi==0.18.0
@@ -228,7 +226,7 @@ toml==0.10.2
     #   pytest-cov
 tomli==1.1.0
     # via black
-traitlets==5.0.5
+traitlets==5.1.0
     # via
     #   ipython
     #   matplotlib-inline
