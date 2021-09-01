@@ -158,6 +158,21 @@ const defaultState = {
           assigned_dev: 'user-id',
           assigned_qa: null,
         },
+        {
+          id: 'task2',
+          name: 'Task 2',
+          slug: 'task-2',
+          old_slugs: ['old-slug-2'],
+          epic: null,
+          branch_url: 'https://github.com/test/test-repo/tree/epicless__task',
+          branch_name: 'epicless__task',
+          description: 'Task Description',
+          description_rendered: '<p>Task Description</p>',
+          has_unmerged_commits: false,
+          commits: [],
+          assigned_dev: 'user-id',
+          assigned_qa: null,
+        },
       ],
     },
   },
@@ -209,6 +224,33 @@ describe('<TaskDetail/>', () => {
       history,
     };
   };
+
+  test('renders epicless task detail', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          tasks: {
+            ...defaultState.tasks,
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[1],
+                },
+              ],
+            },
+          },
+          epicSlug: undefined,
+          taskSlug: 'task-2',
+        },
+      },
+    });
+
+    expect(getByText('Task 2')).toBeVisible();
+    expect(getByText('no epic')).toBeVisible();
+  });
 
   test('renders task detail with org', () => {
     const { getByText, getByTitle, queryByText } = setup();
