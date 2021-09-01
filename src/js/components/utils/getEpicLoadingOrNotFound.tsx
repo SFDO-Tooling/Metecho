@@ -6,7 +6,7 @@ import { SpinnerWrapper } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
 import { Project } from '@/js/store/projects/reducer';
 
-export default ({
+const getEpicLoadingOrNotFound = ({
   project,
   epic,
   epicSlug,
@@ -28,3 +28,5 @@ export default ({
   }
   return false;
 };
+
+export default getEpicLoadingOrNotFound;
