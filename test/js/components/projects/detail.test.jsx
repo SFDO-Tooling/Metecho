@@ -294,7 +294,7 @@ describe('<ProjectDetail />', () => {
       });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -312,7 +312,7 @@ describe('<ProjectDetail />', () => {
       const { getByText, queryByText } = setup({ projectSlug: '' });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 

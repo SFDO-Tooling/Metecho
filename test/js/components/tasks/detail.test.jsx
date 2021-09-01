@@ -348,7 +348,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 

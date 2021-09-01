@@ -9,8 +9,8 @@ const ProjectNotFound = () => (
   <FourOhFour
     message={
       <Trans i18nKey="projectNotFound">
-        We can’t find the project you’re looking for. Try the{' '}
-        <Link to={routes.project_list()}>list of all projects</Link>?
+        We can’t find the Project you’re looking for. Try the{' '}
+        <Link to={routes.project_list()}>list of all Projects</Link>?
       </Trans>
     }
   />

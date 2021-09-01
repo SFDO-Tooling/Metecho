@@ -362,7 +362,7 @@ describe('<EpicDetail/>', () => {
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 

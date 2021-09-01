@@ -67,7 +67,7 @@ const SelectFlowType = ({
           content={
             orgConfigHelp ||
             i18n.t(
-              'CumulusCI projects can set up different kinds of Org environments. Which one would you like to work on for this Task?',
+              'CumulusCI Projects can set up different kinds of Org environments. Which one would you like to work on for this Task?',
             )
           }
           position="overflowBoundaryElement"
