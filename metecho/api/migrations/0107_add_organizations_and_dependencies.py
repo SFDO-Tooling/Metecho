@@ -56,6 +56,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("edited_at", models.DateTimeField(auto_now=True)),
                 ("name", sfdo_template_helpers.fields.string.StringField()),
+                ("url", models.URLField()),
                 ("recommended", models.BooleanField(default=False)),
             ],
             options={

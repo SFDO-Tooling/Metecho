@@ -463,6 +463,7 @@ class Project(
 
 class ProjectDependency(HashIdMixin, TimestampsMixin):
     name = StringField()
+    url = models.URLField()
     recommended = models.BooleanField(default=False)
 
     def __str__(self):
