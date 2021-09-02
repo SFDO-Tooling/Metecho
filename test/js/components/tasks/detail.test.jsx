@@ -465,7 +465,7 @@ describe('<TaskDetail/>', () => {
 
       expect(queryByText('Task 1')).toBeNull();
       expect(queryByText('Task 2')).toBeNull();
-      expect(getByText('another task')).toBeVisible();
+      expect(getByText('another Task')).toBeVisible();
     });
   });
 

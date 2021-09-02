@@ -819,8 +819,8 @@ describe('<EpicDetail/>', () => {
 
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
-      const { queryByText, getByText, getByTitle } = setup();
-      fireEvent.click(getByText('Create a Task'));
+      const { queryByText, getByText, getAllByText, getByTitle } = setup();
+      fireEvent.click(getAllByText('Create a Task')[1]);
 
       expect(getByText('Create a Task for Epic 1')).toBeVisible();
 
