@@ -12,7 +12,10 @@ describe('<DetailPageLayout />', () => {
         <DetailPageLayout
           title="project-1"
           image="image-url"
-          breadcrumb={[{ name: 'project-1', url: '' }]}
+          breadcrumb={[
+            { name: 'project-1' },
+            { name: 'test', url: '/foo', emphasis: true },
+          ]}
           description=""
           repoUrl="repo-url"
         />

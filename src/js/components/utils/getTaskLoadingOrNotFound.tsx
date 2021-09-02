@@ -11,11 +11,13 @@ import { Task } from '@/js/store/tasks/reducer';
 const getTaskLoadingOrNotFound = ({
   project,
   epic,
+  epicSlug,
   task,
   taskSlug,
 }: {
   project?: Project | null;
   epic?: Epic | null;
+  epicSlug?: string;
   task?: Task | null;
   taskSlug?: string;
 }): ReactElement | false => {
@@ -25,7 +27,7 @@ const getTaskLoadingOrNotFound = ({
       return <ProjectNotFound />;
     }
     /* istanbul ignore if */
-    if (!epic) {
+    if (epicSlug && !epic) {
       return <EpicNotFound project={project} />;
     }
     if (!taskSlug || task === null) {

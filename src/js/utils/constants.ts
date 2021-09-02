@@ -21,6 +21,8 @@ export const OBJECT_TYPES = {
 
 export const DEFAULT_ORG_CONFIG_NAME = 'dev';
 
+export const NULL_FILTER_VALUE = 'null';
+
 export type OrgTypes = 'Dev' | 'QA' | 'Playground';
 
 export const ORG_TYPES = {

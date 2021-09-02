@@ -64,6 +64,13 @@ describe('AssignTaskRole', () => {
     ),
   });
 
+  test('renders without epic collaborators', () => {
+    const { getByText, queryByText } = setup({ epicUsers: null });
+
+    expect(queryByText('Epic Collaborators')).toBeNull();
+    expect(getByText('GitHub Collaborators')).toBeVisible();
+  });
+
   test('responds to epic user click', () => {
     const { getByText, getAllByTitle } = setup();
     const userBtn = getAllByTitle('Test User (test user)')[0];

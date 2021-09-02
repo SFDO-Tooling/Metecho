@@ -154,7 +154,7 @@ const AssignEpicCollaboratorsModal = ({
             onRowChange={updateSelection}
           >
             <DataTableColumn
-              label={i18n.t('GitHub Users')}
+              label={i18n.t('GitHub Collaborators')}
               property="login"
               primaryColumn
               truncate

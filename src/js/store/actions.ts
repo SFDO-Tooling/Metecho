@@ -195,7 +195,9 @@ export const fetchObject =
         url: addUrlParams(baseUrl, { ...filters }),
         dispatch,
       });
-      const object = response?.results?.length ? response.results[0] : null;
+      const object = response?.results?.length
+        ? response.results[0]
+        : response[0] || null;
       const shouldSubscribe =
         (typeof shouldSubscribeToObject === 'boolean' &&
           shouldSubscribeToObject) ||
