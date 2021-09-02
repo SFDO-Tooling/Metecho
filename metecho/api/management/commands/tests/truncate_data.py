@@ -9,9 +9,9 @@ def test_truncate_data(project_factory, epic_factory, task_factory):
     project_factory(repo_owner="test", repo_name="repo")
     project_factory(repo_owner="test", repo_name="repo2")
     project = project_factory(repo_owner="test", repo_name="repo3")
-    epic = epic_factory(project=project)
-    task_factory(epic=epic)
-    task_factory(epic=None, project=project)
+    epic = epic_factory(project=project, issue=None)
+    task_factory(epic=epic, issue=None)
+    task_factory(epic=None, project=project, issue=None)
 
     assert ProjectSlug.objects.count() == 3
     assert Project.objects.count() == 3

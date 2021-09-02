@@ -1141,7 +1141,7 @@ class TestTaskViewSet:
         Write operations on the task detail endpoint should depend on repo push
         permissions
         """
-        task = _task_factory()
+        task = _task_factory(issue=None)
         git_hub_repository_factory(
             repo_id=task.root_project.repo_id, user=client.user, permissions=repo_perms
         )
