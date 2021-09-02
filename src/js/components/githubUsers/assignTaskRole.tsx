@@ -28,7 +28,7 @@ const AssignTaskRoleModal = ({
   setUser,
 }: {
   projectId: string;
-  epicUsers: GitHubUser[];
+  epicUsers: GitHubUser[] | null;
   githubUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
   orgType: OrgTypes;
@@ -50,7 +50,7 @@ const AssignTaskRoleModal = ({
       ['desc', 'asc'],
     );
   const validEpicUsers = sort(
-    epicUsers.filter(
+    (epicUsers || []).filter(
       (u) =>
         (u.permissions?.push || orgType === ORG_TYPES.QA) &&
         u.id !== selectedUser?.id,
@@ -176,10 +176,14 @@ const AssignTaskRoleModal = ({
       >
         <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
           <p>
-            <Trans i18nKey="assignUserHelper">
-              Assign any user to this role, and they will also be added as an
-              Epic Collaborator.
-            </Trans>
+            {epicUsers ? (
+              <Trans i18nKey="assignUserHelper">
+                Assign any user to this role, and they will also be added as an
+                Epic Collaborator.
+              </Trans>
+            ) : (
+              i18n.t('Assign any GitHub Collaborator to this role.')
+            )}
           </p>
         </div>
         <div
@@ -209,33 +213,37 @@ const AssignTaskRoleModal = ({
             placeholder={i18n.t('Search for user')}
           />
         </div>
+        {epicUsers ? (
+          <div className="slds-p-horizontal_medium slds-p-bottom_medium">
+            <h3 className="slds-text-heading_small slds-m-bottom_x-small">
+              {i18n.t('Epic Collaborators')}
+            </h3>
+            {filteredEpicUsers.length ? (
+              <ul>
+                {filteredEpicUsers.map((user) => (
+                  <li key={user.id}>
+                    <GitHubUserButton
+                      user={user}
+                      isSelected={selection === user}
+                      onClick={() => handleAssigneeSelection(user)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="slds-p-left_x-small">
+                {findText
+                  ? i18n.t('No users found.')
+                  : i18n.t('There are no available Epic Collaborators.')}
+              </p>
+            )}
+          </div>
+        ) : null}
         <div className="slds-p-horizontal_medium slds-p-bottom_medium">
           <h3 className="slds-text-heading_small slds-m-bottom_x-small">
-            {i18n.t('Epic Collaborators')}
-          </h3>
-          {filteredEpicUsers.length ? (
-            <ul>
-              {filteredEpicUsers.map((user) => (
-                <li key={user.id}>
-                  <GitHubUserButton
-                    user={user}
-                    isSelected={selection === user}
-                    onClick={() => handleAssigneeSelection(user)}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="slds-p-left_x-small">
-              {findText
-                ? i18n.t('No users found.')
-                : i18n.t('There are no available Epic Collaborators.')}
-            </p>
-          )}
-        </div>
-        <div className="slds-p-horizontal_medium slds-p-bottom_medium">
-          <h3 className="slds-text-heading_small slds-m-bottom_x-small">
-            {i18n.t('Other GitHub Collaborators')}
+            {epicUsers
+              ? i18n.t('Other GitHub Collaborators')
+              : i18n.t('GitHub Collaborators')}
           </h3>
           {filteredGitHubUsers.length ? (
             <ul>

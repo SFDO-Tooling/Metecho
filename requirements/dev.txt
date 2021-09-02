@@ -147,6 +147,7 @@ pytest==6.2.5
     #   pytest-cov
     #   pytest-django
     #   pytest-factoryboy
+    #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
 pytest-asyncio==0.15.1
@@ -156,6 +157,8 @@ pytest-cov==2.12.1
 pytest-django==4.4.0
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
+    # via -r requirements/dev.in
+pytest-lazy-fixture==0.6.3
     # via -r requirements/dev.in
 pytest-mock==3.6.1
     # via -r requirements/dev.in

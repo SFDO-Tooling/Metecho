@@ -7,7 +7,6 @@ import { Task } from '@/js/store/tasks/reducer';
 
 import { withRedux } from '../../decorators';
 import {
-  sampleEpic1,
   sampleGitHubUser1,
   sampleGitHubUser2,
   sampleGitHubUser3,
@@ -55,7 +54,6 @@ TasksTable.args = {
   tasks: Object.keys(sampleTasks),
   projectId: sampleProject1.id,
   projectSlug: sampleProject1.slug,
-  epicSlug: sampleEpic1.slug,
   epicUsers: [sampleGitHubUser1],
   githubUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   canAssign: true,

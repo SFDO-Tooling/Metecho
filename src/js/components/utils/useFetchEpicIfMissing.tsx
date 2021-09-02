@@ -9,7 +9,7 @@ import { Project } from '@/js/store/projects/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export default (
-  project: Project | null | undefined,
+  { project }: { project?: Project | null },
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();

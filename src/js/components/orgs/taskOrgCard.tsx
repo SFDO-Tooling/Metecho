@@ -35,7 +35,6 @@ interface TaskOrgCardProps {
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
-  epicUrl: string;
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;

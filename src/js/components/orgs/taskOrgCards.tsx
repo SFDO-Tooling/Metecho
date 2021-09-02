@@ -42,7 +42,6 @@ const TaskOrgCards = ({
   epicUsers,
   githubUsers,
   epicCreatingBranch,
-  epicUrl,
   repoUrl,
   assignUserModalOpen,
   isCreatingOrg,
@@ -64,7 +63,6 @@ const TaskOrgCards = ({
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
-  epicUrl: string;
   repoUrl: string;
   assignUserModalOpen: OrgTypes | null;
   isCreatingOrg: OrgTypeTracker;
@@ -275,7 +273,6 @@ const TaskOrgCards = ({
           epicUsers={epicUsers}
           githubUsers={githubUsers}
           epicCreatingBranch={epicCreatingBranch}
-          epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
@@ -300,7 +297,6 @@ const TaskOrgCards = ({
           epicUsers={epicUsers}
           githubUsers={githubUsers}
           epicCreatingBranch={epicCreatingBranch}
-          epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
