@@ -262,7 +262,7 @@ describe('<ProjectDetail />', () => {
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(
-      getByText('You can create a new epic', { exact: false }),
+      getByText('You can create a new Epic', { exact: false }),
     ).toBeVisible();
   });
 
@@ -314,7 +314,7 @@ describe('<ProjectDetail />', () => {
       });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -332,7 +332,7 @@ describe('<ProjectDetail />', () => {
       const { getByText, queryByText } = setup({ projectSlug: '' });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 

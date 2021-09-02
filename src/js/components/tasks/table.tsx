@@ -422,7 +422,7 @@ const TaskTable = ({
                   A <b>Developer</b> is the person assigned to do the work of a
                   Task. Developers create Dev Orgs for their work, retrieve
                   their changes, and then submit their work for someone to test.
-                  Anyone with permission to contribute to the project on GitHub
+                  Anyone with permission to contribute to the Project on GitHub
                   can be assigned as a Developer on a Task.
                 </Trans>
               }

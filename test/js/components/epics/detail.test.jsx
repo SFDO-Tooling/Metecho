@@ -366,7 +366,7 @@ describe('<EpicDetail/>', () => {
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -377,7 +377,7 @@ describe('<EpicDetail/>', () => {
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('another epic')).toBeVisible();
+      expect(getByText('another Epic')).toBeVisible();
     });
   });
 
@@ -700,7 +700,7 @@ describe('<EpicDetail/>', () => {
     });
   });
 
-  describe('"Submit this epic for review on GitHub" step click', () => {
+  describe('"Submit this Epic for review on GitHub" step click', () => {
     test('opens modal', () => {
       const { getByText, getByLabelText } = setup({
         initialState: {
@@ -718,7 +718,7 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByText('Submit this epic for review on GitHub'));
+      fireEvent.click(getByText('Submit this Epic for review on GitHub'));
 
       expect(getByLabelText('Developer notes')).toBeVisible();
     });
@@ -819,8 +819,8 @@ describe('<EpicDetail/>', () => {
 
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
-      const { queryByText, getByText, getByTitle } = setup();
-      fireEvent.click(getByText('Create a Task'));
+      const { queryByText, getByText, getAllByText, getByTitle } = setup();
+      fireEvent.click(getAllByText('Create a Task')[1]);
 
       expect(getByText('Create a Task for Epic 1')).toBeVisible();
 

@@ -218,7 +218,7 @@ container. `VS Code`_ supports this using the `Remote Development`_ extension
 pack.
 
 Once you have the extension pack installed, when you open the Metecho folder
-in VS Code, you will be prompted to "Reopen in Container". Doing so will
+in VS Code, you will be prompted to ``Reopen in Container``. Doing so will
 effectively run ``docker-compose up`` and reload your window, now running inside
 the Docker container. If you do not see the prompt, run the "Remote-Containers:
 Open Folder in Container..." command from the VS Code Command Palette to start

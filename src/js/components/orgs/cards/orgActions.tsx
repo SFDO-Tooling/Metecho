@@ -175,7 +175,7 @@ const OrgActions = ({
             heading={i18n.t('Create a Dev Org')}
             body={
               <Trans i18nKey="tourTaskCreateDevOrg">
-                A Dev Org is a temporary Salesforce org where you can make
+                A Dev Org is a temporary Salesforce Org where you can make
                 changes that you would like to contribute to the Project. To
                 create an Org, make sure you are connected to a Salesforce
                 account with Dev Hub enabled. Use the drop down menu to delete
@@ -195,7 +195,7 @@ const OrgActions = ({
             heading={i18n.t('Create a Test Org')}
             body={
               <Trans i18nKey="tourTaskCreateTestOrg">
-                A Test Org is a temporary Salesforce org where you can view the
+                A Test Org is a temporary Salesforce Org where you can view the
                 changes the Developer retrieved. To create an Org, make sure you
                 are connected to a Salesforce account with Dev Hub enabled. Read
                 the Developer’s Commit History to see what changes they made.

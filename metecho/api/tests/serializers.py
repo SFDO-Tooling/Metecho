@@ -214,7 +214,7 @@ class TestEpicSerializer:
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
-            "An epic with this name already exists."
+            "An Epic with this name already exists."
         ]
 
     def test_unique_name_for_project__case_insensitive(
@@ -232,7 +232,7 @@ class TestEpicSerializer:
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
-            "An epic with this name already exists."
+            "An Epic with this name already exists."
         ]
 
     def test_unique_name_for_project__case_insensitive__update(

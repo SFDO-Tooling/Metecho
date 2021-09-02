@@ -228,7 +228,7 @@ class EpicSerializer(serializers.ModelSerializer):
                 queryset=Epic.objects.all(),
                 fields=("name", "project"),
                 message=FormattableDict(
-                    "name", _("An epic with this name already exists.")
+                    "name", _("An Epic with this name already exists.")
                 ),
             ),
         )
@@ -337,11 +337,11 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
             removed = collaborators.difference(new_collaborators)
             if added and any(u != user.github_id for u in added):
                 raise serializers.ValidationError(
-                    _("You can only add yourself as a collaborator")
+                    _("You can only add yourself as a Collaborator")
                 )
             if removed and any(u != user.github_id for u in removed):
                 raise serializers.ValidationError(
-                    _("You can only remove yourself as a collaborator")
+                    _("You can only remove yourself as a Collaborator")
                 )
 
         seen_github_users = []
@@ -517,7 +517,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
     def validate(self, data):
         if "assigned_qa" not in data and "assigned_dev" not in data:
             raise serializers.ValidationError(
-                _("You must assign a developer, tester, or both")
+                _("You must assign a Developer, Tester, or both")
             )
         return super().validate(data)
 
@@ -526,7 +526,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
         task: Task = self.instance
         if not task.has_push_permission(user):
             raise serializers.ValidationError(
-                _("You don't have permissions to change the assigned developer")
+                _("You don't have permissions to change the assigned Developer")
             )
         collaborator = task.root_project.get_collaborator(new_dev)
         if new_dev and not collaborator:
@@ -547,7 +547,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
             is_assigning_self = new_qa == user.github_id and task.assigned_qa is None
             if not (is_removing_self or is_assigning_self):
                 raise serializers.ValidationError(
-                    _("You can only assign/remove yourself as a tester")
+                    _("You can only assign/remove yourself as a Tester")
                 )
         if new_qa and not task.root_project.get_collaborator(new_qa):
             raise serializers.ValidationError(
@@ -810,15 +810,15 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
                 )
             if data.get("task") and orgs.filter(task=data["task"]).exists():
                 raise serializers.ValidationError(
-                    _("A ScratchOrg of this type already exists for this task.")
+                    _("A Scratch Org of this type already exists for this Task.")
                 )
             if data.get("epic") and orgs.filter(epic=data["epic"]).exists():
                 raise serializers.ValidationError(
-                    _("A ScratchOrg of this type already exists for this epic.")
+                    _("A Scratch Org of this type already exists for this Epic.")
                 )
             if data.get("project") and orgs.filter(project=data["project"]).exists():
                 raise serializers.ValidationError(
-                    _("A ScratchOrg of this type already exists for this project.")
+                    _("A Scratch Org of this type already exists for this Project.")
                 )
         return data
 

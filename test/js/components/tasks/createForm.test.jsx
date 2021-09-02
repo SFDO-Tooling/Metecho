@@ -73,7 +73,7 @@ describe('<TaskForm/>', () => {
   describe('refresh org types button click', () => {
     test('triggers refreshOrgConfigs actions', () => {
       const { getByText } = setup();
-      const btn = getByText('refresh list of available org types');
+      const btn = getByText('refresh list of available Org types');
       fireEvent.click(btn);
 
       expect(refreshOrgConfigs).toHaveBeenCalledWith('p1');
@@ -216,9 +216,9 @@ describe('<TaskForm/>', () => {
         fireEvent.click(submit);
 
         expect.assertions(1);
-        await findByText('A task was successfully created.');
+        await findByText('A Task was successfully created.');
 
-        expect(getByText('A task was successfully created.')).toBeVisible();
+        expect(getByText('A Task was successfully created.')).toBeVisible();
       });
     });
   });

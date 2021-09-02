@@ -109,7 +109,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
             <Trans i18nKey="tourTaskCommits">
               A “commit” represents changes retrieved from the Dev Org. This
               saves all your changes to a Task, so that others can view them.
-              Add a commit message to let collaborators know what changes you
+              Add a commit message to let Collaborators know what changes you
               saved. Select the link to see the commit in GitHub.
             </Trans>
           }

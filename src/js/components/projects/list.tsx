@@ -86,7 +86,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
       // No projects; show empty message
       const msg = (
         <Trans i18nKey="noProjectsHelper">
-          We couldn’t find any projects you have access to on GitHub. Confirm
+          We couldn’t find any Projects you have access to on GitHub. Confirm
           that you are logged into the correct account or contact an admin on
           GitHub.
         </Trans>
@@ -132,11 +132,11 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
           <TourPopover
             id="tour-projects-select-project"
             align="bottom left"
-            heading={i18n.t('Begin exploring projects')}
+            heading={i18n.t('Begin exploring Projects')}
             body={
               <Trans i18nKey="tourSelectProject">
                 Select a Metecho Project from the list to begin viewing or
-                contributing to the project. Projects are equivalent to
+                contributing to the Project. Projects are equivalent to
                 Repositories in GitHub. They have Orgs, Tasks, and Epics. To
                 learn more, continue the self-guided tour on a Project page.
               </Trans>
@@ -163,8 +163,8 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             >
               <p className="slds-p-bottom_small">
                 <Trans i18nKey="projectListHelper">
-                  Access on GitHub is required to view projects. If you do not
-                  see the project you’re looking for below, confirm that you are
+                  Access on GitHub is required to view Projects. If you do not
+                  see the Project you’re looking for below, confirm that you are
                   logged into the correct account or contact an admin for the
                   repository on GitHub.
                 </Trans>
@@ -200,11 +200,11 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                     heading={i18n.t('View an updated Project list')}
                     body={
                       <Trans i18nKey="tourUpdateProject">
-                        If you have recently been added as a collaborator on
-                        GitHub, you may not yet see your new Project in this
-                        list. First, make sure you are logged in with the
-                        correct GitHub account. Next, use the re-sync button to
-                        get an updated list of Projects.
+                        If you have recently been added to a Project on GitHub,
+                        you may not yet see your new Project in this list.
+                        First, make sure you are logged in with the correct
+                        GitHub account. Next, use the re-sync button to get an
+                        updated list of Projects.
                       </Trans>
                     }
                   />
