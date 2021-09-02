@@ -44,13 +44,31 @@ Commit = namedtuple(
 )
 PATCH_ROOT = "metecho.api.jobs"
 
+fixture = pytest.lazy_fixture
+
 
 @pytest.mark.django_db
 class TestCreateBranchesOnGitHub:
-    def test_create_branches_on_github(self, user_factory, task_factory):
+    def test_require_epic_or_task(self, user_factory):
+        with pytest.raises(ValueError):
+            _create_branches_on_github(
+                user=user_factory(),
+                repo_id=123,
+                epic=None,
+                task=None,
+                originating_user_id="123abc",
+            )
+
+    @pytest.mark.parametrize(
+        "_task_factory",
+        (
+            pytest.param(fixture("task_factory"), id="With Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="With Project"),
+        ),
+    )
+    def test_create_branches_on_github(self, user_factory, _task_factory):
         user = user_factory()
-        task = task_factory()
-        epic = task.epic
+        task = _task_factory()
 
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
@@ -67,7 +85,7 @@ class TestCreateBranchesOnGitHub:
             _create_branches_on_github(
                 user=user,
                 repo_id=123,
-                epic=epic,
+                epic=task.epic,
                 task=task,
                 originating_user_id="123abc",
             )
@@ -247,8 +265,17 @@ class TestAlertUserAboutExpiringOrg:
             assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert not send_mail.called
 
-    def test_good(self, scratch_org_factory):
-        scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
+    @pytest.mark.parametrize(
+        "_task_factory",
+        (
+            pytest.param(fixture("task_factory"), id="Task with Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
+        ),
+    )
+    def test_good(self, scratch_org_factory, _task_factory):
+        scratch_org = scratch_org_factory(
+            unsaved_changes={"something": 1}, task=_task_factory()
+        )
         with ExitStack() as stack:
             send_mail = stack.enter_context(patch("metecho.api.models.send_mail"))
             get_unsaved_changes = stack.enter_context(
@@ -431,8 +458,15 @@ class TestRefreshScratchOrg:
 
 @pytest.mark.django_db
 class TestConvertScratchOrg:
-    def test_convert_to_dev_org(self, mocker, scratch_org_factory, task_factory):
-        task = task_factory(epic__project__repo_id=123)
+    @pytest.mark.parametrize(
+        "_task_factory",
+        (
+            pytest.param(fixture("task_factory"), id="Task with Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
+        ),
+    )
+    def test_convert_to_dev_org(self, mocker, scratch_org_factory, _task_factory):
+        task = _task_factory()
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
@@ -901,12 +935,19 @@ class TestRefreshGitHubUsers:
 
 @pytest.mark.django_db
 class TestSubmitReview:
-    def test_good(self, task_factory, user_factory):
+    @pytest.mark.parametrize(
+        "_task_factory",
+        (
+            pytest.param(fixture("task_factory"), id="Task with Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
+        ),
+    )
+    def test_good(self, user_factory, _task_factory):
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
 
             user = user_factory()
-            task = task_factory(
+            task = _task_factory(
                 pr_is_open=True, review_valid=True, review_sha="test_sha"
             )
             task.finalize_submit_review = MagicMock()
@@ -947,7 +988,7 @@ class TestSubmitReview:
             task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
             scratch_org = scratch_org_factory(task=task, latest_commit="test_sha")
             task.finalize_submit_review = MagicMock()
-            task.epic.project.get_repo_id = MagicMock()
+            task.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -985,7 +1026,7 @@ class TestSubmitReview:
                 pr_is_open=True, review_valid=False, review_sha="test_sha"
             )
             task.finalize_submit_review = MagicMock()
-            task.epic.project.get_repo_id = MagicMock()
+            task.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository

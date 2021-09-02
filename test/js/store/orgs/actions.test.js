@@ -9,7 +9,9 @@ import { getStoreWithHistory, storeWithThunk } from './../../utils';
 const defaultState = {
   user: { id: 'user-id' },
   tasks: {
-    'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
+    'project-id': {
+      tasks: [{ id: 'task-id', name: 'My Task', epic: { id: 'epic-id' } }],
+    },
   },
   epics: {
     'project-id': {

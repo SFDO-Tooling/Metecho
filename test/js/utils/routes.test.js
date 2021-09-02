@@ -1,4 +1,4 @@
-import routes, { routePatterns } from '@/js/utils/routes';
+import routes from '@/js/utils/routes';
 
 describe('routes', () => {
   test.each([
@@ -9,28 +9,19 @@ describe('routes', () => {
     [
       'epic_detail',
       ['project-slug', 'epic-slug'],
-      '/projects/project-slug/epic-slug',
+      '/projects/project-slug/epics/epic-slug',
     ],
     [
-      'task_detail',
+      'project_task_detail',
+      ['project-slug', 'task-slug'],
+      '/projects/project-slug/tasks/task-slug',
+    ],
+    [
+      'epic_task_detail',
       ['project-slug', 'epic-slug', 'task-slug'],
-      '/projects/project-slug/epic-slug/task-slug',
+      '/projects/project-slug/epics/epic-slug/tasks/task-slug',
     ],
   ])('%s returns path with args: %o', (name, args, expected) => {
     expect(routes[name](...args)).toBe(expected);
-  });
-});
-
-describe('routePatterns', () => {
-  test.each([
-    ['home', '/'],
-    ['login', '/login'],
-    ['auth_error', '/accounts/*'],
-    ['project_list', '/projects'],
-    ['project_detail', '/projects/:projectSlug'],
-    ['epic_detail', '/projects/:projectSlug/:epicSlug'],
-    ['task_detail', '/projects/:projectSlug/:epicSlug/:taskSlug'],
-  ])('%s returns path', (name, expected) => {
-    expect(routePatterns[name]()).toBe(expected);
   });
 });

@@ -5,11 +5,10 @@ import { RouteComponentProps } from 'react-router-dom';
 import { AppState, ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
 import { selectEpicsByProject } from '@/js/store/epics/selectors';
-import { Project } from '@/js/store/projects/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export default (
-  project: Project | null | undefined,
+  { projectId }: { projectId?: string },
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
@@ -19,17 +18,17 @@ export default (
   );
 
   useEffect(() => {
-    if (project && !epics?.fetched) {
+    if (projectId && !epics?.fetched) {
       // Fetch epics from API
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.EPIC,
-          filters: { project: project.id },
+          filters: { project: projectId },
           reset: true,
         }),
       );
     }
-  }, [dispatch, project, epics?.fetched]);
+  }, [dispatch, projectId, epics?.fetched]);
 
   return { epics };
 };

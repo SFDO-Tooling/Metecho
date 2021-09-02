@@ -222,9 +222,13 @@ class TestTask:
         task = Task(name="Test Task")
         assert str(task) == "Test Task"
 
-    def test_get_absolute_url(self, task_factory):
-        url = task_factory().get_absolute_url()
-        assert url.startswith("/")
+    def test_get_absolute_url__epic(self, task_factory):
+        task = task_factory()
+        assert task.epic.slug in task.get_absolute_url()
+
+    def test_get_absolute_url__project(self, task_with_project_factory):
+        task = task_with_project_factory()
+        assert task.project.slug in task.get_absolute_url()
 
     def test_notify_changed(self, task_factory):
         with ExitStack() as stack:
@@ -769,18 +773,30 @@ class TestUser:
 
 @pytest.mark.django_db
 class TestScratchOrg:
-    def test_root_project(self, project_factory, epic_factory, scratch_org_factory):
+    def test_root_project(
+        self, project_factory, epic_factory, task_factory, scratch_org_factory
+    ):
         invalid_scratch_org = scratch_org_factory(task=None)
-        task_scratch_org = scratch_org_factory()
         epic = epic_factory()
         epic_scratch_org = scratch_org_factory(task=None, epic=epic)
         project = project_factory()
         project_scratch_org = scratch_org_factory(task=None, project=project)
+        task_with_epic_scratch_org = scratch_org_factory()
+        task_with_project_scratch_org = scratch_org_factory(
+            task=task_factory(epic=None, project=project)
+        )
 
         assert invalid_scratch_org.root_project is None
-        assert task_scratch_org.root_project == task_scratch_org.task.epic.project
         assert epic_scratch_org.root_project == epic.project
         assert project_scratch_org.root_project == project
+        assert (
+            task_with_epic_scratch_org.root_project
+            == task_with_epic_scratch_org.task.epic.project
+        )
+        assert (
+            task_with_project_scratch_org.root_project
+            == task_with_project_scratch_org.task.project
+        )
 
     def test_notify_changed(self, scratch_org_factory):
         with ExitStack() as stack:

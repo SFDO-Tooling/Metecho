@@ -261,6 +261,8 @@ export const sampleTask1 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
@@ -297,6 +299,8 @@ export const sampleTask2 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description:
     'Add panel for controls toggles allowing for accessible interaction',
   description_rendered:
@@ -333,6 +337,8 @@ export const sampleTask3 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: 'Include options set by operating system preferences',
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
@@ -370,6 +376,8 @@ export const sampleTask4 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: 'Internationalization and Localization built in options',
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
@@ -407,6 +415,8 @@ export const sampleTask5 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -443,6 +453,8 @@ export const sampleTask6 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -492,7 +504,7 @@ export const sampleProject1 = {
 
 export const sampleEpicSteps = [
   {
-    label: 'Add a task',
+    label: 'Create a task',
     active: true,
     complete: false,
   },
@@ -516,7 +528,7 @@ export const sampleEpicSteps = [
 
 export const sampleEpicStepsWithAction = [
   {
-    label: 'Add a task',
+    label: 'Create a task',
     active: false,
     complete: true,
   },
@@ -541,7 +553,7 @@ export const sampleEpicStepsWithAction = [
 
 export const sampleEpicStepsWithLink = [
   {
-    label: 'Add a task',
+    label: 'Create a task',
     active: false,
     complete: true,
   },

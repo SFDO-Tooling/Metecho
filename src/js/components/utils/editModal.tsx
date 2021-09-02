@@ -87,7 +87,12 @@ const EditModal = ({
     resetForm,
   } = useForm({
     fields,
-    additionalData: omit(model, ['name', 'description']),
+    additionalData: omit(model, [
+      'name',
+      'description',
+      'org_config_name',
+      'epic',
+    ]),
     onSuccess: handleSuccess,
     onError: handleError,
     objectType: modelType,
