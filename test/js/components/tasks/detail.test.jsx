@@ -247,7 +247,7 @@ describe('<TaskDetail/>', () => {
     });
 
     expect(getByTitle('Task 2')).toBeVisible();
-    expect(getByText('no epic')).toBeVisible();
+    expect(getByText('no Epic')).toBeVisible();
   });
 
   test('renders readonly task detail with dev org', () => {

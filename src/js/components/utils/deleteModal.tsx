@@ -59,7 +59,7 @@ const DeleteModal = ({
       heading = i18n.t('Confirm Deleting Epic');
       message = (
         <Trans i18nKey="confirmDeleteEpic">
-          Are you sure you want to delete Epic “{{ name: model.name }}?” This
+          Are you sure you want to delete Epic “{{ name: model.name }}”? This
           will also delete any Tasks and Orgs in this Epic.
         </Trans>
       );
@@ -68,7 +68,7 @@ const DeleteModal = ({
       heading = i18n.t('Confirm Deleting Task');
       message = (
         <Trans i18nKey="confirmDeleteTask">
-          Are you sure you want to delete Task “{{ name: model.name }}?” This
+          Are you sure you want to delete Task “{{ name: model.name }}”? This
           will also delete any Orgs in this Task.
         </Trans>
       );
