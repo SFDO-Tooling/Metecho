@@ -705,7 +705,7 @@ class Task(
     def full_name(self) -> str:
         # Used in emails to fully identify a task by its parents
         if self.epic:
-            return _('"{}" on {} epic {}').format(self, self.epic.project, self.epic)
+            return _('"{}" on {} Epic {}').format(self, self.epic.project, self.epic)
         return _('"{}" on {}').format(self, self.project)
 
     @property

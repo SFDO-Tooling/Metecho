@@ -159,7 +159,6 @@ export const projectError =
         addToast({
           heading: i18n.t(
             'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “{{project_name}}.”',
-
             { project_name: model.name },
           ),
           details: message,

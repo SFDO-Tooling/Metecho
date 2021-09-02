@@ -862,7 +862,7 @@ const TaskDetail = (
                 url: epicUrl as string,
               }
             : {
-                name: i18n.t('no epic'),
+                name: i18n.t('no Epic'),
                 emphasis: true,
               },
           { name: task.name },
