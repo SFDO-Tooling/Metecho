@@ -81,6 +81,7 @@ class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     sf_username = serializers.SerializerMethodField()
+    can_create_projects = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -96,6 +97,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "org_type",
             "is_devhub_enabled",
             "sf_username",
+            "can_create_projects",
             "currently_fetching_repos",
             "devhub_username",
             "uses_global_devhub",
@@ -109,6 +111,9 @@ class FullUserSerializer(serializers.ModelSerializer):
         if obj.uses_global_devhub:
             return None
         return obj.sf_username
+
+    def get_can_create_projects(self, obj) -> bool:
+        return obj.has_perm("api.add_project")
 
 
 class MinimalUserSerializer(serializers.ModelSerializer):

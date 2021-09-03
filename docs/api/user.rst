@@ -28,6 +28,7 @@ Retrieve
      "is_devhub_enabled": true,
      "devhub_username": "",
      "sf_username": "user@domain.com",
+     "can_create_projects": true,
      "currently_fetching_repos": false,
      "uses_global_devhub": false,
      "agreed_to_tos_at": "2019-02-01T19:47:49Z",
