@@ -84,7 +84,7 @@ class TestRefreshAccessToken:
             )
 
             scratch_org = MagicMock()
-            with pytest.raises(ScratchOrgError, match=".*org still exists*"):
+            with pytest.raises(ScratchOrgError, match=".*Org still exists*"):
                 refresh_access_token(
                     config=MagicMock(),
                     org_name=MagicMock(),
@@ -115,7 +115,7 @@ class TestGetDevhubApi:
             )
 
             scratch_org = MagicMock()
-            with pytest.raises(ScratchOrgError, match=".*org still exists*"):
+            with pytest.raises(ScratchOrgError, match=".*Org still exists*"):
                 get_devhub_api(
                     devhub_username="devhub_username", scratch_org=scratch_org
                 )

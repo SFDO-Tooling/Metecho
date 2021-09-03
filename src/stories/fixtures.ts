@@ -504,17 +504,17 @@ export const sampleProject1 = {
 
 export const sampleEpicSteps = [
   {
-    label: 'Create a task',
+    label: 'Create a Task',
     active: true,
     complete: false,
   },
   {
-    label: 'Assign a Developer to a task',
+    label: 'Assign a Developer to a Task',
     active: false,
     complete: false,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: false,
     complete: false,
   },
@@ -528,17 +528,17 @@ export const sampleEpicSteps = [
 
 export const sampleEpicStepsWithAction = [
   {
-    label: 'Create a task',
+    label: 'Create a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Assign a Developer to a task',
+    label: 'Assign a Developer to a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: true,
     complete: false,
     action: 'submit',
@@ -553,17 +553,17 @@ export const sampleEpicStepsWithAction = [
 
 export const sampleEpicStepsWithLink = [
   {
-    label: 'Create a task',
+    label: 'Create a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Assign a Developer to a task',
+    label: 'Assign a Developer to a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: false,
     complete: true,
     action: 'submit',

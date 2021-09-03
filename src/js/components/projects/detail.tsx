@@ -355,9 +355,9 @@ const ProjectDetail = (
                       <Trans i18nKey="createEpicHelpText">
                         Epics in Metecho are the high-level features that can be
                         broken down into smaller parts by creating Tasks. You
-                        can create a new epic or create an epic based on an
-                        existing GitHub branch. Every epic requires a unique
-                        epic name, which becomes the branch name in GitHub
+                        can create a new Epic or create an Epic based on an
+                        existing GitHub branch. Every Epic requires a unique
+                        Epic name, which becomes the branch name in GitHub
                         unless you choose to use an existing branch.
                       </Trans>
                     ) : (
