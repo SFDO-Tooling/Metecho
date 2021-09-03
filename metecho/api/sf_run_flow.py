@@ -73,10 +73,10 @@ def delete_org_on_error(scratch_org=None, originating_user_id=None):
             #
             # This is also why we repeat the first sentence.
             error_msg = _(
-                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
+                f"Are you certain that the Org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
             )
         else:
-            error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
+            error_msg = _(f"Are you certain that the Org still exists? {err.args[0]}")
 
         error = ScratchOrgError(error_msg)
         scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)

@@ -41,7 +41,7 @@ const ConnectToSalesforce = ({
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev, Test, or Scratch Org.',
+          'Connection to a Salesforce Org with Dev Hub enabled is required to create a Dev, Test, or Scratch Org.',
         )}
         position="overflowBoundaryElement"
         align="top right"
@@ -52,7 +52,7 @@ const ConnectToSalesforce = ({
 
 const ConnectionInfoWarning = () => (
   <Trans i18nKey="devHubNotEnabled">
-    This Salesforce org does not have Dev Hub enabled or your user does not have
+    This Salesforce Org does not have Dev Hub enabled or your user does not have
     permission to create Dev, Test, or Scratch Orgs. Learn how to{' '}
     <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
       enable Dev Hub

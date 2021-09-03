@@ -35,7 +35,7 @@ export const createEpicPR =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Successfully submitted epic for review on GitHub: “{{epic_name}}”.',
+            'Successfully submitted Epic for review on GitHub: “{{epic_name}}.”',
             { epic_name: model.name },
           ),
           linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
@@ -67,7 +67,7 @@ export const createEpicPRFailed =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Uh oh. There was an error submitting epic for review on GitHub: “{{epic_name}}”.',
+            'Uh oh. There was an error submitting Epic for review on GitHub: “{{epic_name}}.”',
             { epic_name: model.name },
           ),
           details: message,

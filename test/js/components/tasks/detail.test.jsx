@@ -247,7 +247,7 @@ describe('<TaskDetail/>', () => {
     });
 
     expect(getByTitle('Task 2')).toBeVisible();
-    expect(getByText('no epic')).toBeVisible();
+    expect(getByText('no Epic')).toBeVisible();
   });
 
   test('renders readonly task detail with dev org', () => {
@@ -432,7 +432,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -443,7 +443,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('another epic')).toBeVisible();
+      expect(getByText('another Epic')).toBeVisible();
     });
   });
 
@@ -454,7 +454,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('another task')).toBeVisible();
+      expect(getByText('another Task')).toBeVisible();
     });
 
     test('renders <TaskNotFound /> for task without epic', () => {
@@ -465,7 +465,7 @@ describe('<TaskDetail/>', () => {
 
       expect(queryByText('Task 1')).toBeNull();
       expect(queryByText('Task 2')).toBeNull();
-      expect(getByText('another task')).toBeVisible();
+      expect(getByText('another Task')).toBeVisible();
     });
   });
 
@@ -892,7 +892,7 @@ describe('<TaskDetail/>', () => {
       });
       fireEvent.click(getByText('Submit Task for Testing'));
 
-      expect(getByText('Submit this task for testing')).toBeVisible();
+      expect(getByText('Submit this Task for testing')).toBeVisible();
     });
   });
 
@@ -1202,7 +1202,7 @@ describe('<TaskDetail/>', () => {
         {},
         null,
         'Submit changes for testing',
-        'Submit this task for testing',
+        'Submit this Task for testing',
         false,
       ],
       [

@@ -90,7 +90,7 @@ const ContributeWorkModal = ({
           <Trans i18nKey="contributeWorkFromTaskWithDevOrg">
             <p>
               <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
-              you’ll start by creating a new task.
+              you’ll start by creating a new Task.
             </p>
             <p>
               You cannot convert your Scratch Org into the Dev Org for this Task
@@ -101,8 +101,8 @@ const ContributeWorkModal = ({
           <p>
             <Trans i18nKey="contributeWorkFromTask">
               <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
-              you’ll start by making this org the Dev Org for <em>this</em> task
-              or a <em>new</em> task.
+              you’ll start by making this Org the Dev Org for <em>this</em> Task
+              or a <em>new</em> Task.
             </Trans>
           </p>
         )}
@@ -146,10 +146,10 @@ const ContributeWorkModal = ({
         <Trans i18nKey="contributeWorkFromEpic">
           <p>
             <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
-            you’ll start by creating a new task.
+            you’ll start by creating a new Task.
           </p>
           <p>
-            Your Scratch Org will become the Dev Org for the newly created task.
+            Your Scratch Org will become the Dev Org for the newly created Task.
           </p>
         </Trans>
       );

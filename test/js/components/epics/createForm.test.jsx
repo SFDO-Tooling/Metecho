@@ -225,7 +225,7 @@ describe('<CreateEpicModal/>', () => {
       fakeBranches = ['feature/foo', 'feature/bar'];
       fetchMock.getOnce(url, fakeBranches);
       fireEvent.click(result.getByText('Use existing GitHub branch'));
-      input = result.queryByLabelText('*Select a branch to use for this epic');
+      input = result.queryByLabelText('*Select a branch to use for this Epic');
       fireEvent.click(input);
       await result.findByText('feature/foo');
     });
@@ -285,7 +285,7 @@ describe('<CreateEpicModal/>', () => {
     const url = window.api_urls.project_feature_branches(defaultProject.id);
     fetchMock.getOnce(url, 404);
     fireEvent.click(getByText('Use existing GitHub branch'));
-    const input = queryByLabelText('*Select a branch to use for this epic');
+    const input = queryByLabelText('*Select a branch to use for this Epic');
     fireEvent.click(input);
     await findByText('Loading existing branches…');
     await findByText("There aren't any available branches at this time.", {

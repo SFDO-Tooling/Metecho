@@ -686,7 +686,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                     <Trans i18nKey="tourCreateTask">
                       To get started contributing to this Epic, create a Task.
                       You will be asked for a name and optional description. You
-                      can chose an org type, but “dev” is recommended. Tasks
+                      can choose an Org type, but “dev” is recommended. Tasks
                       represent small changes to this Epic; each one has a
                       Developer and a Tester.
                     </Trans>

@@ -787,7 +787,7 @@ def submit_review(*, user, task, data, originating_user_id):
             review_sha = task.review_sha
 
         if not (task.pr_is_open and review_sha):
-            raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
+            raise TaskReviewIntegrityError(_("Cannot submit review for this Task."))
 
         repo_id = task.get_repo_id()
         repo_as_user = get_repo_info(user, repo_id=repo_id)

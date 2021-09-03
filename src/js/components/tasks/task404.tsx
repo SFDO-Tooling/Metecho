@@ -17,17 +17,17 @@ const TaskNotFound = ({ project, epic }: Props) => (
     message={
       epic ? (
         <Trans i18nKey="epicTaskNotFound">
-          We can’t find the task you’re looking for. Try{' '}
+          We can’t find the Task you’re looking for. Try{' '}
           <Link to={routes.epic_detail(project.slug, epic.slug)}>
-            another task
+            another Task
           </Link>{' '}
-          from that epic?
+          from that Epic?
         </Trans>
       ) : (
         <Trans i18nKey="projectTaskNotFound">
-          We can’t find the task you’re looking for. Try{' '}
-          <Link to={routes.project_detail(project.slug)}>another task</Link>{' '}
-          from that project?
+          We can’t find the Task you’re looking for. Try{' '}
+          <Link to={routes.project_detail(project.slug)}>another Task</Link>{' '}
+          from that Project?
         </Trans>
       )
     }

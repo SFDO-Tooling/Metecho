@@ -763,7 +763,7 @@ class Task(
     def full_name(self) -> str:
         # Used in emails to fully identify a task by its parents
         if self.epic:
-            return _('"{}" on {} epic {}').format(self, self.epic.project, self.epic)
+            return _('"{}" on {} Epic {}').format(self, self.epic.project, self.epic)
         return _('"{}" on {}').format(self, self.project)
 
     @property
@@ -1105,11 +1105,11 @@ class ScratchOrg(
     def clean(self):
         if len([x for x in [self.project, self.epic, self.task] if x is not None]) != 1:
             raise ValidationError(
-                _("A ScratchOrg must belong to either a project, an epic, or a task.")
+                _("A Scratch Org must belong to either a Project, an Epic, or a Task.")
             )
         if self.org_type != SCRATCH_ORG_TYPES.Playground and not self.task:
             raise ValidationError(
-                {"org_type": _("Dev and Test orgs must belong to a task.")}
+                {"org_type": _("Dev and Test Orgs must belong to a Task.")}
             )
         return super().clean()
 
