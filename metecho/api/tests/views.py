@@ -101,6 +101,12 @@ class TestGitHubOrganizationViewset:
         )
         assert tuple(response.json().keys()) == ("id", "name")
 
+    def test_for_user(self, client, mocker):
+        get_orgs_for_user_job = mocker.patch("metecho.api.jobs.get_orgs_for_user_job")
+        response = client.post(reverse("organization-for-user"))
+        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
+        assert get_orgs_for_user_job.delay.called
+
     def test_members(self, client, mocker, git_hub_organization):
         get_org_members_job = mocker.patch("metecho.api.jobs.get_org_members_job")
         response = client.post(
@@ -108,18 +114,6 @@ class TestGitHubOrganizationViewset:
         )
         assert response.status_code == status.HTTP_202_ACCEPTED, response.content
         assert get_org_members_job.delay.called
-
-    def test_check_membership(self, client, mocker, git_hub_organization):
-        check_user_membership_job = mocker.patch(
-            "metecho.api.jobs.check_user_membership_job"
-        )
-        response = client.post(
-            reverse(
-                "organization-check-membership", args=[str(git_hub_organization.id)]
-            ),
-        )
-        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
-        assert check_user_membership_job.delay.called
 
     def test_check_repo_name(self, client, mocker, git_hub_organization):
         check_repo_name_job = mocker.patch("metecho.api.jobs.check_repo_name_job")

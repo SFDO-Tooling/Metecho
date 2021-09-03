@@ -205,10 +205,12 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
         org.queue_get_members(user=request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
-    @action(detail=True, methods=["POST"])
-    def check_membership(self, request, pk):
-        org: GitHubOrganization = self.get_object()
-        org.queue_check_user_membership(user=request.user)
+    @action(detail=False, methods=["POST"])
+    def for_user(self, request):
+        """
+        Queue a job to get GitHubOrganizations where the current user is a member
+        """
+        GitHubOrganization.queue_get_orgs_for_user(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["POST"])

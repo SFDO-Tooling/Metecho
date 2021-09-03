@@ -26,6 +26,7 @@ def test_serialize(user_factory):
                 "org_type": None,
                 "is_devhub_enabled": False,
                 "sf_username": None,
+                "can_create_projects": False,
                 "currently_fetching_repos": True,
                 "devhub_username": "",
                 "uses_global_devhub": False,

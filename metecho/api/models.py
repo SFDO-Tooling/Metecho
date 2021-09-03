@@ -489,6 +489,28 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
     def github_url(self):
         return f"https://github.com/{self.login}"
 
+    @classmethod
+    def queue_get_orgs_for_user(cls, user: User):
+        from .jobs import get_orgs_for_user_job
+
+        get_orgs_for_user_job.delay(user=user)
+
+    @classmethod
+    def finalize_get_orgs_for_user(
+        cls, *, orgs: list = None, error: Exception = None, user: User
+    ):
+        message = {
+            "type": "GET_ORGS_FOR_USER",
+            "payload": {
+                "originating_user_id": str(user.id),
+                "message": orgs,
+            },
+        }
+        if error is not None:
+            message["type"] = "GET_ORGS_FOR_USER_ERROR"
+            message["payload"]["message"] = str(error)
+        async_to_sync(push.push_message_about_instance)(user, message)
+
     def queue_get_members(self, *, user: User):
         from .jobs import get_org_members_job
 
@@ -506,26 +528,6 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
         }
         if error is not None:
             message["type"] = "GITHUB_ORGANIZATION_MEMBERS_ERROR"
-            message["payload"]["message"] = str(error)
-        async_to_sync(push.push_message_about_instance)(self, message)
-
-    def queue_check_user_membership(self, *, user: User):
-        from .jobs import check_user_membership_job
-
-        check_user_membership_job.delay(self, user=user)
-
-    def finalize_check_user_membership(
-        self, *, result: bool = None, error: Exception = None, user: User
-    ):
-        message = {
-            "type": "GITHUB_ORGANIZATION_MEMBERSHIP_CHECK",
-            "payload": {
-                "originating_user_id": str(user.id),
-                "message": result,
-            },
-        }
-        if error is not None:
-            message["type"] = "GITHUB_ORGANIZATION_MEMBERSHIP_CHECK_ERROR"
             message["payload"]["message"] = str(error)
         async_to_sync(push.push_message_about_instance)(self, message)
 

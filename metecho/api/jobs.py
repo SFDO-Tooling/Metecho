@@ -145,23 +145,27 @@ def _create_branches_on_github(
     return task_branch_name
 
 
-def check_user_membership(organization: GitHubOrganization, *, user: User):
-    organization.refresh_from_db()
+def get_orgs_for_user(user: User):
+    """
+    Filter the local GitHubOrganizations down to those that the user is a member of.
+    """
 
     try:
         gh_user = gh_given_user(user)
-        gh_user_orgs = [org.login for org in gh_user.organizations()]
-        result = organization.login in gh_user_orgs
+        qs = GitHubOrganization.objects.filter(
+            login__in=(org.login for org in gh_user.organizations())
+        )
+        serialized = [{"id": str(org.id), "name": org.name} for org in qs]
     except Exception as error:
-        organization.finalize_check_user_membership(error=error, user=user)
+        GitHubOrganization.finalize_get_orgs_for_user(error=error, user=user)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        organization.finalize_check_user_membership(result=result, user=user)
+        GitHubOrganization.finalize_get_orgs_for_user(orgs=serialized, user=user)
 
 
-check_user_membership_job = job(check_user_membership)
+get_orgs_for_user_job = job(get_orgs_for_user)
 
 
 def check_repo_name(

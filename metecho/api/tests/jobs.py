@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
@@ -16,7 +16,6 @@ from ..jobs import (
     alert_user_about_expiring_org,
     available_org_config_names,
     check_repo_name,
-    check_user_membership,
     commit_changes_from_org,
     convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
@@ -25,6 +24,7 @@ from ..jobs import (
     create_repository,
     delete_scratch_org,
     get_org_members,
+    get_orgs_for_user,
     get_social_image,
     get_unsaved_changes,
     refresh_commits,
@@ -1375,46 +1375,46 @@ class TestGetOrgMembers:
 @pytest.mark.django_db
 class TestCheckUserMembership:
     @pytest.mark.parametrize(
-        "org_name, is_member",
+        "org_name, message",
         (
-            ("existing-org", True),
-            ("missing-org", False),
+            ("existing-org", [{"id": ANY, "name": "Foo Org"}]),
+            ("missing-org", []),
         ),
     )
     def test_ok(
-        self, mocker, git_hub_organization_factory, user_factory, org_name, is_member
+        self, mocker, git_hub_organization_factory, user_factory, org_name, message
     ):
         user = user_factory()
-        org = git_hub_organization_factory(login=org_name)
+        git_hub_organization_factory(login=org_name, name="Foo Org")
         async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
         gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
         gh_given_user.return_value.organizations.return_value = (
             mocker.MagicMock(login="existing-org"),
         )
 
-        check_user_membership(org, user=user)
+        get_orgs_for_user(user=user)
 
         async_to_sync.return_value.assert_called_with(
-            org,
+            user,
             {
-                "type": "GITHUB_ORGANIZATION_MEMBERSHIP_CHECK",
-                "payload": {"originating_user_id": str(user.pk), "message": is_member},
+                "type": "GET_ORGS_FOR_USER",
+                "payload": {"originating_user_id": str(user.pk), "message": message},
             },
         )
 
-    def test_error(self, mocker, caplog, git_hub_organization, user_factory):
+    def test_error(self, mocker, caplog, user_factory):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
         mocker.patch(f"{PATCH_ROOT}.gh_given_user", side_effect=Exception("Oh no!"))
 
         with pytest.raises(Exception):
-            check_user_membership(git_hub_organization, user=user)
+            get_orgs_for_user(user=user)
 
         assert "Oh no!" in caplog.text
         async_to_sync.return_value.assert_called_with(
-            git_hub_organization,
+            user,
             {
-                "type": "GITHUB_ORGANIZATION_MEMBERSHIP_CHECK_ERROR",
+                "type": "GET_ORGS_FOR_USER_ERROR",
                 "payload": {
                     "originating_user_id": str(user.pk),
                     "message": "Oh no!",
