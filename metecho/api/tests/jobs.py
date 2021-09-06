@@ -1239,12 +1239,15 @@ class TestUserReassign:
 
 @pytest.mark.django_db
 class TestCreateRepository:
-    def test_ok(self, mocker, project_factory, user_factory):
-        user = user_factory()
+    @pytest.fixture
+    def github_mocks(self, mocker, project_factory):
+        """
+        Mock the best-case scenario where the user is a member of the GH organization
+        and the repository is created successfully
+        """
         project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
 
         team = mocker.MagicMock()
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
         gh_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user").return_value
         gh_user.organizations.return_value = [
             mocker.MagicMock(login=project.repo_owner),
@@ -1255,7 +1258,17 @@ class TestCreateRepository:
             id=123456, html_url="", permissions=[]
         )
 
-        create_repository(project, user=user)
+        return project, team
+
+    def test_ok(self, mocker, github_mocks, user_factory):
+        user = user_factory()
+        project, team = github_mocks
+        mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
+        sarge.capture_both.return_value.returncode = 0
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+
+        create_repository(project, user=user, dependencies=["http://foo.com"])
         project.refresh_from_db()
 
         assert project.repo_id == 123456
@@ -1272,14 +1285,15 @@ class TestCreateRepository:
             for_list=False,
             group_name=None,
         )
+        assert sarge.capture_both.called
 
-    def test_error(self, mocker, caplog, project, user_factory):
+    def test__gh_error(self, mocker, caplog, project, user_factory):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
         mocker.patch(f"{PATCH_ROOT}.gh_given_user", side_effect=Exception("Oh no!"))
 
-        with pytest.raises(Exception):
-            create_repository(project, user=user)
+        with pytest.raises(Exception, match="Oh no!"):
+            create_repository(project, user=user, dependencies=[])
 
         with pytest.raises(project.DoesNotExist):
             # Expect project to be deleted from the DB since repo creation failed
@@ -1299,14 +1313,46 @@ class TestCreateRepository:
             group_name=None,
         )
 
+    def test__push_error(self, mocker, caplog, github_mocks, user_factory):
+        user = user_factory()
+        mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        project, team = github_mocks
+        cmd = mocker.patch(
+            f"{PATCH_ROOT}.sarge", autospec=True
+        ).capture_both.return_value
+        cmd.returncode = 1
+        cmd.stderr.text = "Oh no!"
+
+        with pytest.raises(Exception, match="Failed to push"):
+            create_repository(project, user=user, dependencies=[])
+
+        with pytest.raises(project.DoesNotExist):
+            # Expect project to be deleted from the DB since repo creation failed
+            project.refresh_from_db()
+
+        assert "Oh no!" in caplog.text
+        async_to_sync.return_value.assert_called_with(
+            project,
+            {
+                "type": "PROJECT_UPDATE_ERROR",
+                "payload": {
+                    "originating_user_id": str(user.pk),
+                    "message": "Failed to push files to GitHub repository",
+                },
+            },
+            for_list=False,
+            group_name=None,
+        )
+
     def test_not_a_member(self, mocker, caplog, project, user_factory):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
         gh_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user").return_value
         gh_user.organizations.return_value = []  # No orgs
 
-        with pytest.raises(ValueError):
-            create_repository(project, user=user)
+        with pytest.raises(ValueError, match="you are not a member"):
+            create_repository(project, user=user, dependencies=[])
 
         assert "you are not a member" in caplog.text
         async_to_sync.return_value.assert_called_with(

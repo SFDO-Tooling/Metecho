@@ -4,8 +4,10 @@ import string
 import traceback
 from datetime import timedelta
 from pathlib import Path
+from typing import Iterable
 
 import requests
+import sarge
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -18,6 +20,11 @@ from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError
 from github3.github import GitHub
 from github3.repos.repo import Repository
+
+import cumulusci
+from cumulusci.cli.project import init_from_context
+from cumulusci.cli.runtime import CliRuntime
+from cumulusci.utils import temporary_dir
 
 from .email_utils import get_user_facing_url
 from .gh import (
@@ -197,9 +204,9 @@ def check_repo_name(
 check_repo_name_job = job(check_repo_name)
 
 
-def create_repository(project: Project, *, user: User):
+def create_repository(project: Project, *, user: User, dependencies: Iterable[str]):
     """
-    Given a local Metecho Project create the corresponding GitHub repository.
+    Given a local Metecho Project create and bootstrap the corresponding GitHub repository.
     """
     project.refresh_from_db()
 
@@ -216,7 +223,7 @@ def create_repository(project: Project, *, user: User):
                 % {"name": project.repo_owner}
             )
 
-        # Team & repository on GitHub
+        # Create team & repository on GitHub
         org = get_org_for_repo_creation(project.repo_owner)
         team = org.create_team(f"{project} Team")
         team.add_or_update_membership(user.username, role="maintainer")
@@ -226,7 +233,45 @@ def create_repository(project: Project, *, user: User):
         team.add_repository(repo.full_name, permission="push")
         project.repo_id = repo.id
 
-        # GitHubRepository instance for local permission checks
+        # Bootstrap repository with CumulusCI
+        with temporary_dir():
+            runtime = CliRuntime()
+            context = {
+                "cci_version": cumulusci.__version__,
+                "project_name": project.repo_name,
+                "package_name": project.repo_name,
+                "package_namespace": None,
+                "api_version": runtime.universal_config.project__package__api_version,
+                "source_format": "sfdx",
+                "dependencies": [
+                    {"type": "github", "url": url} for url in dependencies
+                ],
+                "git": {
+                    "default_branch": "main",
+                    "prefix_feature": "feature/",
+                    "prefix_beta": "beta/",
+                    "prefix_release": "release/",
+                },
+                "test_name_match": None,
+                "code_coverage": 75,
+            }
+            init_from_context(context)
+            cmd = sarge.capture_both(
+                f"""
+                git init;
+                git checkout -b {context["git"]["default_branch"]};
+                git config user.email {user.email};
+                git add --all;
+                git commit -m 'Bootstrap project (via Metecho)';
+                git push https://{gh_user.session.auth.token}@github.com/{repo.full_name}.git main;
+                """,  # noqa: B950
+                shell=True,
+            )
+            if cmd.returncode:  # non-zero return code, something's wrong
+                logger.error(cmd.stderr.text)
+                raise Exception("Failed to push files to GitHub repository")
+
+        # Create GitHubRepository instance for local permission checks
         user.repositories.create(
             repo_id=repo.id,
             repo_url=repo.html_url,
