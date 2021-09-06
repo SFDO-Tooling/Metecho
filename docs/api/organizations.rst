@@ -28,6 +28,19 @@ Retrieve
       ]
     }
 
+Organizations for Current User
+------------------------------
+
+This will queue a job to filter the local GitHubOrganizations down to those that the user is a member of.
+
+.. sourcecode:: http
+
+   POST /api/organizations/for_user/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
+
 Members
 -------
 
@@ -37,19 +50,6 @@ Only members visible to the current user will be returned.
 .. sourcecode:: http
 
    POST /api/organizations/:id/members/ HTTP/1.1
-
-.. sourcecode:: http
-
-   HTTP/1.1 202 ACCEPTED
-
-Check Membership
-----------------
-
-This will queue a job to verify if the current user is a member of the GitHub organization.
-
-.. sourcecode:: http
-
-   POST /api/organizations/:id/check_membership/ HTTP/1.1
 
 .. sourcecode:: http
 
