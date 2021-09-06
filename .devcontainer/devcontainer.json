@@ -7,7 +7,6 @@
   "shutdownAction": "stopCompose",
   "extensions": [
     "bibhasdn.django-html",
-    "coenraads.bracket-pair-colorizer-2",
     "csstools.postcss",
     "dbaeumer.vscode-eslint",
     "formulahendry.auto-rename-tag",
@@ -27,6 +26,7 @@
   ],
   "settings": {
     "terminal.integrated.shell.linux": null,
+    "editor.bracketPairColorization.enabled": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
