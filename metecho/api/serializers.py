@@ -165,7 +165,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             "dependencies",
         )
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> Project:
         # `organization` is not an actual field on Project so we convert it to `repo_owner`
         organization = self.validated_data.pop("organization", None)
         if organization is not None:

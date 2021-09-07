@@ -255,7 +255,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         )
         serializer.is_valid(raise_exception=True)
         dependencies = [dep.url for dep in serializer.validated_data["dependencies"]]
-        project: Project = serializer.save()
+        project = serializer.save()
         project.queue_create_repository(user=request.user, dependencies=dependencies)
         return Response(self.get_serializer(project).data)
 
