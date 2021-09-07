@@ -171,7 +171,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         if organization is not None:
             kwargs.setdefault("repo_owner", organization.login)
 
-        # TODO: do something with dependencies
+        # Dependencies are used by the view, not stored in the model
         self.validated_data.pop("dependencies", None)
 
         return super().save(*args, **kwargs)

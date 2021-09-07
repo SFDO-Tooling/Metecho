@@ -63,7 +63,7 @@ class TestCurrentUserViewSet:
 
     def test_refresh(self, client, mocker):
         refresh_github_repositories_for_user_job = mocker.patch(
-            "metecho.api.jobs.refresh_github_repositories_for_user_job"
+            "metecho.api.jobs.refresh_github_repositories_for_user_job", autospec=True
         )
         response = client.post(reverse("current-user-refresh"))
         client.user.refresh_from_db()
@@ -102,13 +102,17 @@ class TestGitHubOrganizationViewset:
         assert tuple(response.json().keys()) == ("id", "name")
 
     def test_for_user(self, client, mocker):
-        get_orgs_for_user_job = mocker.patch("metecho.api.jobs.get_orgs_for_user_job")
+        get_orgs_for_user_job = mocker.patch(
+            "metecho.api.jobs.get_orgs_for_user_job", autospec=True
+        )
         response = client.post(reverse("organization-for-user"))
         assert response.status_code == status.HTTP_202_ACCEPTED, response.content
         assert get_orgs_for_user_job.delay.called
 
     def test_members(self, client, mocker, git_hub_organization):
-        get_org_members_job = mocker.patch("metecho.api.jobs.get_org_members_job")
+        get_org_members_job = mocker.patch(
+            "metecho.api.jobs.get_org_members_job", autospec=True
+        )
         response = client.post(
             reverse("organization-members", args=[str(git_hub_organization.id)]),
         )
@@ -116,7 +120,9 @@ class TestGitHubOrganizationViewset:
         assert get_org_members_job.delay.called
 
     def test_check_repo_name(self, client, mocker, git_hub_organization):
-        check_repo_name_job = mocker.patch("metecho.api.jobs.check_repo_name_job")
+        check_repo_name_job = mocker.patch(
+            "metecho.api.jobs.check_repo_name_job", autospec=True
+        )
         response = client.post(
             reverse(
                 "organization-check-repo-name", args=[str(git_hub_organization.id)]
@@ -127,7 +133,9 @@ class TestGitHubOrganizationViewset:
         assert check_repo_name_job.delay.called
 
     def test_check_repo_name__missing_name(self, client, mocker, git_hub_organization):
-        check_repo_name_job = mocker.patch("metecho.api.jobs.check_repo_name_job")
+        check_repo_name_job = mocker.patch(
+            "metecho.api.jobs.check_repo_name_job", autospec=True
+        )
         response = client.post(
             reverse(
                 "organization-check-repo-name", args=[str(git_hub_organization.id)]
@@ -147,7 +155,7 @@ class TestProjectViewset:
             git_hub_repository_factory(user=client.user, repo_id=123)
             project = project_factory(repo_id=123)
             available_org_config_names_job = stack.enter_context(
-                patch("metecho.api.jobs.available_org_config_names_job")
+                patch("metecho.api.jobs.available_org_config_names_job", autospec=True)
             )
             response = client.post(
                 reverse(
@@ -164,7 +172,7 @@ class TestProjectViewset:
         git_hub_repository_factory(user=client.user, repo_id=123)
         project = project_factory(repo_id=123)
         refresh_github_users_job = mocker.patch(
-            "metecho.api.jobs.refresh_github_users_job"
+            "metecho.api.jobs.refresh_github_users_job", autospec=True
         )
 
         response = client.post(
@@ -324,7 +332,9 @@ class TestProjectViewset:
         dep1 = project_dependency_factory()
         dep2 = project_dependency_factory()
 
-        create_repository_job = mocker.patch("metecho.api.jobs.create_repository_job")
+        create_repository_job = mocker.patch(
+            "metecho.api.jobs.create_repository_job", autospec=True
+        )
         mocker.patch(
             # Simulate the actual GH repo not existing during the first save
             "metecho.api.models.gh.get_repo_info",
@@ -387,7 +397,7 @@ class TestHookView:
             task = task_factory(epic=epic, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_commits_job")
+                patch("metecho.api.jobs.refresh_commits_job", autospec=True)
             )
             response = client.post(
                 reverse("hook"),
@@ -441,7 +451,7 @@ class TestHookView:
             epic = epic_factory(project=project, branch_name="test-epic")
 
             refresh_commits_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_commits_job")
+                patch("metecho.api.jobs.refresh_commits_job", autospec=True)
             )
             response = client.post(
                 reverse("hook"),
@@ -493,7 +503,7 @@ class TestHookView:
             git_hub_repository_factory(repo_id=123)
 
             refresh_commits_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_commits_job")
+                patch("metecho.api.jobs.refresh_commits_job", autospec=True)
             )
             response = client.post(
                 reverse("hook"),
@@ -555,7 +565,9 @@ class TestHookView:
         settings.GITHUB_HOOK_SECRET = b""
         project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
-        with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
+        with patch(
+            "metecho.api.jobs.refresh_commits_job", autospec=True
+        ) as refresh_commits_job:
             response = client.post(
                 reverse("hook"),
                 json.dumps(
@@ -648,7 +660,7 @@ class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
         with ExitStack() as stack:
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
 
             scratch_org = scratch_org_factory(
@@ -673,7 +685,7 @@ class TestScratchOrgView:
             scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
 
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
@@ -692,7 +704,7 @@ class TestScratchOrgView:
             scratch_org = scratch_org_factory(org_type="Dev")
 
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
@@ -707,7 +719,7 @@ class TestScratchOrgView:
             scratch_org = scratch_org_factory(org_type="Dev")
 
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
@@ -773,7 +785,7 @@ class TestScratchOrgView:
             )
 
             get_unsaved_changes_job = stack.enter_context(
-                patch("metecho.api.jobs.get_unsaved_changes_job")
+                patch("metecho.api.jobs.get_unsaved_changes_job", autospec=True)
             )
             url = reverse("scratch-org-list")
             response = client.get(url)
@@ -794,7 +806,7 @@ class TestScratchOrgView:
             )
 
             get_unsaved_changes_job = stack.enter_context(
-                patch("metecho.api.jobs.get_unsaved_changes_job")
+                patch("metecho.api.jobs.get_unsaved_changes_job", autospec=True)
             )
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
@@ -912,7 +924,7 @@ class TestScratchOrgView:
             scratch_org = scratch_org_factory(owner=client.user)
 
             refresh_scratch_org_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_scratch_org_job")
+                patch("metecho.api.jobs.refresh_scratch_org_job", autospec=True)
             )
             url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
             response = client.post(url)
@@ -925,7 +937,7 @@ class TestScratchOrgView:
             scratch_org = scratch_org_factory()
 
             refresh_scratch_org_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_scratch_org_job")
+                patch("metecho.api.jobs.refresh_scratch_org_job", autospec=True)
             )
             url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
             response = client.post(url)
@@ -1043,7 +1055,7 @@ class TestTaskViewSet:
             task = task_factory(pr_is_open=True, review_valid=True)
 
             submit_review_job = stack.enter_context(
-                patch("metecho.api.jobs.submit_review_job")
+                patch("metecho.api.jobs.submit_review_job", autospec=True)
             )
             data = {
                 "notes": "",

@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -375,10 +375,10 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=None)
 
-    def queue_create_repository(self, *, user: User):
+    def queue_create_repository(self, *, user: User, dependencies: Iterable[str]):
         from .jobs import create_repository_job
 
-        create_repository_job.delay(self, user=user)
+        create_repository_job.delay(self, user=user, dependencies=dependencies)
 
     def finalize_create_repository(self, *, error=None, user: User):
         originating_user_id = str(user.id)
