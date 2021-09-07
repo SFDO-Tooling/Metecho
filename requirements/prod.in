@@ -4,8 +4,7 @@ beautifulsoup4==4.9.3
 bleach==3.3.1
 channels-redis==3.3.0
 channels==3.0.4
-# TODO: remove when https://github.com/SFDO-Tooling/CumulusCI/pull/2853 is merged
-https://github.com/oddbird/CumulusCI/archive/fbaa7a03cf01a390a61af594011425bf886e341d.tar.gz
+cumulusci==3.44.0.dev0
 dj-database-url==0.5.0
 django-allauth==0.45.0
 django-anymail[mailgun]==8.4
