@@ -214,7 +214,7 @@ describe('projectError', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error re-syncing GitHub users for this project: “My Project”.',
+      'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “My Project.”',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

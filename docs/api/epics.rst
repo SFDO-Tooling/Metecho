@@ -28,6 +28,7 @@ Retrieve
           "slug": "test-epic",
           "old_slugs": [],
           "project": "zVQYrye",
+          "task_count": 5,
           "branch_name": "feature/test-epic",
           "branch_url": "https://github.com/SFDO-Tooling/test-project/tree/feature/test-epic",
           "branch_diff_url": "https://github.com/SFDO-Tooling/test-project/compare/main...feature/test-epic",

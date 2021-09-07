@@ -35,7 +35,6 @@ interface TaskOrgCardProps {
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
-  epicUrl: string;
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
@@ -153,7 +152,7 @@ const TaskOrgCard = ({
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
     logError(
-      'An org exists for this task, but is not owned by the assigned user.',
+      'An Org exists for this Task, but is not owned by the assigned user.',
       {
         org,
         assignedUser,

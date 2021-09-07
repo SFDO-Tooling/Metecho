@@ -19,6 +19,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_PROVISIONING
 
     task.:id
+        TASK_CREATE
         TASK_UPDATE
         TASK_CREATE_PR
         TASK_CREATE_PR_FAILED

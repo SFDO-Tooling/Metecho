@@ -6,10 +6,6 @@
 #
 alabaster==0.7.12
     # via sphinx
-appdirs==1.4.4
-    # via
-    #   -c requirements/prod.txt
-    #   black
 asgiref==3.4.1
     # via
     #   -c requirements/prod.txt
@@ -23,13 +19,13 @@ babel==2.9.1
     # via sphinx
 backcall==0.2.0
     # via ipython
-black==21.7b0
+black==21.8b0
     # via -r requirements/dev.in
 certifi==2021.5.30
     # via
     #   -c requirements/prod.txt
     #   requests
-charset-normalizer==2.0.3
+charset-normalizer==2.0.4
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -45,7 +41,7 @@ coveralls==3.2.0
     # via -r requirements/dev.in
 decorator==5.0.9
     # via ipython
-django==3.2.5
+django==3.2.7
     # via
     #   -c requirements/prod.txt
     #   django-extensions
@@ -65,7 +61,7 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==8.10.1
+faker==8.10.3
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -85,11 +81,9 @@ inflection==0.5.1
     # via pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
-ipython==7.25.0
+ipython==7.27.0
     # via -r requirements/dev.in
-ipython-genutils==0.2.0
-    # via traitlets
-isort==5.9.2
+isort==5.9.3
     # via -r requirements/dev.in
 jedi==0.18.0
     # via ipython
@@ -97,7 +91,7 @@ jinja2==2.11.3
     # via
     #   -c requirements/prod.txt
     #   sphinx
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via
     #   -c requirements/prod.txt
     #   jinja2
@@ -123,9 +117,11 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pluggy==0.13.1
+platformdirs==2.3.0
+    # via black
+pluggy==1.0.0
     # via pytest
-prompt-toolkit==3.0.19
+prompt-toolkit==3.0.20
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -135,7 +131,7 @@ pycodestyle==2.7.0
     # via flake8
 pyflakes==2.3.1
     # via flake8
-pygments==2.9.0
+pygments==2.10.0
     # via
     #   doc8
     #   ipython
@@ -144,13 +140,14 @@ pyparsing==2.4.7
     # via
     #   -c requirements/prod.txt
     #   packaging
-pytest==6.2.4
+pytest==6.2.5
     # via
     #   -r requirements/dev.in
     #   pytest-asyncio
     #   pytest-cov
     #   pytest-django
     #   pytest-factoryboy
+    #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
 pytest-asyncio==0.15.1
@@ -160,6 +157,8 @@ pytest-cov==2.12.1
 pytest-django==4.4.0
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
+    # via -r requirements/dev.in
+pytest-lazy-fixture==0.6.3
     # via -r requirements/dev.in
 pytest-mock==3.6.1
     # via -r requirements/dev.in
@@ -174,7 +173,7 @@ pytz==2021.1
     #   -c requirements/prod.txt
     #   babel
     #   django
-regex==2021.7.6
+regex==2021.8.28
     # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in
@@ -214,7 +213,7 @@ sqlparse==0.4.1
     # via
     #   -c requirements/prod.txt
     #   django
-stevedore==3.3.0
+stevedore==3.4.0
     # via doc8
 termcolor==1.1.0
     # via pytest-sugar
@@ -226,12 +225,16 @@ toml==0.10.2
     # via
     #   pytest
     #   pytest-cov
-tomli==1.1.0
+tomli==1.2.1
     # via black
-traitlets==5.0.5
+traitlets==5.1.0
     # via
     #   ipython
     #   matplotlib-inline
+typing-extensions==3.10.0.0
+    # via
+    #   -c requirements/prod.txt
+    #   black
 urllib3==1.26.6
     # via
     #   -c requirements/prod.txt

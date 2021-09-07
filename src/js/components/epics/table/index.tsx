@@ -8,6 +8,7 @@ import { Trans } from 'react-i18next';
 import CollaboratorTableCell from '@/js/components/epics/table/collaboratorCell';
 import DetailTableCell from '@/js/components/epics/table/detailCell';
 import StatusTableCell from '@/js/components/epics/table/statusCell';
+import TaskCountTableCell from '@/js/components/epics/table/taskCountCell';
 import TourPopover from '@/js/components/tour/popover';
 import { Epic } from '@/js/store/epics/reducer';
 
@@ -62,6 +63,29 @@ const EpicTable = ({
         primaryColumn
       >
         <DetailTableCell projectSlug={projectSlug} />
+      </DataTableColumn>
+      <DataTableColumn
+        key="taskCount"
+        label={
+          <>
+            {i18n.t('Tasks')}
+            <TourPopover
+              id="tour-epic-tasks-column"
+              align="top"
+              heading={i18n.t('Epic Tasks')}
+              body={
+                <Trans i18nKey="tourEpicTasksColumn">
+                  The Tasks column is a quick way to see how many Tasks are
+                  included in an Epic.
+                </Trans>
+              }
+            />
+          </>
+        }
+        property="task_count"
+        width="0"
+      >
+        <TaskCountTableCell />
       </DataTableColumn>
       <DataTableColumn
         key="status"

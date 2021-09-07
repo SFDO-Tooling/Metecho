@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError
 from github3.github import GitHub
+from github3.repos.repo import Repository
 
 from .email_utils import get_user_facing_url
 from .gh import (
@@ -57,35 +58,32 @@ def creating_gh_branch(instance):
         instance.currently_creating_branch = False
 
 
+def get_branch_prefix(user, repository: Repository):
+    if settings.BRANCH_PREFIX:
+        return settings.BRANCH_PREFIX
+    with local_github_checkout(user, repository.id) as repo_root:
+        return get_cumulus_prefix(
+            repo_root=repo_root,
+            repo_name=repository.name,
+            repo_url=repository.html_url,
+            repo_owner=repository.owner.login,
+            repo_branch=repository.default_branch,
+            repo_commit=repository.branch(repository.default_branch).latest_sha(),
+        )
+
+
 def epic_create_branch(
     *,
     user,
     epic,
     repository,
-    repo_id,
     originating_user_id,
     should_finalize=True,
 ):
     if epic.branch_name:
         epic_branch_name = epic.branch_name
     else:
-        branch_prefix = epic.project.branch_prefix
-        if branch_prefix:
-            prefix = branch_prefix
-        elif settings.BRANCH_PREFIX:
-            prefix = settings.BRANCH_PREFIX
-        else:
-            with local_github_checkout(user, repo_id) as repo_root:
-                prefix = get_cumulus_prefix(
-                    repo_root=repo_root,
-                    repo_name=repository.name,
-                    repo_url=repository.html_url,
-                    repo_owner=repository.owner.login,
-                    repo_branch=repository.default_branch,
-                    repo_commit=repository.branch(
-                        repository.default_branch
-                    ).latest_sha(),
-                )
+        prefix = epic.project.branch_prefix or get_branch_prefix(user, repository)
         epic_branch_name = f"{prefix}{slugify(epic.name)}"
         with creating_gh_branch(epic):
             latest_sha = repository.branch(repository.default_branch).latest_sha()
@@ -100,21 +98,25 @@ def epic_create_branch(
 
 
 def _create_branches_on_github(
-    *, user, repo_id, epic, task=None, task_sha=None, originating_user_id=None
+    *, user, repo_id, epic=None, task=None, task_sha=None, originating_user_id=None
 ):
-    repository = get_repo_info(user, repo_id=repo_id)
+    if not (epic or task):
+        raise ValueError("At least one of Task or Epic is required")
 
-    # Make epic branch, with latest from epic:
-    epic.refresh_from_db()
-    epic_branch_name = epic_create_branch(
-        epic=epic,
-        repository=repository,
-        user=user,
-        repo_id=repo_id,
-        originating_user_id=originating_user_id,
-    )
-    if not task:
-        return epic_branch_name
+    repository = get_repo_info(user, repo_id=repo_id)
+    epic_branch_name = None
+
+    if epic:
+        # Make epic branch, with latest from epic:
+        epic.refresh_from_db()
+        epic_branch_name = epic_create_branch(
+            epic=epic,
+            repository=repository,
+            user=user,
+            originating_user_id=originating_user_id,
+        )
+        if not task:
+            return epic_branch_name
 
     # Make task branch, with custom commit or falling back to latest from epic:
     task.refresh_from_db()
@@ -122,10 +124,16 @@ def _create_branches_on_github(
         return task.branch_name
 
     with creating_gh_branch(task):
-        latest_sha = task_sha or repository.branch(epic_branch_name).latest_sha()
+        if epic_branch_name:
+            base_branch_name = epic_branch_name
+            prefix = f"{epic_branch_name}__"
+        else:
+            base_branch_name = repository.default_branch
+            prefix = get_branch_prefix(user, repository)
+        latest_sha = task_sha or repository.branch(base_branch_name).latest_sha()
         task_branch_name = try_to_make_branch(
             repository,
-            new_branch=f"{epic_branch_name}__{slugify(task.name)}",
+            new_branch=f"{prefix}{slugify(task.name)}",
             base_sha=latest_sha,
         )
     task.branch_name = task_branch_name
@@ -155,20 +163,14 @@ def alert_user_about_expiring_org(*, org, days):
     get_unsaved_changes(org, originating_user_id=None)
     if org.unsaved_changes:
         task = org.task
-        epic = task.epic
-        project = epic.project
-        metecho_link = get_user_facing_url(
-            path=["projects", project.slug, epic.slug, task.slug]
-        )
+        metecho_link = get_user_facing_url(path=task.get_absolute_url())
 
         # email user
         subject = _("Metecho Scratch Org Expiring with Uncommitted Changes")
         body = render_to_string(
             "scratch_org_expiry_email.txt",
             {
-                "project_name": project.name,
-                "epic_name": epic.name,
-                "task_name": task.name,
+                "task_name": task.full_name,
                 "days": days,
                 "expiry_date": org.expires_at,
                 "user_name": user.username,
@@ -739,15 +741,14 @@ def submit_review(*, user, task, data, originating_user_id):
             review_sha = task.review_sha
 
         if not (task.pr_is_open and review_sha):
-            raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
+            raise TaskReviewIntegrityError(_("Cannot submit review for this Task."))
 
         repo_id = task.get_repo_id()
-        project = task.epic.project
         repo_as_user = get_repo_info(user, repo_id=repo_id)
         repo_as_app = get_repo_info(
             None,
-            repo_owner=project.repo_owner,
-            repo_name=project.repo_name,
+            repo_owner=task.root_project.repo_owner,
+            repo_name=task.root_project.repo_name,
             repo_id=repo_id,
         )
         pr = repo_as_user.pull_request(task.pr_number)
@@ -763,14 +764,7 @@ def submit_review(*, user, task, data, originating_user_id):
             TASK_REVIEW_STATUS["Changes requested"]: "failure",
         }.get(status)
 
-        target_url = get_user_facing_url(
-            path=[
-                "projects",
-                task.epic.project.slug,
-                task.epic.slug,
-                task.slug,
-            ]
-        )
+        target_url = get_user_facing_url(path=task.get_absolute_url())
 
         # We filter notes to string.printable to avoid problems
         # GitHub has with emoji in status descriptions
@@ -852,7 +846,6 @@ def create_gh_branch_for_new_epic(epic, *, user):
             epic_create_branch(
                 epic=epic,
                 repository=repository,
-                repo_id=repo_id,
                 user=user,
                 originating_user_id=str(user.id),
                 should_finalize=False,

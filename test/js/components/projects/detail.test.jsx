@@ -1,12 +1,10 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/js/components/projects/detail';
 import { createObject, fetchObject, fetchObjects } from '@/js/store/actions';
 import { onboarded } from '@/js/store/user/actions';
-import { addUrlParams } from '@/js/utils/api';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
@@ -128,6 +126,7 @@ const defaultState = {
       fetched: true,
     },
   },
+  tasks: {},
   orgs: {
     orgs: {
       [defaultOrg.id]: defaultOrg,
@@ -156,7 +155,9 @@ const tasks = [
       slug: 'epic-1',
       github_users: [],
     },
-    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    project: null,
+    root_project: 'p1',
+    branch_url: 'https://github.com/test/test-repo/tree/feature/epic-1__task-1',
     branch_name: 'feature/epic-1__task-1',
     description: 'Task Description',
     description_rendered: '<p>Task Description</p>',
@@ -176,7 +177,9 @@ const tasks = [
       slug: 'epic-2',
       github_users: [],
     },
-    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    project: null,
+    root_project: 'p1',
+    branch_url: 'https://github.com/test/test-repo/tree/feature/epic-2__task-2',
     branch_name: 'feature/epic-2__task-2',
     description: 'Task Description',
     description_rendered: '<p>Task Description</p>',
@@ -184,6 +187,23 @@ const tasks = [
     commits: [],
     assigned_dev: null,
     assigned_qa: 'my-user',
+  },
+  {
+    id: 'task3',
+    name: 'Task 3',
+    slug: 'task-3',
+    old_slugs: [],
+    epic: null,
+    project: 'p1',
+    root_project: 'p1',
+    branch_url: 'https://github.com/test/test-repo/tree/feature/task-3',
+    branch_name: 'feature/task-3',
+    description: 'Task Description',
+    description_rendered: '<p>Task Description</p>',
+    has_unmerged_commits: false,
+    commits: [],
+    assigned_dev: null,
+    assigned_qa: null,
   },
 ];
 
@@ -242,7 +262,7 @@ describe('<ProjectDetail />', () => {
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(
-      getByText('You can create a new epic', { exact: false }),
+      getByText('You can create a new Epic', { exact: false }),
     ).toBeVisible();
   });
 
@@ -294,7 +314,7 @@ describe('<ProjectDetail />', () => {
       });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -312,7 +332,7 @@ describe('<ProjectDetail />', () => {
       const { getByText, queryByText } = setup({ projectSlug: '' });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -438,34 +458,85 @@ describe('<ProjectDetail />', () => {
   });
 
   describe('Tasks tab', () => {
-    let url;
+    test('fetches tasks list', () => {
+      const { getAllByText } = setup();
+      fireEvent.click(getAllByText('Tasks')[0]);
 
-    beforeEach(() => {
-      url = addUrlParams(window.api_urls.task_list(), {
-        epic__project: 'p1',
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'p1' },
+        objectType: 'task',
       });
-      fetchMock.getOnce(url, tasks);
     });
 
-    test('fetches and renders tasks list', async () => {
-      const { getByText, findByText } = setup();
+    test('renders tasks list', async () => {
+      const { getAllByText, findByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              fetched: true,
+              notFound: [],
+              tasks,
+            },
+          },
+        },
+      });
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
+      fireEvent.click(getAllByText('Tasks')[0]);
       const task = await findByText('Task 2');
 
       expect(task).toBeVisible();
     });
 
     test('renders empty tasks list', async () => {
-      fetchMock.getOnce(url, [], { overwriteRoutes: true });
-      const { getByText, findByText } = setup();
+      const { getAllByText, findByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              fetched: true,
+              notFound: [],
+              tasks: [],
+            },
+          },
+        },
+      });
 
       expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
-      const msg = await findByText('There are no Tasks for this Project.');
+      fireEvent.click(getAllByText('Tasks')[0]);
+      const msg = await findByText('There are no Tasks for this Project.', {
+        exact: false,
+      });
 
       expect(msg).toBeVisible();
+    });
+
+    describe('<CreateTaskModal />', () => {
+      test('opens/closes form', async () => {
+        expect.assertions(2);
+        const { queryByText, findByText, getByText, getAllByText, getByTitle } =
+          setup({
+            initialState: {
+              ...defaultState,
+              tasks: {
+                p1: {
+                  fetched: true,
+                  notFound: [],
+                  tasks: [],
+                },
+              },
+            },
+          });
+        fireEvent.click(getAllByText('Tasks')[0]);
+        fireEvent.click(await findByText('Create a Task'));
+
+        expect(getByText('Create a Task for Project 1')).toBeVisible();
+
+        fireEvent.click(getByTitle('Cancel'));
+
+        expect(queryByText('Create a Task for Project 1')).toBeNull();
+      });
     });
   });
 

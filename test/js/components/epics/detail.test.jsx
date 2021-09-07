@@ -75,7 +75,7 @@ const defaultState = {
   projects: {
     projects: [
       {
-        id: 'r1',
+        id: 'p1',
         name: 'Project 1',
         slug: 'project-1',
         old_slugs: [],
@@ -126,11 +126,11 @@ const defaultState = {
     next: null,
   },
   epics: {
-    r1: {
+    p1: {
       epics: [
         {
           ...epic,
-          project: 'r1',
+          project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
@@ -144,76 +144,80 @@ const defaultState = {
     },
   },
   tasks: {
-    epic1: [
-      {
-        id: 'task1',
-        name: 'Task 1',
-        slug: 'task-1',
-        epic,
-        description: 'Task Description',
-        description_rendered: '<p>Task Description</p>',
-        branch_url: 'https://github.com/test/test-repo/tree/epic__task',
-        branch_name: 'epic__task',
-        review_valid: true,
-        review_status: 'Approved',
-        status: 'Completed',
-      },
-      {
-        id: 'task2',
-        name: 'Task 2',
-        slug: 'task-2',
-        epic,
-        status: 'In progress',
-        assigned_dev: '123456',
-      },
-      {
-        id: 'task3',
-        name: 'Task 3',
-        slug: 'task-3',
-        epic,
-        status: 'Planned',
-      },
-      {
-        id: 'task4',
-        name: 'Task 4',
-        slug: 'task-4',
-        epic,
-      },
-      {
-        id: 'task5',
-        name: 'Task 5',
-        slug: 'task-5',
-        epic,
-        status: 'In progress',
-        review_valid: true,
-        review_status: 'Changes requested',
-      },
-      {
-        id: 'task6',
-        name: 'Task 6',
-        slug: 'task-6',
-        epic,
-        status: 'In progress',
-        review_valid: true,
-        review_status: 'Approved',
-      },
-      {
-        id: 'task7',
-        name: 'Task 7',
-        slug: 'task-7',
-        epic,
-        status: 'In progress',
-        pr_is_open: true,
-      },
-      {
-        id: 'task8',
-        name: 'Task 8',
-        slug: 'task-8',
-        epic,
-        status: 'Canceled',
-        pr_is_open: false,
-      },
-    ],
+    p1: {
+      fetched: ['epic1'],
+      notFound: [],
+      tasks: [
+        {
+          id: 'task1',
+          name: 'Task 1',
+          slug: 'task-1',
+          epic,
+          description: 'Task Description',
+          description_rendered: '<p>Task Description</p>',
+          branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+          branch_name: 'epic__task',
+          review_valid: true,
+          review_status: 'Approved',
+          status: 'Completed',
+        },
+        {
+          id: 'task2',
+          name: 'Task 2',
+          slug: 'task-2',
+          epic,
+          status: 'In progress',
+          assigned_dev: '123456',
+        },
+        {
+          id: 'task3',
+          name: 'Task 3',
+          slug: 'task-3',
+          epic,
+          status: 'Planned',
+        },
+        {
+          id: 'task4',
+          name: 'Task 4',
+          slug: 'task-4',
+          epic,
+        },
+        {
+          id: 'task5',
+          name: 'Task 5',
+          slug: 'task-5',
+          epic,
+          status: 'In progress',
+          review_valid: true,
+          review_status: 'Changes requested',
+        },
+        {
+          id: 'task6',
+          name: 'Task 6',
+          slug: 'task-6',
+          epic,
+          status: 'In progress',
+          review_valid: true,
+          review_status: 'Approved',
+        },
+        {
+          id: 'task7',
+          name: 'Task 7',
+          slug: 'task-7',
+          epic,
+          status: 'In progress',
+          pr_is_open: true,
+        },
+        {
+          id: 'task8',
+          name: 'Task 8',
+          slug: 'task-8',
+          epic,
+          status: 'Canceled',
+          pr_is_open: false,
+        },
+      ],
+    },
   },
   orgs: {
     orgs: {
@@ -294,13 +298,13 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           projects,
-          tasks: { epic1: [] },
+          tasks: { p1: { ...defaultState.tasks.p1, tasks: [] } },
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   github_users: [],
                 },
               ],
@@ -335,11 +339,11 @@ describe('<EpicDetail/>', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,
-        tasks: { epic1: [] },
+        tasks: { p1: { ...defaultState.tasks.p1, tasks: [] } },
       },
     });
 
-    expect(getByText('Add a Task for Epic 1')).toBeVisible();
+    expect(getByText('Create a Task for Epic 1')).toBeVisible();
     expect(queryByText('Tasks for Epic 1')).toBeNull();
   });
 
@@ -349,7 +353,7 @@ describe('<EpicDetail/>', () => {
 
       expect(queryByText('Epic 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
-        filters: { project: 'r1', slug: 'other-epic' },
+        filters: { project: 'p1', slug: 'other-epic' },
         objectType: 'epic',
       });
     });
@@ -362,7 +366,7 @@ describe('<EpicDetail/>', () => {
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('list of all projects')).toBeVisible();
+      expect(getByText('list of all Projects')).toBeVisible();
     });
   });
 
@@ -373,7 +377,7 @@ describe('<EpicDetail/>', () => {
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('another epic')).toBeVisible();
+      expect(getByText('another Epic')).toBeVisible();
     });
   });
 
@@ -421,7 +425,29 @@ describe('<EpicDetail/>', () => {
 
       expect(queryByText('Tasks for Epic 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { epic: 'epic1' },
+        filters: { project: 'p1', epic: 'epic1' },
+        objectType: 'task',
+      });
+    });
+  });
+
+  describe('only some tasks have been fetched', () => {
+    test('fetches all epic tasks from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              ...defaultState.tasks.p1,
+              fetched: [],
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Tasks for Epic 1')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'p1', epic: 'epic1' },
         objectType: 'task',
       });
     });
@@ -433,11 +459,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   github_users: [],
                 },
               ],
@@ -447,11 +473,11 @@ describe('<EpicDetail/>', () => {
       });
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
-      expect(getByText('GitHub Users')).toBeVisible();
+      expect(getByText('GitHub Collaborators')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
 
-      expect(queryByText('GitHub Users')).toBeNull();
+      expect(queryByText('GitHub Collaborators')).toBeNull();
     });
 
     test('updates users', () => {
@@ -494,7 +520,7 @@ describe('<EpicDetail/>', () => {
         fireEvent.click(getByText('Add or Remove Collaborators'));
         fireEvent.click(getByText('Re-Sync GitHub Collaborators'));
 
-        expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
+        expect(refreshGitHubUsers).toHaveBeenCalledWith('p1');
       });
     });
   });
@@ -505,11 +531,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   github_users: ['234567'],
                 },
               ],
@@ -528,11 +554,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   github_users: ['123456'],
                 },
               ],
@@ -552,13 +578,18 @@ describe('<EpicDetail/>', () => {
 
     beforeEach(() => {
       const task = {
-        ...defaultState.tasks.epic1[0],
+        ...defaultState.tasks.p1.tasks[0],
         assigned_qa: '234567',
       };
       result = setup({
         initialState: {
           ...defaultState,
-          tasks: { epic1: [task, defaultState.tasks.epic1[1]] },
+          tasks: {
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [task, defaultState.tasks.p1.tasks[1]],
+            },
+          },
         },
       });
       fireEvent.click(result.getByText('Add or Remove Collaborators'));
@@ -649,11 +680,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   has_unmerged_commits: true,
                 },
               ],
@@ -669,17 +700,17 @@ describe('<EpicDetail/>', () => {
     });
   });
 
-  describe('"Submit this epic for review on GitHub" step click', () => {
+  describe('"Submit this Epic for review on GitHub" step click', () => {
     test('opens modal', () => {
       const { getByText, getByLabelText } = setup({
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   has_unmerged_commits: true,
                 },
               ],
@@ -687,7 +718,7 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByText('Submit this epic for review on GitHub'));
+      fireEvent.click(getByText('Submit this Epic for review on GitHub'));
 
       expect(getByLabelText('Developer notes')).toBeVisible();
     });
@@ -699,11 +730,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   has_unmerged_commits: true,
                   currently_creating_pr: true,
                 },
@@ -721,11 +752,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   pr_url: 'https://example.com/',
                   pr_is_open: true,
                 },
@@ -743,11 +774,11 @@ describe('<EpicDetail/>', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
-              ...defaultState.epics.r1,
+            p1: {
+              ...defaultState.epics.p1,
               epics: [
                 {
-                  ...defaultState.epics.r1.epics[0],
+                  ...defaultState.epics.p1.epics[0],
                   branch_url: 'https://example.com/',
                 },
               ],
@@ -788,14 +819,14 @@ describe('<EpicDetail/>', () => {
 
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
-      const { queryByText, getByText, getByTitle } = setup();
-      fireEvent.click(getByText('Add a Task'));
+      const { queryByText, getByText, getAllByText, getByTitle } = setup();
+      fireEvent.click(getAllByText('Create a Task')[1]);
 
-      expect(getByText('Add a Task for Epic 1')).toBeVisible();
+      expect(getByText('Create a Task for Epic 1')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
 
-      expect(queryByText('Add a Task for Epic 1')).toBeNull();
+      expect(queryByText('Create a Task for Epic 1')).toBeNull();
     });
   });
 
@@ -878,7 +909,7 @@ describe('<EpicDetail/>', () => {
         fireEvent.click(getByText('Contribute'));
 
         expect(
-          getByText('Add a Task to Contribute Work from Scratch Org'),
+          getByText('Create a Task to Contribute Work from Scratch Org'),
         ).toBeVisible();
       });
     });
@@ -889,11 +920,11 @@ describe('<EpicDetail/>', () => {
           initialState: {
             ...defaultState,
             epics: {
-              r1: {
-                ...defaultState.epics.r1,
+              p1: {
+                ...defaultState.epics.p1,
                 epics: [
                   {
-                    ...defaultState.epics.r1.epics[0],
+                    ...defaultState.epics.p1.epics[0],
                     status: EPIC_STATUSES.MERGED,
                   },
                 ],

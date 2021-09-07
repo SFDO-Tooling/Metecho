@@ -99,9 +99,18 @@ class TaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Task
 
-    name = factory.Sequence("Epic {}".format)
+    name = factory.Sequence("Task {}".format)
     epic = factory.SubFactory(EpicFactory)
     org_config_name = "dev"
+
+
+@register
+class TaskWithProjectFactory(TaskFactory):
+    class Meta:
+        model = Task
+
+    epic = None
+    project = factory.SubFactory(ProjectFactory)
 
 
 @register

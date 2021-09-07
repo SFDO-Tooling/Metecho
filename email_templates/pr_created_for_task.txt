@@ -1,7 +1,7 @@
 {% load i18n %}{% trans "Task Submitted For Testing on Metecho" %}
 
 {% blocktrans trimmed %}
-You are the assigned Tester for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}", and this task has been submitted for testing. To view this task, please log into Metecho as user "{{ assigned_user_name }}". We appreciate your contribution to the Salesforce community. Thanks!
+You are the assigned Tester for {{ task_name }}, and this Task has been submitted for testing. To view this Task, please log into Metecho as user "{{ assigned_user_name }}." We appreciate your contribution to the Salesforce community. Thanks!
 {% endblocktrans %}
 
 {{ metecho_link }}

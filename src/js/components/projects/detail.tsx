@@ -12,6 +12,7 @@ import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
+import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
 import LandingModal from '@/js/components/tour/landing';
 import PlanTour from '@/js/components/tour/plan';
@@ -23,13 +24,13 @@ import {
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
+  useAssignUserToTask,
   useFetchEpicsIfMissing,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
+  useFetchProjectTasksIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
-import useAssignUserToTask from '@/js/components/utils/useAssignUserToTask';
-import useFetchTasksByProject from '@/js/components/utils/useFetchTasksByProject';
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
 import { onboarded } from '@/js/store/user/actions';
@@ -54,6 +55,7 @@ const ProjectDetail = (
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
@@ -62,11 +64,14 @@ const ProjectDetail = (
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
-  const { epics } = useFetchEpicsIfMissing(project, props);
-  const { orgs } = useFetchOrgsIfMissing({ project, props });
-  const { tasks, updateTask } = useFetchTasksByProject(
-    project?.id,
-    tasksTabViewed,
+  const { epics } = useFetchEpicsIfMissing({ projectId: project?.id }, props);
+  const { orgs } = useFetchOrgsIfMissing({ projectId: project?.id }, props);
+  const { tasks } = useFetchProjectTasksIfMissing(
+    {
+      projectId: project?.id,
+      tasksTabViewed,
+    },
+    props,
   );
   const assignUser = useAssignUserToTask();
   const playgroundOrg = (orgs || [])[0];
@@ -114,25 +119,11 @@ const ProjectDetail = (
     }
   }, [dispatch, epics?.next, isMounted, project?.id]);
 
-  // Manually update the Task in State after it changes.
-  // @@@ The list of tasks should be moved to the Redux store...
-  /* istanbul ignore next */
-  const doAssignUser = useCallback(
-    async (args: any) => {
-      const {
-        payload: { object, objectType },
-      } = await assignUser(args);
-      if (object && objectType === OBJECT_TYPES.TASK) {
-        updateTask(object);
-      }
-    },
-    [assignUser, updateTask],
-  );
-
   // "create epic" modal related
   const openCreateModal = useCallback(() => {
     setCreateModalOpen(true);
     setCreateOrgModalOpen(false);
+    setCreateTaskModalOpen(false);
   }, []);
   const closeCreateModal = useCallback(() => {
     setCreateModalOpen(false);
@@ -142,9 +133,20 @@ const ProjectDetail = (
   const openCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(true);
     setCreateModalOpen(false);
+    setCreateTaskModalOpen(false);
   }, []);
   const closeCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(false);
+  }, []);
+
+  const openCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(true);
+    setCreateModalOpen(false);
+    setCreateOrgModalOpen(false);
+  }, []);
+
+  const closeCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(false);
   }, []);
 
   // guided tour related
@@ -353,9 +355,9 @@ const ProjectDetail = (
                       <Trans i18nKey="createEpicHelpText">
                         Epics in Metecho are the high-level features that can be
                         broken down into smaller parts by creating Tasks. You
-                        can create a new epic or create an epic based on an
-                        existing GitHub branch. Every epic requires a unique
-                        epic name, which becomes the branch name in GitHub
+                        can create a new Epic or create an Epic based on an
+                        existing GitHub branch. Every Epic requires a unique
+                        Epic name, which becomes the branch name in GitHub
                         unless you choose to use an existing branch.
                       </Trans>
                     ) : (
@@ -397,6 +399,28 @@ const ProjectDetail = (
           >
             {tasks ? (
               <>
+                {project.has_push_permission && (
+                  <div className="slds-m-bottom_medium slds-is-relative">
+                    <Button
+                      label={i18n.t('Create a Task')}
+                      variant="brand"
+                      onClick={openCreateTaskModal}
+                    />
+                    <TourPopover
+                      id="tour-project-add-task"
+                      align="top left"
+                      heading={i18n.t('Create a Task to contribute')}
+                      body={
+                        <Trans i18nKey="tourProjectCreateTask">
+                          To get started contributing to this Project, create a
+                          Task. Tasks represent small changes to this Project;
+                          each one has a Developer and a Tester. Tasks are
+                          equivalent to GitHub branches.
+                        </Trans>
+                      }
+                    />
+                  </div>
+                )}
                 {tasks.length > 0 ? (
                   <TasksTableComponent
                     projectId={project.id}
@@ -405,11 +429,18 @@ const ProjectDetail = (
                     githubUsers={project.github_users}
                     canAssign={project.has_push_permission}
                     isRefreshingUsers={project.currently_fetching_github_users}
-                    assignUserAction={doAssignUser}
+                    assignUserAction={assignUser}
                     viewEpicsColumn
                   />
                 ) : (
-                  <p>{i18n.t('There are no Tasks for this Project.')}</p>
+                  <p>
+                    <Trans i18nKey="noTasks">
+                      Tasks in Metecho represent small changes to this Project;
+                      each one has a Developer and a Tester. Tasks are
+                      equivalent to GitHub branches. There are no Tasks for this
+                      Project.
+                    </Trans>
+                  </p>
                 )}
               </>
             ) : (
@@ -443,6 +474,11 @@ const ProjectDetail = (
           project={project}
           isOpen={createOrgModalOpen}
           closeModal={closeCreateOrgModal}
+        />
+        <CreateTaskModal
+          project={project}
+          isOpenOrOrgId={createTaskModalOpen}
+          closeCreateModal={closeCreateTaskModal}
         />
       </DetailPageLayout>
     </DocumentTitle>

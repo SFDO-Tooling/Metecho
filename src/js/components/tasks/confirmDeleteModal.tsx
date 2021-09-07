@@ -45,14 +45,14 @@ const ConfirmDeleteModal = ({
   if (actionType === CONFIRM_ORG_TRACKER.REFRESH) {
     heading = i18n.t('Confirm Refreshing Org With Unretrieved Changes');
     warning = i18n.t(
-      'This {{type}} has unretrieved changes which will be lost. Are you sure you want to refresh this org?',
+      'This {{type}} has unretrieved changes which will be lost. Are you sure you want to refresh this Org?',
       { type },
     );
     label = i18n.t('Refresh Org');
   } else {
     heading = i18n.t('Confirm Deleting Org With Unretrieved Changes');
     warning = i18n.t(
-      'This {{type}} has unretrieved changes which will be lost. Are you sure you want to delete this org?',
+      'This {{type}} has unretrieved changes which will be lost. Are you sure you want to delete this Org?',
       { type },
     );
     label = i18n.t('Delete Org');

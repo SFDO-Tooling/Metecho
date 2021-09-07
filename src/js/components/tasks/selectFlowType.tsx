@@ -67,7 +67,7 @@ const SelectFlowType = ({
           content={
             orgConfigHelp ||
             i18n.t(
-              'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
+              'CumulusCI Projects can set up different kinds of Org environments. Which one would you like to work on for this Task?',
             )
           }
           position="overflowBoundaryElement"
@@ -76,9 +76,9 @@ const SelectFlowType = ({
         />
         <Button
           assistiveText={{
-            icon: i18n.t('refresh list of available org types'),
+            icon: i18n.t('refresh list of available Org types'),
           }}
-          title={i18n.t('refresh list of available org types')}
+          title={i18n.t('refresh list of available Org types')}
           variant="icon"
           iconCategory="utility"
           iconName="refresh"
@@ -122,7 +122,7 @@ const SelectFlowType = ({
         >
           {isDisabled &&
             i18n.t(
-              'Org Type cannot be changed while an org exists for this task.',
+              'Org Type cannot be changed while an Org exists for this Task.',
             )}
           {errors}
         </div>

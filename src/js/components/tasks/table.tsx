@@ -50,7 +50,6 @@ interface TableCellProps {
 interface Props {
   projectId: string;
   projectSlug: string;
-  epicSlug?: string;
   tasks: Task[];
   epicUsers?: GitHubUser[];
   githubUsers: GitHubUser[];
@@ -62,23 +61,21 @@ interface Props {
 
 const NameTableCell = ({
   projectSlug,
-  epicSlug,
   item,
   className,
   children,
   ...props
 }: TableCellProps & {
   projectSlug: string;
-  epicSlug?: string;
 }) => (
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
-    {projectSlug && item && (epicSlug || item.epic?.slug) && (
+    {projectSlug && item && (
       <Link
-        to={routes.task_detail(
-          projectSlug,
-          epicSlug || item.epic?.slug,
-          item.slug,
-        )}
+        to={
+          item.epic
+            ? routes.epic_task_detail(projectSlug, item.epic.slug, item.slug)
+            : routes.project_task_detail(projectSlug, item.slug)
+        }
       >
         {children}
       </Link>
@@ -94,17 +91,17 @@ const EpicTableCell = ({
   ...props
 }: TableCellProps & {
   projectSlug: string;
-}) =>
-  item?.epic?.slug && item?.epic?.name && projectSlug ? (
-    <DataTableCell
-      {...props}
-      className={classNames(className, 'truncated-cell')}
-    >
+}) => (
+  <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
+    {item?.epic?.slug && item?.epic?.name && projectSlug ? (
       <Link to={routes.epic_detail(projectSlug, item.epic.slug)}>
         {item.epic.name}
       </Link>
-    </DataTableCell>
-  ) : /* istanbul ignore next */ null;
+    ) : (
+      '-'
+    )}
+  </DataTableCell>
+);
 EpicTableCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
@@ -249,9 +246,10 @@ const AssigneeTableCell = ({
         break;
     }
 
-    const epicCollaborators =
-      epicUsers ||
-      githubUsers.filter((user) => item.epic.github_users.includes(user.id));
+    const epicCollaborators = item.epic
+      ? epicUsers ||
+        githubUsers.filter((user) => item.epic?.github_users.includes(user.id))
+      : null;
 
     contents = (
       <>
@@ -304,7 +302,6 @@ AssigneeTableCell.displayName = DataTableCell.displayName;
 const TaskTable = ({
   projectId,
   projectSlug,
-  epicSlug,
   tasks,
   epicUsers,
   githubUsers,
@@ -354,7 +351,7 @@ const TaskTable = ({
         width={viewEpicsColumn ? '40%' : '60%'}
         primaryColumn
       >
-        <NameTableCell projectSlug={projectSlug} epicSlug={epicSlug} />
+        <NameTableCell projectSlug={projectSlug} />
       </DataTableColumn>
       {viewEpicsColumn && (
         <DataTableColumn
@@ -425,7 +422,7 @@ const TaskTable = ({
                   A <b>Developer</b> is the person assigned to do the work of a
                   Task. Developers create Dev Orgs for their work, retrieve
                   their changes, and then submit their work for someone to test.
-                  Anyone with permission to contribute to the project on GitHub
+                  Anyone with permission to contribute to the Project on GitHub
                   can be assigned as a Developer on a Task.
                 </Trans>
               }

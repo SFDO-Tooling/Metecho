@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
@@ -40,7 +42,7 @@ import {
   useFetchEpicIfMissing,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
-  useFetchTasksIfMissing,
+  useFetchTaskIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
 import { AppState, ThunkDispatch } from '@/js/store';
@@ -48,7 +50,6 @@ import { createObject, updateObject } from '@/js/store/actions';
 import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
 import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
 import { selectProjectCollaborator } from '@/js/store/projects/selectors';
-import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
 import {
@@ -85,6 +86,7 @@ const ResubmitButton = ({
 const TaskDetail = (
   props: RouteComponentProps<any, any, { [RETRIEVE_CHANGES]?: boolean }>,
 ) => {
+  const dispatch = useDispatch<ThunkDispatch>();
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -103,20 +105,19 @@ const TaskDetail = (
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
-    project,
+    { project },
     props,
   );
-  const dispatch = useDispatch<ThunkDispatch>();
-  useFetchTasksIfMissing(epic, props);
-  const selectTaskWithProps = useCallback(selectTask, []);
-  const selectTaskSlugWithProps = useCallback(selectTaskSlug, []);
-  const task = useSelector((state: AppState) =>
-    selectTaskWithProps(state, props),
+  const hasEpic = Boolean(epicSlug);
+  const { task, taskSlug } = useFetchTaskIfMissing(
+    {
+      projectId: project?.id,
+      epicId: epic?.id,
+      filterByEpic: hasEpic,
+    },
+    props,
   );
-  const taskSlug = useSelector((state: AppState) =>
-    selectTaskSlugWithProps(state, props),
-  );
-  const { orgs } = useFetchOrgsIfMissing({ task, props });
+  const { orgs } = useFetchOrgsIfMissing({ taskId: task?.id }, props);
   const user = useSelector(selectUserState) as User;
   const qaUser = useSelector((state: AppState) =>
     selectProjectCollaborator(state, project?.id, task?.assigned_qa),
@@ -597,11 +598,13 @@ const TaskDetail = (
     return projectLoadingOrNotFound;
   }
 
-  const epicLoadingOrNotFound = getEpicLoadingOrNotFound({
-    project,
-    epic,
-    epicSlug,
-  });
+  const epicLoadingOrNotFound =
+    hasEpic &&
+    getEpicLoadingOrNotFound({
+      project,
+      epic,
+      epicSlug,
+    });
 
   if (epicLoadingOrNotFound !== false) {
     return epicLoadingOrNotFound;
@@ -610,6 +613,7 @@ const TaskDetail = (
   const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
     project,
     epic,
+    epicSlug,
     task,
     taskSlug,
   });
@@ -620,18 +624,22 @@ const TaskDetail = (
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!project || !epic || !task) {
+  if (!project || (hasEpic && !epic) || !task) {
     return <FourOhFour />;
   }
 
   if (
     (projectSlug && projectSlug !== project.slug) ||
-    (epicSlug && epicSlug !== epic.slug) ||
+    (epicSlug && epicSlug !== epic?.slug) ||
     (taskSlug && taskSlug !== task.slug)
   ) {
     // Redirect to most recent project/epic/task slug
-    return (
-      <Redirect to={routes.task_detail(project.slug, epic.slug, task.slug)} />
+    return hasEpic && epic ? (
+      <Redirect
+        to={routes.epic_task_detail(project.slug, epic.slug, task.slug)}
+      />
+    ) : (
+      <Redirect to={routes.project_task_detail(project.slug, task.slug)} />
     );
   }
 
@@ -796,13 +804,15 @@ const TaskDetail = (
     );
   }
 
-  const epicUrl = routes.epic_detail(project.slug, epic.slug);
+  const projectUrl = routes.project_detail(project.slug);
+  const epicUrl = epic ? routes.epic_detail(project.slug, epic.slug) : null;
   let headerUrl, headerUrlText; // eslint-disable-line one-var
+
   /* istanbul ignore else */
   if (task.branch_url && task.branch_name) {
     headerUrl = task.branch_url;
     headerUrlText = task.branch_name;
-  } else if (epic.branch_url && epic.branch_name) {
+  } else if (epic?.branch_url && epic?.branch_name) {
     headerUrl = epic.branch_url;
     headerUrlText = epic.branch_name;
   } else {
@@ -812,9 +822,13 @@ const TaskDetail = (
 
   return (
     <DocumentTitle
-      title={` ${task.name} | ${epic.name} | ${project.name} | ${i18n.t(
-        'Metecho',
-      )}`}
+      title={
+        epic
+          ? `${task.name} | ${epic.name} | ${project.name} | ${i18n.t(
+              'Metecho',
+            )}`
+          : `${task.name} | ${project.name} | ${i18n.t('Metecho')}`
+      }
     >
       <DetailPageLayout
         type={OBJECT_TYPES.TASK}
@@ -842,10 +856,15 @@ const TaskDetail = (
             name: project.name,
             url: routes.project_detail(project.slug),
           },
-          {
-            name: epic.name,
-            url: epicUrl,
-          },
+          epic
+            ? {
+                name: epic.name,
+                url: epicUrl as string,
+              }
+            : {
+                name: i18n.t('no Epic'),
+                emphasis: true,
+              },
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
@@ -889,8 +908,8 @@ const TaskDetail = (
                     </h3>
                     <p>
                       <Trans i18nKey="taskCanceledHelp">
-                        This task was canceled on GitHub before completion.
-                        Progress on this task has not been lost, but the task
+                        This Task was canceled on GitHub before completion.
+                        Progress on this Task has not been lost, but the Task
                         must be{' '}
                         <ResubmitButton
                           canSubmit={
@@ -952,8 +971,7 @@ const TaskDetail = (
             userHasPermissions={project.has_push_permission}
             epicUsers={epicCollaborators}
             githubUsers={project.github_users}
-            epicCreatingBranch={epic.currently_creating_branch}
-            epicUrl={epicUrl}
+            epicCreatingBranch={Boolean(epic?.currently_creating_branch)}
             repoUrl={project.repo_url}
             openCaptureModal={openCaptureModal}
             assignUserModalOpen={assignUserModalOpen}
@@ -1015,7 +1033,7 @@ const TaskDetail = (
                   label={i18n.t('Create Scratch Org')}
                   variant="outline-brand"
                   onClick={openCreateOrgModal}
-                  disabled={epic.currently_creating_branch}
+                  disabled={Boolean(epic?.currently_creating_branch)}
                 />
               )}
             </>
@@ -1066,7 +1084,7 @@ const TaskDetail = (
               model={task}
               modelType={OBJECT_TYPES.TASK}
               isOpen={deleteModalOpen}
-              redirect={epicUrl}
+              redirect={epicUrl || projectUrl}
               handleClose={closeDeleteModal}
             />
           </>

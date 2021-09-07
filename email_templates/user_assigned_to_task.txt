@@ -1,9 +1,9 @@
 {% load i18n %}{% trans "Task Assignment Alert from Metecho" %}
 
 {% if user_name %}{% blocktrans trimmed %}
-You have been assigned as the {{ role }} for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}" by user "{{ user_name }}". To view this task, please log into Metecho as user "{{ assigned_user_name }}". We appreciate your contribution to the Salesforce community. Thanks!
+You have been assigned as the {{ role }} for {{ task_name }} by user "{{ user_name }}." To view this Task, please log into Metecho as user "{{ assigned_user_name }}." We appreciate your contribution to the Salesforce community. Thanks!
 {% endblocktrans %}{% else %}{% blocktrans trimmed %}
-You have been assigned as the {{ role }} for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}". To view this task, please log into Metecho as user "{{ assigned_user_name }}". We appreciate your contribution to the Salesforce community. Thanks!
+You have been assigned as the {{ role }} for {{ task_name }}. To view this Task, please log into Metecho as user "{{ assigned_user_name }}." We appreciate your contribution to the Salesforce community. Thanks!
 {% endblocktrans %}{% endif %}
 
 {{ metecho_link }}

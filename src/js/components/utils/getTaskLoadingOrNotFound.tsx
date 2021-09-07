@@ -8,14 +8,16 @@ import { Epic } from '@/js/store/epics/reducer';
 import { Project } from '@/js/store/projects/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 
-export default ({
+const getTaskLoadingOrNotFound = ({
   project,
   epic,
+  epicSlug,
   task,
   taskSlug,
 }: {
   project?: Project | null;
   epic?: Epic | null;
+  epicSlug?: string;
   task?: Task | null;
   taskSlug?: string;
 }): ReactElement | false => {
@@ -25,7 +27,7 @@ export default ({
       return <ProjectNotFound />;
     }
     /* istanbul ignore if */
-    if (!epic) {
+    if (epicSlug && !epic) {
       return <EpicNotFound project={project} />;
     }
     if (!taskSlug || task === null) {
@@ -36,3 +38,5 @@ export default ({
   }
   return false;
 };
+
+export default getTaskLoadingOrNotFound;

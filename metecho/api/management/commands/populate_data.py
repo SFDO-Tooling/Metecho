@@ -74,7 +74,7 @@ class Command(BaseCommand):
             repo_name="Metecho-Test",
             description=(
                 "# Welcome to Metecho!\n\n"
-                "This is a description of the project. "
+                "This is a description of the Project. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
         )
@@ -100,3 +100,4 @@ class Command(BaseCommand):
 
         for i in range(5):
             self.create_task(name=f"Sample Task {i+1}", epic=epic)
+            self.create_task(name=f"Project-level Task {i +1}", project=metecho)

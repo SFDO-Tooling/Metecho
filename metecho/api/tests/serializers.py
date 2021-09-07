@@ -15,6 +15,8 @@ from ..serializers import (
     TaskSerializer,
 )
 
+fixture = pytest.lazy_fixture
+
 
 @pytest.mark.django_db
 class TestFullUserSerializer:
@@ -212,7 +214,7 @@ class TestEpicSerializer:
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
-            "An epic with this name already exists."
+            "An Epic with this name already exists."
         ]
 
     def test_unique_name_for_project__case_insensitive(
@@ -230,7 +232,7 @@ class TestEpicSerializer:
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
-            "An epic with this name already exists."
+            "An Epic with this name already exists."
         ]
 
     def test_unique_name_for_project__case_insensitive__update(
@@ -322,36 +324,40 @@ class TestEpicCollaboratorsSerializer:
 
 @pytest.mark.django_db
 class TestTaskSerializer:
-    def test_create(self, rf, user_factory, epic_factory):
+    @pytest.mark.parametrize(
+        "attach_epic, attach_project, success",
+        (
+            pytest.param(True, False, True, id="Epic only"),
+            pytest.param(False, True, True, id="Project only"),
+            pytest.param(True, True, False, id="Epic and project"),
+            pytest.param(False, False, False, id="Missing epic and project"),
+        ),
+    )
+    def test_create(
+        self,
+        attach_epic,
+        attach_project,
+        success,
+        rf,
+        user_factory,
+        epic_factory,
+        project_factory,
+    ):
         user = user_factory()
-        epic = epic_factory()
         data = {
             "name": "Test Task",
             "description": "Description.",
-            "epic": str(epic.id),
+            "epic": str(epic_factory().id) if attach_epic else None,
+            "project": str(project_factory().id) if attach_project else None,
             "org_config_name": "dev",
         }
         r = rf.get("/")
         r.user = user
         serializer = TaskSerializer(data=data, context={"request": r})
-        assert serializer.is_valid(), serializer.errors
-        serializer.save()
-        assert Task.objects.count() == 1
-
-    def test_create__duplicate_name(self, rf, user_factory, task_factory):
-        user = user_factory()
-        task = task_factory(name="Task abc")
-        data = {
-            "name": "Task ABC",  # Same name as existing task
-            "description": "Description.",
-            "epic": str(task.epic.id),
-            "org_config_name": "dev",
-        }
-        r = rf.get("/")
-        r.user = user
-        serializer = TaskSerializer(data=data, context={"request": r})
-        assert not serializer.is_valid()
-        assert "name" in serializer.errors, serializer.errors
+        assert serializer.is_valid() == success, serializer.errors
+        if success:
+            serializer.save()
+            assert Task.objects.count() == 1
 
     @pytest.mark.parametrize(
         "dev_id, assigned_dev",
@@ -406,7 +412,24 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["branch_url"] is None
 
-    def test_branch_diff_url__present(self, epic_factory, task_factory):
+    @pytest.mark.parametrize(
+        "_task_factory, task_data, expected",
+        (
+            pytest.param(
+                fixture("task_factory"),
+                {"epic__branch_name": "test-epic"},
+                "test-epic",
+                id="Task with Epic",
+            ),
+            pytest.param(
+                fixture("task_with_project_factory"),
+                {"project__branch_name": "test-project"},
+                "test-project",
+                id="Task with Project",
+            ),
+        ),
+    )
+    def test_branch_diff_url__present(self, _task_factory, task_data, expected):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             gh.get_repo_info.return_value = MagicMock(
@@ -422,13 +445,14 @@ class TestTaskSerializer:
                 }
             )
 
-            epic = epic_factory(branch_name="test-epic")
-            task = task_factory(epic=epic, branch_name="test-task")
+        task = _task_factory(**task_data, branch_name="test-task")
         serializer = TaskSerializer(task)
-        owner = task.epic.project.repo_owner
-        name = task.epic.project.repo_name
-        expected = f"https://github.com/{owner}/{name}/compare/test-epic...test-task"
-        assert serializer.data["branch_diff_url"] == expected
+        owner = task.root_project.repo_owner
+        name = task.root_project.repo_name
+        assert (
+            serializer.data["branch_diff_url"]
+            == f"https://github.com/{owner}/{name}/compare/{expected}...test-task"
+        )
 
     def test_branch_diff_url__missing(self, task_factory):
         task = task_factory(name="Test task")
@@ -457,16 +481,25 @@ class TestTaskAssigneeSerializer:
         assert not serializer.is_valid()
         assert "non_field_errors" in serializer.errors
 
+    @pytest.mark.parametrize(
+        "_task_factory",
+        (
+            pytest.param(fixture("task_factory"), id="Task with Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
+        ),
+    )
     def test_assign(
-        self, rf, git_hub_repository_factory, task_factory, scratch_org_factory
+        self, rf, git_hub_repository_factory, scratch_org_factory, _task_factory
     ):
-        repo = git_hub_repository_factory(permissions={"push": True})
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": "123456", "permissions": {"push": True}},
-                {"id": "456789", "permissions": {"push": True}},
-            ],
+        task = _task_factory()
+        project = task.root_project
+        project.github_users = [
+            {"id": "123456", "permissions": {"push": True}},
+            {"id": "456789", "permissions": {"push": True}},
+        ]
+        project.save()
+        repo = git_hub_repository_factory(
+            repo_id=project.repo_id, permissions={"push": True}
         )
         so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
         so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)

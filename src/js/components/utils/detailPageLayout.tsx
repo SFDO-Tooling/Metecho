@@ -13,6 +13,7 @@ import routes from '@/js/utils/routes';
 interface Crumb {
   name: string;
   url?: string;
+  emphasis?: boolean;
 }
 
 const DetailPageLayout = ({
@@ -128,13 +129,13 @@ const DetailPageLayout = ({
                 if (crumb.url) {
                   return (
                     <Link to={crumb.url} key={idx}>
-                      {crumb.name}
+                      {crumb.emphasis ? <em>{crumb.name}</em> : crumb.name}
                     </Link>
                   );
                 }
                 return (
                   <div className="slds-p-horizontal_x-small" key={idx}>
-                    {crumb.name}
+                    {crumb.emphasis ? <em>{crumb.name}</em> : crumb.name}
                   </div>
                 );
               }),
@@ -151,17 +152,9 @@ const DetailPageLayout = ({
         <div
           className="slds-col
             slds-size_1-of-1
-            slds-medium-size_8-of-12
-            slds-large-size_7-of-12
-            slds-p-bottom_x-large"
-        >
-          {children}
-        </div>
-        <div
-          className="slds-col
-            slds-size_1-of-1
             slds-medium-size_4-of-12
-            slds-large-size_5-of-12"
+            slds-large-size_5-of-12
+            slds-medium-order_2"
         >
           {description && (
             <PageDescription
@@ -171,6 +164,15 @@ const DetailPageLayout = ({
             />
           )}
           {sidebar}
+        </div>
+        <div
+          className="slds-col
+            slds-size_1-of-1
+            slds-medium-size_8-of-12
+            slds-large-size_7-of-12
+            slds-p-bottom_x-large"
+        >
+          {children}
         </div>
       </div>
     </>

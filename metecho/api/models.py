@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
+from django.db.models.query_utils import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
@@ -503,7 +504,7 @@ class Epic(
 
     def get_absolute_url(self):
         # See src/js/utils/routes.ts
-        return f"/projects/{self.project.slug}/{self.slug}"
+        return f"/projects/{self.project.slug}/epics/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -640,8 +641,16 @@ class Task(
     SoftDeleteMixin,
     models.Model,
 ):
+    # Current assumption is that a Task will always be attached to at least one of
+    # Project or Epic, but never both
+    project = models.ForeignKey(
+        Project, on_delete=models.PROTECT, blank=True, null=True, related_name="tasks"
+    )
+    epic = models.ForeignKey(
+        Epic, on_delete=models.PROTECT, blank=True, null=True, related_name="tasks"
+    )
+
     name = StringField()
-    epic = models.ForeignKey(Epic, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
         max_length=100, blank=True, default="", validators=[validate_unicode_branch]
@@ -678,23 +687,69 @@ class Task(
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
 
+    class Meta:
+        ordering = ("-created_at", "name")
+        constraints = [
+            # Ensure we always have an Epic or Project attached, but not both
+            models.CheckConstraint(
+                check=(Q(project__isnull=False) | Q(epic__isnull=False))
+                & ~Q(project__isnull=False, epic__isnull=False),
+                name="project_xor_epic",
+            )
+        ]
+
     def __str__(self):
         return self.name
 
+    @property
+    def full_name(self) -> str:
+        # Used in emails to fully identify a task by its parents
+        if self.epic:
+            return _('"{}" on {} Epic {}').format(self, self.epic.project, self.epic)
+        return _('"{}" on {}').format(self, self.project)
+
+    @property
+    def root_project(self) -> Project:
+        if self.epic:
+            return self.epic.project
+        return self.project
+
     def save(self, *args, force_epic_save=False, **kwargs):
+        is_new = self.pk is None
         ret = super().save(*args, **kwargs)
-        # To update the epic's status:
-        if force_epic_save or self.epic.should_update_status():
+        save_epic = self.epic and (force_epic_save or self.epic.should_update_status())
+
+        # To update the epic's status
+        if save_epic:
             self.epic.save()
+
+        # Notify epic about new status or new task count
+        if self.epic and (save_epic or is_new):
             self.epic.notify_changed(originating_user_id=None)
+
+        # Notify all users about the new task
+        if is_new:
+            self.notify_changed(type_="TASK_CREATE", originating_user_id=None)
+
         return ret
+
+    def delete(self, *args, **kwargs):
+        # Notify epic about new task count
+        if self.epic:
+            self.epic.notify_changed(originating_user_id=None)
+        return super().delete(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
     def get_absolute_url(self):
         # See src/js/utils/routes.ts
-        return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
+        if self.epic:
+            return (
+                f"/projects/{self.epic.project.slug}"
+                + f"/epics/{self.epic.slug}/tasks/{self.slug}"
+            )
+        return f"/projects/{self.project.slug}/tasks/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -731,10 +786,12 @@ class Task(
             self.save()
 
     def get_repo_id(self):
-        return self.epic.project.get_repo_id()
+        return self.root_project.get_repo_id()
 
     def get_base(self):
-        return self.epic.branch_name
+        if self.epic:
+            return self.epic.branch_name
+        return self.project.branch_name
 
     def get_head(self):
         return self.branch_name
@@ -746,19 +803,12 @@ class Task(
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:
-            task = self
-            epic = task.epic
-            project = epic.project
-            metecho_link = get_user_facing_url(
-                path=["projects", project.slug, epic.slug, task.slug]
-            )
+            metecho_link = get_user_facing_url(path=self.get_absolute_url())
             subject = _("Metecho Task Submitted for Testing")
             body = render_to_string(
                 "pr_created_for_task.txt",
                 {
-                    "task_name": task.name,
-                    "epic_name": epic.name,
-                    "project_name": project.name,
+                    "task_name": self.full_name,
                     "assigned_user_name": user.username,
                     "metecho_link": metecho_link,
                 },
@@ -768,7 +818,7 @@ class Task(
     # end CreatePrMixin configuration
 
     def has_push_permission(self, user):
-        return self.epic.has_push_permission(user)
+        return self.root_project.has_push_permission(user)
 
     def update_review_valid(self):
         review_valid = bool(
@@ -784,8 +834,8 @@ class Task(
         if head and base:
             repo = gh.get_repo_info(
                 None,
-                repo_owner=self.epic.project.repo_owner,
-                repo_name=self.epic.project.repo_name,
+                repo_owner=self.root_project.repo_owner,
+                repo_name=self.root_project.repo_name,
             )
             base_sha = repo.branch(base).commit.sha
             head_sha = repo.branch(head).commit.sha
@@ -802,7 +852,8 @@ class Task(
         self.has_unmerged_commits = False
         self.pr_number = pr_number
         self.pr_is_open = False
-        self.epic.has_unmerged_commits = True
+        if self.epic:
+            self.epic.has_unmerged_commits = True
         # This will save the epic, too:
         self.save(force_epic_save=True)
         self.notify_changed(originating_user_id=originating_user_id)
@@ -892,13 +943,6 @@ class Task(
             if delete_org and deletable_org:
                 org.queue_delete(originating_user_id=originating_user_id)
 
-    class Meta:
-        ordering = ("-created_at", "name")
-        # We enforce this in business logic, not in the database, as we
-        # need to limit this constraint only to active Tasks, and
-        # make the name column case-insensitive:
-        # unique_together = (("name", "epic"),)
-
 
 class ScratchOrg(
     SoftDeleteMixin, PushMixin, HashIdMixin, TimestampsMixin, models.Model
@@ -986,7 +1030,7 @@ class ScratchOrg(
         if self.epic:
             return self.epic.project
         if self.task:
-            return self.task.epic.project
+            return self.task.root_project
         return None
 
     def save(self, *args, **kwargs):
@@ -1003,11 +1047,11 @@ class ScratchOrg(
     def clean(self):
         if len([x for x in [self.project, self.epic, self.task] if x is not None]) != 1:
             raise ValidationError(
-                _("A ScratchOrg must belong to either a project, an epic, or a task.")
+                _("A Scratch Org must belong to either a Project, an Epic, or a Task.")
             )
         if self.org_type != SCRATCH_ORG_TYPES.Playground and not self.task:
             raise ValidationError(
-                {"org_type": _("Dev and Test orgs must belong to a task.")}
+                {"org_type": _("Dev and Test Orgs must belong to a Task.")}
             )
         return super().clean()
 

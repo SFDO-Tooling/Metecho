@@ -1,14 +1,14 @@
-Django==3.2.5
+Django==3.2.7
 autobahn==21.3.1
 beautifulsoup4==4.9.3
 bleach==3.3.1
 channels-redis==3.3.0
 channels==3.0.4
-cumulusci==3.40.1
+cumulusci==3.43.0
 dj-database-url==0.5.0
 django-allauth==0.45.0
 django-anymail[mailgun]==8.4
-django-hashid-field==3.2.1
+django-hashid-field==3.3.0
 django-js-reverse==0.9.1
 django-log-request-id==1.6.0
 django-model-utils==4.1.1

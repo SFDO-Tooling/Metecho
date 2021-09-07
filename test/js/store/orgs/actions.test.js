@@ -9,7 +9,9 @@ import { getStoreWithHistory, storeWithThunk } from './../../utils';
 const defaultState = {
   user: { id: 'user-id' },
   tasks: {
-    'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
+    'project-id': {
+      tasks: [{ id: 'task-id', name: 'My Task', epic: { id: 'epic-id' } }],
+    },
   },
   epics: {
     'project-id': {
@@ -64,7 +66,7 @@ describe('provisionOrg', () => {
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Dev Org for Task “My Task.”',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(org.id),
       );
@@ -91,7 +93,7 @@ describe('provisionOrg', () => {
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Test Org for Epic “My Epic.”',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(thisOrg.id),
       );
@@ -121,7 +123,7 @@ describe('provisionOrg', () => {
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Scratch Org.',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(thisOrg.id),
       );
@@ -151,7 +153,7 @@ describe('provisionOrg', () => {
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Scratch Org for Project “My Project.”',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(thisOrg.id),
       );

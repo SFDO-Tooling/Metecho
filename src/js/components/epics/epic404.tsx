@@ -10,9 +10,9 @@ const EpicNotFound = ({ project }: { project: Project }) => (
   <FourOhFour
     message={
       <Trans i18nKey="epicNotFound">
-        We can’t find the epic you’re looking for. Try{' '}
-        <Link to={routes.project_detail(project.slug)}>another epic</Link> from
-        that project?
+        We can’t find the Epic you’re looking for. Try{' '}
+        <Link to={routes.project_detail(project.slug)}>another Epic</Link> from
+        that Project?
       </Trans>
     }
   />

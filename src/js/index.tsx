@@ -52,7 +52,7 @@ import { selectUserState } from '@/js/store/user/selectors';
 import apiFetch from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import { log, logError } from '@/js/utils/logging';
-import routes, { routePatterns } from '@/js/utils/routes';
+import { routePatterns } from '@/js/utils/routes';
 import { createSocket } from '@/js/utils/websockets';
 
 const history = createBrowserHistory();
@@ -78,35 +78,50 @@ const App = withRouter(
             <div className="slds-grow slds-shrink-none">
               <ErrorBoundary>
                 <Switch>
-                  <Route exact path={routePatterns.login()} component={Login} />
-                  <Route exact path={routePatterns.terms()} component={Terms} />
-                  <Route
+                  <Route exact path={routePatterns.login} component={Login} />
+                  <Route exact path={routePatterns.terms} component={Terms} />
+                  <Redirect
                     exact
-                    path={routePatterns.home()}
-                    render={() => <Redirect to={routes.project_list()} />}
+                    from={routePatterns.home}
+                    to={routePatterns.project_list}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.project_list()}
+                    path={routePatterns.project_list}
                     component={ProjectList}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.project_detail()}
+                    path={routePatterns.project_detail}
                     component={ProjectDetail}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.epic_detail()}
+                    path={routePatterns.epic_detail}
                     component={EpicDetail}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.task_detail()}
+                    path={routePatterns.project_task_detail}
                     component={TaskDetail}
                   />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.epic_task_detail}
+                    component={TaskDetail}
+                  />
+                  <Redirect
+                    exact
+                    from={routePatterns.old_epic_detail}
+                    to={routePatterns.epic_detail}
+                  />
+                  <Redirect
+                    exact
+                    from={routePatterns.old_task_detail}
+                    to={routePatterns.epic_task_detail}
+                  />
                   <Route
-                    path={routePatterns.auth_error()}
+                    path={routePatterns.auth_error}
                     component={AuthError}
                   />
                   <PrivateRoute component={FourOhFour} />
@@ -156,7 +171,7 @@ initializeI18n((i18nError?: string) => {
       if (globalsEl?.textContent) {
         GLOBALS = JSON.parse(globalsEl.textContent);
       }
-    } catch (err) {
+    } catch (err: any) {
       logError(err);
     }
     window.GLOBALS = GLOBALS;

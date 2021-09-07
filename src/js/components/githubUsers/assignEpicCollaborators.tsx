@@ -127,7 +127,7 @@ const AssignEpicCollaboratorsModal = ({
             <Trans i18nKey="epicCollaborators">
               Only users who have access to the GitHub repository for this Epic
               will appear in the list below. Visit GitHub to invite additional
-              collaborators.
+              Collaborators.
             </Trans>
           </p>
         </div>
@@ -154,7 +154,7 @@ const AssignEpicCollaboratorsModal = ({
             onRowChange={updateSelection}
           >
             <DataTableColumn
-              label={i18n.t('GitHub Users')}
+              label={i18n.t('GitHub Collaborators')}
               property="login"
               primaryColumn
               truncate
@@ -168,8 +168,8 @@ const AssignEpicCollaboratorsModal = ({
               message={
                 <Trans i18nKey="noGitHubUsers">
                   We couldn’t find any GitHub users who have access to this
-                  project. Try re-syncing the list of available collaborators,
-                  or contact an admin for this project on GitHub.
+                  Project. Try re-syncing the list of available Collaborators,
+                  or contact an admin for this Project on GitHub.
                 </Trans>
               }
             />

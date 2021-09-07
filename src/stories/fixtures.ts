@@ -145,6 +145,7 @@ export const sampleEpic1 = {
   github_users: [sampleGitHubUser2.id],
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
+  task_count: 6,
 };
 
 export const sampleEpic2 = {
@@ -175,6 +176,7 @@ export const sampleEpic2 = {
   ],
   status: EPIC_STATUSES.IN_PROGRESS,
   latest_sha: 'abc123',
+  task_count: 1,
 };
 
 export const sampleEpic3 = {
@@ -197,6 +199,7 @@ export const sampleEpic3 = {
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
+  task_count: 0,
 };
 
 export const sampleEpic4 = {
@@ -220,6 +223,7 @@ export const sampleEpic4 = {
   github_users: [],
   status: EPIC_STATUSES.MERGED,
   latest_sha: 'abc123',
+  task_count: 5,
 };
 
 export const sampleEpic5 = {
@@ -243,6 +247,7 @@ export const sampleEpic5 = {
   github_users: [sampleGitHubUser1.id, sampleGitHubUser2.id],
   status: EPIC_STATUSES.REVIEW,
   latest_sha: 'abc123',
+  task_count: 3,
 };
 
 export const sampleTask1 = {
@@ -256,6 +261,8 @@ export const sampleTask1 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
@@ -292,6 +299,8 @@ export const sampleTask2 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description:
     'Add panel for controls toggles allowing for accessible interaction',
   description_rendered:
@@ -328,6 +337,8 @@ export const sampleTask3 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: 'Include options set by operating system preferences',
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
@@ -365,6 +376,8 @@ export const sampleTask4 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: 'Internationalization and Localization built in options',
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
@@ -402,6 +415,8 @@ export const sampleTask5 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -438,6 +453,8 @@ export const sampleTask6 = {
     slug: 'my-epic',
     github_users: [sampleGitHubUser2.id],
   },
+  project: null,
+  root_project: 'p1',
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -487,17 +504,17 @@ export const sampleProject1 = {
 
 export const sampleEpicSteps = [
   {
-    label: 'Add a task',
+    label: 'Create a Task',
     active: true,
     complete: false,
   },
   {
-    label: 'Assign a Developer to a task',
+    label: 'Assign a Developer to a Task',
     active: false,
     complete: false,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: false,
     complete: false,
   },
@@ -511,17 +528,17 @@ export const sampleEpicSteps = [
 
 export const sampleEpicStepsWithAction = [
   {
-    label: 'Add a task',
+    label: 'Create a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Assign a Developer to a task',
+    label: 'Assign a Developer to a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: true,
     complete: false,
     action: 'submit',
@@ -536,17 +553,17 @@ export const sampleEpicStepsWithAction = [
 
 export const sampleEpicStepsWithLink = [
   {
-    label: 'Add a task',
+    label: 'Create a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Assign a Developer to a task',
+    label: 'Assign a Developer to a Task',
     active: false,
     complete: true,
   },
   {
-    label: 'Submit this epic for review on GitHub',
+    label: 'Submit this Epic for review on GitHub',
     active: false,
     complete: true,
     action: 'submit',

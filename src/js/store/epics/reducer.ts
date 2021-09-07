@@ -11,6 +11,7 @@ export interface Epic {
   old_slugs: string[];
   description: string;
   description_rendered: string;
+  task_count: number;
   branch_name: string;
   branch_url: string | null;
   branch_diff_url: string | null;
