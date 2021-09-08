@@ -14,6 +14,7 @@ import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
+import HelpTour from '@/js/components/tour/help';
 import LandingModal from '@/js/components/tour/landing';
 import PlanTour from '@/js/components/tour/plan';
 import PlayTour from '@/js/components/tour/play';
@@ -378,9 +379,8 @@ const ProjectDetail = (
             )}
           </TabsPanel>
           <TabsPanel
-            className="tour-project-tasks-list"
             label={
-              <>
+              <div className="tour-project-tasks-list">
                 <TourPopover
                   id="tour-project-tasks-list"
                   align="top left"
@@ -395,7 +395,7 @@ const ProjectDetail = (
                   }
                 />
                 {i18n.t('Tasks')}
-              </>
+              </div>
             }
           >
             {tasks ? (
@@ -465,6 +465,10 @@ const ProjectDetail = (
         />
         <PlayTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAY}
+          onClose={handleTourClose}
+        />
+        <HelpTour
+          run={tourRunning === WALKTHROUGH_TYPES.HELP}
           onClose={handleTourClose}
         />
         <PlanTour
