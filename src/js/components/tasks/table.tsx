@@ -381,7 +381,7 @@ const TaskTable = ({
       <DataTableColumn
         key="status"
         label={
-          <>
+          <div className="tour-task-status-column">
             {i18n.t('Status')}
             <TourPopover
               id="tour-task-status-column"
@@ -401,7 +401,7 @@ const TaskTable = ({
                 </Trans>
               }
             />
-          </>
+          </div>
         }
         property="status"
         width={viewEpicsColumn ? '20%' : '30%'}
@@ -445,7 +445,7 @@ const TaskTable = ({
       <DataTableColumn
         key="assigned_qa"
         label={
-          <>
+          <div className="tour-project-task-tester">
             {i18n.t('Test')}
             <TourPopover
               id="tour-task-tester-column"
@@ -453,15 +453,15 @@ const TaskTable = ({
               heading={i18n.t('Task Testers')}
               body={
                 <Trans i18nKey="tourTaskTesterColumn">
-                  Assign yourself or someone else as a <b>Tester</b> to help on
-                  a Task for this Project. When a Task has a status of “Test,”
-                  it is ready for testing. Testers create a Test Org to view the
+                  Assign yourself or someone else as a Tester to help on a Task
+                  for this Project. When a Task has a status of <b>Test</b>, it
+                  is ready for testing. Testers create a Test Org to view the
                   Developer’s work, and approve the work or request changes
-                  before the Task can be Completed.
+                  before the Task can be completed.
                 </Trans>
               }
             />
-          </>
+          </div>
         }
         property="assigned_qa"
         width="5%"
