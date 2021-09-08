@@ -378,6 +378,7 @@ const ProjectDetail = (
             )}
           </TabsPanel>
           <TabsPanel
+            className="tour-project-tasks-list"
             label={
               <>
                 <TourPopover
