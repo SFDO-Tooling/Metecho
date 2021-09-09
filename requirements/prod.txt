@@ -33,7 +33,7 @@ autobahn==21.3.1
     #   daphne
 automat==20.2.0
     # via twisted
-beautifulsoup4==4.9.3
+beautifulsoup4==4.10.0
     # via -r requirements/prod.in
 bleach==3.3.1
     # via
