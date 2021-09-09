@@ -14,7 +14,6 @@ logger = logging.getLogger()
 class CTCSettings(pydantic.BaseSettings):
     metaci_release_webhook_url: str
     metaci_release_webhook_auth_key: str
-    ctc_sm_business_name_id: str
     ctc_repo_url: str
     heroku_app_name: str
     heroku_slug_commit: str
@@ -53,7 +52,6 @@ def check_change_traffic_control():
     result = call_ctc(
         f"{settings.metaci_release_webhook_url}/case/match-and-start",
         params={
-            "sm_business_name_id": settings.ctc_sm_business_name_id,
             "source_url": source_url,
             "step_description": settings.heroku_app_name,
         },
