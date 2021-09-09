@@ -41,7 +41,7 @@ const HelpTour = ({ run, onClose }: Props) => {
     },
     {
       target: '.tour-task-status-column',
-      title: i18n.t('Task Statuses'),
+      title: i18n.t('Task statuses'),
       content: (
         <Trans i18nKey="walkthroughTaskStatusColumn">
           A Task begins with a status of <b>Planned</b>. When a Dev Org is
