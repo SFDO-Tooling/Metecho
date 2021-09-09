@@ -2,6 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
+import { pick } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -19,10 +20,13 @@ import PlanTour from '@/js/components/tour/plan';
 import PlayTour from '@/js/components/tour/play';
 import TourPopover from '@/js/components/tour/popover';
 import {
+  ContributeCallback,
+  ContributeWorkModal,
   CreateOrgModal,
   DetailPageLayout,
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
+  OrgData,
   SpinnerWrapper,
   useAssignUserToTask,
   useFetchEpicsIfMissing,
@@ -33,6 +37,7 @@ import {
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
+import { Org } from '@/js/store/orgs/reducer';
 import { onboarded } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -53,9 +58,11 @@ const ProjectDetail = (
 ) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [createEpicModalOpen, setCreateEpicModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
+  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
@@ -74,7 +81,7 @@ const ProjectDetail = (
     props,
   );
   const assignUser = useAssignUserToTask();
-  const playgroundOrg = (orgs || [])[0];
+  const playgroundOrg = (orgs || [])[0] as Org | undefined;
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
   const {
@@ -120,34 +127,67 @@ const ProjectDetail = (
   }, [dispatch, epics?.next, isMounted, project?.id]);
 
   // "create epic" modal related
-  const openCreateModal = useCallback(() => {
-    setCreateModalOpen(true);
+  const openCreateEpicModal = useCallback(() => {
+    setCreateEpicModalOpen(true);
     setCreateOrgModalOpen(false);
     setCreateTaskModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
   }, []);
-  const closeCreateModal = useCallback(() => {
-    setCreateModalOpen(false);
+  const closeCreateEpicModal = useCallback(() => {
+    setCreateEpicModalOpen(false);
+  }, []);
+
+  // "create task" modal related
+  const openCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(true);
+    setCreateEpicModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+  }, []);
+  const closeCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(false);
   }, []);
 
   // "create scratch org" modal related
   const openCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(true);
-    setCreateModalOpen(false);
+    setCreateEpicModalOpen(false);
     setCreateTaskModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
   }, []);
   const closeCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(false);
   }, []);
 
-  const openCreateTaskModal = useCallback(() => {
-    setCreateTaskModalOpen(true);
-    setCreateModalOpen(false);
-    setCreateOrgModalOpen(false);
-  }, []);
-
-  const closeCreateTaskModal = useCallback(() => {
+  // "contribute work" modal related:
+  const openContributeModal = () => {
+    setContributeModalOpen(true);
+    setCreateEpicModalOpen(false);
     setCreateTaskModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setConvertOrgData(null);
+  };
+  const closeContributeModal = useCallback(() => {
+    setContributeModalOpen(false);
   }, []);
+  const createAndContribute: ContributeCallback = useCallback(
+    (orgData, { createEpicLessTask }) => {
+      setConvertOrgData(orgData);
+      if (createEpicLessTask) {
+        setCreateTaskModalOpen(true);
+        setCreateEpicModalOpen(false);
+      } else {
+        setCreateEpicModalOpen(true);
+        setCreateTaskModalOpen(false);
+      }
+      setCreateOrgModalOpen(false);
+      setContributeModalOpen(false);
+    },
+    [],
+  );
 
   // guided tour related
   const closeTourLandingModal = useCallback(() => {
@@ -263,6 +303,7 @@ const ProjectDetail = (
                         org={playgroundOrg}
                         project={project}
                         repoUrl={project.repo_url}
+                        openContributeModal={openContributeModal}
                       />
                     </div>
                   </div>
@@ -313,7 +354,7 @@ const ProjectDetail = (
                     <Button
                       label={i18n.t('Create an Epic')}
                       variant="brand"
-                      onClick={openCreateModal}
+                      onClick={openCreateEpicModal}
                       className="tour-create-epic"
                     />
                     <TourPopover
@@ -454,8 +495,9 @@ const ProjectDetail = (
         <CreateEpicModal
           user={user}
           project={project}
-          isOpen={createModalOpen}
-          closeCreateModal={closeCreateModal}
+          isOpen={createEpicModalOpen}
+          playgroundOrgData={convertOrgData}
+          closeCreateModal={closeCreateEpicModal}
         />
         <LandingModal
           isOpen={tourLandingModalOpen}
@@ -477,9 +519,19 @@ const ProjectDetail = (
         />
         <CreateTaskModal
           project={project}
-          isOpenOrOrgId={createTaskModalOpen}
+          isOpen={createTaskModalOpen}
+          playgroundOrgData={convertOrgData}
           closeCreateModal={closeCreateTaskModal}
         />
+        {playgroundOrg ? (
+          <ContributeWorkModal
+            isOpen={contributeModalOpen}
+            hasPermissions={project.has_push_permission}
+            orgData={pick(playgroundOrg, ['id', 'org_config_name'])}
+            closeModal={closeContributeModal}
+            doContribute={createAndContribute}
+          />
+        ) : null}
       </DetailPageLayout>
     </DocumentTitle>
   );

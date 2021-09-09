@@ -692,4 +692,72 @@ describe('<ProjectDetail />', () => {
       });
     });
   });
+
+  describe('<ContributeWorkModal />', () => {
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText, getByLabelText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+
+        fireEvent.click(getByLabelText('Create a new Task with no Epic'));
+        fireEvent.click(getByLabelText('Create a new Epic and Task'));
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
+      });
+    });
+
+    describe('"Contribute" click with Epic', () => {
+      test('opens Create Epic modal', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(getByText('Contribute'));
+
+        expect(
+          getByText('Create an Epic to Contribute Work from Scratch Org'),
+        ).toBeVisible();
+      });
+    });
+
+    describe('"Contribute" click without Epic', () => {
+      test('opens Create Task modal', () => {
+        const { getByText, getByLabelText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(getByLabelText('Create a new Task with no Epic'));
+        fireEvent.click(getByText('Contribute'));
+
+        expect(
+          getByText('Create a Task to Contribute Work from Scratch Org'),
+        ).toBeVisible();
+      });
+    });
+
+    describe('User does not have permissions', () => {
+      test('does not allow contributing', () => {
+        const projects = {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        };
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            projects,
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+        expect(
+          getByText('You do not have “push” access', { exact: false }),
+        ).toBeVisible();
+      });
+    });
+  });
 });
