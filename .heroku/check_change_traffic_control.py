@@ -12,8 +12,8 @@ logger = logging.getLogger()
 
 
 class CTCSettings(pydantic.BaseSettings):
-    metaci_release_webhook_url: str
-    metaci_release_webhook_auth_key: str
+    ctc_url: str
+    ctc_auth_key: str
     ctc_repo_url: str
     heroku_app_name: str
     heroku_slug_commit: str
@@ -28,7 +28,7 @@ def call_ctc(endpoint, **kw):
             "iss": settings.heroku_app_name,
             "exp": timegm(datetime.utcnow().utctimetuple()),
         },
-        settings.metaci_release_webhook_auth_key,
+        settings.ctc_auth_key,
         algorithm="HS256",
     )
     headers = {"Authorization": f"Bearer {assertion}"}
@@ -50,7 +50,7 @@ def check_change_traffic_control():
 
     # find Case and start implementation step
     result = call_ctc(
-        f"{settings.metaci_release_webhook_url}/case/match-and-start",
+        f"{settings.ctc_url}/case/match-and-start",
         params={
             "source_url": source_url,
             "step_description": settings.heroku_app_name,
@@ -69,7 +69,7 @@ def check_change_traffic_control():
         # stop implementation step
         logger.info(f"Updating implementation step status to: {status}")
         call_ctc(
-            f"{settings.metaci_release_webhook_url}/implementation/{step_id}/stop",
+            f"{settings.ctc_url}/implementation/{step_id}/stop",
             params={"status": status},
         )
         # if not successful, propagate the return code
