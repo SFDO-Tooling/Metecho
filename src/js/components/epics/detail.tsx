@@ -701,6 +701,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   projectId={project.id}
                   projectSlug={project.slug}
                   tasks={tasks}
+                  isFetched
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}

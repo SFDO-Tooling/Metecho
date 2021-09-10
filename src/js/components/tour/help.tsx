@@ -24,7 +24,7 @@ const HelpTour = (props: TourProps) => {
       disableBeacon: true,
     },
     {
-      target: '.tour-project-task-tester',
+      target: '.tour-task-tester-column',
       title: i18n.t('Task Testers'),
       content: (
         <Trans i18nKey="walkthroughTaskTester">
