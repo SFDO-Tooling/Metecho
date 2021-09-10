@@ -648,6 +648,15 @@ describe('<ProjectDetail />', () => {
               tasks: [],
             },
           },
+          projects: {
+            ...defaultState.projects,
+            projects: [
+              {
+                ...defaultState.projects.projects[0],
+                has_push_permission: false,
+              },
+            ],
+          },
         },
       });
       fireEvent.click(result.getByText('Create Scratch Org'));
