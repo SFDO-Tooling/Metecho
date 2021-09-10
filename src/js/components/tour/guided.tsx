@@ -15,7 +15,8 @@ import tourStyles from '@/js/components/tour/styles';
 
 export interface TourProps {
   run: boolean;
-  onClose: () => void;
+  onStart?: () => void;
+  onClose?: () => void;
   onBeforeStep?: (index: number) => void;
 }
 
@@ -37,7 +38,7 @@ export const getFinalStep = (): Step => ({
   disableBeacon: true,
 });
 
-const GuidedTour = ({ steps, run, onClose, onBeforeStep }: Props) => {
+const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
   const [helpers, setHelpers] = useState<StoreHelpers | null>(null);
 
   const handleCallback = useCallback(
@@ -50,15 +51,18 @@ const GuidedTour = ({ steps, run, onClose, onBeforeStep }: Props) => {
       if (finished.includes(status) || action === ACTIONS.CLOSE) {
         /* istanbul ignore else */
         if (helpers) {
-          helpers.close();
+          helpers.reset(false);
         }
-        onClose();
+        onClose?.();
       }
-      if (onBeforeStep && type === EVENTS.STEP_BEFORE) {
-        onBeforeStep(index);
+      if (type === EVENTS.TOUR_START) {
+        onStart?.();
+      }
+      if (type === EVENTS.STEP_BEFORE) {
+        onBeforeStep?.(index);
       }
     },
-    [onBeforeStep, helpers, onClose],
+    [helpers, onClose, onStart, onBeforeStep],
   );
 
   return (

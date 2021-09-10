@@ -182,6 +182,9 @@ const ProjectDetail = (
         break;
     }
   }, []);
+  const handlePlanTourStart = useCallback(() => {
+    setSelectedTabOverride(0);
+  }, []);
 
   const handleTabSelect = useCallback((idx: number) => {
     /* istanbul ignore else */
@@ -492,6 +495,7 @@ const ProjectDetail = (
         />
         <PlanTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAN}
+          onStart={handlePlanTourStart}
           onClose={handleTourClose}
         />
         <CreateOrgModal

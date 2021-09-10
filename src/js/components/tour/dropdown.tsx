@@ -43,7 +43,11 @@ const TourDropdown = ({
   const projectUrl = project ? routes.project_detail(project.slug) : null;
   const user = useSelector(selectUserState);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const isMounted = useIsMounted();
+
+  const handleOpenClose = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const handleClose = useCallback(() => setIsOpen(false), []);
 
   const handleSelect = useCallback(
     (type: WalkthroughType) => {
@@ -51,8 +55,9 @@ const TourDropdown = ({
       if (projectUrl) {
         history.push(projectUrl, { [SHOW_WALKTHROUGH]: type });
       }
+      handleClose();
     },
-    [projectUrl], // eslint-disable-line react-hooks/exhaustive-deps
+    [projectUrl, handleClose], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleToggle = useCallback(
@@ -78,6 +83,9 @@ const TourDropdown = ({
       hasNoCloseButton
       heading={i18n.t('How to Use Metecho')}
       classNameBody="slds-p-horizontal_none"
+      isOpen={isOpen}
+      onClick={handleOpenClose}
+      onRequestClose={handleClose}
       body={
         <>
           {project && (
