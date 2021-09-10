@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-// import backpackSvg from '@/img/backpack-lg.svg?raw';
+import backpackSvg from '@/img/backpack-lg.svg?raw';
 import mapSvg from '@/img/map-lg.svg?raw';
 import seesawSvg from '@/img/seesaw-lg.svg?raw';
 import { Illustration } from '@/js/components/utils';
@@ -37,14 +37,13 @@ const LandingModal = ({
       type: WALKTHROUGH_TYPES.PLAY,
       icon: seesawSvg,
     },
-    // {
-    //   header: i18n.t('I want to Help'),
-    //   tag: i18n.t('Browse available Tasks; give your input.'),
-    //   linkText: i18n.t('Start Help Walkthrough'),
-    //   type: WALKTHROUGH_TYPES.HELP,
-    //   icon: backpackSvg,
-    //   disabled: true,
-    // },
+    {
+      header: i18n.t('I want to Help'),
+      tag: i18n.t('Browse available Tasks; give your input.'),
+      linkText: i18n.t('Start Help Walkthrough'),
+      type: WALKTHROUGH_TYPES.HELP,
+      icon: backpackSvg,
+    },
     {
       header: i18n.t('I want to Plan'),
       tag: i18n.t('Create a Task or an Epic; add your work.'),
@@ -76,7 +75,7 @@ const LandingModal = ({
             <div
               className="slds-p-around_small
                 slds-small-size_1-of-1
-                slds-medium-size_1-of-2"
+                slds-medium-size_1-of-3"
               key={idx}
             >
               <Card

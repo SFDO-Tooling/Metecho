@@ -355,7 +355,7 @@ const ProjectDetail = (
               />
             </div>
             <EpicTable
-              epics={epics?.epics || []}
+              epics={/* istanbul ignore next */ epics?.epics || []}
               isFetched={Boolean(epics?.fetched)}
               userHasPermissions={project.has_push_permission}
               projectSlug={project.slug}
