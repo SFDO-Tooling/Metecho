@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 import Joyride, {
   ACTIONS,
   CallBackProps,
+  EVENTS,
   STATUS,
   status as StatusType,
   Step,
@@ -12,10 +13,14 @@ import Joyride, {
 
 import tourStyles from '@/js/components/tour/styles';
 
-interface Props {
-  steps: Step[];
+export interface TourProps {
   run: boolean;
   onClose: () => void;
+  onBeforeStep?: (index: number) => void;
+}
+
+interface Props extends TourProps {
+  steps: Step[];
 }
 
 export const getFinalStep = (): Step => ({
@@ -32,12 +37,12 @@ export const getFinalStep = (): Step => ({
   disableBeacon: true,
 });
 
-const GuidedTour = ({ steps, run, onClose }: Props) => {
+const GuidedTour = ({ steps, run, onClose, onBeforeStep }: Props) => {
   const [helpers, setHelpers] = useState<StoreHelpers | null>(null);
 
   const handleCallback = useCallback(
     (data: CallBackProps) => {
-      const { action, status } = data;
+      const { action, status, type, index } = data;
       const finished: StatusType[keyof StatusType][] = [
         STATUS.FINISHED,
         STATUS.SKIPPED,
@@ -49,8 +54,11 @@ const GuidedTour = ({ steps, run, onClose }: Props) => {
         }
         onClose();
       }
+      if (onBeforeStep && type === EVENTS.STEP_BEFORE) {
+        onBeforeStep(index);
+      }
     },
-    [onClose, helpers],
+    [onBeforeStep, helpers, onClose],
   );
 
   return (

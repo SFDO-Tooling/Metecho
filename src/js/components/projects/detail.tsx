@@ -61,6 +61,9 @@ const ProjectDetail = (
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
   const [tasksTabViewed, setTasksTabViewed] = useState(false);
+  const [selectedTabOverride, setSelectedTabOverride] = useState<
+    number | undefined
+  >(undefined);
   const [tourRunning, setTourRunning] = useState<WalkthroughType | null>(null);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -167,6 +170,17 @@ const ProjectDetail = (
   );
   const handleTourClose = useCallback(() => {
     setTourRunning(null);
+    setSelectedTabOverride(undefined);
+  }, []);
+  const handleHelpTourStep = useCallback((index: number) => {
+    switch (index) {
+      case 0:
+      case 1:
+      case 2:
+        setSelectedTabOverride(1);
+        setTasksTabViewed(true);
+        break;
+    }
   }, []);
 
   const handleTabSelect = useCallback((idx: number) => {
@@ -288,7 +302,11 @@ const ProjectDetail = (
           </div>
         }
       >
-        <Tabs variant="scoped" onSelect={handleTabSelect}>
+        <Tabs
+          variant="scoped"
+          onSelect={handleTabSelect}
+          selectedIndex={selectedTabOverride}
+        >
           <TabsPanel
             label={
               <>
@@ -470,6 +488,7 @@ const ProjectDetail = (
         <HelpTour
           run={tourRunning === WALKTHROUGH_TYPES.HELP}
           onClose={handleTourClose}
+          onBeforeStep={handleHelpTourStep}
         />
         <PlanTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAN}
