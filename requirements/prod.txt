@@ -370,7 +370,7 @@ sqlalchemy==1.4.22
     # via
     #   cumulusci
     #   snowfakery
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 terminaltables==3.1.0
     # via cumulusci
