@@ -177,6 +177,9 @@ const ProjectDetail = (
       case 1:
       case 2:
         setSelectedTabOverride(1);
+        // Activating the tab programmatically does not fire the
+        // `handleTabSelect` callback to fetch Tasks from the API,
+        // so do that manually:
         setTasksTabViewed(true);
         break;
     }
