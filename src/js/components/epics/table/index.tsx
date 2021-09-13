@@ -68,7 +68,7 @@ const EpicTable = ({
             </>
           }
           property="name"
-          width="100%"
+          width="60%"
           primaryColumn
         >
           <DetailTableCell projectSlug={projectSlug} />
@@ -92,7 +92,7 @@ const EpicTable = ({
             </>
           }
           property="task_count"
-          width="0"
+          width="5%"
         >
           <TaskCountTableCell />
         </DataTableColumn>
@@ -120,7 +120,7 @@ const EpicTable = ({
             </>
           }
           property="status"
-          width="0"
+          width="30%"
         >
           <StatusTableCell />
         </DataTableColumn>
@@ -151,7 +151,7 @@ const EpicTable = ({
             </>
           }
           property="numCollaborators"
-          width="0"
+          width="5%"
         >
           <CollaboratorTableCell />
         </DataTableColumn>
