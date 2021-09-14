@@ -14,6 +14,7 @@ import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
+import HelpTour from '@/js/components/tour/help';
 import LandingModal from '@/js/components/tour/landing';
 import PlanTour from '@/js/components/tour/plan';
 import PlayTour from '@/js/components/tour/play';
@@ -23,7 +24,6 @@ import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
-  SpinnerWrapper,
   useAssignUserToTask,
   useFetchEpicsIfMissing,
   useFetchOrgsIfMissing,
@@ -60,6 +60,9 @@ const ProjectDetail = (
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
   const [tasksTabViewed, setTasksTabViewed] = useState(false);
+  const [selectedTabOverride, setSelectedTabOverride] = useState<
+    number | undefined
+  >(undefined);
   const [tourRunning, setTourRunning] = useState<WalkthroughType | null>(null);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -166,6 +169,23 @@ const ProjectDetail = (
   );
   const handleTourClose = useCallback(() => {
     setTourRunning(null);
+    setSelectedTabOverride(undefined);
+  }, []);
+  const handleHelpTourStep = useCallback((index: number) => {
+    switch (index) {
+      case 0:
+      case 1:
+      case 2:
+        setSelectedTabOverride(1);
+        // Activating the tab programmatically does not fire the
+        // `handleTabSelect` callback to fetch Tasks from the API,
+        // so do that manually:
+        setTasksTabViewed(true);
+        break;
+    }
+  }, []);
+  const handlePlanTourStart = useCallback(() => {
+    setSelectedTabOverride(0);
   }, []);
 
   const handleTabSelect = useCallback((idx: number) => {
@@ -278,6 +298,7 @@ const ProjectDetail = (
             ) : (
               // Fetching scratch orgs from API
               <Button
+                className="tour-scratch-org"
                 label={
                   <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
                 }
@@ -287,7 +308,11 @@ const ProjectDetail = (
           </div>
         }
       >
-        <Tabs variant="scoped" onSelect={handleTabSelect}>
+        <Tabs
+          variant="scoped"
+          onSelect={handleTabSelect}
+          selectedIndex={selectedTabOverride}
+        >
           <TabsPanel
             label={
               <>
@@ -306,80 +331,52 @@ const ProjectDetail = (
               </>
             }
           >
-            {epics?.fetched ? (
-              <>
-                {project.has_push_permission && (
-                  <div className="slds-m-bottom_medium slds-is-relative">
-                    <Button
-                      label={i18n.t('Create an Epic')}
-                      variant="brand"
-                      onClick={openCreateModal}
-                      className="tour-create-epic"
-                    />
-                    <TourPopover
-                      id="tour-project-create-epic"
-                      align="top left"
-                      body={
-                        <Trans i18nKey="tourCreateEpic">
-                          Create an Epic to make a group of related Tasks.
-                          Invite multiple Collaborators to your Epic and assign
-                          people as Developers and Testers for each Task. Epics
-                          are equivalent to GitHub branches, just like Tasks.
-                        </Trans>
-                      }
-                      heading={i18n.t('Create Epics to group Tasks')}
-                    />
-                  </div>
-                )}
-                {epics.epics.length > 0 ? (
-                  <>
-                    <EpicTable epics={epics.epics} projectSlug={project.slug} />
-                    {epics.next ? (
-                      <div className="slds-m-top_large">
-                        <Button
-                          label={
-                            fetchingEpics ? (
-                              <LabelWithSpinner />
-                            ) : (
-                              i18n.t('Load More')
-                            )
-                          }
-                          onClick={fetchMoreEpics}
-                        />
-                      </div>
-                    ) : /* istanbul ignore next */ null}
-                  </>
-                ) : (
-                  <p>
-                    {project.has_push_permission ? (
-                      <Trans i18nKey="createEpicHelpText">
-                        Epics in Metecho are the high-level features that can be
-                        broken down into smaller parts by creating Tasks. You
-                        can create a new Epic or create an Epic based on an
-                        existing GitHub branch. Every Epic requires a unique
-                        Epic name, which becomes the branch name in GitHub
-                        unless you choose to use an existing branch.
-                      </Trans>
-                    ) : (
-                      <Trans i18nKey="noEpics">
-                        Epics in Metecho are the high-level features that can be
-                        broken down into smaller parts by creating Tasks. There
-                        are no Epics for this Project.
-                      </Trans>
-                    )}
-                  </p>
-                )}
-              </>
-            ) : (
-              // Fetching epics from API
-              <div className="slds-is-relative slds-p-vertical_x-large">
-                <SpinnerWrapper />
+            <div className="slds-m-bottom_medium slds-is-relative">
+              <Button
+                label={
+                  epics?.fetched
+                    ? i18n.t('Create an Epic')
+                    : i18n.t('Loading Epics…')
+                }
+                variant="brand"
+                onClick={openCreateModal}
+                className="tour-create-epic"
+                disabled={!project.has_push_permission || !epics?.fetched}
+              />
+              <TourPopover
+                id="tour-project-create-epic"
+                align="top left"
+                body={
+                  <Trans i18nKey="tourCreateEpic">
+                    Create an Epic to make a group of related Tasks. Invite
+                    multiple Collaborators to your Epic and assign people as
+                    Developers and Testers for each Task. Epics are equivalent
+                    to GitHub branches, just like Tasks.
+                  </Trans>
+                }
+                heading={i18n.t('Create Epics to group Tasks')}
+              />
+            </div>
+            <EpicTable
+              epics={/* istanbul ignore next */ epics?.epics || []}
+              isFetched={Boolean(epics?.fetched)}
+              userHasPermissions={project.has_push_permission}
+              projectSlug={project.slug}
+            />
+            {epics?.epics?.length && epics?.next ? (
+              <div className="slds-m-top_large">
+                <Button
+                  label={
+                    fetchingEpics ? <LabelWithSpinner /> : i18n.t('Load More')
+                  }
+                  onClick={fetchMoreEpics}
+                />
               </div>
-            )}
+            ) : /* istanbul ignore next */ null}
           </TabsPanel>
           <TabsPanel
             label={
-              <>
+              <div className="tour-project-tasks-list">
                 <TourPopover
                   id="tour-project-tasks-list"
                   align="top left"
@@ -394,61 +391,43 @@ const ProjectDetail = (
                   }
                 />
                 {i18n.t('Tasks')}
-              </>
+              </div>
             }
           >
-            {tasks ? (
-              <>
-                {project.has_push_permission && (
-                  <div className="slds-m-bottom_medium slds-is-relative">
-                    <Button
-                      label={i18n.t('Create a Task')}
-                      variant="brand"
-                      onClick={openCreateTaskModal}
-                    />
-                    <TourPopover
-                      id="tour-project-add-task"
-                      align="top left"
-                      heading={i18n.t('Create a Task to contribute')}
-                      body={
-                        <Trans i18nKey="tourProjectCreateTask">
-                          To get started contributing to this Project, create a
-                          Task. Tasks represent small changes to this Project;
-                          each one has a Developer and a Tester. Tasks are
-                          equivalent to GitHub branches.
-                        </Trans>
-                      }
-                    />
-                  </div>
-                )}
-                {tasks.length > 0 ? (
-                  <TasksTableComponent
-                    projectId={project.id}
-                    projectSlug={project.slug}
-                    tasks={tasks}
-                    githubUsers={project.github_users}
-                    canAssign={project.has_push_permission}
-                    isRefreshingUsers={project.currently_fetching_github_users}
-                    assignUserAction={assignUser}
-                    viewEpicsColumn
-                  />
-                ) : (
-                  <p>
-                    <Trans i18nKey="noTasks">
-                      Tasks in Metecho represent small changes to this Project;
-                      each one has a Developer and a Tester. Tasks are
-                      equivalent to GitHub branches. There are no Tasks for this
-                      Project.
-                    </Trans>
-                  </p>
-                )}
-              </>
-            ) : (
-              // Fetching tasks from API
-              <div className="slds-is-relative slds-p-vertical_x-large">
-                <SpinnerWrapper />
-              </div>
-            )}
+            <div className="slds-m-bottom_medium slds-is-relative">
+              <Button
+                label={
+                  tasks ? i18n.t('Create a Task') : i18n.t('Loading Tasks…')
+                }
+                variant="brand"
+                onClick={openCreateTaskModal}
+                disabled={!project.has_push_permission || !tasks}
+              />
+              <TourPopover
+                id="tour-project-add-task"
+                align="top left"
+                heading={i18n.t('Create a Task to contribute')}
+                body={
+                  <Trans i18nKey="tourProjectCreateTask">
+                    To get started contributing to this Project, create a Task.
+                    Tasks represent small changes to this Project; each one has
+                    a Developer and a Tester. Tasks are equivalent to GitHub
+                    branches.
+                  </Trans>
+                }
+              />
+            </div>
+            <TasksTableComponent
+              projectId={project.id}
+              projectSlug={project.slug}
+              tasks={tasks || []}
+              isFetched={Boolean(tasks)}
+              githubUsers={project.github_users}
+              canAssign={project.has_push_permission}
+              isRefreshingUsers={project.currently_fetching_github_users}
+              assignUserAction={assignUser}
+              viewEpicsColumn
+            />
           </TabsPanel>
         </Tabs>
         <CreateEpicModal
@@ -466,8 +445,14 @@ const ProjectDetail = (
           run={tourRunning === WALKTHROUGH_TYPES.PLAY}
           onClose={handleTourClose}
         />
+        <HelpTour
+          run={tourRunning === WALKTHROUGH_TYPES.HELP}
+          onClose={handleTourClose}
+          onBeforeStep={handleHelpTourStep}
+        />
         <PlanTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAN}
+          onStart={handlePlanTourStart}
           onClose={handleTourClose}
         />
         <CreateOrgModal
