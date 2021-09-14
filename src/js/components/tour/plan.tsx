@@ -11,6 +11,19 @@ import GuidedTour, {
 const PlanTour = (props: TourProps) => {
   const steps: Step[] = [
     {
+      target: '.tour-project-tasks-list',
+      title: i18n.t('List of Tasks'),
+      content: (
+        <Trans i18nKey="walkthroughCreateTasks">
+          Select the Tasks tab to see a list of all the work being done on this
+          Project and who is doing it. Tasks represent small changes to the
+          Project and may be grouped with other Tasks in an Epic.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
       target: '.tour-create-epic',
       title: i18n.t('Create Epics to group Tasks'),
       content: (

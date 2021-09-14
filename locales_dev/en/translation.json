@@ -486,6 +486,7 @@
   "view changes": "view changes",
   "viewOutdatedOrg": "You may proceed with the outdated Org, but be aware that you will not be testing the latest changes.",
   "walkthroughCreateEpic": "Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple Collaborators to your Epic and assign different people as Developers and Testers for each Task.",
+  "walkthroughCreateTasks": "Select the Tasks tab to see a list of all the work being done on this Project and who is doing it. Tasks represent small changes to the Project and may be grouped with other Tasks in an Epic.",
   "walkthroughDropdown": "If you would like to review this or any other walkthrough, simply click the question mark. There is also a self-guided tour with more definitions and explanations.",
   "walkthroughHelp": "Review these walkthroughs anytime you need them, or turn on the self-guided tour when you have specific questions.",
   "walkthroughScratchOrg": "Scratch Orgs are a temporary place for you to view the work on this Project. You can use Scratch Orgs to play with changes to the Project without affecting the Project. Create a Scratch Org for the entire Project, or visit an Epic or Task to create a Scratch Org for specific work in progress.",
