@@ -3,14 +3,12 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
 
-import GuidedTour, { getFinalStep } from '@/js/components/tour/guided';
+import GuidedTour, {
+  getFinalStep,
+  TourProps,
+} from '@/js/components/tour/guided';
 
-interface Props {
-  run: boolean;
-  onClose: () => void;
-}
-
-const PlayTour = ({ run, onClose }: Props) => {
+const PlayTour = (props: TourProps) => {
   const steps: Step[] = [
     {
       target: '.tour-scratch-org',
@@ -30,7 +28,7 @@ const PlayTour = ({ run, onClose }: Props) => {
     getFinalStep(),
   ];
 
-  return <GuidedTour steps={steps} run={run} onClose={onClose} />;
+  return <GuidedTour steps={steps} {...props} />;
 };
 
 export default PlayTour;
