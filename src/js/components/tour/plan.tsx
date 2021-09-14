@@ -3,14 +3,12 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
 
-import GuidedTour, { getFinalStep } from '@/js/components/tour/guided';
+import GuidedTour, {
+  getFinalStep,
+  TourProps,
+} from '@/js/components/tour/guided';
 
-interface Props {
-  run: boolean;
-  onClose: () => void;
-}
-
-const PlanTour = ({ run, onClose }: Props) => {
+const PlanTour = (props: TourProps) => {
   const steps: Step[] = [
     {
       target: '.tour-create-epic',
@@ -28,7 +26,7 @@ const PlanTour = ({ run, onClose }: Props) => {
     getFinalStep(),
   ];
 
-  return <GuidedTour steps={steps} run={run} onClose={onClose} />;
+  return <GuidedTour steps={steps} {...props} />;
 };
 
 export default PlanTour;

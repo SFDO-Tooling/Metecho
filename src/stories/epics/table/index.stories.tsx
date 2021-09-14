@@ -41,6 +41,8 @@ const Template = ({ epics, ...rest }: StoryProps) => (
 export const EpicTable: Story<StoryProps> = Template.bind({});
 EpicTable.args = {
   epics: Object.keys(sampleEpics),
+  isFetched: true,
+  userHasPermissions: true,
   projectSlug: 'my-project',
 };
 EpicTable.argTypes = {

@@ -618,6 +618,37 @@ describe('<ProjectDetail />', () => {
       });
     });
 
+    describe('help tour click', () => {
+      test('runs tour with task tab active', async () => {
+        const { queryByText, findByText, getByText, getByTitle } = setup({
+          initialState: {
+            ...defaultState,
+            user: {
+              username: 'foobar',
+              onboarded_at: null,
+            },
+          },
+        });
+
+        expect.assertions(3);
+        await findByText('What can Metecho help you do today?', {
+          exact: false,
+        });
+        fireEvent.click(getByText('Start Help Walkthrough'));
+        const dialog = await findByText('List of Tasks');
+
+        expect(dialog).toBeVisible();
+
+        const btn = await findByText('Loading Tasks…');
+
+        expect(btn).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(queryByText('List of Tasks')).toBeNull();
+      });
+    });
+
     describe('redirect from menu dropdown', () => {
       test('runs tour', async () => {
         const { findByText, history } = setup({
