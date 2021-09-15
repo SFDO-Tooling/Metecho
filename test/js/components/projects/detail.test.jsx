@@ -608,13 +608,13 @@ describe('<ProjectDetail />', () => {
           exact: false,
         });
         fireEvent.click(getByText('Start Plan Walkthrough'));
-        const dialog = await findByText('Create Epics to group Tasks');
+        const dialog = await findByText('List of Tasks');
 
         expect(dialog).toBeVisible();
 
         fireEvent.click(getByTitle('Close'));
 
-        expect(queryByText('Create Epics to group Tasks')).toBeNull();
+        expect(queryByText('List of Tasks')).toBeNull();
       });
     });
 
@@ -656,7 +656,7 @@ describe('<ProjectDetail />', () => {
         });
 
         expect.assertions(2);
-        const dialog = await findByText('Create Epics to group Tasks');
+        const dialog = await findByText('List of Tasks');
 
         expect(dialog).toBeVisible();
         expect(history.replace).toHaveBeenCalledWith({ state: {} });

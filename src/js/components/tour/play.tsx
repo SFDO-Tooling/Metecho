@@ -49,7 +49,7 @@ const PlayTour = (props: TourProps) => {
           and create a Task Scratch Org to view only the work on that Task.
         </Trans>
       ),
-      placement: 'left',
+      placement: 'right',
       disableBeacon: true,
     },
     {
