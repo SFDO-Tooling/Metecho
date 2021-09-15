@@ -11,18 +11,58 @@ import GuidedTour, {
 const PlayTour = (props: TourProps) => {
   const steps: Step[] = [
     {
+      target: '.walkthrough-metecho-name',
+      title: i18n.t('What’s in a name?'),
+      content: (
+        <Trans i18nKey="walkthroughMetechoName">
+          Metecho makes it easier for you to view, test, and contribute to
+          Salesforce Projects without learning GitHub. Create Orgs to view work
+          and Tasks to contribute work. Pronunciation: “Met” rhymes with “Bet.”
+          “Echo” as in the reflection of sound waves. Definition: To share or
+          participate in.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
       target: '.tour-scratch-org',
       title: i18n.t('View & play with a Project'),
       content: (
         <Trans i18nKey="walkthroughScratchOrg">
           Scratch Orgs are a temporary place for you to view the work on this
           Project. You can use Scratch Orgs to play with changes to the Project
-          without affecting the Project. Create a Scratch Org for the entire
-          Project, or visit an Epic or Task to create a Scratch Org for specific
-          work in progress.
+          without affecting the Project.
         </Trans>
       ),
       placement: 'left',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-project-tasks-list',
+      title: i18n.t('List of Tasks'),
+      content: (
+        <Trans i18nKey="walkthroughListTasks">
+          Select the Tasks tab to see a list of all the work being done on this
+          Project and who is doing it. Tasks represent small changes to the
+          Project and may be grouped with other Tasks in an Epic. Select a Task
+          and create a Task Scratch Org to view only the work on that Task.
+        </Trans>
+      ),
+      placement: 'left',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-project-epics-list',
+      title: i18n.t('List of Epics'),
+      content: (
+        <Trans i18nKey="walkthroughListEpics">
+          Select the Epics tab to see a list of all the Epics for this Project.
+          Each Epic is a group of related Tasks. Select an Epic and create an
+          Epic Scratch Org to view only the work on that Epic.
+        </Trans>
+      ),
+      placement: 'right',
       disableBeacon: true,
     },
     getFinalStep(),

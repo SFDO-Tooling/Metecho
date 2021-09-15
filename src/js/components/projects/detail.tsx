@@ -315,7 +315,7 @@ const ProjectDetail = (
         >
           <TabsPanel
             label={
-              <>
+              <div className="tour-project-epics-list">
                 <TourPopover
                   id="tour-project-epics-list"
                   align="top left"
@@ -328,7 +328,7 @@ const ProjectDetail = (
                   }
                 />
                 {i18n.t('Epics')}
-              </>
+              </div>
             }
           >
             <div className="slds-m-bottom_medium slds-is-relative">
