@@ -14,7 +14,7 @@ const PlanTour = (props: TourProps) => {
       target: '.tour-project-tasks-list',
       title: i18n.t('List of Tasks'),
       content: (
-        <Trans i18nKey="walkthroughCreateTasks">
+        <Trans i18nKey="walkthroughTasksTab">
           Select the Tasks tab to see a list of all the work being done on this
           Project and who is doing it. Tasks represent small changes to the
           Project and may be grouped with other Tasks in an Epic.
