@@ -9,6 +9,11 @@ import GuidedTour, {
 } from '@/js/components/tour/guided';
 
 const HelpTour = (props: TourProps) => {
+  /*
+    Note: Any step which targets an element that may be hidden (or not in the
+    DOM) will be skipped unless the element is made visible when the *prior*
+    step is active.
+  */
   const steps: Step[] = [
     {
       target: '.tour-project-tasks-list',

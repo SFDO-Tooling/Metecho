@@ -178,6 +178,7 @@ const ProjectDetail = (
     // so do that manually:
     setTasksTabViewed(true);
   }, []);
+  /* istanbul ignore next */
   const handlePlayTourStep = useCallback(
     (index: number) => {
       switch (index) {
@@ -191,6 +192,7 @@ const ProjectDetail = (
     },
     [setTasksTabActive],
   );
+  /* istanbul ignore next */
   const handlePlanTourStep = useCallback((index: number) => {
     switch (index) {
       case 2:
