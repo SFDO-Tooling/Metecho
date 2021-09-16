@@ -49,10 +49,7 @@ const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
         STATUS.SKIPPED,
       ];
       if (finished.includes(status) || action === ACTIONS.CLOSE) {
-        /* istanbul ignore else */
-        if (helpers) {
-          helpers.reset(false);
-        }
+        helpers?.reset(false);
         onClose?.();
       }
       const starting: string[] = [EVENTS.TOUR_START, EVENTS.TOUR_STATUS];
@@ -79,6 +76,7 @@ const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
       continuous
       showProgress
       disableScrolling
+      hideBackButton
       getHelpers={setHelpers}
       callback={handleCallback}
       styles={tourStyles}
