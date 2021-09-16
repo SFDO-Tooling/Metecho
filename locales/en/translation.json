@@ -71,6 +71,7 @@
   "Create Scratch Org": "Create Scratch Org",
   "Create a Dev Org": "Create a Dev Org",
   "Create a Task": "Create a Task",
+  "Create a Task to Contribute": "Create a Task to Contribute",
   "Create a Task for {{epic_name}}": "Create a Task for {{epic_name}}",
   "Create a Task for {{project_name}}": "Create a Task for {{project_name}}",
   "Create a Task or an Epic; add your work.": "Create a Task or an Epic; add your work.",
@@ -490,6 +491,7 @@
   "view changes": "view changes",
   "viewOutdatedOrg": "You may proceed with the outdated Org, but be aware that you will not be testing the latest changes.",
   "walkthroughCreateEpic": "Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple Collaborators to your Epic and assign different people as Developers and Testers for each Task.",
+  "walkthroughCreateTask": "To get started contributing to this Project, create a Task. Tasks represent small changes to this Project; each one has a Developer and a Tester. Tasks are equivalent to GitHub branches.",
   "walkthroughDropdown": "If you would like to review this or any other walkthrough, simply click the question mark. There is also a self-guided tour with more definitions and explanations.",
   "walkthroughHelp": "Review these walkthroughs anytime you need them, or turn on the self-guided tour when you have specific questions.",
   "walkthroughListEpics": "Select the Epics tab to see a list of all the Epics for this Project. Each Epic is a group of related Tasks. Select an Epic and create an Epic Scratch Org to view only the work on that Epic.",
@@ -499,6 +501,5 @@
   "walkthroughTaskStatusColumn": "A Task begins with a status of <1>Planned</1>. When a Dev Org is created, the status changes to <3>In Progress</3>, and the Developer begins work. When the Developer is ready for the work to be tested, the status becomes <5>Test</5>. After Testing, the status becomes either <7>Changes Requested</7> or <9>Approved</9> based on the Tester’s review. If the Developer retrieves new changes, the status moves back to <11>In Progress</11>. Once the Task is added to the Project on GitHub, the status is <13>Complete</13>.",
   "walkthroughTaskTester": "Assign yourself or someone else as a Tester to help on a Task for this Project. When a Task has a status of <1>Test</1>, it is ready for testing. Testers create a Test Org to view the Developer’s work, and approve the work or request changes before the Task can be completed.",
   "walkthroughTasksList": "Select the Tasks tab to see a list of all the work being done on this Project and who is doing it. Tasks represent small changes to the Project and may be grouped with other Tasks in an Epic.",
-  "walkthroughTasksTab": "Select the Tasks tab to see a list of all the work being done on this Project and who is doing it. Tasks represent small changes to the Project and may be grouped with other Tasks in an Epic.",
   "welcomeMessage": "<0>To get started</0> log in with your GitHub account."
 }

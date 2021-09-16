@@ -11,13 +11,13 @@ import GuidedTour, {
 const PlanTour = (props: TourProps) => {
   const steps: Step[] = [
     {
-      target: '.tour-project-tasks-list',
-      title: i18n.t('List of Tasks'),
+      target: '.tour-create-task',
+      title: i18n.t('Create a Task to Contribute'),
       content: (
-        <Trans i18nKey="walkthroughTasksTab">
-          Select the Tasks tab to see a list of all the work being done on this
-          Project and who is doing it. Tasks represent small changes to the
-          Project and may be grouped with other Tasks in an Epic.
+        <Trans i18nKey="walkthroughCreateTask">
+          To get started contributing to this Project, create a Task. Tasks
+          represent small changes to this Project; each one has a Developer and
+          a Tester. Tasks are equivalent to GitHub branches.
         </Trans>
       ),
       placement: 'right',

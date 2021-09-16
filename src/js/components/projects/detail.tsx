@@ -400,6 +400,7 @@ const ProjectDetail = (
                   tasks ? i18n.t('Create a Task') : i18n.t('Loading Tasks…')
                 }
                 variant="brand"
+                className="tour-create-task"
                 onClick={openCreateTaskModal}
                 disabled={!project.has_push_permission || !tasks}
               />
