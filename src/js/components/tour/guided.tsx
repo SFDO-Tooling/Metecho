@@ -55,7 +55,8 @@ const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
         }
         onClose?.();
       }
-      if (type === EVENTS.TOUR_START) {
+      const starting: string[] = [EVENTS.TOUR_START, EVENTS.TOUR_STATUS];
+      if (action === ACTIONS.START && starting.includes(type)) {
         onStart?.();
       }
       if (type === EVENTS.STEP_BEFORE) {
