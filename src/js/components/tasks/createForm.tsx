@@ -227,7 +227,7 @@ const CreateTaskModal = ({
       ]}
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
-        {!epic && (
+        {!epic && !isContributingFromOrg && (
           <p className="slds-align_absolute-center slds-m-bottom_small">
             {i18n.t(
               'You are creating a Task for this Project. To group multiple Tasks together, create an Epic.',
