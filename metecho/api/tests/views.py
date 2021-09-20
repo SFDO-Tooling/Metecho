@@ -522,7 +522,7 @@ class TestHookView:
 
 
 @pytest.mark.django_db
-class TestScratchOrgView:
+class TestScratchOrgViewSet:
     def test_commit_happy_path(self, client, scratch_org_factory):
         with ExitStack() as stack:
             commit_changes_from_org_job = stack.enter_context(

@@ -16,6 +16,7 @@ django-parler==2.2
 django-redis==5.0.0
 django-rq==2.4.1
 djangorestframework==3.12.4
+drf-spectacular==0.18.2
 furl==2.1.2
 github3-py==2.0.0
 honcho==1.0.1

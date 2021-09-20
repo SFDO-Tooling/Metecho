@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from github3.exceptions import ConnectionError, ResponseError
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -31,6 +32,7 @@ from .serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GuidedTourSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     ReviewSerializer,
@@ -78,11 +80,12 @@ class RepoPushPermissionMixin:
 class CreatePrMixin:
     error_pr_exists = ""  # Implement this
 
+    @extend_schema(request=CreatePrSerializer)
     @action(detail=True, methods=["POST"])
     def create_pr(self, request, pk=None):
+        """Queue a job to create a GitHub pull request."""
         serializer = CreatePrSerializer(data=self.request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         instance = self.get_object()
         if instance.pr_is_open:
             raise ValidationError(self.error_pr_exists)
@@ -99,8 +102,9 @@ class CreatePrMixin:
 class HookView(APIView):
     authentication_classes = (GitHubHookAuthentication,)
 
+    @extend_schema(exclude=True)
     def post(self, request):
-        # To support the various formats that GitHub can post to this endpoint:
+        """Intendend to respond to several GitHubs webhooks. Not consumed by the frontend."""
         serializers = {
             "push": PushHookSerializer,
             "pull_request": PrHookSerializer,
@@ -110,63 +114,69 @@ class HookView(APIView):
         if serializer_class is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = serializer_class(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
 
         serializer.process_hook()
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class CurrentUserViewSet(GenericViewSet):
-    """
-    Actions related to the current user
-    """
+    """Actions related to the current user."""
 
     model = User
+    queryset = User.objects.none()  # Required by drf-spectacular
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
 
-    def retrieve(self, request, pk=None):
+    @extend_schema(operation_id="current_user_retrieve")
+    def get(self, request):
+        """Get full details about the current user."""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+    @extend_schema(request=None)
     @action(methods=["PUT"], detail=False)
     def agree_to_tos(self, request):
+        """Set the user's `agreed_to_tos_at` field to the current datetime."""
         request.user.agreed_to_tos_at = timezone.now()
         request.user.save()
-        return self.retrieve(request)
+        return self.get(request)
 
+    @extend_schema(request=None)
     @action(methods=["PUT"], detail=False)
     def complete_onboarding(self, request):
+        """Set the user's `onboarded_at` field to the current datetime."""
         request.user.onboarded_at = timezone.now()
         request.user.save()
-        return self.retrieve(request)
+        return self.get(request)
 
+    @extend_schema(request=GuidedTourSerializer)
     @action(methods=["POST"], detail=False)
     def guided_tour(self, request):
-        enabled = request.data.get("enabled")
-        if enabled is not None:
-            request.user.self_guided_tour_enabled = enabled
+        """Update the user's guided-tour preferences and history."""
+        serializer = GuidedTourSerializer(instance=request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return self.get(request)
 
-        state = request.data.get("state")
-        if state is not None:
-            request.user.self_guided_tour_state = state
-
-        request.user.save()
-        return self.retrieve(request)
-
+    @extend_schema(request=None)
     @action(methods=["POST"], detail=False)
     def disconnect(self, request):
+        """Disconnect the current user from their SalesForce account."""
         request.user.invalidate_salesforce_credentials()
-        return self.retrieve(request)
+        return self.get(request)
 
+    @extend_schema(request=None, responses={202: None})
     @action(methods=["POST"], detail=False)
     def refresh(self, request):
+        """Queue a job to refresh the user's list of GitHub repositories."""
         request.user.queue_refresh_repositories()
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """Read-only information about all users."""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = MinimalUserSerializer
     pagination_class = CustomPaginator
@@ -174,6 +184,8 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
 
 
 class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """Read-only information about Metecho Projects."""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -194,22 +206,33 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
         return self.queryset.filter(repo_id__in=repo_ids)
 
+    @extend_schema(request=None, responses={202: None})
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):
+        """Queue a job to refresh the list of GitHub users for a Project."""
         project = self.get_object()
         project.queue_refresh_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=None, responses={202: None})
     @action(detail=True, methods=["POST"])
     def refresh_org_config_names(self, request, pk=None):
+        """Queue a job to refresh the list of ScratchOrg configs for a Project."""
         project = self.get_object()
         project.queue_available_org_config_names(user=request.user)
         return Response(
             self.get_serializer(project).data, status=status.HTTP_202_ACCEPTED
         )
 
-    @action(detail=True, methods=["GET"])
+    @extend_schema(
+        request=None,
+        responses=OpenApiResponse(
+            {"type": "array", "items": {"type": "string"}}, description=""
+        ),
+    )
+    @action(detail=True, methods=["GET"], pagination_class=None)
     def feature_branches(self, request, pk=None):
+        """Get a list of feature branch names for a Project."""
         instance = self.get_object()
         repo = gh.get_repo_info(
             None, repo_owner=instance.repo_owner, repo_name=instance.repo_name
@@ -232,6 +255,8 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
 
 
 class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
+    """Manage Epics related to a Metecho Project."""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = EpicSerializer
     pagination_class = CustomPaginator
@@ -252,6 +277,7 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
             "ordering", "-created_at", "name"
         )
 
+    @extend_schema(request=EpicCollaboratorsSerializer)
     @action(detail=True, methods=["POST", "PUT"])
     def collaborators(self, request, pk=None):
         """
@@ -268,6 +294,8 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
 
 
 class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
+    """Manage Tasks related to a Metecho Project or Epic."""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.select_related("epic", "epic__project").active()
@@ -275,11 +303,12 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for testing.")
 
+    @extend_schema(request=ReviewSerializer)
     @action(detail=True, methods=["POST"])
     def review(self, request, pk=None):
+        """Queue a job that submits a Task pull request review."""
         serializer = ReviewSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         task = self.get_object()
         org = serializer.validated_data["org"]
 
@@ -295,11 +324,17 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         )
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(
+        request=CanReassignSerializer,
+        responses=OpenApiResponse(
+            {"properties": {"can_reassign": {"type": "boolean"}}}, description=""
+        ),
+    )
     @action(detail=True, methods=["POST"])
     def can_reassign(self, request, pk=None):
+        """Check if a GitHub user can be assigned to a Task"""
         serializer = CanReassignSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         task = self.get_object()
         role = serializer.validated_data["role"]
         role_org_type = {
@@ -327,6 +362,7 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
             }
         )
 
+    @extend_schema(request=TaskAssigneeSerializer)
     @action(detail=True, methods=["POST", "PUT"])
     def assignees(self, request, pk=None):
         """
@@ -350,6 +386,8 @@ class ScratchOrgViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    """Manage SalesForce ScratchOrgs."""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer
     queryset = ScratchOrg.objects.active()
@@ -442,11 +480,12 @@ class ScratchOrgViewSet(
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    @extend_schema(request=CommitSerializer, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
     def commit(self, request, pk=None):
+        """Queue a job that commits changes captured from a ScratchOrg."""
         serializer = CommitSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
@@ -474,8 +513,10 @@ class ScratchOrgViewSet(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
 
+    @extend_schema(request=None, responses={302: None})
     @action(detail=True, methods=["GET"])
     def redirect(self, request, pk=None):
+        """Redirect to a ScratchOrg's URL."""
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
@@ -486,8 +527,10 @@ class ScratchOrgViewSet(
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)
 
+    @extend_schema(request=None, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
     def refresh(self, request, pk=None):
+        """Queue a job that retrieves the latest changes from a ScratchOrg."""
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
