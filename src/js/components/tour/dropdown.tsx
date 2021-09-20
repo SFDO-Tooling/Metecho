@@ -7,7 +7,7 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
 
-// import backpackIcon from '@/img/backpack-sm.svg';
+import backpackIcon from '@/img/backpack-sm.svg';
 import mapIcon from '@/img/map-sm.svg';
 import seesawIcon from '@/img/seesaw-sm.svg';
 import { useIsMounted } from '@/js/components/utils';
@@ -43,7 +43,11 @@ const TourDropdown = ({
   const projectUrl = project ? routes.project_detail(project.slug) : null;
   const user = useSelector(selectUserState);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const isMounted = useIsMounted();
+
+  const handleOpenClose = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const handleClose = useCallback(() => setIsOpen(false), []);
 
   const handleSelect = useCallback(
     (type: WalkthroughType) => {
@@ -51,8 +55,9 @@ const TourDropdown = ({
       if (projectUrl) {
         history.push(projectUrl, { [SHOW_WALKTHROUGH]: type });
       }
+      handleClose();
     },
-    [projectUrl], // eslint-disable-line react-hooks/exhaustive-deps
+    [projectUrl, handleClose], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleToggle = useCallback(
@@ -78,6 +83,9 @@ const TourDropdown = ({
       hasNoCloseButton
       heading={i18n.t('How to Use Metecho')}
       classNameBody="slds-p-horizontal_none"
+      isOpen={isOpen}
+      onClick={handleOpenClose}
+      onRequestClose={handleClose}
       body={
         <>
           {project && (
@@ -100,17 +108,22 @@ const TourDropdown = ({
                   }
                 />
               </li>
-              {/* <li className="slds-p-horizontal_small">
-                <Button
-                  label={i18n.t('Help Walkthrough')}
-                  variant="base"
-                  iconPosition="left"
-                  iconSize="large"
-                  iconPath={`${backpackIcon}#backpack-sm`}
-                  style={{ width: '100%' }}
-                  onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
-                />
-              </li> */}
+              {
+                <li className="slds-p-horizontal_small">
+                  <Button
+                    label={i18n.t('Help Walkthrough')}
+                    variant="base"
+                    iconPosition="left"
+                    iconSize="large"
+                    iconPath={`${backpackIcon}#backpack-sm`}
+                    style={{ width: '100%' }}
+                    onClick={
+                      /* istanbul ignore next */ () =>
+                        handleSelect(WALKTHROUGH_TYPES.HELP)
+                    }
+                  />
+                </li>
+              }
               <li className="slds-p-horizontal_small">
                 <Button
                   label={i18n.t('Plan Walkthrough')}

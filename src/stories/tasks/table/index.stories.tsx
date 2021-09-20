@@ -52,6 +52,7 @@ const Template = ({ tasks, ...rest }: StoryProps) => (
 export const TasksTable: Story<StoryProps> = Template.bind({});
 TasksTable.args = {
   tasks: Object.keys(sampleTasks),
+  isFetched: true,
   projectId: sampleProject1.id,
   projectSlug: sampleProject1.slug,
   epicUsers: [sampleGitHubUser1],

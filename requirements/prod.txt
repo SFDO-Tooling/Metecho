@@ -33,7 +33,7 @@ autobahn==21.3.1
     #   daphne
 automat==20.2.0
     # via twisted
-beautifulsoup4==4.9.3
+beautifulsoup4==4.10.0
     # via -r requirements/prod.in
 bleach==3.3.1
     # via
@@ -319,7 +319,7 @@ robotframework-stacktrace==0.4.1
     # via
     #   cumulusci
     #   robotframework-pabot
-rq==1.9.0
+rq==1.10.0
     # via
     #   django-rq
     #   rq-scheduler
@@ -370,7 +370,7 @@ sqlalchemy==1.4.22
     # via
     #   cumulusci
     #   snowfakery
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 terminaltables==3.1.0
     # via cumulusci

@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 import Joyride, {
   ACTIONS,
   CallBackProps,
+  EVENTS,
   STATUS,
   status as StatusType,
   Step,
@@ -12,10 +13,15 @@ import Joyride, {
 
 import tourStyles from '@/js/components/tour/styles';
 
-interface Props {
-  steps: Step[];
+export interface TourProps {
   run: boolean;
-  onClose: () => void;
+  onStart?: () => void;
+  onClose?: () => void;
+  onBeforeStep?: (index: number) => void;
+}
+
+interface Props extends TourProps {
+  steps: Step[];
 }
 
 export const getFinalStep = (): Step => ({
@@ -32,25 +38,29 @@ export const getFinalStep = (): Step => ({
   disableBeacon: true,
 });
 
-const GuidedTour = ({ steps, run, onClose }: Props) => {
+const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
   const [helpers, setHelpers] = useState<StoreHelpers | null>(null);
 
   const handleCallback = useCallback(
     (data: CallBackProps) => {
-      const { action, status } = data;
+      const { action, status, type, index } = data;
       const finished: StatusType[keyof StatusType][] = [
         STATUS.FINISHED,
         STATUS.SKIPPED,
       ];
       if (finished.includes(status) || action === ACTIONS.CLOSE) {
-        /* istanbul ignore else */
-        if (helpers) {
-          helpers.close();
-        }
-        onClose();
+        helpers?.reset(false);
+        onClose?.();
+      }
+      const starting: string[] = [EVENTS.TOUR_START, EVENTS.TOUR_STATUS];
+      if (action === ACTIONS.START && starting.includes(type)) {
+        onStart?.();
+      }
+      if (type === EVENTS.STEP_BEFORE) {
+        onBeforeStep?.(index);
       }
     },
-    [onClose, helpers],
+    [helpers, onClose, onStart, onBeforeStep],
   );
 
   return (
@@ -66,6 +76,7 @@ const GuidedTour = ({ steps, run, onClose }: Props) => {
       continuous
       showProgress
       disableScrolling
+      hideBackButton
       getHelpers={setHelpers}
       callback={handleCallback}
       styles={tourStyles}
