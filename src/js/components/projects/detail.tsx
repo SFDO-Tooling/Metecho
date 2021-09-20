@@ -211,21 +211,34 @@ const ProjectDetail = (
     setTourRunning(null);
     setSelectedTabOverride(undefined);
   }, []);
-  const handleHelpTourStep = useCallback((index: number) => {
+  const setTasksTabActive = useCallback(() => {
+    setSelectedTabOverride(1);
+    // Activating the tab programmatically does not fire the
+    // `handleTabSelect` callback to fetch Tasks from the API,
+    // so do that manually:
+    setTasksTabViewed(true);
+  }, []);
+  /* istanbul ignore next */
+  const handlePlayTourStep = useCallback(
+    (index: number) => {
+      switch (index) {
+        case 2:
+          setTasksTabActive();
+          break;
+        case 3:
+          setSelectedTabOverride(0);
+          break;
+      }
+    },
+    [setTasksTabActive],
+  );
+  /* istanbul ignore next */
+  const handlePlanTourStep = useCallback((index: number) => {
     switch (index) {
-      case 0:
-      case 1:
       case 2:
-        setSelectedTabOverride(1);
-        // Activating the tab programmatically does not fire the
-        // `handleTabSelect` callback to fetch Tasks from the API,
-        // so do that manually:
-        setTasksTabViewed(true);
+        setSelectedTabOverride(0);
         break;
     }
-  }, []);
-  const handlePlanTourStart = useCallback(() => {
-    setSelectedTabOverride(0);
   }, []);
 
   const handleTabSelect = useCallback((idx: number) => {
@@ -282,11 +295,7 @@ const ProjectDetail = (
         breadcrumb={[{ name: project.name }]}
         image={project.repo_image_url}
         sidebar={
-          <div
-            className="slds-m-bottom_x-large
-              metecho-secondary-block
-              slds-m-left_medium"
-          >
+          <div className="slds-m-bottom_x-large metecho-secondary-block">
             <div className="slds-is-relative heading">
               <TourPopover
                 id="tour-project-scratch-org"
@@ -356,7 +365,7 @@ const ProjectDetail = (
         >
           <TabsPanel
             label={
-              <>
+              <div className="tour-project-epics-list">
                 <TourPopover
                   id="tour-project-epics-list"
                   align="top left"
@@ -369,7 +378,7 @@ const ProjectDetail = (
                   }
                 />
                 {i18n.t('Epics')}
-              </>
+              </div>
             }
           >
             <div className="slds-m-bottom_medium slds-is-relative">
@@ -441,6 +450,7 @@ const ProjectDetail = (
                   tasks ? i18n.t('Create a Task') : i18n.t('Loading Tasks…')
                 }
                 variant="brand"
+                className="tour-create-task"
                 onClick={openCreateTaskModal}
                 disabled={!project.has_push_permission || !tasks}
               />
@@ -486,16 +496,18 @@ const ProjectDetail = (
         <PlayTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAY}
           onClose={handleTourClose}
+          onBeforeStep={handlePlayTourStep}
         />
         <HelpTour
           run={tourRunning === WALKTHROUGH_TYPES.HELP}
+          onStart={setTasksTabActive}
           onClose={handleTourClose}
-          onBeforeStep={handleHelpTourStep}
         />
         <PlanTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAN}
-          onStart={handlePlanTourStart}
+          onStart={setTasksTabActive}
           onClose={handleTourClose}
+          onBeforeStep={handlePlanTourStep}
         />
         <CreateOrgModal
           project={project}
