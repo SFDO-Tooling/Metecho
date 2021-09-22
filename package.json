@@ -171,6 +171,7 @@
     "html-webpack-plugin/**/ansi-regex": "^5.0.1",
     "i18next": "^20.6.1",
     "jest-junit/**/ansi-regex": "^5.0.1",
+    "react-joyride/**/nested-property": "^4.0.0",
     "trim": "^0.0.3"
   },
   "storybook-deployer": {
