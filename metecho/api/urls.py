@@ -29,7 +29,7 @@ urlpatterns = router.urls + [
     ),
 ]
 
-if settings.API_DOCS_ENABLED:
+if settings.API_DOCS_ENABLED:  # pragma: nocover
     urlpatterns += [
         path("schema/", SpectacularAPIView.as_view(), name="schema"),
         path(
