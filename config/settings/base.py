@@ -450,6 +450,7 @@ SPECTACULAR_SETTINGS = {
         "EpicStatusEnum": "metecho.api.models.EPIC_STATUSES",
         "ReviewStatusEnum": "metecho.api.models.TASK_REVIEW_STATUS",
     },
+    "SERVE_INCLUDE_SCHEMA": False,  # Don't include schema view in docs
 }
 
 
