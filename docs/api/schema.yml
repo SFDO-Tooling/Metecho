@@ -1361,8 +1361,8 @@ components:
           type: boolean
           readOnly: true
         sf_username:
-          type: object
-          additionalProperties: {}
+          type: string
+          nullable: true
           readOnly: true
         currently_fetching_repos:
           type: boolean
