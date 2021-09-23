@@ -10,15 +10,20 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
-import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
+import {
+  LabelWithSpinner,
+  OrgData,
+  useForm,
+  useIsMounted,
+} from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { Project } from '@/js/store/projects/reducer';
 import { User } from '@/js/store/user/reducer';
 import apiFetch from '@/js/utils/api';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { CREATE_TASK_FROM_ORG, OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 interface ComboboxOption {
@@ -26,10 +31,11 @@ interface ComboboxOption {
   label: string;
 }
 
-interface Props extends RouteComponentProps {
+interface Props {
   user: User;
   project: Project;
   isOpen: boolean;
+  playgroundOrgData?: OrgData | null;
   closeCreateModal: () => void;
 }
 
@@ -37,9 +43,10 @@ const CreateEpicModal = ({
   user,
   project,
   isOpen,
+  playgroundOrgData,
   closeCreateModal,
-  history,
 }: Props) => {
+  const history = useHistory();
   const isMounted = useIsMounted();
   const [isSaving, setIsSaving] = useState(false);
   // state related to setting base branch on epic creation
@@ -49,27 +56,9 @@ const CreateEpicModal = ({
   const [filterVal, setFilterVal] = useState('');
 
   const submitButton = useRef<HTMLButtonElement | null>(null);
+  const isContributingFromOrg = Boolean(playgroundOrgData);
 
   const dispatch = useDispatch<ThunkDispatch>();
-
-  const onSuccess = (action: AnyAction) => {
-    const {
-      type,
-      payload: { object, objectType },
-    } = action;
-    /* istanbul ignore else */
-    if (isMounted.current) {
-      setIsSaving(false);
-    }
-    if (
-      type === 'CREATE_OBJECT_SUCCEEDED' &&
-      objectType === OBJECT_TYPES.EPIC &&
-      object?.slug
-    ) {
-      const url = routes.epic_detail(project.slug, object.slug);
-      history.push(url);
-    }
-  };
 
   /* istanbul ignore next */
   const onError = () => {
@@ -92,9 +81,44 @@ const CreateEpicModal = ({
       project: project.id,
       github_users: user.github_id ? [user.github_id] : [],
     },
-    onSuccess,
     onError,
   });
+
+  const resetFilterVal = () => {
+    setFilterVal('');
+  };
+
+  const closeForm = () => {
+    setFromBranchChecked(false);
+    resetFilterVal();
+    resetForm();
+    closeCreateModal();
+  };
+
+  const onSuccess = (action: AnyAction) => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setIsSaving(false);
+      closeForm();
+      const {
+        type,
+        payload: { object, objectType },
+      } = action;
+      if (
+        type === 'CREATE_OBJECT_SUCCEEDED' &&
+        objectType === OBJECT_TYPES.EPIC &&
+        object?.slug
+      ) {
+        // Redirect to newly created epic
+        const url = routes.epic_detail(project.slug, object.slug);
+        // Trigger create-task
+        const state = isContributingFromOrg
+          ? { [CREATE_TASK_FROM_ORG]: playgroundOrgData as OrgData }
+          : undefined;
+        history.push(url, state);
+      }
+    }
+  };
 
   const submitClicked = () => {
     // Click hidden button inside form to activate native browser validation
@@ -106,18 +130,7 @@ const CreateEpicModal = ({
 
   const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     setIsSaving(true);
-    handleSubmit(e);
-  };
-
-  const resetFilterVal = () => {
-    setFilterVal('');
-  };
-
-  const closeForm = () => {
-    setFromBranchChecked(false);
-    resetFilterVal();
-    resetForm();
-    closeCreateModal();
+    handleSubmit(e, { success: onSuccess });
   };
 
   const doGetBranches = async () => {
@@ -213,14 +226,21 @@ const CreateEpicModal = ({
     );
   }
 
+  let heading;
+  if (isContributingFromOrg) {
+    heading = i18n.t('Create an Epic to Contribute Work from Scratch Org');
+  } else {
+    heading = i18n.t('Create an Epic for {{project_name}}', {
+      project_name: project.name,
+    });
+  }
+
   return (
     <Modal
       isOpen={isOpen}
       size="small"
       disableClose={isSaving}
-      heading={i18n.t('Create an Epic for {{project_name}}', {
-        project_name: project.name,
-      })}
+      heading={heading}
       onRequestClose={closeForm}
       assistiveText={{ closeButton: i18n.t('Cancel') }}
       footer={[
@@ -338,4 +358,4 @@ const CreateEpicModal = ({
   );
 };
 
-export default withRouter(CreateEpicModal);
+export default CreateEpicModal;
