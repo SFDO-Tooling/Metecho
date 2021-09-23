@@ -30,7 +30,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinxcontrib.httpdomain", "sphinxcontrib.openapi"]
+extensions = ["sphinx.ext.autodoc", "sphinxcontrib.httpdomain"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -123,7 +123,13 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "Metecho.tex", u"Metecho Documentation", u"Salesforce.org", "manual",)
+    (
+        master_doc,
+        "Metecho.tex",
+        u"Metecho Documentation",
+        u"Salesforce.org",
+        "manual",
+    )
 ]
 
 
