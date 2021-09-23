@@ -125,7 +125,7 @@ class FullUserSerializer(HashIdModelSerializer):
             "self_guided_tour_state",
         )
 
-    def get_sf_username(self, obj) -> dict:
+    def get_sf_username(self, obj) -> Optional[str]:
         if obj.uses_global_devhub:
             return None
         return obj.sf_username
