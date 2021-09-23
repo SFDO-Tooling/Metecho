@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework import routers
@@ -26,9 +27,14 @@ urlpatterns = router.urls + [
         CurrentUserViewSet.as_view({"get": "get"}),
         name="current-user-detail",
     ),
-    # Automated API docs
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path(
-        "schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
-    ),
 ]
+
+if settings.API_DOCS_ENABLED:
+    urlpatterns += [
+        path("schema/", SpectacularAPIView.as_view(), name="schema"),
+        path(
+            "schema/redoc/",
+            SpectacularRedocView.as_view(url_name="schema"),
+            name="redoc",
+        ),
+    ]

@@ -99,6 +99,8 @@ MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 if MODE == "dev":
     environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
+API_DOCS_ENABLED = env("API_DOCS_ENABLED", default=DEBUG, type_=boolish)
+
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "127.0.0.1:8000",
