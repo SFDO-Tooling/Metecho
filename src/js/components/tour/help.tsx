@@ -1,4 +1,5 @@
 import i18n from 'i18next';
+import { pick } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
@@ -7,6 +8,50 @@ import GuidedTour, {
   getFinalStep,
   TourProps,
 } from '@/js/components/tour/guided';
+import { getDemoEpic } from '@/js/components/tour/plan';
+import { Task } from '@/js/store/tasks/reducer';
+import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
+
+export const getDemoTask = ({
+  project,
+  github_id,
+}: {
+  project: string;
+  github_id: string | null;
+}): Task => {
+  const epic = getDemoEpic({ project, github_id });
+
+  return {
+    id: 'demo-task',
+    name: i18n.t('This is a Sample Task'),
+    description: '',
+    description_rendered: '',
+    epic: pick(epic, ['id', 'name', 'slug', 'github_users']),
+    project: null,
+    slug: 'this-is-a-sample-task',
+    old_slugs: [],
+    has_unmerged_commits: true,
+    currently_creating_branch: false,
+    currently_creating_pr: false,
+    branch_name: '',
+    root_project: project,
+    branch_url: null,
+    commits: [],
+    origin_sha: '',
+    branch_diff_url: null,
+    pr_url: null,
+    review_submitted_at: null,
+    review_valid: false,
+    review_status: '',
+    review_sha: '',
+    status: TASK_STATUSES.IN_PROGRESS,
+    pr_is_open: false,
+    assigned_dev: github_id,
+    assigned_qa: null,
+    currently_submitting_review: false,
+    org_config_name: DEFAULT_ORG_CONFIG_NAME,
+  };
+};
 
 const HelpTour = (props: TourProps) => {
   /*
