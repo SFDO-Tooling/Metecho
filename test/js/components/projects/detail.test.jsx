@@ -591,6 +591,33 @@ describe('<ProjectDetail />', () => {
       expect(onboarded).toHaveBeenCalledTimes(1);
     });
 
+    describe('play tour click', () => {
+      test('runs tour', async () => {
+        const { queryByText, findByText, getByText, getByTitle } = setup({
+          initialState: {
+            ...defaultState,
+            user: {
+              username: 'foobar',
+              onboarded_at: null,
+            },
+          },
+        });
+
+        expect.assertions(2);
+        await findByText('What can Metecho help you do today?', {
+          exact: false,
+        });
+        fireEvent.click(getByText('Start Play Walkthrough'));
+        const dialog = await findByText('View & play with a Project');
+
+        expect(dialog).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(queryByText('View & play with a Project')).toBeNull();
+      });
+    });
+
     describe('plan tour click', () => {
       test('runs tour', async () => {
         const { queryByText, findByText, getByText, getByTitle } = setup({
@@ -639,7 +666,7 @@ describe('<ProjectDetail />', () => {
 
         expect(dialog).toBeVisible();
 
-        const btn = await findByText('Loading Tasks…');
+        const btn = await findByText('Create a Task');
 
         expect(btn).toBeVisible();
 
