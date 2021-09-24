@@ -117,8 +117,10 @@ const PlayTour = (props: TourProps) => {
       title: i18n.t('Contribute your work'),
       content: (
         <Trans i18nKey="walkthroughPlayScratchOrgContribute">
-          To contribute your own work from a Scratch Org, you need “push”
-          permissions on the Project in GitHub, then select “Contribute Work” to
+          To contribute your own work from a Scratch Org you need “push”
+          permissions on the Project in GitHub.
+          If you do not have permissions, ask a Project admin.
+          Select “Contribute Work” to
           create a Task for your Scratch Org. When your Org expires or is
           deleted, any work not contributed will be lost.
         </Trans>
