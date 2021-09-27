@@ -84,7 +84,7 @@ const PlayTour = (props: TourProps) => {
           <b>Definition</b>: To share or participate in.
         </Trans>
       ),
-      placement: 'right',
+      placement: 'bottom',
       disableBeacon: true,
     },
     {
