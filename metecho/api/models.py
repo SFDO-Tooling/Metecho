@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -145,40 +145,40 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
-    def github_id(self):
+    def github_id(self) -> Optional[str]:
         try:
             return self.github_account.uid
         except (AttributeError, KeyError, TypeError):
             return None
 
     @property
-    def avatar_url(self):
+    def avatar_url(self) -> Optional[str]:
         try:
             return self.github_account.get_avatar_url()
         except (AttributeError, KeyError, TypeError):
             return None
 
     @property
-    def org_id(self):
+    def org_id(self) -> Optional[str]:
         try:
             return self.salesforce_account.extra_data["organization_id"]
         except (AttributeError, KeyError, TypeError):
             return None
 
     @property
-    def org_name(self):
+    def org_name(self) -> Optional[str]:
         if self.devhub_username or self.uses_global_devhub:
             return None
         return self._get_org_property("Name")
 
     @property
-    def org_type(self):
+    def org_type(self) -> Optional[str]:
         if self.devhub_username or self.uses_global_devhub:
             return None
         return self._get_org_property("OrganizationType")
 
     @property
-    def full_org_type(self):
+    def full_org_type(self) -> Optional[str]:
         org_type = self._get_org_property("OrganizationType")
         is_sandbox = self._get_org_property("IsSandbox")
         has_expiration = self._get_org_property("TrialExpirationDate") is not None
@@ -194,14 +194,14 @@ class User(HashIdMixin, AbstractUser):
             return ORG_TYPES.Scratch
 
     @property
-    def instance_url(self):
+    def instance_url(self) -> Optional[str]:
         try:
             return self.salesforce_account.extra_data["instance_url"]
         except (AttributeError, KeyError):
             return None
 
     @property
-    def uses_global_devhub(self):
+    def uses_global_devhub(self) -> bool:
         return bool(
             settings.DEVHUB_USERNAME
             and not self.devhub_username
@@ -209,7 +209,7 @@ class User(HashIdMixin, AbstractUser):
         )
 
     @property
-    def sf_username(self):
+    def sf_username(self) -> Optional[str]:
         if self.devhub_username:
             return self.devhub_username
 
@@ -222,7 +222,7 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
-    def sf_token(self):
+    def sf_token(self) -> Tuple[Optional[str], Optional[str]]:
         try:
             token = self.salesforce_account.socialtoken_set.first()
             return (
@@ -237,15 +237,15 @@ class User(HashIdMixin, AbstractUser):
         return self.socialaccount_set.get(provider="github").socialtoken_set.get().token
 
     @property
-    def github_account(self):
+    def github_account(self) -> Optional[SocialAccount]:
         return self.socialaccount_set.filter(provider="github").first()
 
     @property
-    def salesforce_account(self):
+    def salesforce_account(self) -> Optional[SocialAccount]:
         return self.socialaccount_set.filter(provider="salesforce").first()
 
     @property
-    def valid_token_for(self):
+    def valid_token_for(self) -> Optional[str]:
         if self.devhub_username or self.uses_global_devhub:
             return None
         if all(self.sf_token) and self.org_id:
@@ -253,7 +253,7 @@ class User(HashIdMixin, AbstractUser):
         return None
 
     @cached_property
-    def is_devhub_enabled(self):
+    def is_devhub_enabled(self) -> bool:
         # We can shortcut and avoid making an HTTP request in some cases:
         if self.devhub_username or self.uses_global_devhub:
             return True

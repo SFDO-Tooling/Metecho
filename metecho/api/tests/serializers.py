@@ -10,7 +10,6 @@ from ..serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
-    HashidPrimaryKeyRelatedField,
     ScratchOrgSerializer,
     TaskAssigneeSerializer,
     TaskSerializer,
@@ -41,20 +40,6 @@ class TestFullUserSerializer:
         )
         serializer = FullUserSerializer(user)
         assert serializer.data["can_create_projects"]
-
-
-class TestHashidPrimaryKeyRelatedField:
-    def test_with_pk_field(self):
-        pk_field = MagicMock()
-        pk_field.to_representation.return_value = 1
-        field = HashidPrimaryKeyRelatedField(read_only=True, pk_field=pk_field)
-        val = MagicMock(pk=1)
-        assert field.to_representation(val) == 1
-
-    def test_without_pk_field(self):
-        field = HashidPrimaryKeyRelatedField(read_only=True)
-        val = MagicMock(pk=1)
-        assert field.to_representation(val) == "1"
 
 
 @pytest.mark.django_db

@@ -1,10 +1,12 @@
 import json
 from collections import namedtuple
 from contextlib import ExitStack
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.core.management import call_command
 from django.urls import reverse
 from github3.exceptions import NotFoundError, ResponseError
 from rest_framework import status
@@ -16,6 +18,19 @@ from ..models import SCRATCH_ORG_TYPES, Project
 Branch = namedtuple("Branch", ["name"])
 
 fixture = pytest.lazy_fixture
+
+
+def test_openapi_schema(tmp_path):
+    schema_file = Path("docs/api/schema.yml")
+    temp_file = tmp_path / "schema.yml"
+
+    cmd = "spectacular --file {} --validate --fail-on-warn"
+    call_command(*cmd.format(temp_file).split())
+
+    assert schema_file.read_text() == temp_file.read_text(), (
+        f"The OpenAPI schema is outdated. Run `{cmd.format(schema_file)}` and commit "
+        "the results."
+    )
 
 
 @pytest.mark.django_db
@@ -656,7 +671,7 @@ class TestHookView:
 
 
 @pytest.mark.django_db
-class TestScratchOrgView:
+class TestScratchOrgViewSet:
     def test_commit_happy_path(self, client, scratch_org_factory):
         with ExitStack() as stack:
             commit_changes_from_org_job = stack.enter_context(

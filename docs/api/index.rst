@@ -1,12 +1,8 @@
 API Reference
 =============
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+You can access automatically generated API documentation on any Metecho instance
+by following these steps:
 
-   user
-   projects
-   epics
-   tasks
-   scratch-orgs
+- Set the environment variable `API_DOCS_ENABLED=true`.
+- Visit `/api/schema/redoc/`.
