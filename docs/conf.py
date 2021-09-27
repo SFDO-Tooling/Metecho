@@ -123,7 +123,13 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "Metecho.tex", u"Metecho Documentation", u"Salesforce.org", "manual",)
+    (
+        master_doc,
+        "Metecho.tex",
+        u"Metecho Documentation",
+        u"Salesforce.org",
+        "manual",
+    )
 ]
 
 
