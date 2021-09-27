@@ -117,12 +117,11 @@ const PlayTour = (props: TourProps) => {
       title: i18n.t('Contribute your work'),
       content: (
         <Trans i18nKey="walkthroughPlayScratchOrgContribute">
-          To contribute your own work from a Scratch Org you need “push”
-          permissions on the Project in GitHub.
-          If you do not have permissions, ask a Project admin.
-          Select “Contribute Work” to
-          create a Task for your Scratch Org. When your Org expires or is
-          deleted, any work not contributed will be lost.
+          To contribute your own work from a Scratch Org, you need “push”
+          permissions on the Project in GitHub. If you do not have the right
+          permissions, ask a Project admin. Select “Contribute Work” to create a
+          Task for your Scratch Org. When your Org expires or is deleted, any
+          work not contributed will be lost.
         </Trans>
       ),
       placement: 'left',
@@ -135,8 +134,8 @@ const PlayTour = (props: TourProps) => {
         <Trans i18nKey="walkthroughPlayListTasks">
           Select the Tasks tab to see a list of all the work being done on this
           Project and who is doing it. Tasks represent small changes to the
-          Project and may be grouped with other Tasks in an Epic. Select a Task
-          and create a Task Scratch Org to view the work on that Task.
+          Project, and may be part of an Epic. Select a Task and create a Task
+          Scratch Org to view the work on that Task.
         </Trans>
       ),
       placement: 'right',

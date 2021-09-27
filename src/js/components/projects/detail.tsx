@@ -464,7 +464,8 @@ const ProjectDetail = (
                     <Trans i18nKey="tourTasksList">
                       Select the Tasks tab to see a list of all the work being
                       done on this Project and who is working on it. Tasks
-                      represent small changes to the Project, and may be part of an Epic.
+                      represent small changes to the Project, and may be part of
+                      an Epic.
                     </Trans>
                   }
                 />
