@@ -110,6 +110,17 @@ class GitHubIssueSerializer(HashIdModelSerializer):
         )
         fields = read_only_fields
 
+    @extend_schema_field(
+        {
+            "properties": {
+                "id": {"type": "string", "format": "HashID"},
+                "name": {"type": "string"},
+                "status": {"type": "string"},
+                "slug": {"type": "string"},
+            },
+            "nullable": True,
+        }
+    )
     def get_epic(self, issue):
         try:
             return {
@@ -121,6 +132,19 @@ class GitHubIssueSerializer(HashIdModelSerializer):
         except Epic.DoesNotExist:
             return None
 
+    @extend_schema_field(
+        {
+            "properties": {
+                "id": {"type": "string", "format": "HashID"},
+                "name": {"type": "string"},
+                "status": {"type": "string"},
+                "review_status": {"type": "string"},
+                "slug": {"type": "string"},
+                "epic_slug": {"type": "string"},
+            },
+            "nullable": True,
+        }
+    )
     def get_task(self, issue):
         try:
             return {

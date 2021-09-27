@@ -10,9 +10,15 @@ def slug_is_active(queryset, name, value):
 
 
 class GitHubIssueFilter(filters.FilterSet):
-    search = filters.CharFilter(label="Search", method="do_search")
+    search = filters.CharFilter(
+        label="Search",
+        method="do_search",
+        help_text="Search in issue titles and numbers",
+    )
     is_attached = filters.BooleanFilter(
-        label="Is attached", method="filter_by_is_attached"
+        label="Is attached",
+        method="filter_by_is_attached",
+        help_text="Filter/exclude issues attached to Epics or Tasks",
     )
 
     class Meta:

@@ -199,6 +199,8 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
 
 
 class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
+    """GitHub Issues"""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = GitHubIssueSerializer
     pagination_class = CustomPaginator
@@ -241,10 +243,12 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
     @extend_schema(request=None, responses={202: None})
     @action(detail=True, methods=["POST"])
     def refresh_github_issues(self, request, pk=None):
+        """Queue a job to refresh the list of GitHub Issues for a Project"""
         instance = self.get_object()
         instance.queue_refresh_github_issues(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=None, responses={202: None})
     @action(detail=True, methods=["POST"])
     def refresh_org_config_names(self, request, pk=None):
         """Queue a job to refresh the list of ScratchOrg configs for a Project."""
