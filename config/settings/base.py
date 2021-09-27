@@ -88,6 +88,7 @@ PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT")
 HASHID_FIELD_ALLOW_INT_LOOKUP = True
+HASHID_FIELD_ENABLE_HASHID_OBJECT = False  # Use plain strings
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -97,6 +98,8 @@ MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 
 if MODE == "dev":
     environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+API_DOCS_ENABLED = env("API_DOCS_ENABLED", default=DEBUG, type_=boolish)
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -142,6 +145,7 @@ INSTALLED_APPS = [
     "metecho.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
     "parler",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -433,6 +437,20 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# API docs settings
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Metecho",
+    "DESCRIPTION": "2019–2021, Salesforce.org",
+    "VERSION": "0.1.0",
+    "ENUM_NAME_OVERRIDES": {
+        "TaskStatusEnum": "metecho.api.models.TASK_STATUSES",
+        "EpicStatusEnum": "metecho.api.models.EPIC_STATUSES",
+        "ReviewStatusEnum": "metecho.api.models.TASK_REVIEW_STATUS",
+    },
+    "SERVE_INCLUDE_SCHEMA": False,  # Don't include schema view in docs
 }
 
 
