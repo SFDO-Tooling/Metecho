@@ -197,6 +197,8 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
 
 
 class ProjectDependencyViewSet(ReadOnlyModelViewSet):
+    """Dependencies available during Project creation"""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectDependencySerializer
     pagination_class = CustomPaginator
@@ -204,27 +206,32 @@ class ProjectDependencyViewSet(ReadOnlyModelViewSet):
 
 
 class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
+    """GitHub Organizations available during Project creation"""
+
     permission_classes = (IsAuthenticated,)
     serializer_class = GitHubOrganizationSerializer
     pagination_class = CustomPaginator
     queryset = GitHubOrganization.objects.all()
 
+    @extend_schema(request=None, responses={202: None})
     @action(detail=True, methods=["POST"])
     def members(self, request, pk):
+        """Queue a job to fetch the members of the Organization"""
         org: GitHubOrganization = self.get_object()
         org.queue_get_members(user=request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=None, responses={202: None})
     @action(detail=False, methods=["POST"])
     def for_user(self, request):
-        """
-        Queue a job to get GitHubOrganizations where the current user is a member
-        """
+        """Queue a job to get GitHubOrganizations where the current user is a member"""
         GitHubOrganization.queue_get_orgs_for_user(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=CheckRepoNameSerializer, responses={202: None})
     @action(detail=True, methods=["POST"])
     def check_repo_name(self, request, pk):
+        """Queue a job to determine if a repository name is available for the Organization"""
         org: GitHubOrganization = self.get_object()
         serializer = CheckRepoNameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
