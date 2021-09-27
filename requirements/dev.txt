@@ -78,7 +78,9 @@ idna==3.2
 imagesize==1.2.0
     # via sphinx
 inflection==0.5.1
-    # via pytest-factoryboy
+    # via
+    #   -c requirements/prod.txt
+    #   pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
 ipython==7.27.0
