@@ -313,8 +313,8 @@ class Project(
     github_users = models.JSONField(default=list, blank=True)
     # List of {
     #   "key": str,
-    #   "label": str,
-    #   "description": str,
+    #   "days": int,
+    #   "config_file": str,
     # }
     org_config_names = models.JSONField(default=list, blank=True)
     currently_fetching_org_config_names = models.BooleanField(default=False)

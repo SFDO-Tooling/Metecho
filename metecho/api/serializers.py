@@ -88,6 +88,20 @@ class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return OrderedDict(((item.pk, self.display_value(item)) for item in queryset))
 
 
+class RepoPermissionSerializer(serializers.Serializer):
+    push = serializers.BooleanField(required=False)
+    pull = serializers.BooleanField(required=False)
+    admin = serializers.BooleanField(required=False)
+
+
+class GitHubUserSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    login = serializers.CharField()
+    name = serializers.CharField(required=False)
+    avatar_url = serializers.URLField()
+    permissions = RepoPermissionSerializer(required=False)
+
+
 class GuidedTourSerializer(serializers.ModelSerializer):
     enabled = serializers.BooleanField(
         source="self_guided_tour_enabled", required=False
@@ -144,8 +158,10 @@ class ProjectSerializer(HashIdModelSerializer):
     repo_url = serializers.SerializerMethodField()
     repo_image_url = serializers.SerializerMethodField()
     has_push_permission = serializers.SerializerMethodField()
-    github_users = StringListField()
-    org_config_names = StringListField(read_only=True)
+    github_users = GitHubUserSerializer(many=True, allow_empty=True, required=False)
+    org_config_names = serializers.ListField(
+        child=serializers.DictField(), read_only=True
+    )
 
     class Meta:
         model = Project
