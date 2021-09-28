@@ -13,7 +13,7 @@ import {
   refreshGitHubUsers,
   refreshOrgConfigs,
 } from '@/js/store/projects/actions';
-import { EPIC_STATUSES } from '@/js/utils/constants';
+import { CREATE_TASK_FROM_ORG, EPIC_STATUSES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -244,18 +244,24 @@ describe('<EpicDetail/>', () => {
       initialState: defaultState,
       projectSlug: 'project-1',
       epicSlug: 'epic-1',
+      location: {},
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, projectSlug, epicSlug } = opts;
+    const { initialState, projectSlug, epicSlug, location } = opts;
     const context = {};
+    const history = { replace: jest.fn() };
     const response = renderWithRedux(
       <StaticRouter context={context}>
-        <EpicDetail match={{ params: { projectSlug, epicSlug } }} />
+        <EpicDetail
+          match={{ params: { projectSlug, epicSlug } }}
+          location={location}
+          history={history}
+        />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { ...response, context };
+    return { ...response, context, history };
   };
 
   test('renders epic detail, scratch org, and tasks list', () => {
@@ -450,6 +456,22 @@ describe('<EpicDetail/>', () => {
         filters: { project: 'p1', epic: 'epic1' },
         objectType: 'task',
       });
+    });
+  });
+
+  describe('converting org and retrieving changes', () => {
+    test('opens create task modal', async () => {
+      const { findByText, history } = setup({
+        location: { state: { [CREATE_TASK_FROM_ORG]: { id: 'org-id' } } },
+      });
+
+      expect.assertions(2);
+      const modal = await findByText(
+        'Create a Task to Contribute Work from Scratch Org',
+      );
+
+      expect(modal).toBeVisible();
+      expect(history.replace).toHaveBeenCalledWith({ state: {} });
     });
   });
 

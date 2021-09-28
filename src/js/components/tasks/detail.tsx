@@ -5,6 +5,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
+import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -26,6 +27,7 @@ import TaskStatusPath from '@/js/components/tasks/path';
 import TaskStatusSteps from '@/js/components/tasks/steps';
 import TourPopover from '@/js/components/tour/popover';
 import {
+  ContributeCallback,
   ContributeWorkModal,
   CreateOrgModal,
   DeleteModal,
@@ -36,6 +38,7 @@ import {
   getProjectLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   LabelWithSpinner,
+  OrgData,
   PageOptions,
   SpinnerWrapper,
   SubmitModal,
@@ -100,7 +103,7 @@ const TaskDetail = (
   );
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
-  const [createModalOrgId, setCreateModalOrgId] = useState<string | null>(null);
+  const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -227,7 +230,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeSubmitReviewModal = () => {
     setSubmitReviewModalOpen(false);
@@ -241,7 +244,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeCaptureModal = () => {
     setCaptureModalOpen(false);
@@ -255,7 +258,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   // edit modal related...
   const openEditModal = () => {
@@ -267,7 +270,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -282,7 +285,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -298,7 +301,7 @@ const TaskDetail = (
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(null);
@@ -314,7 +317,7 @@ const TaskDetail = (
     setDeleteModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeCreateOrgModal = () => {
     setCreateOrgModalOpen(false);
@@ -330,15 +333,15 @@ const TaskDetail = (
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
   const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
   }, []);
 
   // "create task" modal related:
-  const openCreateModal = useCallback((orgId: string) => {
-    setCreateModalOrgId(orgId);
+  const openCreateModal = useCallback((orgData: OrgData) => {
+    setConvertOrgData(orgData);
     setContributeModalOpen(false);
     setSubmitReviewModalOpen(false);
     setCaptureModalOpen(false);
@@ -349,7 +352,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
   }, []);
   const closeCreateModal = () => {
-    setCreateModalOrgId(null);
+    setConvertOrgData(null);
   };
 
   const doRefetchOrg = useCallback(
@@ -422,12 +425,12 @@ const TaskDetail = (
     }
   }, [devOrg, doRefetchOrg, orgHasChanges]);
 
-  const doContributeFromScratchOrg = useCallback(
-    ({ id, useExistingTask }: { id: string; useExistingTask: boolean }) => {
+  const doContributeFromScratchOrg: ContributeCallback = useCallback(
+    (orgData, { useExistingTask }) => {
       closeContributeModal();
       // eslint-disable-next-line no-negated-condition
       if (!useExistingTask) {
-        openCreateModal(id);
+        openCreateModal(orgData);
       } else {
         /* istanbul ignore else */
         // eslint-disable-next-line no-lonely-if
@@ -449,7 +452,7 @@ const TaskDetail = (
           dispatch(
             updateObject({
               objectType: OBJECT_TYPES.ORG,
-              url: window.api_urls.scratch_org_detail(id),
+              url: window.api_urls.scratch_org_detail(orgData.id),
               data: { org_type: ORG_TYPES.DEV },
               patch: true,
             }),
@@ -1110,7 +1113,7 @@ const TaskDetail = (
               task={task}
               isOpen={contributeModalOpen}
               hasPermissions={project.has_push_permission}
-              orgId={playgroundOrg.id}
+              orgData={pick(playgroundOrg, ['id', 'org_config_name'])}
               hasDevOrg={Boolean(devOrg)}
               closeModal={closeContributeModal}
               doContribute={doContributeFromScratchOrg}
@@ -1118,8 +1121,8 @@ const TaskDetail = (
             <CreateTaskModal
               project={project}
               epic={epic}
-              isOpenOrOrgId={createModalOrgId}
-              playgroundOrg={playgroundOrg}
+              isOpen={Boolean(convertOrgData)}
+              playgroundOrgData={convertOrgData}
               closeCreateModal={closeCreateModal}
             />
           </>

@@ -591,6 +591,33 @@ describe('<ProjectDetail />', () => {
       expect(onboarded).toHaveBeenCalledTimes(1);
     });
 
+    describe('play tour click', () => {
+      test('runs tour', async () => {
+        const { queryByText, findByText, getByText, getByTitle } = setup({
+          initialState: {
+            ...defaultState,
+            user: {
+              username: 'foobar',
+              onboarded_at: null,
+            },
+          },
+        });
+
+        expect.assertions(2);
+        await findByText('What can Metecho help you do today?', {
+          exact: false,
+        });
+        fireEvent.click(getByText('Start Play Walkthrough'));
+        const dialog = await findByText('View & play with a Project');
+
+        expect(dialog).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(queryByText('View & play with a Project')).toBeNull();
+      });
+    });
+
     describe('plan tour click', () => {
       test('runs tour', async () => {
         const { queryByText, findByText, getByText, getByTitle } = setup({
@@ -639,7 +666,7 @@ describe('<ProjectDetail />', () => {
 
         expect(dialog).toBeVisible();
 
-        const btn = await findByText('Loading Tasks…');
+        const btn = await findByText('Create a Task');
 
         expect(btn).toBeVisible();
 
@@ -678,6 +705,15 @@ describe('<ProjectDetail />', () => {
               epics: [],
               tasks: [],
             },
+          },
+          projects: {
+            ...defaultState.projects,
+            projects: [
+              {
+                ...defaultState.projects.projects[0],
+                has_push_permission: false,
+              },
+            ],
           },
         },
       });
@@ -720,6 +756,74 @@ describe('<ProjectDetail />', () => {
         expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
           'qa',
         );
+      });
+    });
+  });
+
+  describe('<ContributeWorkModal />', () => {
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText, getByLabelText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+
+        fireEvent.click(getByLabelText('Create a new Task with no Epic'));
+        fireEvent.click(getByLabelText('Create a new Epic and Task'));
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
+      });
+    });
+
+    describe('"Contribute" click with Epic', () => {
+      test('opens Create Epic modal', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(getByText('Contribute'));
+
+        expect(
+          getByText('Create an Epic to Contribute Work from Scratch Org'),
+        ).toBeVisible();
+      });
+    });
+
+    describe('"Contribute" click without Epic', () => {
+      test('opens Create Task modal', () => {
+        const { getByText, getByLabelText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(getByLabelText('Create a new Task with no Epic'));
+        fireEvent.click(getByText('Contribute'));
+
+        expect(
+          getByText('Create a Task to Contribute Work from Scratch Org'),
+        ).toBeVisible();
+      });
+    });
+
+    describe('User does not have permissions', () => {
+      test('does not allow contributing', () => {
+        const projects = {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        };
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            projects,
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+        expect(
+          getByText('You do not have “push” access', { exact: false }),
+        ).toBeVisible();
       });
     });
   });
