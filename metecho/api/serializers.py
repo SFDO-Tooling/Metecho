@@ -102,6 +102,12 @@ class GitHubUserSerializer(serializers.Serializer):
     permissions = RepoPermissionSerializer(required=False)
 
 
+class OrgConfigNameSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+
+
 class GuidedTourSerializer(serializers.ModelSerializer):
     enabled = serializers.BooleanField(
         source="self_guided_tour_enabled", required=False
@@ -159,9 +165,7 @@ class ProjectSerializer(HashIdModelSerializer):
     repo_image_url = serializers.SerializerMethodField()
     has_push_permission = serializers.SerializerMethodField()
     github_users = GitHubUserSerializer(many=True, allow_empty=True, required=False)
-    org_config_names = serializers.ListField(
-        child=serializers.DictField(), read_only=True
-    )
+    org_config_names = OrgConfigNameSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project

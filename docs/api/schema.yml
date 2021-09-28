@@ -1443,6 +1443,17 @@ components:
       - avatar_url
       - id
       - username
+    OrgConfigName:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+      required:
+      - key
     OrgTypeEnum:
       enum:
       - Dev
@@ -1840,8 +1851,7 @@ components:
         org_config_names:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/OrgConfigName'
           readOnly: true
         currently_fetching_org_config_names:
           type: boolean
