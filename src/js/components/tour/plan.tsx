@@ -7,6 +7,43 @@ import GuidedTour, {
   getFinalStep,
   TourProps,
 } from '@/js/components/tour/guided';
+import { Epic } from '@/js/store/epics/reducer';
+import { EPIC_STATUSES } from '@/js/utils/constants';
+
+export const getDemoEpic = ({
+  project,
+  github_id,
+}: {
+  project: string;
+  github_id: string | null;
+}): Epic => {
+  const description = i18n.t(
+    'This is a sample description to show where the description of the Epic would appear.',
+  );
+
+  return {
+    id: 'demo-epic',
+    name: i18n.t('This is a Sample Epic'),
+    description,
+    description_rendered: `<p>${description}</p>`,
+    slug: 'this-is-a-sample-epic',
+    old_slugs: [],
+    project,
+    task_count: 1,
+    branch_url: '#',
+    branch_diff_url: null,
+    branch_name: 'feature/this-is-a-sample-epic',
+    has_unmerged_commits: false,
+    currently_creating_branch: false,
+    currently_creating_pr: false,
+    pr_url: null,
+    pr_is_open: false,
+    pr_is_merged: false,
+    status: EPIC_STATUSES.IN_PROGRESS,
+    github_users: /* istanbul ignore next */ github_id ? [github_id] : [],
+    latest_sha: '',
+  };
+};
 
 const PlanTour = (props: TourProps) => {
   /*
@@ -22,7 +59,7 @@ const PlanTour = (props: TourProps) => {
         <Trans i18nKey="walkthroughPlanListTasks">
           Select the Tasks tab to see a list of all the work being done on this
           Project and who is doing it. Tasks represent small changes to the
-          Project and may be grouped with other Tasks in an Epic.
+          Project, and may be part of an Epic.
         </Trans>
       ),
       placement: 'right',

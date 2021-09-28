@@ -2,6 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
+import { pick } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -14,16 +15,19 @@ import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
-import HelpTour from '@/js/components/tour/help';
+import HelpTour, { getDemoTask } from '@/js/components/tour/help';
 import LandingModal from '@/js/components/tour/landing';
-import PlanTour from '@/js/components/tour/plan';
-import PlayTour from '@/js/components/tour/play';
+import PlanTour, { getDemoEpic } from '@/js/components/tour/plan';
+import PlayTour, { getDemoOrg } from '@/js/components/tour/play';
 import TourPopover from '@/js/components/tour/popover';
 import {
+  ContributeCallback,
+  ContributeWorkModal,
   CreateOrgModal,
   DetailPageLayout,
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
+  OrgData,
   useAssignUserToTask,
   useFetchEpicsIfMissing,
   useFetchOrgsIfMissing,
@@ -33,6 +37,7 @@ import {
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
+import { Org } from '@/js/store/orgs/reducer';
 import { onboarded } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -53,9 +58,11 @@ const ProjectDetail = (
 ) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [createEpicModalOpen, setCreateEpicModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
+  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
@@ -64,6 +71,7 @@ const ProjectDetail = (
     number | undefined
   >(undefined);
   const [tourRunning, setTourRunning] = useState<WalkthroughType | null>(null);
+  const [playTourOrg, setPlayTourOrg] = useState<Org | null>(null);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -77,7 +85,12 @@ const ProjectDetail = (
     props,
   );
   const assignUser = useAssignUserToTask();
-  const playgroundOrg = (orgs || [])[0];
+  const runningPlayTour = tourRunning === WALKTHROUGH_TYPES.PLAY;
+  const runningHelpTour = tourRunning === WALKTHROUGH_TYPES.HELP;
+  const runningPlanTour = tourRunning === WALKTHROUGH_TYPES.PLAN;
+  const playgroundOrg = runningPlayTour
+    ? playTourOrg
+    : ((orgs || [])[0] as Org | undefined);
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
   const {
@@ -123,34 +136,67 @@ const ProjectDetail = (
   }, [dispatch, epics?.next, isMounted, project?.id]);
 
   // "create epic" modal related
-  const openCreateModal = useCallback(() => {
-    setCreateModalOpen(true);
+  const openCreateEpicModal = useCallback(() => {
+    setCreateEpicModalOpen(true);
     setCreateOrgModalOpen(false);
     setCreateTaskModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
   }, []);
-  const closeCreateModal = useCallback(() => {
-    setCreateModalOpen(false);
+  const closeCreateEpicModal = useCallback(() => {
+    setCreateEpicModalOpen(false);
+  }, []);
+
+  // "create task" modal related
+  const openCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(true);
+    setCreateEpicModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+  }, []);
+  const closeCreateTaskModal = useCallback(() => {
+    setCreateTaskModalOpen(false);
   }, []);
 
   // "create scratch org" modal related
   const openCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(true);
-    setCreateModalOpen(false);
+    setCreateEpicModalOpen(false);
     setCreateTaskModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
   }, []);
   const closeCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(false);
   }, []);
 
-  const openCreateTaskModal = useCallback(() => {
-    setCreateTaskModalOpen(true);
-    setCreateModalOpen(false);
-    setCreateOrgModalOpen(false);
-  }, []);
-
-  const closeCreateTaskModal = useCallback(() => {
+  // "contribute work" modal related:
+  const openContributeModal = () => {
+    setContributeModalOpen(true);
+    setCreateEpicModalOpen(false);
     setCreateTaskModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setConvertOrgData(null);
+  };
+  const closeContributeModal = useCallback(() => {
+    setContributeModalOpen(false);
   }, []);
+  const createAndContribute: ContributeCallback = useCallback(
+    (orgData, { createEpicLessTask }) => {
+      setConvertOrgData(orgData);
+      if (createEpicLessTask) {
+        setCreateTaskModalOpen(true);
+        setCreateEpicModalOpen(false);
+      } else {
+        setCreateEpicModalOpen(true);
+        setCreateTaskModalOpen(false);
+      }
+      setCreateOrgModalOpen(false);
+      setContributeModalOpen(false);
+    },
+    [],
+  );
 
   // guided tour related
   const closeTourLandingModal = useCallback(() => {
@@ -178,19 +224,30 @@ const ProjectDetail = (
     // so do that manually:
     setTasksTabViewed(true);
   }, []);
+  const demoOrg = getDemoOrg({
+    project: project?.id || null,
+    owner: user.id,
+    owner_gh_username: user.username,
+    owner_gh_id: user.github_id,
+    latest_commit: project?.latest_sha || '',
+  });
   /* istanbul ignore next */
   const handlePlayTourStep = useCallback(
     (index: number) => {
       switch (index) {
         case 2:
-          setTasksTabActive();
+          setPlayTourOrg(demoOrg);
           break;
-        case 3:
+        case 4:
+          setTasksTabActive();
+          setPlayTourOrg(null);
+          break;
+        case 5:
           setSelectedTabOverride(0);
           break;
       }
     },
-    [setTasksTabActive],
+    [demoOrg, setTasksTabActive],
   );
   /* istanbul ignore next */
   const handlePlanTourStep = useCallback((index: number) => {
@@ -255,7 +312,11 @@ const ProjectDetail = (
         breadcrumb={[{ name: project.name }]}
         image={project.repo_image_url}
         sidebar={
-          <div className="slds-m-bottom_x-large metecho-secondary-block">
+          <div
+            className="slds-m-bottom_x-large
+              metecho-secondary-block
+              tour-scratch-org"
+          >
             <div className="slds-is-relative heading">
               <TourPopover
                 id="tour-project-scratch-org"
@@ -275,7 +336,7 @@ const ProjectDetail = (
                 {i18n.t('My Project Scratch Org')}
               </h2>
             </div>
-            {orgs ? (
+            {orgs || runningPlayTour ? (
               <>
                 {playgroundOrg ? (
                   <div
@@ -283,21 +344,18 @@ const ProjectDetail = (
                       slds-wrap
                       slds-grid_pull-padded-x-small"
                   >
-                    <div
-                      className="slds-size_1-of-1
-                        slds-p-around_x-small
-                        tour-scratch-org"
-                    >
+                    <div className="slds-size_1-of-1 slds-p-around_x-small">
                       <PlaygroundOrgCard
                         org={playgroundOrg}
                         project={project}
                         repoUrl={project.repo_url}
+                        openContributeModal={openContributeModal}
                       />
                     </div>
                   </div>
                 ) : (
                   <Button
-                    className="tour-scratch-org"
+                    className="tour-create-scratch-org"
                     label={i18n.t('Create Scratch Org')}
                     variant="outline-brand"
                     onClick={openCreateOrgModal}
@@ -343,14 +401,17 @@ const ProjectDetail = (
             <div className="slds-m-bottom_medium slds-is-relative">
               <Button
                 label={
-                  epics?.fetched
+                  epics?.fetched || tourRunning
                     ? i18n.t('Create an Epic')
                     : i18n.t('Loading Epics…')
                 }
                 variant="brand"
-                onClick={openCreateModal}
+                onClick={openCreateEpicModal}
                 className="tour-create-epic"
-                disabled={!project.has_push_permission || !epics?.fetched}
+                disabled={
+                  !tourRunning &&
+                  (!project.has_push_permission || !epics?.fetched)
+                }
               />
               <TourPopover
                 id="tour-project-create-epic"
@@ -367,7 +428,16 @@ const ProjectDetail = (
               />
             </div>
             <EpicTable
-              epics={/* istanbul ignore next */ epics?.epics || []}
+              epics={
+                /* istanbul ignore next */ tourRunning && !epics?.epics?.length
+                  ? [
+                      getDemoEpic({
+                        project: project.id,
+                        github_id: user.github_id,
+                      }),
+                    ]
+                  : epics?.epics || []
+              }
               isFetched={Boolean(epics?.fetched)}
               userHasPermissions={project.has_push_permission}
               projectSlug={project.slug}
@@ -394,8 +464,8 @@ const ProjectDetail = (
                     <Trans i18nKey="tourTasksList">
                       Select the Tasks tab to see a list of all the work being
                       done on this Project and who is working on it. Tasks
-                      represent small changes to the Project, and may be grouped
-                      with other Tasks in an Epic.
+                      represent small changes to the Project, and may be part of
+                      an Epic.
                     </Trans>
                   }
                 />
@@ -406,12 +476,16 @@ const ProjectDetail = (
             <div className="slds-m-bottom_medium slds-is-relative">
               <Button
                 label={
-                  tasks ? i18n.t('Create a Task') : i18n.t('Loading Tasks…')
+                  tasks || tourRunning
+                    ? i18n.t('Create a Task')
+                    : i18n.t('Loading Tasks…')
                 }
                 variant="brand"
                 className="tour-create-task"
                 onClick={openCreateTaskModal}
-                disabled={!project.has_push_permission || !tasks}
+                disabled={
+                  !tourRunning && (!project.has_push_permission || !tasks)
+                }
               />
               <TourPopover
                 id="tour-project-add-task"
@@ -430,7 +504,16 @@ const ProjectDetail = (
             <TasksTableComponent
               projectId={project.id}
               projectSlug={project.slug}
-              tasks={tasks || []}
+              tasks={
+                tourRunning && !tasks?.length
+                  ? [
+                      getDemoTask({
+                        project: project.id,
+                        github_id: user.github_id,
+                      }),
+                    ]
+                  : tasks || []
+              }
               isFetched={Boolean(tasks)}
               githubUsers={project.github_users}
               canAssign={project.has_push_permission}
@@ -443,8 +526,9 @@ const ProjectDetail = (
         <CreateEpicModal
           user={user}
           project={project}
-          isOpen={createModalOpen}
-          closeCreateModal={closeCreateModal}
+          isOpen={createEpicModalOpen}
+          playgroundOrgData={convertOrgData}
+          closeCreateModal={closeCreateEpicModal}
         />
         <LandingModal
           isOpen={tourLandingModalOpen}
@@ -452,17 +536,17 @@ const ProjectDetail = (
           onRequestClose={closeTourLandingModal}
         />
         <PlayTour
-          run={tourRunning === WALKTHROUGH_TYPES.PLAY}
+          run={runningPlayTour}
           onClose={handleTourClose}
           onBeforeStep={handlePlayTourStep}
         />
         <HelpTour
-          run={tourRunning === WALKTHROUGH_TYPES.HELP}
+          run={runningHelpTour}
           onStart={setTasksTabActive}
           onClose={handleTourClose}
         />
         <PlanTour
-          run={tourRunning === WALKTHROUGH_TYPES.PLAN}
+          run={runningPlanTour}
           onStart={setTasksTabActive}
           onClose={handleTourClose}
           onBeforeStep={handlePlanTourStep}
@@ -474,9 +558,19 @@ const ProjectDetail = (
         />
         <CreateTaskModal
           project={project}
-          isOpenOrOrgId={createTaskModalOpen}
+          isOpen={createTaskModalOpen}
+          playgroundOrgData={convertOrgData}
           closeCreateModal={closeCreateTaskModal}
         />
+        {playgroundOrg ? (
+          <ContributeWorkModal
+            isOpen={contributeModalOpen}
+            hasPermissions={project.has_push_permission}
+            orgData={pick(playgroundOrg, ['id', 'org_config_name'])}
+            closeModal={closeContributeModal}
+            doContribute={createAndContribute}
+          />
+        ) : null}
       </DetailPageLayout>
     </DocumentTitle>
   );

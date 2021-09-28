@@ -10,50 +10,55 @@ import { Trans } from 'react-i18next';
 import mapSvg from '@/img/map-lg.svg?raw';
 import { Illustration } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
-import { Project } from '@/js/store/projects/reducer';
+import { Org } from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 
-type ContributeCallback = ({
-  id,
-  useExistingTask,
-}: {
-  id: string;
-  useExistingTask: boolean;
-}) => void;
+export type OrgData = Pick<Org, 'id' | 'org_config_name'>;
+
+export type ContributeCallback = (
+  orgData: OrgData,
+  {
+    useExistingTask,
+    createEpicLessTask,
+  }: {
+    useExistingTask?: boolean;
+    createEpicLessTask?: boolean;
+  },
+) => void;
 
 interface Props {
-  project?: Project;
   epic?: Epic;
   task?: Task;
   isOpen: boolean;
   hasPermissions: boolean;
-  orgId: string;
+  orgData: OrgData;
   hasDevOrg?: boolean;
   closeModal: () => void;
   doContribute: ContributeCallback;
 }
 
 const ContributeWorkModal = ({
-  project,
   epic,
   task,
   isOpen,
   hasPermissions,
-  orgId,
+  orgData,
   hasDevOrg,
   closeModal,
   doContribute,
 }: Props) => {
   const [useExistingTask, setUseExistingTask] = useState(!hasDevOrg);
+  const [createEpicLessTask, setCreateEpicLessTask] = useState(false);
 
   const doClose = useCallback(() => {
     setUseExistingTask(!hasDevOrg);
+    setCreateEpicLessTask(false);
     closeModal();
   }, [closeModal, hasDevOrg]);
 
   const handleSubmit = useCallback(
-    () => doContribute({ id: orgId, useExistingTask }),
-    [doContribute, orgId, useExistingTask],
+    () => doContribute(orgData, { useExistingTask, createEpicLessTask }),
+    [doContribute, orgData, useExistingTask, createEpicLessTask],
   );
 
   let contents = null;
@@ -138,24 +143,71 @@ const ContributeWorkModal = ({
         </RadioGroup>
       </>
     );
+  } else if (epic) {
+    contents = (
+      <Trans i18nKey="contributeWorkFromEpic">
+        <p>
+          <b>To contribute the work you’ve done in your Scratch Org,</b> you’ll
+          start by creating a new Task.
+        </p>
+        <p>
+          Your Scratch Org will become the Dev Org for the newly created Task.
+        </p>
+      </Trans>
+    );
   } else {
-    /* istanbul ignore else */
-    // eslint-disable-next-line no-lonely-if
-    if (epic) {
-      contents = (
-        <Trans i18nKey="contributeWorkFromEpic">
+    const handleEpicLessTaskChange = (
+      event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      if (event.target.value === 'true') {
+        setCreateEpicLessTask(true);
+      } else {
+        setCreateEpicLessTask(false);
+      }
+    };
+
+    contents = (
+      <>
+        <Trans i18nKey="contributeWorkFromProject">
           <p>
-            <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
-            you’ll start by creating a new Task.
+            <b>To contribute the work you’ve done in your Scratch Org,</b> start
+            by creating a new Task (with or without a new Epic).
           </p>
           <p>
             Your Scratch Org will become the Dev Org for the newly created Task.
           </p>
         </Trans>
-      );
-    } else if (project) {
-      // @@@ Add this when project Scratch Orgs can be converted...
-    }
+        <RadioGroup
+          assistiveText={{
+            label: i18n.t('Select Task Type'),
+            required: i18n.t('Required'),
+          }}
+          className="slds-p-left_none"
+          name="project-contribute-work"
+          required
+          onChange={handleEpicLessTaskChange}
+        >
+          <Radio
+            id="org-epic-and-task"
+            labels={{
+              label: i18n.t('Create a new Epic and Task'),
+            }}
+            checked={!createEpicLessTask}
+            name="project-contribute-work"
+            value="false"
+          />
+          <Radio
+            id="org-epic-less-task"
+            labels={{
+              label: i18n.t('Create a new Task with no Epic'),
+            }}
+            checked={createEpicLessTask}
+            name="project-contribute-work"
+            value="true"
+          />
+        </RadioGroup>
+      </>
+    );
   }
 
   return (

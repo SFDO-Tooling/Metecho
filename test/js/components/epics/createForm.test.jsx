@@ -41,19 +41,13 @@ describe('<CreateEpicModal/>', () => {
       project: defaultProject,
       user: defaultUser,
       isOpen: true,
+      closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
-    const { user, project, isOpen } = opts;
     const context = {};
-    const closeCreateModal = jest.fn();
     const result = renderWithRedux(
       <StaticRouter context={context}>
-        <CreateEpicModal
-          user={user}
-          project={project}
-          closeCreateModal={closeCreateModal}
-          isOpen={isOpen}
-        />
+        <CreateEpicModal {...opts} />
       </StaticRouter>,
       {},
       storeWithThunk,
@@ -297,5 +291,60 @@ describe('<CreateEpicModal/>', () => {
         exact: false,
       }),
     ).toBeInTheDocument();
+  });
+
+  describe('add and contribute from scratch org', () => {
+    describe('success', () => {
+      test('redirects to new epic page with state', async () => {
+        const orgData = {
+          id: 'org-id',
+          org_config_name: 'qa',
+        };
+        const { findByText, getByText, getByLabelText, context } = setup({
+          playgroundOrgData: orgData,
+        });
+        createObject.mockReturnValueOnce(() =>
+          Promise.resolve({
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'epic',
+              object: {
+                id: 'epic1',
+                slug: 'name-of-epic',
+                name: 'Name of Epic',
+                project: 'r1',
+              },
+            },
+          }),
+        );
+        const submit = getByText('Create');
+        const nameInput = getByLabelText('*Epic Name');
+        fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
+        fireEvent.click(submit);
+
+        expect.assertions(3);
+        await findByText('Creating…');
+        await findByText('Create');
+
+        await waitFor(() =>
+          expect(createObject).toHaveBeenCalledWith({
+            objectType: 'epic',
+            data: {
+              name: 'Name of Epic',
+              description: '',
+              project: 'r1',
+              branch_name: '',
+              github_users: [],
+            },
+            hasForm: true,
+            shouldSubscribeToObject: true,
+          }),
+        );
+        expect(context.action).toEqual('PUSH');
+        expect(context.url).toEqual(
+          routes.epic_detail('project-1', 'name-of-epic'),
+        );
+      });
+    });
   });
 });
