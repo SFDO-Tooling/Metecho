@@ -23,7 +23,7 @@ def test_openapi_schema(tmp_path):
     schema_file = Path("docs/api/schema.yml")
     temp_file = tmp_path / "schema.yml"
 
-    cmd = "spectacular --file {} --validate --fail-on-warn"
+    cmd = "python manage.py spectacular --file {} --validate --fail-on-warn"
     call_command(*cmd.format(temp_file).split())
 
     assert schema_file.read_text() == temp_file.read_text(), (
