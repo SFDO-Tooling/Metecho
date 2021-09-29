@@ -4,8 +4,8 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ThunkDispatch } from 'src/js/store';
 
+import { ThunkDispatch } from '@/js/store';
 import { updateTour } from '@/js/store/user/actions';
 import { selectUserState } from '@/js/store/user/selectors';
 

@@ -61,10 +61,10 @@ const Header = () => {
               Salesforce Projects without learning GitHub.
               <br />
               <br />
-              <b>Pronunciation</b>: “Met” rhymes with “Bet.” “Echo” as in the
+              <b>Pronunciation</b>: “Met” rhymes with “bet.” “Echo” as in the
               reflection of sound waves.
               <br />
-              <b>Definition</b>: “Share or participate in.”
+              <b>Definition</b>: To share or participate in.
             </Trans>
           }
         />

@@ -1545,6 +1545,24 @@ components:
       - project
       - task
       - title
+    GitHubUser:
+      type: object
+      properties:
+        id:
+          type: string
+        login:
+          type: string
+        name:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        permissions:
+          $ref: '#/components/schemas/RepoPermission'
+      required:
+      - avatar_url
+      - id
+      - login
     GuidedTour:
       type: object
       properties:
@@ -1573,6 +1591,17 @@ components:
       - avatar_url
       - id
       - username
+    OrgConfigName:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+      required:
+      - key
     OrgTypeEnum:
       enum:
       - Dev
@@ -1990,7 +2019,7 @@ components:
         github_users:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/GitHubUser'
         repo_image_url:
           type: string
           format: uri
@@ -1998,7 +2027,7 @@ components:
         org_config_names:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/OrgConfigName'
           readOnly: true
         currently_fetching_org_config_names:
           type: boolean
@@ -2017,7 +2046,6 @@ components:
       - currently_fetching_issues
       - currently_fetching_org_config_names
       - description_rendered
-      - github_users
       - has_push_permission
       - id
       - latest_sha
@@ -2029,6 +2057,15 @@ components:
       - repo_owner
       - repo_url
       - slug
+    RepoPermission:
+      type: object
+      properties:
+        push:
+          type: boolean
+        pull:
+          type: boolean
+        admin:
+          type: boolean
     Review:
       type: object
       properties:
@@ -2353,7 +2390,7 @@ components:
     cookieAuth:
       type: apiKey
       in: cookie
-      name: Session
+      name: sessionid
     tokenAuth:
       type: apiKey
       in: header

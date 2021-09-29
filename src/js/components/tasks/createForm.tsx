@@ -3,7 +3,6 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import { isString } from 'lodash';
 import React, { useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -11,13 +10,13 @@ import { AnyAction } from 'redux';
 import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
+  OrgData,
   useForm,
   useFormDefaults,
   useIsMounted,
   useTransientMessage,
 } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
-import { Org } from '@/js/store/orgs/reducer';
 import { Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
@@ -29,16 +28,16 @@ import routes from '@/js/utils/routes';
 interface Props {
   project: Project;
   epic?: Epic | null;
-  isOpenOrOrgId: boolean | string | null;
-  playgroundOrg?: Org;
+  isOpen: boolean;
+  playgroundOrgData?: OrgData | null;
   closeCreateModal: () => void;
 }
 
 const CreateTaskModal = ({
   project,
   epic,
-  isOpenOrOrgId,
-  playgroundOrg,
+  isOpen,
+  playgroundOrgData,
   closeCreateModal,
 }: Props) => {
   const history = useHistory();
@@ -49,10 +48,13 @@ const CreateTaskModal = ({
   const [isSavingBatch, setIsSavingBatch] = useState(false);
 
   const submitButton = useRef<HTMLButtonElement | null>(null);
-  const isContributingFromOrg = isString(isOpenOrOrgId);
-  const useExistingOrgConfig = Boolean(isContributingFromOrg && playgroundOrg);
+  const isContributingFromOrg = Boolean(playgroundOrgData);
+  const useExistingOrgConfig = Boolean(
+    isContributingFromOrg && playgroundOrgData?.org_config_name,
+  );
   const defaultOrgConfig = useExistingOrgConfig
-    ? playgroundOrg?.org_config_name || DEFAULT_ORG_CONFIG_NAME
+    ? /* istanbul ignore next */ playgroundOrgData?.org_config_name ||
+      DEFAULT_ORG_CONFIG_NAME
     : DEFAULT_ORG_CONFIG_NAME;
 
   /* istanbul ignore next */
@@ -69,7 +71,7 @@ const CreateTaskModal = ({
   };
 
   if (isContributingFromOrg) {
-    additionalData.dev_org = isOpenOrOrgId as string;
+    additionalData.dev_org = playgroundOrgData?.id as string;
   }
 
   const {
@@ -169,7 +171,7 @@ const CreateTaskModal = ({
 
   return (
     <Modal
-      isOpen={Boolean(isOpenOrOrgId)}
+      isOpen={isOpen}
       size="small"
       disableClose={isSaving || isSavingBatch}
       heading={heading}
@@ -225,7 +227,7 @@ const CreateTaskModal = ({
       ]}
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
-        {!epic && (
+        {!epic && !isContributingFromOrg && (
           <p className="slds-align_absolute-center slds-m-bottom_small">
             {i18n.t(
               'You are creating a Task for this Project. To group multiple Tasks together, create an Epic.',
