@@ -250,7 +250,7 @@ pyjwt[crypto]==2.1.0
     # via
     #   cumulusci
     #   django-allauth
-pyopenssl==20.0.1
+pyopenssl==21.0.0
     # via twisted
 pyparsing==2.4.7
     # via packaging
