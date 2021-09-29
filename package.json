@@ -102,7 +102,7 @@
     "@types/classnames": "^2.3.1",
     "@types/core-js": "^2.5.5",
     "@types/js-cookie": "^2.2.7",
-    "@types/lodash": "^4.14.172",
+    "@types/lodash": "^4.14.175",
     "@types/react": "^17.0.19",
     "@types/react-document-title": "^2.0.5",
     "@types/react-dom": "^17.0.9",
