@@ -71,6 +71,9 @@ case "$1" in
         dcr python manage.py makemessages --locale "${@:2}"
         dcr python manage.py compilemessages
         ;;
+    "schema")
+        dcr python manage.py spectacular --file docs/api/schema.yml --validate --fail-on-warn "${@:2}"
+        ;;
     "shell" | "bash" | "sh")
         dcr bash "${@:2}"
         ;;
