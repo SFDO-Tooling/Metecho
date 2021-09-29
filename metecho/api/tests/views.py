@@ -23,12 +23,12 @@ def test_openapi_schema(tmp_path):
     schema_file = Path("docs/api/schema.yml")
     temp_file = tmp_path / "schema.yml"
 
-    cmd = "python manage.py spectacular --file {} --validate --fail-on-warn"
+    cmd = "spectacular --file {} --validate --fail-on-warn"
     call_command(*cmd.format(temp_file).split())
 
     assert schema_file.read_text() == temp_file.read_text(), (
-        f"The OpenAPI schema is outdated. Run `{cmd.format(schema_file)}` and commit "
-        "the results."
+        "The OpenAPI schema is outdated. Run `python manage.py "
+        f"{cmd.format(schema_file)}` and commit the results."
     )
 
 
