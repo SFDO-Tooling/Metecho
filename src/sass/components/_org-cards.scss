@@ -13,21 +13,31 @@
     padding-left: 0;
     padding-right: 0;
   }
-
-  .slds-media {
-    margin-bottom: $spacing-medium;
-  }
 }
 
 // override min-width and force header to wrap on nested card headers
 .wrap-inner-truncate {
   .slds-card__header {
+    align-items: baseline;
     flex-wrap: wrap;
+
+    // Specifically target OrgActions in card header
+    .slds-no-flex {
+      align-items: baseline;
+      display: flex;
+      flex: 0 1 auto;
+      flex-wrap: wrap; // allow button group to wrap when space is limited
+    }
   }
 
   .slds-has-flexi-truncate {
-    min-width: auto;
     margin-right: $spacing-x-small;
+    // allow org title to display in truncated state before org actions wrap
+    min-width: 35%; // arbitrary width
+  }
+
+  .slds-media {
+    margin-bottom: $spacing-x-small;
   }
 }
 

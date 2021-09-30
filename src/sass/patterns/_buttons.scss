@@ -1,0 +1,11 @@
+// Buttons
+// =======
+
+@media (min-width: $mq-medium) {
+  .narrow-buttons {
+    --sds-c-button-brand-spacing-inline-start: #{$spacing-x-small};
+    --sds-c-button-brand-spacing-inline-end: #{$spacing-x-small};
+    --sds-c-button-outline-brand-spacing-inline-start: #{$spacing-x-small};
+    --sds-c-button-outline-brand-spacing-inline-end: #{$spacing-x-small};
+  }
+}
