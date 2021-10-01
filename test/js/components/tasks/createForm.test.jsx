@@ -53,7 +53,7 @@ describe('<TaskForm/>', () => {
     const defaults = {
       project: defaultProject,
       epic: defaultEpic,
-      isOpenOrOrgId: true,
+      isOpen: true,
       closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
@@ -226,13 +226,12 @@ describe('<TaskForm/>', () => {
   describe('add and contribute from scratch org', () => {
     describe('success', () => {
       test('redirects to new task page', async () => {
-        const org = {
+        const orgData = {
           id: 'org-id',
           org_config_name: 'qa',
         };
         const { getByText, getByLabelText, context } = setup({
-          isOpenOrOrgId: org.id,
-          playgroundOrg: org,
+          playgroundOrgData: orgData,
         });
         const submit = getByText('Create');
         const nameInput = getByLabelText('*Task Name');
@@ -264,11 +263,11 @@ describe('<TaskForm/>', () => {
           expect(createObject).toHaveBeenCalledWith({
             objectType: 'task',
             data: {
-              dev_org: org.id,
+              dev_org: orgData.id,
               name: 'Name of Org Task',
               description: '',
               epic: defaultEpic.id,
-              org_config_name: 'qa',
+              org_config_name: orgData.org_config_name,
             },
             hasForm: true,
             shouldSubscribeToObject: true,

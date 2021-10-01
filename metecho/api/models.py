@@ -1283,6 +1283,7 @@ class ScratchOrg(
         self.org_type = SCRATCH_ORG_TYPES.Dev
         self.task = task
         self.epic = None
+        self.project = None
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 

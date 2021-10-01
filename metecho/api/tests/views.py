@@ -28,8 +28,8 @@ def test_openapi_schema(tmp_path):
     call_command(*cmd.format(temp_file).split())
 
     assert schema_file.read_text() == temp_file.read_text(), (
-        f"The OpenAPI schema is outdated. Run `{cmd.format(schema_file)}` and commit "
-        "the results."
+        "The OpenAPI schema is outdated. Run `python manage.py "
+        f"{cmd.format(schema_file)}` and commit the results."
     )
 
 
