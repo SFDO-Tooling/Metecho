@@ -362,7 +362,9 @@ class TestProjectViewset:
                 "organization": str(git_hub_organization.pk),
                 "name": "Foo",
                 "repo_name": "foo",
-                "github_users": [{"id": "123"}],
+                "github_users": [
+                    {"id": "123", "login": "abc", "avatar_url": "http://example.com"}
+                ],
                 "dependencies": [str(dep1.id), str(dep2.id)],
             },
             format="json",
@@ -373,7 +375,9 @@ class TestProjectViewset:
         assert project.name == "Foo"
         assert project.repo_name == "foo"
         assert project.repo_owner == git_hub_organization.login
-        assert project.github_users == [{"id": "123"}]
+        assert project.github_users == [
+            {"id": "123", "login": "abc", "avatar_url": "http://example.com"}
+        ]
         assert create_repository_job.delay.called
 
 
