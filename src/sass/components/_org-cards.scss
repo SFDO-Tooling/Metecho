@@ -27,11 +27,13 @@
       display: flex;
       flex: 0 1 auto;
       flex-wrap: wrap; // allow button group to wrap when space is limited
+      margin-right: $spacing-medium;
+      row-gap: $spacing-x-small;
     }
   }
 
   .slds-has-flexi-truncate {
-    margin-right: $spacing-x-small;
+    margin-right: calc(#{$spacing-x-small} + #{$spacing-medium});
     // allow org title to display in truncated state before org actions wrap
     min-width: 35%; // arbitrary width
   }
@@ -39,4 +41,10 @@
   .slds-media {
     margin-bottom: $spacing-x-small;
   }
+}
+
+.metecho-card-more {
+  position: absolute;
+  right: $spacing-small;
+  top: $spacing-small;
 }
