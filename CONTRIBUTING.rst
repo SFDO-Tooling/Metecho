@@ -187,6 +187,7 @@ will see you can run e.g.::
     $ ./derrick migrate <app> <prefix>  # run Django migrations
     $ ./derrick migrations <app>  # add new Django migrations (``makemigrations``)
     $ ./derrick messages <locale>  # build messages for i18n
+    $ ./derrick schema  # generate OpenAPI schema file
     $ ./derrick shell  # open Python shell
     $ ./derrick prune  # clean up unused Docker images and containers
     $ ./derrick storybook  # build storybook and run dev server
