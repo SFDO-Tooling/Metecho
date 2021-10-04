@@ -1,7 +1,7 @@
 // Containers
 // ==========
 
-.metecho-frame {
+// Prevent unwanted horizontal scroll by overriding the 100vw applied by slds-grid_frame
   min-width: 100%;
 }
 
