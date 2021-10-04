@@ -18,6 +18,8 @@
 // override min-width and force header to wrap on nested card headers
 .wrap-inner-truncate {
   .slds-card__header {
+    // hold space for absolutely positioned dropdown toggle
+    --sds-c-card-header-spacing-inline-end: #{$spacing-x-large};
     align-items: baseline;
     flex-wrap: wrap;
 
@@ -27,13 +29,12 @@
       display: flex;
       flex: 0 1 auto;
       flex-wrap: wrap; // allow button group to wrap when space is limited
-      margin-right: $spacing-medium;
       row-gap: $spacing-x-small;
     }
   }
 
   .slds-has-flexi-truncate {
-    margin-right: calc(#{$spacing-x-small} + #{$spacing-medium});
+    margin-right: $spacing-x-small;
     // allow org title to display in truncated state before org actions wrap
     min-width: 35%; // arbitrary width
   }
