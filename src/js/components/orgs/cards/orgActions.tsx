@@ -118,7 +118,10 @@ const OrgActions = ({
       <Button
         label={i18n.t('Contribute Work')}
         variant="outline-brand"
-        className="slds-m-right_x-small slds-m-left_none slds-m-top_xx-small tour-scratch-org-contribute"
+        className="slds-m-right_x-small
+          slds-m-left_none
+          slds-m-top_xx-small
+          tour-scratch-org-contribute"
         onClick={openContributeModal}
       />
     );
