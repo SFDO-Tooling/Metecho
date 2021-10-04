@@ -2,6 +2,7 @@
 // ==========
 
 // Prevent unwanted horizontal scroll by overriding the 100vw applied by slds-grid_frame
+.metecho-frame {
   min-width: 100%;
 }
 
