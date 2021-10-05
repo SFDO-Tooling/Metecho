@@ -52,12 +52,13 @@ Docker-based development
     GITHUB_APP_ID=...
     DOCKER_GITHUB_APP_KEY=...
     FULL_ACCESS_GITHUB_APP_ID=...
-    FULL_ACCESS_GITHUB_APP_KEY=...
+    DOCKER_FULL_ACCESS_GITHUB_APP_KEY=...
 
    Note that none of the values should be quoted, and while
-   ``DOCKER_SFDX_HUB_KEY`` and ``DOCKER_GITHUB_APP_KEY`` are RSA private keys,
-   they must have newlines replaced with ``\n`` in order to work properly with
-   the Docker ``env_file`` configuration option (see `this issue`_).
+   ``DOCKER_SFDX_HUB_KEY``, ``DOCKER_GITHUB_APP_KEY``, and
+   ``DOCKER_FULL_ACCESS_GITHUB_APP_KEY`` are RSA private keys, they must have
+   newlines replaced with ``\n`` in order to work properly with the Docker
+   ``env_file`` configuration option (see `this issue`_).
 
 3. Run ``./derrick build`` to build/re-build all the container images.
 

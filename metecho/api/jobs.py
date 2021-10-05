@@ -6,10 +6,14 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Iterable
 
+import cumulusci
 import requests
 import sarge
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
+from cumulusci.cli.project import init_from_context
+from cumulusci.cli.runtime import CliRuntime
+from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -20,11 +24,6 @@ from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError
 from github3.github import GitHub
 from github3.repos.repo import Repository
-
-import cumulusci
-from cumulusci.cli.project import init_from_context
-from cumulusci.cli.runtime import CliRuntime
-from cumulusci.utils import temporary_dir
 
 from .email_utils import get_user_facing_url
 from .gh import (

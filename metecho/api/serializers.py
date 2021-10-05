@@ -165,14 +165,12 @@ class MinimalUserSerializer(HashIdModelSerializer):
 
 
 class ProjectDependencySerializer(HashIdModelSerializer):
-
     class Meta:
         model = ProjectDependency
         fields = ("id", "name", "recommended")
 
 
 class GitHubOrganizationSerializer(HashIdModelSerializer):
-
     class Meta:
         model = GitHubOrganization
         fields = ("id", "name")

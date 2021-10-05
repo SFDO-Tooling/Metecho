@@ -238,8 +238,12 @@ GITHUB_APP_KEY = bytes(env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY), "ut
 
 # Same as above, but for the GitHub app with write access
 FULL_ACCESS_GITHUB_APP_ID = env("FULL_ACCESS_GITHUB_APP_ID", default=0, type_=int)
+DOCKER_FULL_ACCESS_GITHUB_APP_KEY = env(
+    "DOCKER_FULL_ACCESS_GITHUB_APP_KEY", default=""
+).replace("\\n", "\n")
 FULL_ACCESS_GITHUB_APP_KEY = bytes(
-    env("FULL_ACCESS_GITHUB_APP_KEY", default="").replace("\\n", "\n"), "utf-8"
+    env("FULL_ACCESS_GITHUB_APP_KEY", default=DOCKER_FULL_ACCESS_GITHUB_APP_KEY),
+    "utf-8",
 )
 
 
