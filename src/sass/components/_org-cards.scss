@@ -19,7 +19,6 @@
 .wrap-inner-truncate {
   .slds-card__header {
     // hold space for absolutely positioned dropdown toggle
-    --sds-c-card-header-spacing-inline-end: #{$spacing-x-large};
     align-items: baseline;
     flex-wrap: wrap;
 
@@ -29,12 +28,13 @@
       display: flex;
       flex: 0 1 auto;
       flex-wrap: wrap; // allow button group to wrap when space is limited
+      position: relative;
       row-gap: $spacing-x-small;
+      width: 100%;
     }
   }
 
   .slds-has-flexi-truncate {
-    margin-right: $spacing-x-small;
     // allow org title to display in truncated state before org actions wrap
     min-width: 35%; // arbitrary width
   }
@@ -46,6 +46,6 @@
 
 .metecho-card-more {
   position: absolute;
-  right: $spacing-small;
-  top: $spacing-small;
+  right: 0;
+  top: -$spacing-x-large;
 }
