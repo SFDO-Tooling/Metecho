@@ -2,6 +2,14 @@ import * as actions from '@/js/store/epics/actions';
 
 import { storeWithThunk } from './../../utils';
 
+describe('createEpic', () => {
+  test('returns EpicCreated', () => {
+    const expected = { type: 'EPIC_CREATE', payload: {} };
+
+    expect(actions.createEpic({})).toEqual(expected);
+  });
+});
+
 describe('updateEpic', () => {
   test('returns EpicUpdated', () => {
     const expected = { type: 'EPIC_UPDATE', payload: {} };
