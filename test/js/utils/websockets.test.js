@@ -2,6 +2,7 @@ import Sockette from 'sockette';
 
 import { removeObject } from '@/js/store/actions';
 import {
+  createEpic,
   createEpicPR,
   createEpicPRFailed,
   updateEpic,
@@ -31,6 +32,7 @@ import {
 } from '@/js/store/projects/actions';
 import { connectSocket, disconnectSocket } from '@/js/store/socket/actions';
 import {
+  createTask,
   createTaskPR,
   createTaskPRFailed,
   submitReview,
@@ -71,6 +73,8 @@ const actions = {
   submitReviewFailed,
   updateFailed,
   updateOrg,
+  createEpic,
+  createTask,
   updateEpic,
   updateProject,
   updateTask,
@@ -108,9 +112,11 @@ describe('getAction', () => {
   test.each([
     ['PROJECT_UPDATE', 'updateProject', true],
     ['PROJECT_UPDATE_ERROR', 'projectError', false],
+    ['EPIC_CREATE', 'createEpic', true],
     ['EPIC_UPDATE', 'updateEpic', true],
     ['EPIC_CREATE_PR', 'createEpicPR', false],
     ['EPIC_CREATE_PR_FAILED', 'createEpicPRFailed', false],
+    ['TASK_CREATE', 'createTask', true],
     ['TASK_UPDATE', 'updateTask', true],
     ['TASK_CREATE_PR', 'createTaskPR', false],
     ['TASK_CREATE_PR_FAILED', 'createTaskPRFailed', false],

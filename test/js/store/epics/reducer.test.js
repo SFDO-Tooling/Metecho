@@ -368,6 +368,61 @@ describe('reducer', () => {
     });
   });
 
+  describe('EPIC_CREATE', () => {
+    test('adds new epic to list', () => {
+      const epic = {
+        id: 'p1',
+        project: 'project-1',
+        name: 'Epic 1',
+      };
+      const expected = {
+        'project-1': {
+          epics: [epic],
+          next: null,
+          notFound: [],
+          fetched: false,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'EPIC_CREATE',
+          payload: epic,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('does not update existing epic', () => {
+      const epic = {
+        id: 'p1',
+        project: 'project-1',
+        name: 'Epic 1',
+      };
+      const epic2 = {
+        id: 'p2',
+        project: 'project-1',
+        name: 'Epic 2',
+      };
+      const editedEpic = { ...epic, name: 'Edited Epic Name' };
+      const expected = {
+        'project-1': {
+          epics: [epic, epic2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(expected, {
+        type: 'EPIC_CREATE',
+        payload: editedEpic,
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('EPIC_UPDATE', () => {
     test('adds new epic to list', () => {
       const epic = {

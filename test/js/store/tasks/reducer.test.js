@@ -459,6 +459,52 @@ describe('reducer', () => {
     });
   });
 
+  describe('TASK_CREATE', () => {
+    test('adds new task to list', () => {
+      const task = {
+        id: 't1',
+        epic,
+        root_project: 'p1',
+      };
+      const expected = {
+        p1: { tasks: [task], fetched: [], notFound: [] },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'TASK_CREATE',
+          payload: task,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('does not update existing task', () => {
+      const task = {
+        id: 't1',
+        epic,
+        name: 'Task Name',
+        root_project: 'p1',
+      };
+      const task2 = {
+        id: 't2',
+        epic,
+        root_project: 'p1',
+      };
+      const editedTask = { ...task, name: 'Edited Task Name' };
+      const expected = {
+        p1: { tasks: [editedTask, task2], fetched: [], notFound: [] },
+      };
+      const actual = reducer(expected, {
+        type: 'TASK_CREATE',
+        payload: editedTask,
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('TASK_UPDATE', () => {
     test('adds new task to list', () => {
       const task = {

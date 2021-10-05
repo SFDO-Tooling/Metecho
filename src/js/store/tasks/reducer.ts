@@ -228,12 +228,11 @@ const reducer = (
       }
       return tasks;
     }
+    case 'TASK_CREATE':
     case 'TASK_UPDATE':
     case 'UPDATE_OBJECT_SUCCEEDED': {
       let maybeTask;
-      if (action.type === 'TASK_UPDATE') {
-        maybeTask = action.payload;
-      } else {
+      if (action.type === 'UPDATE_OBJECT_SUCCEEDED') {
         const {
           object,
           objectType,
@@ -241,6 +240,8 @@ const reducer = (
         if (objectType === OBJECT_TYPES.TASK && object) {
           maybeTask = object;
         }
+      } else {
+        maybeTask = action.payload as Task;
       }
       /* istanbul ignore if */
       if (!maybeTask) {
@@ -252,6 +253,10 @@ const reducer = (
       };
       const existingTask = find(projectTasks.tasks, ['id', task.id]);
       if (existingTask) {
+        // Don't update existing task on TASK_CREATE event
+        if (action.type === 'TASK_CREATE') {
+          return tasks;
+        }
         return {
           ...tasks,
           [task.root_project]: {
