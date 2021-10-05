@@ -426,6 +426,12 @@ const ProjectDetail = (
                 }
                 heading={i18n.t('Create Epics to group Tasks')}
               />
+              <Button
+                label={i18n.t('Create Epic From Github Issue')}
+                variant="outline-brand"
+                onClick={openCreateEpicModal}
+                className="tour-create-epic"
+              />
             </div>
             <EpicTable
               epics={

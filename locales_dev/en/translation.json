@@ -67,6 +67,7 @@
   "Copyright 2019–{{current_year}} Salesforce.org. All rights reserved.": "Copyright 2019–{{current_year}} Salesforce.org. All rights reserved.",
   "Create": "Create",
   "Create & New": "Create & New",
+  "Create Epic From Github Issue": "Create Epic From Github Issue",
   "Create Epics to group Tasks": "Create Epics to group Tasks",
   "Create Org": "Create Org",
   "Create Scratch Org": "Create Scratch Org",
