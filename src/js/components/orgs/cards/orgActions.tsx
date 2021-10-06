@@ -88,7 +88,7 @@ const OrgActions = ({
         <Button
           label={i18n.t('Update Review')}
           variant="outline-brand"
-          className="slds-m-right_x-small"
+          className="slds-m-right_x-small slds-m-left_none"
           onClick={openSubmitReviewModal}
         />
       );
@@ -97,7 +97,7 @@ const OrgActions = ({
         <Button
           label={i18n.t('Submit Review')}
           variant="outline-brand"
-          className="slds-m-right_x-small"
+          className="slds-m-right_x-small slds-m-left_none"
           onClick={openSubmitReviewModal}
         />
       );
