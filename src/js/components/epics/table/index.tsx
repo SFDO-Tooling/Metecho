@@ -2,6 +2,7 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
+import { orderBy } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -32,10 +33,14 @@ const EpicTable = ({
   projectSlug: string;
 }) => {
   const items = isFetched
-    ? epics.map((epic) => ({
-        ...epic,
-        numCollaborators: epic.github_users?.length || 0,
-      }))
+    ? orderBy(
+        epics.map((epic) => ({
+          ...epic,
+          numCollaborators: epic.github_users?.length || 0,
+        })),
+        ['created_at', 'name'],
+        ['desc', 'asc'],
+      )
     : [];
 
   return isFetched ? (

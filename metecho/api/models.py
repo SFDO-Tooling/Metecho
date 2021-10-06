@@ -704,6 +704,17 @@ class Epic(
         elif self.should_update_in_progress():
             self.status = EPIC_STATUSES["In progress"]
 
+    def notify_created(self, originating_user_id=None):
+        # Notify all users about the new epic
+        group_name = CHANNELS_GROUP_NAME.format(
+            model=self.project._meta.model_name, id=self.project.id
+        )
+        self.notify_changed(
+            type_="EPIC_CREATE",
+            originating_user_id=originating_user_id,
+            group_name=group_name,
+        )
+
     def finalize_pr_closed(self, pr_number, *, originating_user_id):
         self.pr_number = pr_number
         self.pr_is_open = False
@@ -840,10 +851,6 @@ class Task(
         if self.epic and (save_epic or is_new):
             self.epic.notify_changed(originating_user_id=None)
 
-        # Notify all users about the new task
-        if is_new:
-            self.notify_changed(type_="TASK_CREATE", originating_user_id=None)
-
         return ret
 
     def delete(self, *args, **kwargs):
@@ -955,6 +962,17 @@ class Task(
             self.has_unmerged_commits = (
                 repo.compare_commits(base_sha, head_sha).ahead_by > 0
             )
+
+    def notify_created(self, originating_user_id=None):
+        # Notify all users about the new task
+        group_name = CHANNELS_GROUP_NAME.format(
+            model=self.root_project._meta.model_name, id=self.root_project.id
+        )
+        self.notify_changed(
+            type_="TASK_CREATE",
+            originating_user_id=originating_user_id,
+            group_name=group_name,
+        )
 
     def finalize_task_update(self, *, originating_user_id):
         self.save()

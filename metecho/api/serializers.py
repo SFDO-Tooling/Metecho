@@ -334,12 +334,14 @@ class EpicSerializer(HashIdModelSerializer):
         )
 
     def create(self, validated_data):
+        user = self.context["request"].user
         if not validated_data.get("branch_name"):
             # This temporarily prevents users from taking other actions
             # (e.g. creating scratch orgs) that also might trigger branch creation
             # and could result in race conditions and duplicate branches on GitHub.
             validated_data["currently_creating_branch"] = True
         instance = super().create(validated_data)
+        instance.notify_created(originating_user_id=str(user.id))
         instance.create_gh_branch(self.context["request"].user)
         instance.project.queue_available_org_config_names(
             user=self.context["request"].user
@@ -604,6 +606,7 @@ class TaskSerializer(HashIdModelSerializer):
             validated_data["assigned_dev"] = user.github_id
 
         task = super().create(validated_data)
+        task.notify_created(originating_user_id=str(user.id))
 
         if dev_org:
             dev_org.queue_convert_to_dev_org(task, originating_user_id=str(user.id))
