@@ -166,11 +166,11 @@
     "@storybook/**/browserslist": "^4.16.5",
     "@storybook/**/immer": "^9.0.6",
     "@storybook/**/prismjs": "^1.25.0",
+    "@storybook/**/react-refresh": "^0.10.0",
     "@storybook/**/set-value": "^4.0.1",
     "glob-parent": "^5.1.2",
     "html-webpack-plugin/**/ansi-regex": "^5.0.1",
     "i18next": "^20.6.1",
-    "jest-junit/**/ansi-regex": "^5.0.1",
     "react-joyride/**/nested-property": "^4.0.0",
     "trim": "^0.0.3"
   },
