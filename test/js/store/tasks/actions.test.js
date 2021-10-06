@@ -2,6 +2,14 @@ import * as actions from '@/js/store/tasks/actions';
 
 import { storeWithThunk } from './../../utils';
 
+describe('createTask', () => {
+  test('returns TaskCreated', () => {
+    const expected = { type: 'TASK_CREATE', payload: {} };
+
+    expect(actions.createTask({})).toEqual(expected);
+  });
+});
+
 describe('updateTask', () => {
   test('returns TaskUpdated', () => {
     const expected = { type: 'TASK_UPDATE', payload: {} };

@@ -5,6 +5,10 @@ import { Epic } from '@/js/store/epics/reducer';
 import { isCurrentUser } from '@/js/store/helpers';
 import { addToast } from '@/js/store/toasts/actions';
 
+interface EpicCreated {
+  type: 'EPIC_CREATE';
+  payload: Epic;
+}
 interface EpicUpdated {
   type: 'EPIC_UPDATE';
   payload: Epic;
@@ -14,7 +18,12 @@ interface EpicCreatePRFailed {
   payload: Epic;
 }
 
-export type EpicAction = EpicUpdated | EpicCreatePRFailed;
+export type EpicAction = EpicCreated | EpicUpdated | EpicCreatePRFailed;
+
+export const createEpic = (payload: Epic): EpicCreated => ({
+  type: 'EPIC_CREATE',
+  payload,
+});
 
 export const updateEpic = (payload: Epic): EpicUpdated => ({
   type: 'EPIC_UPDATE',

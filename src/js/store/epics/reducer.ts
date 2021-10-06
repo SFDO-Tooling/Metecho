@@ -142,12 +142,11 @@ const reducer = (
       }
       return epics;
     }
+    case 'EPIC_CREATE':
     case 'EPIC_UPDATE':
     case 'UPDATE_OBJECT_SUCCEEDED': {
       let maybeEpic;
-      if (action.type === 'EPIC_UPDATE') {
-        maybeEpic = action.payload;
-      } else {
+      if (action.type === 'UPDATE_OBJECT_SUCCEEDED') {
         const {
           object,
           objectType,
@@ -155,6 +154,8 @@ const reducer = (
         if (objectType === OBJECT_TYPES.EPIC && object) {
           maybeEpic = object;
         }
+      } else {
+        maybeEpic = action.payload as Epic;
       }
       /* istanbul ignore if */
       if (!maybeEpic) {
@@ -166,6 +167,10 @@ const reducer = (
       };
       const existingEpic = projectEpics.epics.find((p) => p.id === epic.id);
       if (existingEpic) {
+        // Don't update existing epic on EPIC_CREATE event
+        if (action.type === 'EPIC_CREATE') {
+          return epics;
+        }
         return {
           ...epics,
           [epic.project]: {
