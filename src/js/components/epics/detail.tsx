@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
+import { pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -20,6 +21,7 @@ import CreateTaskModal from '@/js/components/tasks/createForm';
 import TaskTable from '@/js/components/tasks/table';
 import TourPopover from '@/js/components/tour/popover';
 import {
+  ContributeCallback,
   ContributeWorkModal,
   CreateOrgModal,
   DeleteModal,
@@ -29,6 +31,7 @@ import {
   getEpicLoadingOrNotFound,
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
+  OrgData,
   PageOptions,
   SpinnerWrapper,
   SubmitModal,
@@ -43,11 +46,17 @@ import { updateObject } from '@/js/store/actions';
 import { Org } from '@/js/store/orgs/reducer';
 import { GitHubUser, User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
-import { EPIC_STATUSES, OBJECT_TYPES } from '@/js/utils/constants';
+import {
+  CREATE_TASK_FROM_ORG,
+  EPIC_STATUSES,
+  OBJECT_TYPES,
+} from '@/js/utils/constants';
 import { getBranchLink, getCompletedTasks } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
-const EpicDetail = (props: RouteComponentProps) => {
+const EpicDetail = (
+  props: RouteComponentProps<any, any, { [CREATE_TASK_FROM_ORG]?: OrgData }>,
+) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
@@ -66,11 +75,14 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] = useState<
-    boolean | string
-  >(false);
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const {
+    history,
+    location: { state },
+  } = props;
 
   const playgroundOrg = (orgs || [])[0] as Org | undefined;
 
@@ -81,7 +93,8 @@ const EpicDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
     setCreateOrgModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
@@ -168,7 +181,8 @@ const EpicDetail = (props: RouteComponentProps) => {
         setEditModalOpen(false);
         setDeleteModalOpen(false);
         setContributeModalOpen(false);
-        setCreateModalOrgIdOrOpen(false);
+        setCreateTaskModalOpen(false);
+        setConvertOrgData(null);
         setCreateOrgModalOpen(false);
       } else {
         updateEpicUsers(users);
@@ -195,7 +209,8 @@ const EpicDetail = (props: RouteComponentProps) => {
         setEditModalOpen(false);
         setDeleteModalOpen(false);
         setContributeModalOpen(false);
-        setCreateModalOrgIdOrOpen(false);
+        setCreateTaskModalOpen(false);
+        setConvertOrgData(null);
         setCreateOrgModalOpen(false);
       } else {
         updateEpicUsers(users);
@@ -210,7 +225,8 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
   };
@@ -227,7 +243,8 @@ const EpicDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
   };
@@ -241,7 +258,8 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
   };
@@ -251,7 +269,8 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   // "create task" modal related:
   const openCreateModal = () => {
-    setCreateModalOrgIdOrOpen(true);
+    setCreateTaskModalOpen(true);
+    setConvertOrgData(null);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -260,13 +279,15 @@ const EpicDetail = (props: RouteComponentProps) => {
     setContributeModalOpen(false);
   };
   const closeCreateModal = () => {
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
   };
 
   // "create scratch org" modal related:
   const openCreateOrgModal = () => {
     setCreateOrgModalOpen(true);
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -280,7 +301,8 @@ const EpicDetail = (props: RouteComponentProps) => {
   // "contribute work" modal related:
   const openContributeModal = () => {
     setContributeModalOpen(true);
-    setCreateModalOrgIdOrOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -290,8 +312,9 @@ const EpicDetail = (props: RouteComponentProps) => {
   const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
   }, []);
-  const createAndContribute = useCallback(({ id }: { id: string }) => {
-    setCreateModalOrgIdOrOpen(id);
+  const createAndContribute: ContributeCallback = useCallback((orgData) => {
+    setConvertOrgData(orgData);
+    setCreateTaskModalOpen(true);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -315,6 +338,29 @@ const EpicDetail = (props: RouteComponentProps) => {
     },
     [readyToSubmit, currentlySubmitting],
   );
+
+  const epicIsMerged = epic?.status === EPIC_STATUSES.MERGED;
+  const epicHasTasks = Boolean(tasks && tasks.length > 0);
+
+  // Auto-open the create-task modal if `CREATE_TASK_FROM_ORG` param is truthy
+  const creatingTaskFromOrg = state?.[CREATE_TASK_FROM_ORG];
+  useEffect(() => {
+    if (
+      creatingTaskFromOrg?.id &&
+      project?.has_push_permission &&
+      !epicIsMerged
+    ) {
+      // Remove location state
+      history.replace({ state: {} });
+      createAndContribute(creatingTaskFromOrg, {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    createAndContribute,
+    creatingTaskFromOrg,
+    epicIsMerged,
+    project?.has_push_permission,
+  ]);
 
   const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
     project,
@@ -447,8 +493,6 @@ const EpicDetail = (props: RouteComponentProps) => {
     headerUrlText = `${project.repo_owner}/${project.repo_name}`;
   }
 
-  const epicIsMerged = epic.status === EPIC_STATUSES.MERGED;
-  const epicHasTasks = Boolean(tasks && tasks.length > 0);
   let taskHeader = i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name });
   if (!epicHasTasks && !epicIsMerged) {
     taskHeader = project.has_push_permission
@@ -701,6 +745,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   projectId={project.id}
                   projectSlug={project.slug}
                   tasks={tasks}
+                  isFetched
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}
@@ -743,8 +788,8 @@ const EpicDetail = (props: RouteComponentProps) => {
               <CreateTaskModal
                 project={project}
                 epic={epic}
-                isOpenOrOrgId={createModalOrgIdOrOpen}
-                playgroundOrg={playgroundOrg}
+                isOpen={createTaskModalOpen}
+                playgroundOrgData={convertOrgData}
                 closeCreateModal={closeCreateModal}
               />
             )}
@@ -755,7 +800,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             epic={epic}
             isOpen={contributeModalOpen}
             hasPermissions={project.has_push_permission}
-            orgId={playgroundOrg.id}
+            orgData={pick(playgroundOrg, ['id', 'org_config_name'])}
             closeModal={closeContributeModal}
             doContribute={createAndContribute}
           />

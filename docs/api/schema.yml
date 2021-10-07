@@ -1,0 +1,2214 @@
+openapi: 3.0.3
+info:
+  title: Metecho
+  version: 0.1.0
+  description: 2019–2021, Salesforce.org
+paths:
+  /api/epics/:
+    get:
+      operationId: epics_list
+      description: Manage Epics related to a Metecho Project.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: project
+        schema:
+          type: string
+          format: HashID
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - epics
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEpicList'
+          description: ''
+    post:
+      operationId: epics_create
+      description: Manage Epics related to a Metecho Project.
+      tags:
+      - epics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Epic'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Epic'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Epic'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+  /api/epics/{id}/:
+    get:
+      operationId: epics_retrieve
+      description: Manage Epics related to a Metecho Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+    put:
+      operationId: epics_update
+      description: Manage Epics related to a Metecho Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Epic'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Epic'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Epic'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+    patch:
+      operationId: epics_partial_update
+      description: Manage Epics related to a Metecho Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEpic'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEpic'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEpic'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+    delete:
+      operationId: epics_destroy
+      description: Manage Epics related to a Metecho Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/epics/{id}/collaborators/:
+    post:
+      operationId: epics_collaborators_create
+      description: |-
+        Edit the Epic collaborators. Exposed as a separate endpoint for users without
+        write access to Epics.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EpicCollaborators'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EpicCollaborators'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EpicCollaborators'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+    put:
+      operationId: epics_collaborators_update
+      description: |-
+        Edit the Epic collaborators. Exposed as a separate endpoint for users without
+        write access to Epics.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EpicCollaborators'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EpicCollaborators'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EpicCollaborators'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+  /api/epics/{id}/create_pr/:
+    post:
+      operationId: epics_create_pr_create
+      description: Queue a job to create a GitHub pull request.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this epic.
+        required: true
+      tags:
+      - epics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePr'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePr'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreatePr'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epic'
+          description: ''
+  /api/projects/:
+    get:
+      operationId: projects_list
+      description: Read-only information about Metecho Projects.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - projects
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectList'
+          description: ''
+  /api/projects/{id}/:
+    get:
+      operationId: projects_retrieve
+      description: Read-only information about Metecho Projects.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this project.
+        required: true
+      tags:
+      - projects
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/projects/{id}/feature_branches/:
+    get:
+      operationId: projects_feature_branches_retrieve
+      description: Get a list of feature branch names for a Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this project.
+        required: true
+      tags:
+      - projects
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+          description: ''
+  /api/projects/{id}/refresh_github_users/:
+    post:
+      operationId: projects_refresh_github_users_create
+      description: Queue a job to refresh the list of GitHub users for a Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this project.
+        required: true
+      tags:
+      - projects
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
+  /api/projects/{id}/refresh_org_config_names/:
+    post:
+      operationId: projects_refresh_org_config_names_create
+      description: Queue a job to refresh the list of ScratchOrg configs for a Project.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this project.
+        required: true
+      tags:
+      - projects
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
+  /api/scratch-orgs/:
+    get:
+      operationId: scratch_orgs_list
+      description: Manage SalesForce ScratchOrgs.
+      parameters:
+      - in: query
+        name: epic
+        schema:
+          type: string
+          format: HashID
+      - in: query
+        name: project
+        schema:
+          type: string
+          format: HashID
+      - in: query
+        name: task
+        schema:
+          type: string
+          format: HashID
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+    post:
+      operationId: scratch_orgs_create
+      description: Manage SalesForce ScratchOrgs.
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/scratch-orgs/{id}/:
+    get:
+      operationId: scratch_orgs_retrieve
+      description: Manage SalesForce ScratchOrgs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+    put:
+      operationId: scratch_orgs_update
+      description: Manage SalesForce ScratchOrgs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScratchOrg'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+    patch:
+      operationId: scratch_orgs_partial_update
+      description: Manage SalesForce ScratchOrgs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedScratchOrg'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedScratchOrg'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedScratchOrg'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+    delete:
+      operationId: scratch_orgs_destroy
+      description: Manage SalesForce ScratchOrgs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/scratch-orgs/{id}/commit/:
+    post:
+      operationId: scratch_orgs_commit_create
+      description: Queue a job that commits changes captured from a ScratchOrg.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Commit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Commit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Commit'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/scratch-orgs/{id}/redirect/:
+    get:
+      operationId: scratch_orgs_redirect_retrieve
+      description: Redirect to a ScratchOrg's URL.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '302':
+          description: No response body
+  /api/scratch-orgs/{id}/refresh/:
+    post:
+      operationId: scratch_orgs_refresh_create
+      description: Queue a job that retrieves the latest changes from a ScratchOrg.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/tasks/:
+    get:
+      operationId: tasks_list
+      description: Manage Tasks related to a Metecho Project or Epic.
+      parameters:
+      - in: query
+        name: epic
+        schema:
+          type: string
+          format: HashID
+      - in: query
+        name: project
+        schema:
+          type: string
+      - in: query
+        name: slug
+        schema:
+          type: string
+      tags:
+      - tasks
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+          description: ''
+    post:
+      operationId: tasks_create
+      description: Manage Tasks related to a Metecho Project or Epic.
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Task'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+  /api/tasks/{id}/:
+    get:
+      operationId: tasks_retrieve
+      description: Manage Tasks related to a Metecho Project or Epic.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    put:
+      operationId: tasks_update
+      description: Manage Tasks related to a Metecho Project or Epic.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Task'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    patch:
+      operationId: tasks_partial_update
+      description: Manage Tasks related to a Metecho Project or Epic.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTask'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTask'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTask'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    delete:
+      operationId: tasks_destroy
+      description: Manage Tasks related to a Metecho Project or Epic.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/tasks/{id}/assignees/:
+    post:
+      operationId: tasks_assignees_create
+      description: |-
+        Edit the assigned Developer and Tester on a Task. Exposed as a separate endpoint
+        for users without write access to Tasks.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskAssignee'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskAssignee'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskAssignee'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    put:
+      operationId: tasks_assignees_update
+      description: |-
+        Edit the assigned Developer and Tester on a Task. Exposed as a separate endpoint
+        for users without write access to Tasks.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskAssignee'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskAssignee'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskAssignee'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+  /api/tasks/{id}/can_reassign/:
+    post:
+      operationId: tasks_can_reassign_create
+      description: Check if a GitHub user can be assigned to a Task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanReassign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CanReassign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CanReassign'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  can_reassign:
+                    type: boolean
+          description: ''
+  /api/tasks/{id}/create_pr/:
+    post:
+      operationId: tasks_create_pr_create
+      description: Queue a job to create a GitHub pull request.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePr'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePr'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreatePr'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+  /api/tasks/{id}/review/:
+    post:
+      operationId: tasks_review_create
+      description: Queue a job that submits a Task pull request review.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Review'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+  /api/user/:
+    get:
+      operationId: current_user_retrieve
+      description: Get full details about the current user.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/user/agree_to_tos/:
+    put:
+      operationId: user_agree_to_tos_update
+      description: Set the user's `agreed_to_tos_at` field to the current datetime.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/user/complete_onboarding/:
+    put:
+      operationId: user_complete_onboarding_update
+      description: Set the user's `onboarded_at` field to the current datetime.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/user/disconnect/:
+    post:
+      operationId: user_disconnect_create
+      description: Disconnect the current user from their SalesForce account.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/user/guided_tour/:
+    post:
+      operationId: user_guided_tour_create
+      description: Update the user's guided-tour preferences and history.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuidedTour'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GuidedTour'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GuidedTour'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullUser'
+          description: ''
+  /api/user/refresh/:
+    post:
+      operationId: user_refresh_create
+      description: Queue a job to refresh the user's list of GitHub repositories.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
+  /api/users/:
+    get:
+      operationId: users_list
+      description: Read-only information about all users.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - users
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMinimalUserList'
+          description: ''
+  /api/users/{id}/:
+    get:
+      operationId: users_retrieve
+      description: Read-only information about all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MinimalUser'
+          description: ''
+components:
+  schemas:
+    CanReassign:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        gh_uid:
+          type: string
+      required:
+      - gh_uid
+      - role
+    Commit:
+      type: object
+      properties:
+        commit_message:
+          type: string
+        changes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        target_directory:
+          type: string
+      required:
+      - changes
+      - commit_message
+      - target_directory
+    CreatePr:
+      type: object
+      properties:
+        title:
+          type: string
+        critical_changes:
+          type: string
+        additional_changes:
+          type: string
+        issues:
+          type: string
+        notes:
+          type: string
+        alert_assigned_qa:
+          type: boolean
+      required:
+      - additional_changes
+      - alert_assigned_qa
+      - critical_changes
+      - issues
+      - notes
+      - title
+    Epic:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        project:
+          type: string
+          format: HashID
+        task_count:
+          type: integer
+          readOnly: true
+        branch_url:
+          type: string
+          format: uri
+          readOnly: true
+        branch_diff_url:
+          type: string
+          format: uri
+          readOnly: true
+        branch_name:
+          type: string
+          pattern: ^[-\w/]+$
+          maxLength: 100
+        has_unmerged_commits:
+          type: boolean
+          readOnly: true
+        currently_creating_branch:
+          type: boolean
+          readOnly: true
+        currently_creating_pr:
+          type: boolean
+          readOnly: true
+        pr_url:
+          type: string
+          format: uri
+          readOnly: true
+        pr_is_open:
+          type: boolean
+          readOnly: true
+        pr_is_merged:
+          type: boolean
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EpicStatusEnum'
+          readOnly: true
+        github_users:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        latest_sha:
+          type: string
+          readOnly: true
+      required:
+      - branch_diff_url
+      - branch_url
+      - currently_creating_branch
+      - currently_creating_pr
+      - description_rendered
+      - github_users
+      - has_unmerged_commits
+      - id
+      - latest_sha
+      - name
+      - old_slugs
+      - pr_is_merged
+      - pr_is_open
+      - pr_url
+      - project
+      - slug
+      - status
+      - task_count
+    EpicCollaborators:
+      type: object
+      properties:
+        github_users:
+          type: array
+          items:
+            type: string
+      required:
+      - github_users
+    EpicStatusEnum:
+      enum:
+      - Planned
+      - In progress
+      - Review
+      - Merged
+      type: string
+    FullUser:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        avatar_url:
+          type: string
+          nullable: true
+          readOnly: true
+        github_id:
+          type: string
+          nullable: true
+          readOnly: true
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        valid_token_for:
+          type: string
+          nullable: true
+          readOnly: true
+        org_name:
+          type: string
+          nullable: true
+          readOnly: true
+        org_type:
+          type: string
+          nullable: true
+          readOnly: true
+        is_devhub_enabled:
+          type: boolean
+          readOnly: true
+        sf_username:
+          type: string
+          nullable: true
+          readOnly: true
+        currently_fetching_repos:
+          type: boolean
+        devhub_username:
+          type: string
+        uses_global_devhub:
+          type: boolean
+          readOnly: true
+        agreed_to_tos_at:
+          type: string
+          format: date-time
+          nullable: true
+        onboarded_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date of the last time the user completed the interactive onboarding
+        self_guided_tour_enabled:
+          type: boolean
+        self_guided_tour_state:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - avatar_url
+      - github_id
+      - id
+      - is_devhub_enabled
+      - org_name
+      - org_type
+      - sf_username
+      - username
+      - uses_global_devhub
+      - valid_token_for
+    GitHubUser:
+      type: object
+      properties:
+        id:
+          type: string
+        login:
+          type: string
+        name:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        permissions:
+          $ref: '#/components/schemas/RepoPermission'
+      required:
+      - avatar_url
+      - id
+      - login
+    GuidedTour:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        state:
+          type: object
+          additionalProperties: {}
+    MinimalUser:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        avatar_url:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - avatar_url
+      - id
+      - username
+    OrgConfigName:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+      required:
+      - key
+    OrgTypeEnum:
+      enum:
+      - Dev
+      - QA
+      - Playground
+      type: string
+    PaginatedEpicList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Epic'
+    PaginatedMinimalUserList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinimalUser'
+    PaginatedProjectList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+    PatchedEpic:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        project:
+          type: string
+          format: HashID
+        task_count:
+          type: integer
+          readOnly: true
+        branch_url:
+          type: string
+          format: uri
+          readOnly: true
+        branch_diff_url:
+          type: string
+          format: uri
+          readOnly: true
+        branch_name:
+          type: string
+          pattern: ^[-\w/]+$
+          maxLength: 100
+        has_unmerged_commits:
+          type: boolean
+          readOnly: true
+        currently_creating_branch:
+          type: boolean
+          readOnly: true
+        currently_creating_pr:
+          type: boolean
+          readOnly: true
+        pr_url:
+          type: string
+          format: uri
+          readOnly: true
+        pr_is_open:
+          type: boolean
+          readOnly: true
+        pr_is_merged:
+          type: boolean
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EpicStatusEnum'
+          readOnly: true
+        github_users:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        latest_sha:
+          type: string
+          readOnly: true
+    PatchedScratchOrg:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        project:
+          type: string
+          format: HashID
+          nullable: true
+        epic:
+          type: string
+          format: HashID
+          nullable: true
+        task:
+          type: string
+          format: HashID
+          nullable: true
+        org_type:
+          $ref: '#/components/schemas/OrgTypeEnum'
+        owner:
+          type: string
+          format: HashID
+          readOnly: true
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        last_modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        latest_commit:
+          type: string
+          readOnly: true
+        latest_commit_url:
+          type: string
+          format: uri
+          readOnly: true
+        latest_commit_at:
+          type: string
+          format: date-time
+          readOnly: true
+        last_checked_unsaved_changes_at:
+          type: string
+          format: date-time
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        unsaved_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        total_unsaved_changes:
+          type: integer
+          readOnly: true
+        has_unsaved_changes:
+          type: boolean
+          readOnly: true
+        ignored_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        ignored_changes_write:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+        total_ignored_changes:
+          type: integer
+          readOnly: true
+        has_ignored_changes:
+          type: boolean
+          readOnly: true
+        currently_refreshing_changes:
+          type: boolean
+          readOnly: true
+        currently_capturing_changes:
+          type: boolean
+          readOnly: true
+        currently_refreshing_org:
+          type: boolean
+          readOnly: true
+        currently_reassigning_user:
+          type: boolean
+          readOnly: true
+        is_created:
+          type: boolean
+          readOnly: true
+        delete_queued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner_gh_username:
+          type: string
+          readOnly: true
+        owner_gh_id:
+          type: string
+          readOnly: true
+        has_been_visited:
+          type: boolean
+          readOnly: true
+        valid_target_directories:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        org_config_name:
+          type: string
+    PatchedTask:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        epic:
+          type: string
+          format: HashID
+          nullable: true
+        project:
+          type: string
+          format: HashID
+          nullable: true
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        has_unmerged_commits:
+          type: boolean
+          readOnly: true
+        currently_creating_branch:
+          type: boolean
+          readOnly: true
+        currently_creating_pr:
+          type: boolean
+          readOnly: true
+        branch_name:
+          type: string
+          pattern: ^[-\w/]+$
+          maxLength: 100
+        root_project:
+          type: string
+          readOnly: true
+        branch_url:
+          type: string
+          format: uri
+          readOnly: true
+        commits:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        origin_sha:
+          type: string
+          readOnly: true
+        branch_diff_url:
+          type: string
+          format: uri
+          readOnly: true
+        pr_url:
+          type: string
+          format: uri
+          readOnly: true
+        review_submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        review_valid:
+          type: boolean
+          readOnly: true
+        review_status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatusEnum'
+          readOnly: true
+        review_sha:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatusEnum'
+          readOnly: true
+        pr_is_open:
+          type: boolean
+          readOnly: true
+        assigned_dev:
+          type: string
+          nullable: true
+          maxLength: 50
+        assigned_qa:
+          type: string
+          readOnly: true
+        dev_org:
+          type: string
+          format: HashID
+          writeOnly: true
+        currently_submitting_review:
+          type: boolean
+          readOnly: true
+        org_config_name:
+          type: string
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        repo_url:
+          type: string
+          format: uri
+          readOnly: true
+        repo_owner:
+          type: string
+        repo_name:
+          type: string
+        has_push_permission:
+          type: boolean
+          readOnly: true
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        is_managed:
+          type: boolean
+        slug:
+          type: string
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        branch_prefix:
+          type: string
+        github_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/GitHubUser'
+        repo_image_url:
+          type: string
+          format: uri
+          readOnly: true
+        org_config_names:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrgConfigName'
+          readOnly: true
+        currently_fetching_org_config_names:
+          type: boolean
+          readOnly: true
+        currently_fetching_github_users:
+          type: boolean
+          readOnly: true
+        latest_sha:
+          type: string
+          readOnly: true
+      required:
+      - currently_fetching_github_users
+      - currently_fetching_org_config_names
+      - description_rendered
+      - has_push_permission
+      - id
+      - latest_sha
+      - name
+      - old_slugs
+      - org_config_names
+      - repo_image_url
+      - repo_name
+      - repo_owner
+      - repo_url
+      - slug
+    RepoPermission:
+      type: object
+      properties:
+        push:
+          type: boolean
+        pull:
+          type: boolean
+        admin:
+          type: boolean
+    Review:
+      type: object
+      properties:
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReviewStatusEnum'
+        delete_org:
+          type: boolean
+        org:
+          type: string
+          format: HashID
+          nullable: true
+      required:
+      - delete_org
+      - notes
+      - org
+      - status
+    ReviewStatusEnum:
+      enum:
+      - Approved
+      - Changes requested
+      type: string
+    RoleEnum:
+      enum:
+      - assigned_qa
+      - assigned_dev
+      type: string
+    ScratchOrg:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        project:
+          type: string
+          format: HashID
+          nullable: true
+        epic:
+          type: string
+          format: HashID
+          nullable: true
+        task:
+          type: string
+          format: HashID
+          nullable: true
+        org_type:
+          $ref: '#/components/schemas/OrgTypeEnum'
+        owner:
+          type: string
+          format: HashID
+          readOnly: true
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        last_modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        latest_commit:
+          type: string
+          readOnly: true
+        latest_commit_url:
+          type: string
+          format: uri
+          readOnly: true
+        latest_commit_at:
+          type: string
+          format: date-time
+          readOnly: true
+        last_checked_unsaved_changes_at:
+          type: string
+          format: date-time
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        unsaved_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        total_unsaved_changes:
+          type: integer
+          readOnly: true
+        has_unsaved_changes:
+          type: boolean
+          readOnly: true
+        ignored_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        ignored_changes_write:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+        total_ignored_changes:
+          type: integer
+          readOnly: true
+        has_ignored_changes:
+          type: boolean
+          readOnly: true
+        currently_refreshing_changes:
+          type: boolean
+          readOnly: true
+        currently_capturing_changes:
+          type: boolean
+          readOnly: true
+        currently_refreshing_org:
+          type: boolean
+          readOnly: true
+        currently_reassigning_user:
+          type: boolean
+          readOnly: true
+        is_created:
+          type: boolean
+          readOnly: true
+        delete_queued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner_gh_username:
+          type: string
+          readOnly: true
+        owner_gh_id:
+          type: string
+          readOnly: true
+        has_been_visited:
+          type: boolean
+          readOnly: true
+        valid_target_directories:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        org_config_name:
+          type: string
+      required:
+      - currently_capturing_changes
+      - currently_reassigning_user
+      - currently_refreshing_changes
+      - currently_refreshing_org
+      - delete_queued_at
+      - description_rendered
+      - expires_at
+      - has_been_visited
+      - has_ignored_changes
+      - has_unsaved_changes
+      - id
+      - ignored_changes
+      - is_created
+      - last_checked_unsaved_changes_at
+      - last_modified_at
+      - latest_commit
+      - latest_commit_at
+      - latest_commit_url
+      - org_config_name
+      - org_type
+      - owner
+      - owner_gh_id
+      - owner_gh_username
+      - total_ignored_changes
+      - total_unsaved_changes
+      - unsaved_changes
+      - url
+      - valid_target_directories
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        description_rendered:
+          type: string
+          readOnly: true
+        epic:
+          type: string
+          format: HashID
+          nullable: true
+        project:
+          type: string
+          format: HashID
+          nullable: true
+        slug:
+          type: string
+          readOnly: true
+        old_slugs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        has_unmerged_commits:
+          type: boolean
+          readOnly: true
+        currently_creating_branch:
+          type: boolean
+          readOnly: true
+        currently_creating_pr:
+          type: boolean
+          readOnly: true
+        branch_name:
+          type: string
+          pattern: ^[-\w/]+$
+          maxLength: 100
+        root_project:
+          type: string
+          readOnly: true
+        branch_url:
+          type: string
+          format: uri
+          readOnly: true
+        commits:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        origin_sha:
+          type: string
+          readOnly: true
+        branch_diff_url:
+          type: string
+          format: uri
+          readOnly: true
+        pr_url:
+          type: string
+          format: uri
+          readOnly: true
+        review_submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        review_valid:
+          type: boolean
+          readOnly: true
+        review_status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatusEnum'
+          readOnly: true
+        review_sha:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatusEnum'
+          readOnly: true
+        pr_is_open:
+          type: boolean
+          readOnly: true
+        assigned_dev:
+          type: string
+          nullable: true
+          maxLength: 50
+        assigned_qa:
+          type: string
+          readOnly: true
+        dev_org:
+          type: string
+          format: HashID
+          writeOnly: true
+        currently_submitting_review:
+          type: boolean
+          readOnly: true
+        org_config_name:
+          type: string
+      required:
+      - assigned_qa
+      - branch_diff_url
+      - branch_url
+      - commits
+      - currently_creating_branch
+      - currently_creating_pr
+      - currently_submitting_review
+      - description_rendered
+      - has_unmerged_commits
+      - id
+      - name
+      - old_slugs
+      - org_config_name
+      - origin_sha
+      - pr_is_open
+      - pr_url
+      - review_sha
+      - review_status
+      - review_submitted_at
+      - review_valid
+      - root_project
+      - slug
+      - status
+    TaskAssignee:
+      type: object
+      properties:
+        assigned_dev:
+          type: string
+          nullable: true
+        assigned_qa:
+          type: string
+          nullable: true
+        should_alert_dev:
+          type: boolean
+        should_alert_qa:
+          type: boolean
+    TaskStatusEnum:
+      enum:
+      - Planned
+      - In progress
+      - Completed
+      - Canceled
+      type: string
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

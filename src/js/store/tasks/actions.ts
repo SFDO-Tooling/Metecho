@@ -5,6 +5,10 @@ import { isCurrentUser } from '@/js/store/helpers';
 import { Task } from '@/js/store/tasks/reducer';
 import { addToast } from '@/js/store/toasts/actions';
 
+interface TaskCreated {
+  type: 'TASK_CREATE';
+  payload: Task;
+}
 interface TaskUpdated {
   type: 'TASK_UPDATE';
   payload: Task;
@@ -14,7 +18,12 @@ interface TaskCreatePRFailed {
   payload: Task;
 }
 
-export type TaskAction = TaskUpdated | TaskCreatePRFailed;
+export type TaskAction = TaskCreated | TaskUpdated | TaskCreatePRFailed;
+
+export const createTask = (payload: Task): TaskCreated => ({
+  type: 'TASK_CREATE',
+  payload,
+});
 
 export const updateTask = (payload: Task): TaskUpdated => ({
   type: 'TASK_UPDATE',

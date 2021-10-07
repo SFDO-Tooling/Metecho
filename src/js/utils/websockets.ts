@@ -3,6 +3,7 @@ import Sockette from 'sockette';
 
 import { removeObject } from '@/js/store/actions';
 import {
+  createEpic,
   createEpicPR,
   createEpicPRFailed,
   updateEpic,
@@ -35,6 +36,7 @@ import {
 import { Project } from '@/js/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/js/store/socket/actions';
 import {
+  createTask,
   createTaskPR,
   createTaskPRFailed,
   submitReview,
@@ -93,6 +95,13 @@ interface ProjectUpdateErrorEvent {
     originating_user_id: string | null;
   };
 }
+interface EpicCreatedEvent {
+  type: 'EPIC_CREATE';
+  payload: {
+    model: Epic;
+    originating_user_id: string | null;
+  };
+}
 interface EpicUpdatedEvent {
   type: 'EPIC_UPDATE';
   payload: {
@@ -112,6 +121,13 @@ interface EpicCreatePRFailedEvent {
   payload: {
     message?: string;
     model: Epic;
+    originating_user_id: string | null;
+  };
+}
+interface TaskCreatedEvent {
+  type: 'TASK_CREATE';
+  payload: {
+    model: Task;
     originating_user_id: string | null;
   };
 }
@@ -282,9 +298,11 @@ interface SoftDeletedEvent {
 type ModelEvent =
   | ProjectUpdatedEvent
   | ProjectUpdateErrorEvent
+  | EpicCreatedEvent
   | EpicUpdatedEvent
   | EpicCreatePREvent
   | EpicCreatePRFailedEvent
+  | TaskCreatedEvent
   | TaskUpdatedEvent
   | TaskCreatePREvent
   | TaskCreatePRFailedEvent
@@ -332,12 +350,16 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && updateProject(event.payload.model);
     case 'PROJECT_UPDATE_ERROR':
       return hasModel(event) && projectError(event.payload);
+    case 'EPIC_CREATE':
+      return hasModel(event) && createEpic(event.payload.model);
     case 'EPIC_UPDATE':
       return hasModel(event) && updateEpic(event.payload.model);
     case 'EPIC_CREATE_PR':
       return hasModel(event) && createEpicPR(event.payload);
     case 'EPIC_CREATE_PR_FAILED':
       return hasModel(event) && createEpicPRFailed(event.payload);
+    case 'TASK_CREATE':
+      return hasModel(event) && createTask(event.payload.model);
     case 'TASK_UPDATE':
       return hasModel(event) && updateTask(event.payload.model);
     case 'TASK_CREATE_PR':

@@ -86,9 +86,7 @@ const Overview = ({
             </p>
           </Trans>
         )}
-        {isProject || !project.has_push_permission
-          ? cannotContributeWarning
-          : null}
+        {!project.has_push_permission && cannotContributeWarning}
       </div>
     </div>
   );

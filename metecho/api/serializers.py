@@ -4,6 +4,9 @@ from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.extensions import OpenApiSerializerFieldExtension
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import JSONField
 
@@ -41,11 +44,20 @@ class FormattableDict:
         }
 
 
-class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
-    def to_representation(self, value):
-        if self.pk_field is not None:
-            return self.pk_field.to_representation(value.pk)
-        return str(value.pk)
+class StringListField(serializers.ListField):
+    child = serializers.CharField()
+
+
+class HashIdModelSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+
+class HashIdFix(OpenApiSerializerFieldExtension):
+    # Fix drf_spectacular warnings about not knowing the return type of HashId fields
+    target_class = "hashid_field.rest.UnconfiguredHashidSerialField"
+
+    def map_serializer_field(self, auto_schema, direction):  # pragma: nocover
+        return {"type": "string", "format": "HashID"}
 
 
 class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
@@ -76,8 +88,38 @@ class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return OrderedDict(((item.pk, self.display_value(item)) for item in queryset))
 
 
-class FullUserSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class RepoPermissionSerializer(serializers.Serializer):
+    push = serializers.BooleanField(required=False)
+    pull = serializers.BooleanField(required=False)
+    admin = serializers.BooleanField(required=False)
+
+
+class GitHubUserSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    login = serializers.CharField()
+    name = serializers.CharField(required=False)
+    avatar_url = serializers.URLField()
+    permissions = RepoPermissionSerializer(required=False)
+
+
+class OrgConfigNameSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+
+
+class GuidedTourSerializer(serializers.ModelSerializer):
+    enabled = serializers.BooleanField(
+        source="self_guided_tour_enabled", required=False
+    )
+    state = serializers.JSONField(source="self_guided_tour_state", required=False)
+
+    class Meta:
+        model = User
+        fields = ("enabled", "state")
+
+
+class FullUserSerializer(HashIdModelSerializer):
     sf_username = serializers.SerializerMethodField()
 
     class Meta:
@@ -103,26 +145,27 @@ class FullUserSerializer(serializers.ModelSerializer):
             "self_guided_tour_state",
         )
 
-    def get_sf_username(self, obj) -> dict:
+    def get_sf_username(self, obj) -> Optional[str]:
         if obj.uses_global_devhub:
             return None
         return obj.sf_username
 
 
-class MinimalUserSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
-
+class MinimalUserSerializer(HashIdModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "avatar_url")
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class ProjectSerializer(HashIdModelSerializer):
+    slug = serializers.CharField()
+    old_slugs = StringListField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
     repo_image_url = serializers.SerializerMethodField()
     has_push_permission = serializers.SerializerMethodField()
+    github_users = GitHubUserSerializer(many=True, allow_empty=True, required=False)
+    org_config_names = OrgConfigNameSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project
@@ -147,15 +190,16 @@ class ProjectSerializer(serializers.ModelSerializer):
             "latest_sha",
         )
         extra_kwargs = {
-            "org_config_names": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
             "currently_fetching_github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
         }
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_repo_url(self, obj) -> Optional[str]:
         return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_repo_image_url(self, obj) -> Optional[str]:
         return obj.repo_image_url if obj.include_repo_image_url else ""
 
@@ -163,21 +207,24 @@ class ProjectSerializer(serializers.ModelSerializer):
         return obj.has_push_permission(self.context["request"].user)
 
 
-class EpicMinimalSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class EpicMinimalSerializer(HashIdModelSerializer):
+    name = serializers.CharField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    github_users = StringListField(read_only=True)
 
     class Meta:
         model = Epic
-        read_only_fields = ("id", "name", "slug", "github_users")
-        fields = read_only_fields
+        fields = ("id", "name", "slug", "github_users")
 
 
-class EpicSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class EpicSerializer(HashIdModelSerializer):
+    slug = serializers.CharField(read_only=True)
+    old_slugs = StringListField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
+    github_users = StringListField(read_only=True)
     task_count = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
@@ -208,8 +255,6 @@ class EpicSerializer(serializers.ModelSerializer):
             "latest_sha",
         )
         extra_kwargs = {
-            "slug": {"read_only": True},
-            "old_slugs": {"read_only": True},
             "task_count": {"read_only": True},
             "branch_url": {"read_only": True},
             "branch_diff_url": {"read_only": True},
@@ -220,7 +265,6 @@ class EpicSerializer(serializers.ModelSerializer):
             "pr_is_open": {"read_only": True},
             "pr_is_merged": {"read_only": True},
             "status": {"read_only": True},
-            "github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
         }
         validators = (
@@ -234,12 +278,14 @@ class EpicSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+        user = self.context["request"].user
         if not validated_data.get("branch_name"):
             # This temporarily prevents users from taking other actions
             # (e.g. creating scratch orgs) that also might trigger branch creation
             # and could result in race conditions and duplicate branches on GitHub.
             validated_data["currently_creating_branch"] = True
         instance = super().create(validated_data)
+        instance.notify_created(originating_user_id=str(user.id))
         instance.create_gh_branch(self.context["request"].user)
         instance.project.queue_available_org_config_names(
             user=self.context["request"].user
@@ -289,6 +335,7 @@ class EpicSerializer(serializers.ModelSerializer):
     def get_task_count(self, obj) -> int:
         return obj.tasks.active().count()
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_branch_diff_url(self, obj) -> Optional[str]:
         project = obj.project
         repo_owner = project.repo_owner
@@ -302,6 +349,7 @@ class EpicSerializer(serializers.ModelSerializer):
             )
         return None
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_branch_url(self, obj) -> Optional[str]:
         project = obj.project
         repo_owner = project.repo_owner
@@ -311,6 +359,7 @@ class EpicSerializer(serializers.ModelSerializer):
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
         return None
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_pr_url(self, obj) -> Optional[str]:
         project = obj.project
         repo_owner = project.repo_owner
@@ -322,6 +371,8 @@ class EpicSerializer(serializers.ModelSerializer):
 
 
 class EpicCollaboratorsSerializer(serializers.ModelSerializer):
+    github_users = StringListField(allow_empty=True)
+
     class Meta:
         model = Epic
         fields = ("github_users",)
@@ -359,8 +410,9 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
         return github_users
 
 
-class TaskSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class TaskSerializer(HashIdModelSerializer):
+    slug = serializers.CharField(read_only=True)
+    old_slugs = StringListField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     epic = NestedPrimaryKeyRelatedField(
         queryset=Epic.objects.all(),
@@ -421,8 +473,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "org_config_name",
         )
         extra_kwargs = {
-            "slug": {"read_only": True},
-            "old_slugs": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
             "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
@@ -445,6 +495,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def get_root_project(self, obj) -> str:
         return str(obj.root_project.pk)
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_branch_url(self, obj) -> Optional[str]:
         project = obj.root_project
         repo_owner = project.repo_owner
@@ -454,6 +505,7 @@ class TaskSerializer(serializers.ModelSerializer):
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
         return None
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_branch_diff_url(self, obj) -> Optional[str]:
         base_branch = obj.get_base()
         project = obj.root_project
@@ -467,6 +519,7 @@ class TaskSerializer(serializers.ModelSerializer):
             )
         return None
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_pr_url(self, obj) -> Optional[str]:
         project = obj.root_project
         repo_owner = project.repo_owner
@@ -497,6 +550,7 @@ class TaskSerializer(serializers.ModelSerializer):
             validated_data["assigned_dev"] = user.github_id
 
         task = super().create(validated_data)
+        task.notify_created(originating_user_id=str(user.id))
 
         if dev_org:
             dev_org.queue_convert_to_dev_org(task, originating_user_id=str(user.id))
@@ -672,8 +726,7 @@ class ReviewSerializer(serializers.Serializer):
     )
 
 
-class ScratchOrgSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+class ScratchOrgSerializer(HashIdModelSerializer):
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(),
         pk_field=serializers.CharField(),

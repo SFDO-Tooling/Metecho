@@ -1,6 +1,11 @@
 // Containers
 // ==========
 
+// Prevent unwanted horizontal scroll by overriding the 100vw applied by slds-grid_frame
+.metecho-frame {
+  min-width: 100%;
+}
+
 // Restrict fixed/absolute containers to half the viewport
 // ie. used on toast containers to unblock header links
 .half-container {

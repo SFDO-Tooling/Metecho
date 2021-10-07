@@ -10,6 +10,8 @@ Websocket notifications you can subscribe to:
         PROJECT_UPDATE
         PROJECT_UPDATE_ERROR
         SCRATCH_ORG_PROVISIONING
+        TASK_CREATE
+        EPIC_CREATE
 
     epic.:id
         EPIC_UPDATE
@@ -19,7 +21,6 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_PROVISIONING
 
     task.:id
-        TASK_CREATE
         TASK_UPDATE
         TASK_CREATE_PR
         TASK_CREATE_PR_FAILED

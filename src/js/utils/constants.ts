@@ -84,3 +84,5 @@ export const CONFIRM_ORG_TRACKER = {
 };
 
 export const RETRIEVE_CHANGES = 'retrieve_changes';
+
+export const CREATE_TASK_FROM_ORG = 'create_task_from_org';
