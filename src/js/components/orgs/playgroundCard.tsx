@@ -142,7 +142,7 @@ const PlaygroundOrgCard = ({
     <>
       <Card
         bodyClassName="slds-card__body_inner"
-        className="wrap-inner-truncate narrow-buttons"
+        className="wrap-inner-truncate narrow-buttons playground-org-card"
         heading={heading}
         icon={
           org &&

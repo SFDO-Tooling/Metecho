@@ -120,7 +120,6 @@ const OrgActions = ({
         variant="outline-brand"
         className="slds-m-right_x-small
           slds-m-left_none
-          slds-m-top_xx-small
           tour-scratch-org-contribute"
         onClick={openContributeModal}
       />

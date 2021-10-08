@@ -1,6 +1,4 @@
 .has-nested-card {
-  // remove extra space on org action dropdown
-  --sds-c-card-body-spacing-inline-end: 0;
   > .slds-card__header {
     margin-bottom: 0;
   }
@@ -12,18 +10,19 @@
 
 .nested-card {
   .slds-card__header {
+    --card-header-toggle-space: 0;
+    --dropdown-right: 0;
     padding-left: 0;
-    padding-right: 0;
   }
 }
 
 // override min-width and force header to wrap on nested card headers
 .wrap-inner-truncate {
   .slds-card__header {
-    // hold space for absolutely positioned dropdown toggle
-    --sds-c-card-header-spacing-inline-end: #{$spacing-x-large};
     align-items: baseline;
     flex-wrap: wrap;
+    // hold space for absolutely positioned dropdown toggle
+    padding-right: var(--card-header-toggle-space, #{$spacing-x-large});
 
     // Specifically target OrgActions in card header
     .slds-no-flex {
@@ -44,10 +43,10 @@
   .slds-media {
     margin-bottom: $spacing-x-small;
   }
-}
 
-.metecho-card-more {
-  position: absolute;
-  right: $spacing-small;
-  top: $spacing-small;
+  .metecho-card-more {
+    position: absolute;
+    right: var(--dropdown-right, $spacing-small);
+    top: $spacing-small;
+  }
 }
