@@ -13,6 +13,10 @@
     --card-header-toggle-space: 0;
     --dropdown-right: 0;
     padding-left: 0;
+
+    .has-org & {
+      margin-right: $spacing-large;
+    }
   }
 }
 

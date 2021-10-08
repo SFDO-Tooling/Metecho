@@ -133,7 +133,7 @@ const OrgActions = ({
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
-            className="slds-m-right_x-small"
+            className="slds-m-right_x-small slds-m-left_none"
             onClick={doRefreshOrg}
           />
         ) : null}

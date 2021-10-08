@@ -217,7 +217,10 @@ const TaskOrgCard = ({
     >
       {popover}
       <Card
-        className={classNames({ 'has-nested-card': assignedUser })}
+        className={classNames({
+          'has-nested-card': assignedUser,
+          'has-org': org,
+        })}
         bodyClassName="slds-card__body_inner"
         heading={heading}
         headerActions={
