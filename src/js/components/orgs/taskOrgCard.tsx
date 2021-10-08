@@ -261,7 +261,10 @@ const TaskOrgCard = ({
           <>
             <hr className="slds-m-vertical_none" />
             <Card
-              className="nested-card wrap-inner-truncate narrow-buttons task-org-card"
+              className="nested-card
+                wrap-inner-truncate
+                narrow-buttons
+                task-org-card"
               heading={orgHeading}
               icon={
                 org &&
