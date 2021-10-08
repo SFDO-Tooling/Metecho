@@ -15,7 +15,7 @@
     padding-left: 0;
 
     .has-org & {
-      margin-right: $spacing-large;
+      margin-right: $spacing-medium;
     }
   }
 }
@@ -53,4 +53,8 @@
     right: var(--dropdown-right, $spacing-small);
     top: $spacing-small;
   }
+}
+
+.playground-org-card {
+  --dropdown-right: #{$spacing-medium};
 }
