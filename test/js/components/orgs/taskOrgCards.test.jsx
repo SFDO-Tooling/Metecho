@@ -260,7 +260,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_dev).toEqual('user-id');
+      expect(data.assigned_dev).toBe('user-id');
       expect(data.should_alert_dev).toBe(true);
     });
 
@@ -280,7 +280,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.assigned_qa).toBe('user-id');
       expect(data.should_alert_qa).toBe(false);
     });
 
@@ -314,7 +314,7 @@ describe('<TaskOrgCards/>', () => {
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_qa).toEqual(
+      expect(updateObject.mock.calls[0][0].data.assigned_qa).toBe(
         'other-user-id',
       );
     });
@@ -351,7 +351,7 @@ describe('<TaskOrgCards/>', () => {
           fireEvent.click(getByText('Confirm'));
 
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev).toEqual(
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
             'other-user-id',
           );
         });
@@ -375,7 +375,7 @@ describe('<TaskOrgCards/>', () => {
 
           expect(refetchOrg).not.toHaveBeenCalled();
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev).toEqual(
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
             'other-user-id',
           );
         });
@@ -888,8 +888,8 @@ describe('<TaskOrgCards/>', () => {
 
         const args = deleteObject.mock.calls[0][0];
 
-        expect(args.objectType).toEqual('scratch_org');
-        expect(args.object.id).toEqual('org-id');
+        expect(args.objectType).toBe('scratch_org');
+        expect(args.object.id).toBe('org-id');
       });
     });
 
@@ -916,13 +916,13 @@ describe('<TaskOrgCards/>', () => {
 
         const refetchArgs = refetchOrg.mock.calls[0][0];
 
-        expect(refetchArgs.id).toEqual('org-id');
+        expect(refetchArgs.id).toBe('org-id');
         expect(deleteObject).toHaveBeenCalledTimes(1);
 
         const deleteArgs = deleteObject.mock.calls[0][0];
 
-        expect(deleteArgs.objectType).toEqual('scratch_org');
-        expect(deleteArgs.object.id).toEqual('org-id');
+        expect(deleteArgs.objectType).toBe('scratch_org');
+        expect(deleteArgs.object.id).toBe('org-id');
       });
 
       describe('org has changes', () => {
@@ -972,8 +972,8 @@ describe('<TaskOrgCards/>', () => {
 
               const args = deleteObject.mock.calls[0][0];
 
-              expect(args.objectType).toEqual('scratch_org');
-              expect(args.object.id).toEqual('org-id');
+              expect(args.objectType).toBe('scratch_org');
+              expect(args.object.id).toBe('org-id');
             });
           });
         });

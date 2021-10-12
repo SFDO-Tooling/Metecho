@@ -46,7 +46,7 @@ describe('<PrivateRoute />', () => {
       user: { agreed_to_tos_at: null },
     });
 
-    expect(context.action).toEqual('REPLACE');
+    expect(context.action).toBe('REPLACE');
     expect(context.url).toEqual(routes.terms());
     expect(queryByText('Hi!')).toBeNull();
   });
@@ -54,7 +54,7 @@ describe('<PrivateRoute />', () => {
   test('redirects to login if not logged in', () => {
     const { context, queryByText } = setup();
 
-    expect(context.action).toEqual('REPLACE');
+    expect(context.action).toBe('REPLACE');
     expect(context.url).toEqual(routes.login());
     expect(queryByText('Hi!')).toBeNull();
   });

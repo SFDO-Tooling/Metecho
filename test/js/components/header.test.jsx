@@ -97,7 +97,7 @@ describe('<Header />', () => {
         fireEvent.click(getByText('Get Help'));
         fireEvent.click(getByText('Plan Walkthrough'));
 
-        expect(context.action).toEqual('PUSH');
+        expect(context.action).toBe('PUSH');
         expect(context.url).toEqual(url);
       });
 

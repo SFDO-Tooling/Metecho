@@ -76,7 +76,7 @@ describe('<Login />', () => {
         { user: {} },
       );
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.home());
     });
   });

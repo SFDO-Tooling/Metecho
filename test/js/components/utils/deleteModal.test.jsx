@@ -58,7 +58,7 @@ describe('<DeleteModal />', () => {
       objectType: 'epic',
       object: defaultEpic,
     });
-    expect(context.action).toEqual('PUSH');
-    expect(context.url).toEqual('/foo');
+    expect(context.action).toBe('PUSH');
+    expect(context.url).toBe('/foo');
   });
 });

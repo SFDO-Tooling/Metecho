@@ -322,7 +322,7 @@ describe('<ProjectDetail />', () => {
     test('redirects to project_detail with new slug', () => {
       const { context } = setup({ projectSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.project_detail('project-1'));
     });
   });
@@ -752,10 +752,8 @@ describe('<ProjectDetail />', () => {
 
         expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
-        expect(createObject.mock.calls[0][0].data.project).toEqual('p1');
-        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
-          'qa',
-        );
+        expect(createObject.mock.calls[0][0].data.project).toBe('p1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toBe('qa');
       });
     });
   });

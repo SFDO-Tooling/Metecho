@@ -47,7 +47,7 @@ describe('provisionOrg', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('SCRATCH_ORG_PROVISION');
+    expect(allActions[0].type).toBe('SCRATCH_ORG_PROVISION');
     expect(allActions[0]).toEqual(orgAction);
   });
 
@@ -62,11 +62,11 @@ describe('provisionOrg', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Dev Org for Task “My Task.”',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
+      expect(allActions[0].payload.linkText).toBe('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(org.id),
       );
@@ -89,11 +89,11 @@ describe('provisionOrg', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Test Org for Epic “My Epic.”',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
+      expect(allActions[0].payload.linkText).toBe('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(thisOrg.id),
       );
@@ -119,11 +119,11 @@ describe('provisionOrg', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Scratch Org.',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
+      expect(allActions[0].payload.linkText).toBe('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(thisOrg.id),
       );
@@ -149,11 +149,11 @@ describe('provisionOrg', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Successfully created Scratch Org for Project “My Project.”',
       );
-      expect(allActions[0].payload.linkText).toEqual('View your new Org.');
+      expect(allActions[0].payload.linkText).toBe('View your new Org.');
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(thisOrg.id),
       );
@@ -176,10 +176,8 @@ describe('provisionOrg', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Successfully created Dev Org.',
-    );
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe('Successfully created Dev Org.');
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
     expect(allActions[1]).toEqual(thisOrgAction);
@@ -222,12 +220,12 @@ describe('provisionFailed', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Uh oh. There was an error creating your new Dev Org for Task “My Task.”',
       );
-      expect(allActions[0].payload.details).toEqual('error msg');
-      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[0].payload.details).toBe('error msg');
+      expect(allActions[0].payload.variant).toBe('error');
       expect(allActions[1]).toEqual(orgAction);
     });
 
@@ -252,8 +250,8 @@ describe('provisionFailed', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
+      expect(allActions[0].type).toBe('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toBe(
         'Uh oh. There was an error creating your new Dev Org.',
       );
       expect(allActions[0].payload.linkText).toBeUndefined();
@@ -334,7 +332,7 @@ describe('refetchOrg', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[2]).toEqual(failed);
       }
     });
@@ -372,12 +370,12 @@ describe('updateFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error checking for changes on your Test Org for Task “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -400,12 +398,12 @@ describe('updateFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Uh oh. There was an error checking for changes on your Scratch Org.',
     );
     expect(allActions[0].payload.details).toBeUndefined();
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 });
@@ -453,7 +451,7 @@ describe('deleteOrg', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Successfully deleted Dev Org for Task “My Task.”',
       );
@@ -480,8 +478,8 @@ describe('deleteOrg', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
+      expect(allActions[0].type).toBe('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toBe(
         'Uh oh. There was an error communicating with your Scratch Org.',
       );
       expect(allActions[1]).toEqual(orgAction);
@@ -512,12 +510,12 @@ describe('deleteFailed', () => {
       );
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Uh oh. There was an error deleting your Dev Org for Task “My Task.”',
       );
-      expect(allActions[0].payload.details).toEqual('error msg');
-      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[0].payload.details).toBe('error msg');
+      expect(allActions[0].payload.variant).toBe('error');
       expect(allActions[1]).toEqual(orgAction);
     });
   });
@@ -541,7 +539,7 @@ describe('commitSucceeded', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully retrieved changes from your Test Org for Task “My Task.”',
     );
@@ -567,8 +565,8 @@ describe('commitSucceeded', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Successfully retrieved changes from your Scratch Org.',
     );
     expect(allActions[1]).toEqual(action);
@@ -596,12 +594,12 @@ describe('commitFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error retrieving changes from your Scratch Org for Task “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -628,12 +626,12 @@ describe('commitFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Uh oh. There was an error retrieving changes from your Scratch Org.',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 });
@@ -694,7 +692,7 @@ describe('refreshOrg', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
       }
@@ -720,7 +718,7 @@ describe('orgRefreshed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully refreshed your Test Org for Task “My Task.”',
     );
@@ -746,8 +744,8 @@ describe('orgRefreshed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Successfully refreshed your Scratch Org.',
     );
     expect(allActions[1]).toEqual(action);
@@ -776,12 +774,12 @@ describe('refreshError', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error refreshing your Test Org for Task “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -808,12 +806,12 @@ describe('refreshError', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Uh oh. There was an error refreshing your Scratch Org.',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -895,12 +893,12 @@ describe('orgReassignFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error reassigning the Dev Org for Task “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -927,12 +925,12 @@ describe('orgReassignFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Uh oh. There was an error reassigning this Scratch Org.',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 });
@@ -1001,12 +999,12 @@ describe('orgConvertFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error contributing work from your Dev Org on Task “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(replace).toHaveBeenCalledWith({ state: {} });
   });
 
@@ -1030,11 +1028,11 @@ describe('orgConvertFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toBe(
       'Uh oh. There was an error contributing work from your Test Org.',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
   });
 });

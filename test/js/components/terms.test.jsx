@@ -59,8 +59,8 @@ describe('<Terms/>', () => {
       { from: { pathname: '/foo/bar' } },
     );
 
-    expect(context.action).toEqual('REPLACE');
-    expect(context.url).toEqual('/foo/bar');
+    expect(context.action).toBe('REPLACE');
+    expect(context.url).toBe('/foo/bar');
     expect(queryByText('Metecho Terms of Service')).toBeNull();
   });
 
