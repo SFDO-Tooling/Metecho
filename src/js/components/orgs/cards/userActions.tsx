@@ -59,6 +59,7 @@ const UserActions = ({
         iconName="down"
         iconSize="small"
         iconVariant="border-filled"
+        triggerClassName="metecho-card-more"
         width="xx-small"
         options={options}
         onSelect={handleSelect}

@@ -1,0 +1,12 @@
+// Buttons
+// =======
+
+@media (min-width: $mq-medium) {
+  .narrow-buttons {
+    .slds-button_brand,
+    .slds-button_outline-brand {
+      padding-left: #{$spacing-x-small};
+      padding-right: #{$spacing-x-small};
+    }
+  }
+}
