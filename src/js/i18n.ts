@@ -16,6 +16,7 @@ const init = (cb: (error?: string) => void): Promise<any> =>
     .use(initReactI18next)
     .init(
       {
+        compatibilityJSON: 'v3',
         fallbackLng: 'en',
         keySeparator: false,
         nsSeparator: false,
