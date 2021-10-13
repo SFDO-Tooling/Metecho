@@ -537,7 +537,7 @@ describe('reducer', () => {
         },
       });
 
-      expect(actual.orgs[org.id].delete_queued_at).not.toBeUndefined();
+      expect(actual.orgs[org.id].delete_queued_at).toBeDefined();
     });
 
     test('ignores if objectType !== "scratch_org"', () => {

@@ -236,7 +236,7 @@ describe('<PlaygroundOrgCard/>', () => {
 
       const args = deleteObject.mock.calls[0][0];
 
-      expect(args.objectType).toEqual('scratch_org');
+      expect(args.objectType).toBe('scratch_org');
       expect(args.object.id).toEqual(defaultOrg.id);
     });
   });

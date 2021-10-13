@@ -473,7 +473,7 @@ describe('<TaskDetail/>', () => {
     test('redirects to epic_task_detail with new slug', () => {
       const { context } = setup({ taskSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.epic_task_detail('project-1', 'epic-1', 'task-1'),
       );
@@ -485,7 +485,7 @@ describe('<TaskDetail/>', () => {
         taskSlug: 'old-slug-2',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.project_task_detail('project-1', 'task-2'),
       );
@@ -519,7 +519,7 @@ describe('<TaskDetail/>', () => {
 
       const refetchArgs = refetchOrg.mock.calls[0][0];
 
-      expect(refetchArgs.id).toEqual('org-id');
+      expect(refetchArgs.id).toBe('org-id');
 
       expect(
         getByText('Select the location to retrieve changes'),
@@ -1348,10 +1348,8 @@ describe('<TaskDetail/>', () => {
 
         expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
-        expect(createObject.mock.calls[0][0].data.task).toEqual('task1');
-        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
-          'dev',
-        );
+        expect(createObject.mock.calls[0][0].data.task).toBe('task1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toBe('dev');
       });
     });
   });

@@ -141,7 +141,7 @@ describe('<CreateEpicModal/>', () => {
         await findByText('Create');
         await createObject;
 
-        expect(context.action).toEqual('PUSH');
+        expect(context.action).toBe('PUSH');
         expect(context.url).toEqual(
           routes.epic_detail('project-1', 'name-of-epic'),
         );
@@ -235,24 +235,24 @@ describe('<CreateEpicModal/>', () => {
       const { getByText } = result;
       fireEvent.click(getByText('feature/foo'));
 
-      expect(input.value).toEqual('feature/foo');
+      expect(input.value).toBe('feature/foo');
 
       fireEvent.click(getByText('Remove selected option'));
 
-      expect(input.value).toEqual('');
+      expect(input.value).toBe('');
     });
 
     test('search/filter branches from list', () => {
       fireEvent.change(input, { target: { value: 'foo' } });
 
-      expect(input.value).toEqual('foo');
+      expect(input.value).toBe('foo');
     });
 
     test('select new branch instead', () => {
       const { getByText, getByLabelText } = result;
       fireEvent.click(getByText('feature/foo'));
 
-      expect(input.value).toEqual('feature/foo');
+      expect(input.value).toBe('feature/foo');
 
       fireEvent.click(getByLabelText('Create new branch on GitHub'));
 
@@ -263,14 +263,14 @@ describe('<CreateEpicModal/>', () => {
       fireEvent.change(input, { target: { value: 'feature/foo' } });
       fireEvent.blur(input);
 
-      expect(input.value).toEqual('feature/foo');
+      expect(input.value).toBe('feature/foo');
     });
 
     test('resets input value on blur if no match found', () => {
       fireEvent.change(input, { target: { value: 'nope' } });
       fireEvent.blur(input);
 
-      expect(input.value).toEqual('');
+      expect(input.value).toBe('');
     });
   });
 
@@ -340,7 +340,7 @@ describe('<CreateEpicModal/>', () => {
             shouldSubscribeToObject: true,
           }),
         );
-        expect(context.action).toEqual('PUSH');
+        expect(context.action).toBe('PUSH');
         expect(context.url).toEqual(
           routes.epic_detail('project-1', 'name-of-epic'),
         );

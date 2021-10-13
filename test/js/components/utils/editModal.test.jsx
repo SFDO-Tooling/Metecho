@@ -54,7 +54,7 @@ describe('<EditModal />', () => {
       store,
     });
 
-    expect(nameInput.value).toEqual('New Epic Name');
+    expect(nameInput.value).toBe('New Epic Name');
 
     setup({
       model: {
@@ -66,7 +66,7 @@ describe('<EditModal />', () => {
       store,
     });
 
-    expect(descriptionInput.value).toEqual('New description');
+    expect(descriptionInput.value).toBe('New description');
   });
 
   test('submit clicked', async () => {
