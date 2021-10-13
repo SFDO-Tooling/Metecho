@@ -65,7 +65,7 @@ faker==8.14.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
-flake8==3.9.2
+flake8==4.0.1
     # via
     #   -r requirements/dev.in
     #   flake8-bugbear
@@ -129,9 +129,9 @@ ptyprocess==0.7.0
     # via pexpect
 py==1.10.0
     # via pytest
-pycodestyle==2.7.0
+pycodestyle==2.8.0
     # via flake8
-pyflakes==2.3.1
+pyflakes==2.4.0
     # via flake8
 pygments==2.10.0
     # via
@@ -176,7 +176,7 @@ pytz==2021.1
     #   -c requirements/prod.txt
     #   babel
     #   django
-regex==2021.9.30
+regex==2021.10.8
     # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in

@@ -191,8 +191,8 @@ describe('refetchAllData', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
       }
     });
@@ -237,8 +237,8 @@ describe('disconnect', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
       }
     });
@@ -283,8 +283,8 @@ describe('refreshUser', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
       }
     });
@@ -329,8 +329,8 @@ describe('agreeToTerms', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
       }
     });
@@ -378,8 +378,8 @@ describe('onboarded', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
       }
     });
@@ -443,8 +443,8 @@ describe('updateTour', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
       }
     });

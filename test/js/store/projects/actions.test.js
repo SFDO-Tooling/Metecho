@@ -66,7 +66,7 @@ describe('refreshProjects', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
       }
@@ -111,12 +111,12 @@ describe('projectsRefreshError', () => {
     } finally {
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Uh oh. There was an error re-syncing Projects.',
       );
-      expect(allActions[0].payload.details).toEqual('error msg');
-      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[0].payload.details).toBe('error msg');
+      expect(allActions[0].payload.variant).toBe('error');
       expect(allActions[1]).toEqual(event);
     }
   });
@@ -176,7 +176,7 @@ describe('refreshGitHubUsers', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
       }
@@ -212,12 +212,12 @@ describe('projectError', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “My Project.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -298,7 +298,7 @@ describe('refreshOrgConfigs', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
       }

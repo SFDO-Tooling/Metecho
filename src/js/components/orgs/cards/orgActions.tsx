@@ -88,7 +88,7 @@ const OrgActions = ({
         <Button
           label={i18n.t('Update Review')}
           variant="outline-brand"
-          className="slds-m-right_x-small"
+          className="slds-m-right_x-small slds-m-left_none"
           onClick={openSubmitReviewModal}
         />
       );
@@ -97,7 +97,7 @@ const OrgActions = ({
         <Button
           label={i18n.t('Submit Review')}
           variant="outline-brand"
-          className="slds-m-right_x-small"
+          className="slds-m-right_x-small slds-m-left_none"
           onClick={openSubmitReviewModal}
         />
       );
@@ -118,7 +118,9 @@ const OrgActions = ({
       <Button
         label={i18n.t('Contribute Work')}
         variant="outline-brand"
-        className="slds-m-right_x-small tour-scratch-org-contribute"
+        className="slds-m-right_x-small
+          slds-m-left_none
+          tour-scratch-org-contribute"
         onClick={openContributeModal}
       />
     );
@@ -131,7 +133,7 @@ const OrgActions = ({
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
-            className="slds-m-horizontal_x-small"
+            className="slds-m-right_x-small slds-m-left_none"
             onClick={doRefreshOrg}
           />
         ) : null}
@@ -146,6 +148,7 @@ const OrgActions = ({
           iconName="down"
           iconSize="small"
           iconVariant="border-filled"
+          triggerClassName="metecho-card-more"
           width="xx-small"
           options={[{ id: 0, label: i18n.t('Delete Org') }]}
           onSelect={doDeleteOrg}

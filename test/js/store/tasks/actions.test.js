@@ -35,12 +35,12 @@ describe('createTaskPR', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted Task for testing: “My Task.”',
     );
-    expect(allActions[0].payload.linkText).toEqual('View pull request.');
-    expect(allActions[0].payload.linkUrl).toEqual('my-pr-url');
+    expect(allActions[0].payload.linkText).toBe('View pull request.');
+    expect(allActions[0].payload.linkUrl).toBe('my-pr-url');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -81,7 +81,7 @@ describe('createTaskPR', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted Task for testing: “My Task.”',
     );
@@ -111,12 +111,12 @@ describe('createTaskPRFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error submitting Task for testing: “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -160,12 +160,12 @@ describe('submitReview', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted review for Task: “My Task.”',
     );
-    expect(allActions[0].payload.linkText).toEqual('View pull request.');
-    expect(allActions[0].payload.linkUrl).toEqual('my-pr-url');
+    expect(allActions[0].payload.linkText).toBe('View pull request.');
+    expect(allActions[0].payload.linkUrl).toBe('my-pr-url');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -206,7 +206,7 @@ describe('submitReview', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted review for Task: “My Task.”',
     );
@@ -236,12 +236,12 @@ describe('submitReviewFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error submitting review for Task: “My Task.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
