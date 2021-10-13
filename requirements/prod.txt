@@ -213,7 +213,7 @@ jinja2==2.11.3
     # via
     #   cumulusci
     #   snowfakery
-jsonschema==4.0.1
+jsonschema==4.1.0
     # via drf-spectacular
 jwcrypto==1.0
     # via
