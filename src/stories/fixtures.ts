@@ -38,6 +38,7 @@ export const api_urls = {
     `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
+  issue_list: () => `/api/issues/`,
 };
 
 export const sampleUser1 = {

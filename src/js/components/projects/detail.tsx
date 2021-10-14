@@ -12,6 +12,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
+import CreateIssueModal from '@/js/components/projects/createIssue';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
@@ -58,6 +59,7 @@ const ProjectDetail = (
 ) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
+  const [createIssueModalOpen, setCreateIssueModalOpen] = useState(false);
   const [createEpicModalOpen, setCreateEpicModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
@@ -145,6 +147,19 @@ const ProjectDetail = (
   }, []);
   const closeCreateEpicModal = useCallback(() => {
     setCreateEpicModalOpen(false);
+  }, []);
+
+  // "create issue" modal related
+  const openCreateIssueModal = useCallback(() => {
+    setCreateIssueModalOpen(true);
+    setCreateEpicModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setCreateTaskModalOpen(false);
+    setContributeModalOpen(false);
+  }, []);
+
+  const closeCreateIssueModal = useCallback(() => {
+    setCreateIssueModalOpen(false);
   }, []);
 
   // "create task" modal related
@@ -429,7 +444,7 @@ const ProjectDetail = (
               <Button
                 label={i18n.t('Create Epic From Github Issue')}
                 variant="outline-brand"
-                onClick={openCreateEpicModal}
+                onClick={openCreateIssueModal}
                 className="tour-create-epic"
               />
             </div>
@@ -529,6 +544,11 @@ const ProjectDetail = (
             />
           </TabsPanel>
         </Tabs>
+        <CreateIssueModal
+          projectId={project.id}
+          isOpen={createIssueModalOpen}
+          closeIssueModal={closeCreateIssueModal}
+        />
         <CreateEpicModal
           user={user}
           project={project}

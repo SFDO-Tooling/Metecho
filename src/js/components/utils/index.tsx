@@ -12,6 +12,7 @@ export { default as SubmitModal } from './submitModal';
 export { default as CreateOrgModal } from './createOrgModal';
 export { default as ContributeWorkModal } from './contributeWorkModal';
 export type { OrgData, ContributeCallback } from './contributeWorkModal';
+export { default as useFetchIssues } from './useFetchIssues';
 
 export { default as getEpicLoadingOrNotFound } from './getEpicLoadingOrNotFound';
 export { default as getProjectLoadingOrNotFound } from './getProjectLoadingOrNotFound';
