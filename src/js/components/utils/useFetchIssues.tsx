@@ -1,20 +1,29 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { ThunkDispatch } from '@/js/store';
 import { addUrlParams } from '@/js/utils/api';
 import apiFetch from '@/js/utils/api';
 
 export default ({ projectId }: { projectId: string }) => {
-  const issues = useRef({});
+  const dispatch = useDispatch<ThunkDispatch>();
+  const [issues, setIssues] = useState<any[]>();
+
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();
-    apiFetch({
-      url: addUrlParams(baseUrl, {
-        project: projectId,
-      }),
-    }).then((payload) => {
-      issues.current = payload;
-    });
-  });
+    const fetchIssues = async () => {
+      const payload = await apiFetch({
+        url: addUrlParams(baseUrl, {
+          project: projectId,
+        }),
+        dispatch,
+      });
+      setIssues(payload?.results || []);
+    };
+    if (projectId && !issues) {
+      fetchIssues();
+    }
+  }, [dispatch, issues, projectId]);
 
   return { issues };
 };

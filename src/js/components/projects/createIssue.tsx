@@ -3,9 +3,9 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
-import { LabelWithSpinner, useFetchIssues } from '@/js/components/utils';
+import { useFetchIssues } from '@/js/components/utils';
 
 interface Props {
   projectId: string;
@@ -13,8 +13,8 @@ interface Props {
   closeIssueModal: () => void;
 }
 
-const createIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
-  const issues = useFetchIssues(projectId);
+const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
+  const { issues } = useFetchIssues({ projectId });
 
   const closeForm = () => {
     closeIssueModal();
@@ -57,16 +57,9 @@ const createIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
           required
           // onChange={handleBranchCheckboxChange}
         >
-          {issues.map((issue) => (
-            <Radio label={`${issue.name}`} name="issue" />
+          {issues?.map((issue, idx) => (
+            <Radio key={idx} label={`${issue.title}`} name="issue" />
           ))}
-          <Radio
-            id="epic-branch-existing"
-            labels={{ label: i18n.t('Use existing GitHub branch') }}
-            // checked={fromBranchChecked}
-            name="epic-branch"
-            value="existing"
-          />
         </RadioGroup>
         {/* Clicking hidden button allows for native browser form validation */}
         <button
@@ -80,4 +73,4 @@ const createIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
   );
 };
 
-export default createIssueModal;
+export default CreateIssueModal;
