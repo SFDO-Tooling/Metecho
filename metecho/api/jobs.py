@@ -56,6 +56,8 @@ def creating_gh_branch(instance):
         yield
     finally:
         instance.currently_creating_branch = False
+        instance.save()
+        instance.notify_changed(originating_user_id=None)
 
 
 def get_branch_prefix(user, repository: Repository):
@@ -83,9 +85,9 @@ def epic_create_branch(
     if epic.branch_name:
         epic_branch_name = epic.branch_name
     else:
-        prefix = epic.project.branch_prefix or get_branch_prefix(user, repository)
-        epic_branch_name = f"{prefix}{slugify(epic.name)}"
         with creating_gh_branch(epic):
+            prefix = epic.project.branch_prefix or get_branch_prefix(user, repository)
+            epic_branch_name = f"{prefix}{slugify(epic.name)}"
             latest_sha = repository.branch(repository.default_branch).latest_sha()
             epic_branch_name = try_to_make_branch(
                 repository, new_branch=epic_branch_name, base_sha=latest_sha

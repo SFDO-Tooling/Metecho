@@ -336,7 +336,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.assigned_qa).toBe('user-id');
       expect(data.should_alert_qa).toBe(false);
     });
   });
@@ -391,7 +391,7 @@ describe('<EpicDetail/>', () => {
     test('redirects to epic_detail with new slug', () => {
       const { context } = setup({ epicSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.epic_detail('project-1', 'epic-1'));
     });
   });
@@ -665,7 +665,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.assigned_qa).toBe('user-id');
       expect(data.should_alert_qa).toBe(false);
     });
 
@@ -902,10 +902,8 @@ describe('<EpicDetail/>', () => {
 
         expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
-        expect(createObject.mock.calls[0][0].data.epic).toEqual('epic1');
-        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
-          'dev',
-        );
+        expect(createObject.mock.calls[0][0].data.epic).toBe('epic1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toBe('dev');
       });
     });
   });

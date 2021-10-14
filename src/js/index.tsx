@@ -72,7 +72,12 @@ const App = withRouter(
 
     return (
       <DocumentTitle title={i18n.t('Metecho')}>
-        <div className="slds-grid slds-grid_frame slds-grid_vertical">
+        <div
+          className="slds-grid
+            slds-grid_frame
+            slds-grid_vertical
+            metecho-frame"
+        >
           <ErrorBoundary>
             <Header />
             <div className="slds-grow slds-shrink-none">

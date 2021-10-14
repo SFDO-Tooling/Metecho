@@ -40,8 +40,8 @@ describe('<Toasts />', () => {
       const { getByText, context } = setup();
       fireEvent.click(getByText('open link'));
 
-      expect(context.action).toEqual('PUSH');
-      expect(context.url).toEqual('/test/url/');
+      expect(context.action).toBe('PUSH');
+      expect(context.url).toBe('/test/url/');
     });
 
     test('opens link url in new window if `openLinkInNewWindow`', () => {

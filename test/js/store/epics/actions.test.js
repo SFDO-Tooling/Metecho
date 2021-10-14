@@ -2,6 +2,14 @@ import * as actions from '@/js/store/epics/actions';
 
 import { storeWithThunk } from './../../utils';
 
+describe('createEpic', () => {
+  test('returns EpicCreated', () => {
+    const expected = { type: 'EPIC_CREATE', payload: {} };
+
+    expect(actions.createEpic({})).toEqual(expected);
+  });
+});
+
 describe('updateEpic', () => {
   test('returns EpicUpdated', () => {
     const expected = { type: 'EPIC_UPDATE', payload: {} };
@@ -30,12 +38,12 @@ describe('createEpicPR', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted Epic for review on GitHub: “My Epic.”',
     );
-    expect(allActions[0].payload.linkText).toEqual('View pull request.');
-    expect(allActions[0].payload.linkUrl).toEqual('my-pr-url');
+    expect(allActions[0].payload.linkText).toBe('View pull request.');
+    expect(allActions[0].payload.linkUrl).toBe('my-pr-url');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -57,7 +65,7 @@ describe('createEpicPR', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted Epic for review on GitHub: “My Epic.”',
     );
@@ -87,12 +95,12 @@ describe('createEpicPRFailed', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error submitting Epic for review on GitHub: “My Epic.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 });
