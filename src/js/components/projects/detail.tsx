@@ -60,6 +60,7 @@ const ProjectDetail = (
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createIssueModalOpen, setCreateIssueModalOpen] = useState(false);
+
   const [createEpicModalOpen, setCreateEpicModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);

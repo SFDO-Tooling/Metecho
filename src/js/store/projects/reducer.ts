@@ -37,6 +37,17 @@ export interface ProjectsState {
   refreshing: boolean;
 }
 
+export interface GithubIssue {
+  id: string;
+  number: number;
+  title: string;
+  createdAt: string;
+  htmlUrl: string;
+  project: string;
+  epic: string | null;
+  task: string | null;
+}
+
 const defaultState = {
   projects: [],
   next: null,

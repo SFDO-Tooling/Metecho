@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { GithubIssue } from 'src/js/store/projects/reducer';
 
 import { ThunkDispatch } from '@/js/store';
 import { addUrlParams } from '@/js/utils/api';
 import apiFetch from '@/js/utils/api';
 
-export default ({ projectId }: { projectId: string }) => {
+export default ({
+  projectId,
+  isOpen,
+  isAttached,
+}: {
+  projectId: string;
+  isAttached: boolean;
+  isOpen: boolean;
+}) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const [issues, setIssues] = useState<any[]>();
+  const [issues, setIssues] = useState<GithubIssue[]>();
+  const attached = isAttached ? `{ search: '&is_attached=true' }` : '';
 
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();
@@ -15,15 +25,16 @@ export default ({ projectId }: { projectId: string }) => {
       const payload = await apiFetch({
         url: addUrlParams(baseUrl, {
           project: projectId,
+          search: attached,
         }),
         dispatch,
       });
       setIssues(payload?.results || []);
     };
-    if (projectId && !issues) {
+    if (projectId && !issues && isOpen) {
       fetchIssues();
     }
-  }, [dispatch, issues, projectId]);
+  }, [dispatch, issues, projectId, attached, isOpen]);
 
   return { issues };
 };

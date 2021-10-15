@@ -3,9 +3,9 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useState } from 'react';
 
-import { useFetchIssues } from '@/js/components/utils';
+import { LabelWithSpinner, useFetchIssues } from '@/js/components/utils';
 
 interface Props {
   projectId: string;
@@ -14,10 +14,33 @@ interface Props {
 }
 
 const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
-  const { issues } = useFetchIssues({ projectId });
+  const { issues } = useFetchIssues({ projectId, isAttached: false, isOpen });
+  const { issues: attachedIssues } = useFetchIssues({
+    projectId,
+    isOpen,
+    isAttached: true,
+  });
+
+  const [selectedIssue, setSelectedIssue] = useState('');
+  const [enableButton, setEnableButton] = useState(false);
 
   const closeForm = () => {
     closeIssueModal();
+  };
+
+  // const submitForm = (issue) => {
+  //   // createEpicModalOpen();
+  //   // passIdToModal(issue);
+  // };
+
+  const changeSelection = (issueId) => {
+    if (isOpen) {
+      setEnableButton(true);
+      setSelectedIssue(issueId);
+    } else {
+      setEnableButton(false);
+      setSelectedIssue('');
+    }
   };
 
   return (
@@ -30,44 +53,75 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={closeForm} />,
         <Button
-          key="submit"
+          key="createEpic"
           type="submit"
           variant="brand"
+          // disabled={enableButton}
           label={i18n.t('Create Epic')}
+          // onSubmit={submitForm(selectedIssue)}
         />,
         <Button
-          key="submit"
+          key="createTask"
           type="submit"
           variant="outline-brand"
+          // disabled={enableButton}
           label={i18n.t('Create Task')}
+          // onSubmit={submitForm(selectedIssue)}
         />,
       ]}
     >
+      <p className="slds-align_absolute-center slds-m-bottom_small">
+        {i18n.t(
+          "Issues is Github's bug and enhancement tracker system. Select from these open Issues, and create a Task or Epic.",
+        )}
+      </p>
       <form
         className="slds-form slds-p-around_large"
         data-form="create-epic-branch"
       >
         <RadioGroup
           assistiveText={{
-            label: i18n.t('Epic Branch'),
+            label: i18n.t('Available Issues'),
             required: i18n.t('Required'),
           }}
           className="slds-form-element_stacked slds-p-left_none"
           name="epic-branch"
           required
-          // onChange={handleBranchCheckboxChange}
         >
-          {issues?.map((issue, idx) => (
-            <Radio key={idx} label={`${issue.title}`} name="issue" />
+          {issues ? (
+            issues?.map((issue, idx) => (
+              <Radio
+                key={idx}
+                label={`${issue.title}`}
+                name="issue"
+                checked={changeSelection(issue.id)}
+              />
+            ))
+          ) : (
+            <LabelWithSpinner
+              label={i18n.t('Loading Issues...')}
+              variant="inverse"
+            />
+          )}
+        </RadioGroup>
+        <RadioGroup
+          assistiveText={{
+            label: i18n.t('Attached Issues'),
+          }}
+          className="slds-form-element_stacked slds-p-left_none"
+          name="epic-branch"
+        >
+          {attachedIssues?.map((issue, idx) => (
+            <Radio
+              key={idx}
+              label={`${issue.title}`}
+              name="attachedIssue"
+              disabled
+            />
           ))}
         </RadioGroup>
         {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          // ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          // disabled={isSaving}
-        />
+        <button type="submit" style={{ display: 'none' }} />
       </form>
     </Modal>
   );
