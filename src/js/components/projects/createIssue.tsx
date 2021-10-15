@@ -26,6 +26,8 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
 
   const closeForm = () => {
     closeIssueModal();
+    setSelectedIssue('');
+    setEnableButton(false);
   };
 
   // const submitForm = (issue) => {
@@ -33,14 +35,9 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
   //   // passIdToModal(issue);
   // };
 
-  const changeSelection = (issueId) => {
-    if (isOpen) {
-      setEnableButton(true);
-      setSelectedIssue(issueId);
-    } else {
-      setEnableButton(false);
-      setSelectedIssue('');
-    }
+  const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEnableButton(true);
+    setSelectedIssue(event.target.value);
   };
 
   return (
@@ -77,7 +74,7 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
       </p>
       <form
         className="slds-form slds-p-around_large"
-        data-form="create-epic-branch"
+        data-form="attach-github-issue"
       >
         <RadioGroup
           assistiveText={{
@@ -85,16 +82,18 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
             required: i18n.t('Required'),
           }}
           className="slds-form-element_stacked slds-p-left_none"
-          name="epic-branch"
+          name="github-issue"
           required
+          onChange={changeSelection}
         >
           {issues ? (
-            issues?.map((issue, idx) => (
+            issues.map((issue, idx) => (
               <Radio
                 key={idx}
-                label={`${issue.title}`}
-                name="issue"
-                checked={changeSelection(issue.id)}
+                label={issue.title}
+                name="github-issue"
+                value={issue.id}
+                checked={selectedIssue === issue.id}
               />
             ))
           ) : (
@@ -109,13 +108,15 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
             label: i18n.t('Attached Issues'),
           }}
           className="slds-form-element_stacked slds-p-left_none"
-          name="epic-branch"
+          name="attached-github-issue"
         >
           {attachedIssues?.map((issue, idx) => (
             <Radio
               key={idx}
-              label={`${issue.title}`}
-              name="attachedIssue"
+              label={issue.title}
+              name="attached-github-issue"
+              checked
+              value={issue.id}
               disabled
             />
           ))}

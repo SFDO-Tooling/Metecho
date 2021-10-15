@@ -17,7 +17,6 @@ export default ({
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [issues, setIssues] = useState<GithubIssue[]>();
-  const attached = isAttached ? `{ search: '&is_attached=true' }` : '';
 
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();
@@ -25,16 +24,16 @@ export default ({
       const payload = await apiFetch({
         url: addUrlParams(baseUrl, {
           project: projectId,
-          search: attached,
+          is_attached: isAttached,
         }),
         dispatch,
       });
       setIssues(payload?.results || []);
     };
-    if (projectId && !issues && isOpen) {
+    if (projectId && isOpen) {
       fetchIssues();
     }
-  }, [dispatch, issues, projectId, attached, isOpen]);
+  }, [dispatch, projectId, isOpen, isAttached]);
 
   return { issues };
 };
