@@ -133,7 +133,7 @@ django-js-reverse==0.9.1
     # via -r requirements/prod.in
 django-log-request-id==1.6.0
     # via -r requirements/prod.in
-django-model-utils==4.1.1
+django-model-utils==4.2.0
     # via -r requirements/prod.in
 django-parler==2.2
     # via -r requirements/prod.in
