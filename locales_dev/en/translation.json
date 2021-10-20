@@ -193,6 +193,7 @@
   "No Epics": "No Epics",
   "No Tasks": "No Tasks",
   "No Tasks for {{epic_name}}": "No Tasks for {{epic_name}}",
+  "No attached Issues": "No attached Issues",
   "No matching branches found.": "No matching branches found.",
   "No users found.": "No users found.",
   "Not Enabled": "Not Enabled",

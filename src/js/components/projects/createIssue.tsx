@@ -5,7 +5,11 @@ import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import { LabelWithSpinner, useFetchIssues } from '@/js/components/utils';
+import {
+  ExternalLink,
+  LabelWithSpinner,
+  useFetchIssues,
+} from '@/js/components/utils';
 
 interface Props {
   projectId: string;
@@ -22,28 +26,28 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
   });
 
   const [selectedIssue, setSelectedIssue] = useState('');
-  const [enableButton, setEnableButton] = useState(false);
 
   const closeForm = () => {
     closeIssueModal();
     setSelectedIssue('');
-    setEnableButton(false);
   };
 
-  // const submitForm = (issue) => {
+  // const submitForm = (taskorEpic, issue) => {
   //   // createEpicModalOpen();
   //   // passIdToModal(issue);
+  // closeIssueModal();
   // };
 
+  console.log(attachedIssues);
+
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEnableButton(true);
     setSelectedIssue(event.target.value);
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      size="small"
+      size="medium"
       heading={i18n.t('Select Github Issue to Develop')}
       onRequestClose={closeForm}
       assistiveText={{ closeButton: i18n.t('Cancel') }}
@@ -53,21 +57,21 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
           key="createEpic"
           type="submit"
           variant="brand"
-          // disabled={enableButton}
+          disabled={!selectedIssue}
           label={i18n.t('Create Epic')}
-          // onSubmit={submitForm(selectedIssue)}
+          // onSubmit={submitForm(epic, selectedIssue)}
         />,
         <Button
           key="createTask"
           type="submit"
           variant="outline-brand"
-          // disabled={enableButton}
+          disabled={!selectedIssue}
           label={i18n.t('Create Task')}
-          // onSubmit={submitForm(selectedIssue)}
+          // onSubmit={submitForm(task, selectedIssue)}
         />,
       ]}
     >
-      <p className="slds-align_absolute-center slds-m-bottom_small">
+      <p className="slds-align_absolute-center">
         {i18n.t(
           "Issues is Github's bug and enhancement tracker system. Select from these open Issues, and create a Task or Epic.",
         )}
@@ -76,53 +80,68 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
         className="slds-form slds-p-around_large"
         data-form="attach-github-issue"
       >
-        <RadioGroup
-          assistiveText={{
-            label: i18n.t('Available Issues'),
-            required: i18n.t('Required'),
-          }}
-          className="slds-form-element_stacked slds-p-left_none"
-          name="github-issue"
-          required
-          onChange={changeSelection}
-        >
-          {issues ? (
-            issues.map((issue, idx) => (
-              <Radio
-                key={idx}
-                label={issue.title}
-                name="github-issue"
-                value={issue.id}
-                checked={selectedIssue === issue.id}
-              />
-            ))
-          ) : (
-            <LabelWithSpinner
-              label={i18n.t('Loading Issues...')}
-              variant="inverse"
-            />
-          )}
-        </RadioGroup>
-        <RadioGroup
-          assistiveText={{
-            label: i18n.t('Attached Issues'),
-          }}
-          className="slds-form-element_stacked slds-p-left_none"
-          name="attached-github-issue"
-        >
-          {attachedIssues?.map((issue, idx) => (
-            <Radio
-              key={idx}
-              label={issue.title}
+        <div className="slds-grid slds-gutters">
+          <div className="slds-col slds-size_1-of-2">
+            <h2 className="slds-text-heading_medium">Available Issues</h2>
+            <RadioGroup
+              assistiveText={{
+                label: i18n.t('Available Issues'),
+                required: i18n.t('Required'),
+              }}
+              className="slds-form-element_stacked slds-p-left_none"
+              name="github-issue"
+              required
+              onChange={changeSelection}
+            >
+              {issues ? (
+                issues.map((issue, idx) => (
+                  <>
+                    <Radio
+                      key={idx}
+                      label={`#${issue.number}: ${issue.title}`}
+                      name="github-issue"
+                      value={issue.id}
+                      checked={selectedIssue === issue.id}
+                    />
+                    <ExternalLink showButtonIcon={true} url={issue.html_url}>
+                      View on Github
+                    </ExternalLink>
+                  </>
+                ))
+              ) : (
+                <LabelWithSpinner
+                  label={i18n.t('Loading Issues...')}
+                  variant="inverse"
+                />
+              )}
+            </RadioGroup>
+          </div>
+          <div className="slds-col slds-size_1-of-2">
+            <h2 className="slds-text-heading_medium">Attached Issues</h2>
+            <RadioGroup
+              assistiveText={{
+                label: i18n.t('Attached Issues'),
+              }}
+              className="slds-form-element_stacked slds-p-left_none"
               name="attached-github-issue"
-              checked
-              value={issue.id}
-              disabled
-            />
-          ))}
-        </RadioGroup>
-        {/* Clicking hidden button allows for native browser form validation */}
-        <button type="submit" style={{ display: 'none' }} />
+            >
+              {attachedIssues && attachedIssues?.length > 0 ? (
+                attachedIssues?.map((issue, idx) => (
+                  <Radio
+                    key={idx}
+                    label={issue.title}
+                    name="attached-github-issue"
+                    checked
+                    value={issue.id}
+                    disabled
+                  />
+                ))
+              ) : (
+                <p>{i18n.t(`No attached Issues`)}</p>
+              )}
+            </RadioGroup>
+          </div>
+        </div>
       </form>
     </Modal>
   );

@@ -41,8 +41,8 @@ export interface GithubIssue {
   id: string;
   number: number;
   title: string;
-  createdAt: string;
-  htmlUrl: string;
+  created_at: string;
+  html_url: string;
   project: string;
   epic: string | null;
   task: string | null;
