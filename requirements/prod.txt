@@ -148,7 +148,7 @@ djangorestframework==3.12.4
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-drf-spectacular==0.20.1
+drf-spectacular==0.20.2
     # via -r requirements/prod.in
 faker==8.14.0
     # via
