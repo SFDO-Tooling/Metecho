@@ -20,7 +20,7 @@ import {
   useIsMounted,
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
-import { Project } from '@/js/store/projects/reducer';
+import { GithubIssue, Project } from '@/js/store/projects/reducer';
 import { User } from '@/js/store/user/reducer';
 import apiFetch from '@/js/utils/api';
 import { CREATE_TASK_FROM_ORG, OBJECT_TYPES } from '@/js/utils/constants';
@@ -36,6 +36,7 @@ interface Props {
   project: Project;
   isOpen: boolean;
   playgroundOrgData?: OrgData | null;
+  issue?: GithubIssue | null;
   closeCreateModal: () => void;
 }
 
@@ -45,6 +46,7 @@ const CreateEpicModal = ({
   isOpen,
   playgroundOrgData,
   closeCreateModal,
+  issue,
 }: Props) => {
   const history = useHistory();
   const isMounted = useIsMounted();
@@ -80,6 +82,7 @@ const CreateEpicModal = ({
     additionalData: {
       project: project.id,
       github_users: user.github_id ? [user.github_id] : [],
+      // issue,
     },
     onError,
   });

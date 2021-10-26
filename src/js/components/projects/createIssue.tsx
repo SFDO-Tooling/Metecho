@@ -4,6 +4,7 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
 import React, { useState } from 'react';
+import { GithubIssue } from 'src/js/store/projects/reducer';
 
 import {
   ExternalLink,
@@ -11,13 +12,24 @@ import {
   useFetchIssues,
 } from '@/js/components/utils';
 
+export type createEpicOrTaskCallback = (
+  issue: GithubIssue,
+  createEpicfromIssue: boolean,
+) => void;
+
 interface Props {
   projectId: string;
   isOpen: boolean;
   closeIssueModal: () => void;
+  createEpicOrTask: createEpicOrTaskCallback;
 }
 
-const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
+const CreateIssueModal = ({
+  projectId,
+  isOpen,
+  closeIssueModal,
+  createEpicOrTask,
+}: Props) => {
   const { issues } = useFetchIssues({ projectId, isAttached: false, isOpen });
   const { issues: attachedIssues } = useFetchIssues({
     projectId,
@@ -32,16 +44,21 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
     setSelectedIssue('');
   };
 
-  // const submitForm = (taskorEpic, issue) => {
-  //   // createEpicModalOpen();
-  //   // passIdToModal(issue);
-  // closeIssueModal();
-  // };
-
-  console.log(attachedIssues);
-
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedIssue(event.target.value);
+  };
+
+  const onSubmit = (issueId, createEpic) => {
+    const issue = issues && issues?.find((i) => i.id === issueId) : null;
+    console.log(issue);
+    createEpicOrTask(issue, createEpic);
+    // issue.id and boolean whether task or epic? or two seperate functions
+    // in project detail store issue in state, and opens modal (epic or task)
+    // make sure to pass the state object to the modal
+    // if there's a issue id, display it
+    // pass github issue object instead - need other things
+    // createAndContribute example
+    // api only needs id on post
   };
 
   return (
@@ -59,7 +76,7 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
           variant="brand"
           disabled={!selectedIssue}
           label={i18n.t('Create Epic')}
-          // onSubmit={submitForm(epic, selectedIssue)}
+          onSubmit={onSubmit(selectedIssue, true)}
         />,
         <Button
           key="createTask"
@@ -67,7 +84,7 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
           variant="outline-brand"
           disabled={!selectedIssue}
           label={i18n.t('Create Task')}
-          // onSubmit={submitForm(task, selectedIssue)}
+          onSubmit={onSubmit(selectedIssue, false)}
         />,
       ]}
     >
@@ -95,18 +112,18 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
             >
               {issues ? (
                 issues.map((issue, idx) => (
-                  <>
+                  <div key={idx}>
                     <Radio
                       key={idx}
-                      label={`#${issue.number}: ${issue.title}`}
+                      labels={{ label: `#${issue.number}: ${issue.title}` }}
                       name="github-issue"
                       value={issue.id}
                       checked={selectedIssue === issue.id}
                     />
-                    <ExternalLink showButtonIcon={true} url={issue.html_url}>
+                    <ExternalLink url={issue.html_url} showButtonIcon={true}>
                       View on Github
                     </ExternalLink>
-                  </>
+                  </div>
                 ))
               ) : (
                 <LabelWithSpinner
@@ -129,7 +146,7 @@ const CreateIssueModal = ({ projectId, isOpen, closeIssueModal }: Props) => {
                 attachedIssues?.map((issue, idx) => (
                   <Radio
                     key={idx}
-                    label={issue.title}
+                    labels={{ label: `#${issue.number}: ${issue.title}` }}
                     name="attached-github-issue"
                     checked
                     value={issue.id}

@@ -8,6 +8,7 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { GithubIssue } from 'src/js/store/projects/reducer';
 
 import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
@@ -60,7 +61,7 @@ const ProjectDetail = (
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createIssueModalOpen, setCreateIssueModalOpen] = useState(false);
-
+  const [issue, setIssue] = useState<GithubIssue | null>(null);
   const [createEpicModalOpen, setCreateEpicModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
@@ -163,6 +164,19 @@ const ProjectDetail = (
     setCreateIssueModalOpen(false);
   }, []);
 
+  const setIssueAndCreateEpicOrTask = useCallback(
+    (selectedIssue: GithubIssue, createEpicfromIssue: boolean) => {
+      setIssue(selectedIssue);
+      if (createEpicfromIssue) {
+        setCreateEpicModalOpen(true);
+        setCreateTaskModalOpen(false);
+      } else {
+        setCreateTaskModalOpen(true);
+        setCreateTaskModalOpen(false);
+      }
+    },
+    [],
+  );
   // "create task" modal related
   const openCreateTaskModal = useCallback(() => {
     setCreateTaskModalOpen(true);
@@ -549,6 +563,7 @@ const ProjectDetail = (
           projectId={project.id}
           isOpen={createIssueModalOpen}
           closeIssueModal={closeCreateIssueModal}
+          createEpicOrTask={setIssueAndCreateEpicOrTask}
         />
         <CreateEpicModal
           user={user}
@@ -556,6 +571,7 @@ const ProjectDetail = (
           isOpen={createEpicModalOpen}
           playgroundOrgData={convertOrgData}
           closeCreateModal={closeCreateEpicModal}
+          issue={issue}
         />
         <LandingModal
           isOpen={tourLandingModalOpen}
