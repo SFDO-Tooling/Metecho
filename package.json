@@ -148,7 +148,7 @@
     "redux-mock-store": "^1.5.4",
     "sass": "^1.42.1",
     "sass-loader": "^12.1.0",
-    "style-loader": "^3.3.0",
+    "style-loader": "^3.3.1",
     "stylelint": "^13.13.1",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-recommended": "^5.0.0",
