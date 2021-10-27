@@ -57,7 +57,7 @@ docutils==0.16
     #   doc8
     #   restructuredtext-lint
     #   sphinx
-factory-boy==3.2.0
+factory-boy==3.2.1
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
