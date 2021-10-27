@@ -165,14 +165,16 @@ const ProjectDetail = (
   }, []);
 
   const setIssueAndCreateEpicOrTask = useCallback(
-    (selectedIssue: GithubIssue, createEpicfromIssue: boolean) => {
-      setIssue(selectedIssue);
-      if (createEpicfromIssue) {
-        setCreateEpicModalOpen(true);
-        setCreateTaskModalOpen(false);
-      } else {
-        setCreateTaskModalOpen(true);
-        setCreateTaskModalOpen(false);
+    (selectedIssue: GithubIssue | null, createEpicfromIssue: boolean) => {
+      if (selectedIssue) {
+        setIssue(selectedIssue);
+        if (createEpicfromIssue) {
+          setCreateEpicModalOpen(true);
+          setCreateTaskModalOpen(false);
+        } else {
+          setCreateTaskModalOpen(true);
+          setCreateEpicModalOpen(false);
+        }
       }
     },
     [],
@@ -604,6 +606,7 @@ const ProjectDetail = (
           isOpen={createTaskModalOpen}
           playgroundOrgData={convertOrgData}
           closeCreateModal={closeCreateTaskModal}
+          issue={issue}
         />
         {playgroundOrg ? (
           <ContributeWorkModal

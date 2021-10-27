@@ -13,7 +13,7 @@ import {
 import { GithubIssue } from '@/js/store/projects/reducer';
 
 export type createEpicOrTaskCallback = (
-  issue: GithubIssue,
+  issue: GithubIssue | null,
   createEpicfromIssue: boolean,
 ) => void;
 
@@ -37,20 +37,19 @@ const CreateIssueModal = ({
     isAttached: true,
   });
 
-  const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<string>('');
 
   const closeForm = () => {
     closeIssueModal();
-    setSelectedIssue(null);
+    setSelectedIssue('');
   };
 
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedIssue(event.target.value || null);
+    setSelectedIssue(event.target.value || '');
   };
 
-  const onSubmit = (issueId, createEpic) => {
+  const onSubmit = (issueId: string, createEpic: boolean) => {
     const issue = (issues && issues?.find((i) => i.id === issueId)) || null;
-    console.log(issue);
     createEpicOrTask(issue, createEpic);
     // issue.id and boolean whether task or epic? or two seperate functions
     // in project detail store issue in state, and opens modal (epic or task)

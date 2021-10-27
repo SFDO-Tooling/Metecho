@@ -9,6 +9,7 @@ import { AnyAction } from 'redux';
 
 import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
+  ExternalLink,
   LabelWithSpinner,
   OrgData,
   useForm,
@@ -17,7 +18,7 @@ import {
   useTransientMessage,
 } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
-import { Project } from '@/js/store/projects/reducer';
+import { GithubIssue, Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
@@ -31,6 +32,7 @@ interface Props {
   isOpen: boolean;
   playgroundOrgData?: OrgData | null;
   closeCreateModal: () => void;
+  issue?: GithubIssue | null;
 }
 
 const CreateTaskModal = ({
@@ -39,6 +41,7 @@ const CreateTaskModal = ({
   isOpen,
   playgroundOrgData,
   closeCreateModal,
+  issue,
 }: Props) => {
   const history = useHistory();
   const isMounted = useIsMounted();
@@ -68,6 +71,7 @@ const CreateTaskModal = ({
   const additionalData: { [key: string]: any } = {
     epic: epic?.id,
     project: epic ? undefined : project.id,
+    issue: issue ? issue.id : undefined,
   };
 
   if (isContributingFromOrg) {
@@ -226,6 +230,16 @@ const CreateTaskModal = ({
         />,
       ]}
     >
+      {issue && (
+        <div>
+          <p className="slds-p-around_large">
+            <span>Attached Issue: </span>#{issue.number}: {issue.title}
+          </p>
+          <ExternalLink url={issue.html_url} showButtonIcon={true}>
+            View on Github
+          </ExternalLink>
+        </div>
+      )}
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
         {!epic && !isContributingFromOrg && (
           <p className="slds-align_absolute-center slds-m-bottom_small">

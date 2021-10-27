@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
 import {
+  ExternalLink,
   LabelWithSpinner,
   OrgData,
   useForm,
@@ -82,7 +83,7 @@ const CreateEpicModal = ({
     additionalData: {
       project: project.id,
       github_users: user.github_id ? [user.github_id] : [],
-      // issue,
+      issue: issue ? issue.id : undefined,
     },
     onError,
   });
@@ -269,6 +270,16 @@ const CreateEpicModal = ({
         />,
       ]}
     >
+      {issue && (
+        <div>
+          <p className="slds-p-around_large">
+            <span>Attached Issue: </span>#{issue.number}: {issue.title}
+          </p>
+          <ExternalLink url={issue.html_url} showButtonIcon={true}>
+            View on Github
+          </ExternalLink>
+        </div>
+      )}
       <form
         onSubmit={doSubmit}
         className="slds-form slds-p-around_large"
