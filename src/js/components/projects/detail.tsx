@@ -8,7 +8,6 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { GithubIssue } from 'src/js/store/projects/reducer';
 
 import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
@@ -40,6 +39,7 @@ import {
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
 import { Org } from '@/js/store/orgs/reducer';
+import { GithubIssue } from '@/js/store/projects/reducer';
 import { onboarded } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';

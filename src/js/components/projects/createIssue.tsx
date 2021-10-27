@@ -4,13 +4,13 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
 import React, { useState } from 'react';
-import { GithubIssue } from 'src/js/store/projects/reducer';
 
 import {
   ExternalLink,
   LabelWithSpinner,
   useFetchIssues,
 } from '@/js/components/utils';
+import { GithubIssue } from '@/js/store/projects/reducer';
 
 export type createEpicOrTaskCallback = (
   issue: GithubIssue,
@@ -37,19 +37,19 @@ const CreateIssueModal = ({
     isAttached: true,
   });
 
-  const [selectedIssue, setSelectedIssue] = useState('');
+  const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
 
   const closeForm = () => {
     closeIssueModal();
-    setSelectedIssue('');
+    setSelectedIssue(null);
   };
 
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedIssue(event.target.value);
+    setSelectedIssue(event.target.value || null);
   };
 
   const onSubmit = (issueId, createEpic) => {
-    const issue = issues && issues?.find((i) => i.id === issueId) : null;
+    const issue = (issues && issues?.find((i) => i.id === issueId)) || null;
     console.log(issue);
     createEpicOrTask(issue, createEpic);
     // issue.id and boolean whether task or epic? or two seperate functions
@@ -76,7 +76,7 @@ const CreateIssueModal = ({
           variant="brand"
           disabled={!selectedIssue}
           label={i18n.t('Create Epic')}
-          onSubmit={onSubmit(selectedIssue, true)}
+          onClick={() => onSubmit(selectedIssue, true)}
         />,
         <Button
           key="createTask"
@@ -84,7 +84,7 @@ const CreateIssueModal = ({
           variant="outline-brand"
           disabled={!selectedIssue}
           label={i18n.t('Create Task')}
-          onSubmit={onSubmit(selectedIssue, false)}
+          onClick={() => onSubmit(selectedIssue, false)}
         />,
       ]}
     >
