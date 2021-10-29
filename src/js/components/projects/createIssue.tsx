@@ -51,6 +51,7 @@ const CreateIssueModal = ({
   const onSubmit = (issueId: string, createEpic: boolean) => {
     const issue = (issues && issues?.find((i) => i.id === issueId)) || null;
     createEpicOrTask(issue, createEpic);
+    closeForm();
   };
 
   return (

@@ -1,4 +1,5 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -539,18 +540,23 @@ describe('<ProjectDetail />', () => {
       });
     });
   });
-  describe('<createIssue />', () => {
+
+  describe('<CreateIssueModal />', () => {
     test('opens/closes modal', () => {
+      fetchMock.get(`begin:${window.api_urls.issue_list()}`, {
+        results: [],
+      });
       const { queryByText, getByText, getByTitle } = setup();
       fireEvent.click(getByText('Create Epic From Github Issue'));
 
-      // expect(getByTitle('Select Github Issue To Develop')).toBeVisible();
+      expect(getByText('Select Github Issue to Develop')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
 
-      expect(queryByText('Select Github Issue To Develop')).toBeNull();
+      expect(queryByText('Select Github Issue to Develop')).toBeNull();
     });
   });
+
   describe('<CreateEpicModal />', () => {
     test('opens/closes form', () => {
       const { queryByText, getByText, getByTitle } = setup();

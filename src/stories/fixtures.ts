@@ -38,7 +38,7 @@ export const api_urls = {
     `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
-  issue_list: () => `/api/issues/`,
+  issue_list: () => '/api/issues/',
 };
 
 export const sampleUser1 = {
@@ -779,8 +779,8 @@ export const issue1 = {
   number: 87,
   title: 'this is an issue',
   created_at: 'yesterday',
-  html_url:'https://github.com',
+  html_url: 'https://github.com',
   project: sampleProject1,
   epic: null,
   task: sampleTask1,
-}
+};
