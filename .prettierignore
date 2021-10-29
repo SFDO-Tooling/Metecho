@@ -16,5 +16,6 @@ jscache/
 node_modules/
 postgres/
 staticfiles/
+storybook-static/
 venv/
 webpack-stats.json
