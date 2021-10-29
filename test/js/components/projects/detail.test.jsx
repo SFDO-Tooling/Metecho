@@ -539,7 +539,18 @@ describe('<ProjectDetail />', () => {
       });
     });
   });
+  describe('<createIssue />', () => {
+    test('opens/closes modal', () => {
+      const { queryByText, getByText, getByTitle } = setup();
+      fireEvent.click(getByText('Create Epic From Github Issue'));
 
+      // expect(getByTitle('Select Github Issue To Develop')).toBeVisible();
+
+      fireEvent.click(getByTitle('Cancel'));
+
+      expect(queryByText('Select Github Issue To Develop')).toBeNull();
+    });
+  });
   describe('<CreateEpicModal />', () => {
     test('opens/closes form', () => {
       const { queryByText, getByText, getByTitle } = setup();

@@ -773,3 +773,14 @@ export const sampleScratchOrg = {
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
 };
+
+export const issue1 = {
+  id: 'test123',
+  number: 87,
+  title: 'this is an issue',
+  created_at: 'yesterday',
+  html_url:'https://github.com',
+  project: sampleProject1,
+  epic: null,
+  task: sampleTask1,
+}

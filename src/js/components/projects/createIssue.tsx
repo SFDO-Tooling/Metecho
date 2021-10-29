@@ -51,13 +51,6 @@ const CreateIssueModal = ({
   const onSubmit = (issueId: string, createEpic: boolean) => {
     const issue = (issues && issues?.find((i) => i.id === issueId)) || null;
     createEpicOrTask(issue, createEpic);
-    // issue.id and boolean whether task or epic? or two seperate functions
-    // in project detail store issue in state, and opens modal (epic or task)
-    // make sure to pass the state object to the modal
-    // if there's a issue id, display it
-    // pass github issue object instead - need other things
-    // createAndContribute example
-    // api only needs id on post
   };
 
   return (

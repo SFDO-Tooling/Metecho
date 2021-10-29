@@ -538,6 +538,12 @@ const ProjectDetail = (
                   </Trans>
                 }
               />
+              <Button
+                label={i18n.t('Create Task From Github Issue')}
+                variant="outline-brand"
+                onClick={openCreateIssueModal}
+                className="tour-create-epic"
+              />
             </div>
             <TasksTableComponent
               projectId={project.id}
