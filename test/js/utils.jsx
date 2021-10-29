@@ -11,6 +11,7 @@ const mockStore = configureStore([]);
 
 export const initI18n = () => {
   i18n.use(initReactI18next).init({
+    compatibilityJSON: 'v3',
     fallbackLng: 'en',
     keySeparator: false,
     nsSeparator: false,
