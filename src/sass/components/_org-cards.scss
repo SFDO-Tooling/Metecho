@@ -12,6 +12,7 @@
   .slds-card__header {
     --card-header-toggle-space: 0;
     --dropdown-right: 0;
+
     padding-left: 0;
 
     .has-org & {
@@ -25,6 +26,7 @@
   .slds-card__header {
     align-items: baseline;
     flex-wrap: wrap;
+
     // hold space for absolutely positioned dropdown toggle
     padding-right: var(--card-header-toggle-space, #{$spacing-x-large});
 
@@ -40,6 +42,7 @@
 
   .slds-has-flexi-truncate {
     margin-right: $spacing-x-small;
+
     // allow org title to display in truncated state before org actions wrap
     min-width: 35%; // arbitrary width
   }
