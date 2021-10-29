@@ -1,4 +1,5 @@
 import { History } from 'history';
+import { RouteComponentProps } from 'react-router-dom';
 import { AnyAction, combineReducers } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
@@ -29,6 +30,11 @@ export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
   AnyAction
 >;
 export type ThunkDispatch = ReduxThunkDispatch<AppState, History, AnyAction>;
+export type RouteProps = RouteComponentProps<{
+  projectSlug?: string;
+  epicSlug?: string;
+  taskSlug?: string;
+}>;
 
 const reducer = combineReducers({
   toasts: toastsReducer,

@@ -30,6 +30,7 @@ $repo-img-pos-adjust: -1.125rem;
 // When image and name are displayed in header
 .metecho-repo-image-header {
   height: $repo-img-size-static;
+
   // .slds-page-header__icon is 2.25rem -- account for vertical space
   margin-bottom: $repo-img-pos-adjust;
   margin-top: $repo-img-pos-adjust;

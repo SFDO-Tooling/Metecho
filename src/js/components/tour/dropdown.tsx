@@ -5,13 +5,13 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import backpackIcon from '@/img/backpack-sm.svg';
 import mapIcon from '@/img/map-sm.svg';
 import seesawIcon from '@/img/seesaw-sm.svg';
 import { useIsMounted } from '@/js/components/utils';
-import { AppState, ThunkDispatch } from '@/js/store';
+import { AppState, RouteProps, ThunkDispatch } from '@/js/store';
 import { selectProject } from '@/js/store/projects/selectors';
 import { updateTour } from '@/js/store/user/actions';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -31,14 +31,12 @@ const TourDropdown = ({
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
-  const match =
-    useRouteMatch<{
-      projectSlug?: string;
-    }>(routePatterns.project_detail) ||
-    ({ params: {} } as Match<{ projectSlug?: string }>);
+  const match = useRouteMatch(routePatterns.project_detail) || {
+    params: {},
+  };
   const selectProjectWithProps = useCallback(selectProject, []);
   const project = useSelector((state: AppState) =>
-    selectProjectWithProps(state, { match }),
+    selectProjectWithProps(state, { match } as RouteProps),
   );
   const projectUrl = project ? routes.project_detail(project.slug) : null;
   const user = useSelector(selectUserState);

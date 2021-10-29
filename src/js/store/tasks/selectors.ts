@@ -1,14 +1,11 @@
 import { filter, map } from 'lodash';
-import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/js/store';
+import { AppState, RouteProps } from '@/js/store';
 import { selectEpic, selectEpicSlug } from '@/js/store/epics/selectors';
 import { selectProject } from '@/js/store/projects/selectors';
-import { Task, TaskState } from '@/js/store/tasks/reducer';
 
-export const selectTaskState = (appState: AppState): TaskState =>
-  appState.tasks;
+export const selectTaskState = (appState: AppState) => appState.tasks;
 
 export const selectTasksStateByProject = createSelector(
   [selectTaskState, selectProject],
@@ -48,12 +45,12 @@ export const selectTasksByEpic = createSelector(
 
 export const selectTaskSlug = (
   appState: AppState,
-  { match: { params } }: RouteComponentProps<{ taskSlug?: string }>,
+  { match: { params } }: RouteProps,
 ) => params.taskSlug;
 
 export const selectTask = createSelector(
   [selectTasksStateByProject, selectEpic, selectEpicSlug, selectTaskSlug],
-  (tasks, epic, epicSlug, taskSlug): Task | null | undefined => {
+  (tasks, epic, epicSlug, taskSlug) => {
     if (!tasks || (epicSlug && !epic) || !taskSlug) {
       return undefined;
     }
@@ -70,10 +67,7 @@ export const selectTask = createSelector(
   },
 );
 
-export const selectTaskById = (
-  appState: AppState,
-  id?: string | null,
-): Task | undefined =>
+export const selectTaskById = (appState: AppState, id?: string | null) =>
   map(appState.tasks, 'tasks')
     .flat()
     .find((t) => t.id === id);

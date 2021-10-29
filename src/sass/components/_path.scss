@@ -24,8 +24,8 @@ $color-background-path-complete-hover: $color-gray-6;
     background: $color-background-path-complete;
     flex-grow: 0.5;
 
-    &:before,
-    &:after {
+    &::before,
+    &::after {
       background: inherit;
     }
 
@@ -33,8 +33,8 @@ $color-background-path-complete-hover: $color-gray-6;
       background: $color-background-path-complete-hover;
       flex-grow: 1.5;
 
-      &:before,
-      &:after {
+      &::before,
+      &::after {
         background: inherit;
       }
     }
@@ -47,20 +47,20 @@ $color-background-path-complete-hover: $color-gray-6;
   .slds-is-active {
     background: $color-background-path-active;
 
-    &:before,
-    &:after {
+    &::before,
+    &::after {
       background: inherit;
     }
 
     &:first-child {
-      &:before,
-      &:after {
+      &::before,
+      &::after {
         background: inherit;
       }
 
       &:hover {
-        &:before,
-        &:after {
+        &::before,
+        &::after {
           background-image: linear-gradient(
             90deg,
             $color-background-path-active-hover,
@@ -74,8 +74,8 @@ $color-background-path-complete-hover: $color-gray-6;
     &:hover {
       background: $color-background-path-active-hover;
 
-      &:before,
-      &:after {
+      &::before,
+      &::after {
         background: inherit;
       }
 
@@ -96,11 +96,11 @@ $color-background-path-complete-hover: $color-gray-6;
       color: $color-text-brand-primary;
     }
 
-    &:before,
-    &:after,
+    &::before,
+    &::after,
     &:hover,
-    &:hover:before,
-    &:hover:after {
+    &:hover::before,
+    &:hover::after {
       background: $color-background-path-won;
     }
   }
@@ -112,11 +112,11 @@ $color-background-path-complete-hover: $color-gray-6;
       color: $color-text-brand-primary;
     }
 
-    &:before,
-    &:after,
+    &::before,
+    &::after,
     &:hover,
-    &:hover:before,
-    &:hover:after {
+    &:hover::before,
+    &:hover::after {
       background: $color-background-path-lost;
     }
   }
