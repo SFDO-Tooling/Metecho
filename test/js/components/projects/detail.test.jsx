@@ -10,6 +10,7 @@ import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 import {
+  issue1,
   sampleEpic1,
   sampleEpic2,
   sampleProject1,
@@ -141,6 +142,9 @@ const defaultState = {
   user: {
     username: 'my-user',
     onboarded_at: 'now',
+  },
+  issues: {
+    issue1,
   },
 };
 
@@ -554,6 +558,48 @@ describe('<ProjectDetail />', () => {
       fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Select Github Issue to Develop')).toBeNull();
+    });
+
+    test('creates a task from issue', async () => {
+      fetchMock.get(`end:is_attached=false`, {
+        results: [issue1],
+      });
+
+      fetchMock.get(`/api/issues/?project=p1&is_attached=true`, {
+        results: [],
+      });
+
+      const { queryByText, getByText, findByLabelText } = setup();
+      fireEvent.click(getByText('Create Epic From Github Issue'));
+
+      expect(getByText('Select Github Issue to Develop')).toBeVisible();
+      const radio = await findByLabelText('#87: this is an issue');
+      fireEvent.click(radio);
+      fireEvent.click(getByText('Create Task'));
+
+      expect(queryByText('Select Github Issue to Develop')).toBeNull();
+      expect(queryByText('#87: this is an issue')).toBeVisible();
+    });
+
+    test('creates an epic from issue', async () => {
+      fetchMock.get(`end:is_attached=false`, {
+        results: [issue1],
+      });
+
+      fetchMock.get(`/api/issues/?project=p1&is_attached=true`, {
+        results: [],
+      });
+
+      const { queryByText, getByText, findByLabelText } = setup();
+      fireEvent.click(getByText('Create Epic From Github Issue'));
+
+      expect(getByText('Select Github Issue to Develop')).toBeVisible();
+      const radio = await findByLabelText('#87: this is an issue');
+      fireEvent.click(radio);
+      fireEvent.click(getByText('Create Epic'));
+
+      expect(queryByText('Select Github Issue to Develop')).toBeNull();
+      expect(queryByText('#87: this is an issue')).toBeVisible();
     });
   });
 

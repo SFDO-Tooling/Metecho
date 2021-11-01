@@ -782,5 +782,5 @@ export const issue1 = {
   html_url: 'https://github.com',
   project: sampleProject1,
   epic: null,
-  task: sampleTask1,
+  task: null,
 };
