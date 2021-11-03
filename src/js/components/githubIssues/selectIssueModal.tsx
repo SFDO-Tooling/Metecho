@@ -87,7 +87,7 @@ const SelectIssueModal = ({
           type="submit"
           variant={isOpen === 'epic' ? 'brand' : 'outline-brand'}
           disabled={!selectedIssue}
-          label={i18n.t('Create Epic')}
+          label={i18n.t('Create an Epic')}
           onClick={() => onSubmit(selectedIssue, 'epic')}
         />,
         <Button
@@ -95,7 +95,7 @@ const SelectIssueModal = ({
           type="submit"
           variant={isOpen === 'task' ? 'brand' : 'outline-brand'}
           disabled={!selectedIssue}
-          label={i18n.t('Create Task')}
+          label={i18n.t('Create a Task')}
           onClick={() => onSubmit(selectedIssue, 'task')}
         />,
       ]}
@@ -124,7 +124,7 @@ const SelectIssueModal = ({
                   required
                   onChange={changeSelection}
                 >
-                  {attachedIssues.length > 0 ? (
+                  {issues.length ? (
                     issues.map((issue, idx) => (
                       <div key={idx} className="slds-p-vertical_x-small">
                         <Radio
@@ -152,7 +152,7 @@ const SelectIssueModal = ({
                   className="slds-form-element_stacked slds-p-left_none"
                   name="attached-github-issue"
                 >
-                  {attachedIssues.length > 0 ? (
+                  {attachedIssues.length ? (
                     attachedIssues.map((issue, idx) => (
                       <div key={idx} className="slds-p-vertical_x-small">
                         <Radio

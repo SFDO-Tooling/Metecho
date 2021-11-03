@@ -143,9 +143,6 @@ const defaultState = {
     username: 'my-user',
     onboarded_at: 'now',
   },
-  issues: {
-    sampleIssue,
-  },
 };
 
 const tasks = [
@@ -545,13 +542,13 @@ describe('<ProjectDetail />', () => {
     });
   });
 
-  describe('<CreateIssueModal />', () => {
+  describe('<SelectIssueModal />', () => {
     test('opens/closes modal', () => {
       fetchMock.get(`begin:${window.api_urls.issue_list()}`, {
         results: [],
       });
       const { queryByText, getByText, getByTitle } = setup();
-      fireEvent.click(getByText('Create Epic From GitHub Issue'));
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
 
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
 
@@ -561,45 +558,77 @@ describe('<ProjectDetail />', () => {
     });
 
     test('creates a task from issue', async () => {
-      fetchMock.get(`end:is_attached=false`, {
+      fetchMock.getOnce('end:is_attached=false', {
         results: [sampleIssue],
       });
-
-      fetchMock.get(`/api/issues/?project=p1&is_attached=true`, {
+      fetchMock.getOnce('end:is_attached=true', {
         results: [],
       });
+      const {
+        queryByText,
+        getByText,
+        findByLabelText,
+        getAllByText,
+        findByText,
+      } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              fetched: true,
+              notFound: [],
+              tasks: [],
+            },
+          },
+        },
+      });
+      expect.assertions(3);
+      fireEvent.click(getAllByText('Tasks')[0]);
 
-      const { queryByText, getByText, findByLabelText } = setup();
-      fireEvent.click(getByText('Create Epic From GitHub Issue'));
+      const btn = await findByText('Create Task from GitHub Issue');
+      fireEvent.click(btn);
 
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
       const radio = await findByLabelText('#87: this is an issue');
       fireEvent.click(radio);
-      fireEvent.click(getByText('Create Task'));
+      fireEvent.click(getAllByText('Create a Task')[1]);
 
       expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
-      expect(queryByText('#87: this is an issue')).toBeVisible();
+
+      await findByText('Attached Issue:');
+
+      expect(getByText('#87: this is an issue')).toBeVisible();
     });
 
     test('creates an epic from issue', async () => {
-      fetchMock.get(`end:is_attached=false`, {
+      fetchMock.get('end:is_attached=false', {
         results: [sampleIssue],
       });
-
-      fetchMock.get(`/api/issues/?project=p1&is_attached=true`, {
+      fetchMock.get('end:is_attached=true', {
         results: [],
       });
+      const {
+        queryByText,
+        getByText,
+        findByLabelText,
+        getAllByText,
+        findByText,
+      } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
 
-      const { queryByText, getByText, findByLabelText } = setup();
-      fireEvent.click(getByText('Create Epic From GitHub Issue'));
-
+      expect.assertions(3);
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
       const radio = await findByLabelText('#87: this is an issue');
       fireEvent.click(radio);
-      fireEvent.click(getByText('Create Epic'));
+      fireEvent.click(getAllByText('Create an Epic')[1]);
 
       expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
-      expect(queryByText('#87: this is an issue')).toBeVisible();
+
+      await findByText('Attached Issue:');
+
+      expect(getByText('#87: this is an issue')).toBeVisible();
     });
   });
 
@@ -785,13 +814,13 @@ describe('<ProjectDetail />', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
+        const { getByText, queryByText, getByTitle } = result;
 
         expect(
           getByText('You are creating a Scratch Org', { exact: false }),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(
           queryByText('You are creating a Scratch Org', { exact: false }),
@@ -824,14 +853,14 @@ describe('<ProjectDetail />', () => {
   describe('<ContributeWorkModal />', () => {
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText, getByLabelText } = setup();
+        const { getByText, queryByText, getByLabelText, getByTitle } = setup();
         fireEvent.click(getByText('Contribute Work'));
 
         expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
 
         fireEvent.click(getByLabelText('Create a new Task with no Epic'));
         fireEvent.click(getByLabelText('Create a new Epic and Task'));
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
       });

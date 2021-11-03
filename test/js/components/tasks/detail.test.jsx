@@ -625,7 +625,7 @@ describe('<TaskDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, getByLabelText, queryByText } = setup({
+        const { getByText, getByLabelText, queryByText, getByTitle } = setup({
           initialState: {
             ...defaultState,
             orgs,
@@ -641,7 +641,7 @@ describe('<TaskDetail/>', () => {
         fireEvent.click(
           getByLabelText('Convert Scratch Org into Dev Org for this Task'),
         );
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
       });
@@ -1320,13 +1320,13 @@ describe('<TaskDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
+        const { getByText, queryByText, getByTitle } = result;
 
         expect(
           getByText('You are creating a Scratch Org', { exact: false }),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(
           queryByText('You are creating a Scratch Org', { exact: false }),

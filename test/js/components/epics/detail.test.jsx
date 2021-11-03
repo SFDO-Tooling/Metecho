@@ -874,13 +874,13 @@ describe('<EpicDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
+        const { getByText, queryByText, getByTitle } = result;
 
         expect(
           getByText('You are creating a Scratch Org', { exact: false }),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(
           queryByText('You are creating a Scratch Org', { exact: false }),
@@ -911,12 +911,12 @@ describe('<EpicDetail/>', () => {
   describe('<ContributeWorkModal />', () => {
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = setup();
+        const { getByText, queryByText, getByTitle } = setup();
         fireEvent.click(getByText('Contribute Work'));
 
         expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
       });
