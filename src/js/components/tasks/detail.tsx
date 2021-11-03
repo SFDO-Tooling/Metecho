@@ -427,7 +427,6 @@ const TaskDetail = (
 
   const doContributeFromScratchOrg: ContributeCallback = useCallback(
     (orgData, { useExistingTask }) => {
-      closeContributeModal();
       // eslint-disable-next-line no-negated-condition
       if (!useExistingTask) {
         openCreateModal(orgData);
@@ -462,14 +461,7 @@ const TaskDetail = (
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      closeContributeModal,
-      openCreateModal,
-      devOrg,
-      task?.id,
-      user.github_id,
-      userIsAssignedDev,
-    ],
+    [openCreateModal, devOrg, task?.id, user.github_id, userIsAssignedDev],
   );
 
   const handleStepAction = useCallback(

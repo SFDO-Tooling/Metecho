@@ -774,13 +774,13 @@ export const sampleScratchOrg = {
   valid_target_directories: {},
 };
 
-export const issue1 = {
+export const sampleIssue = {
   id: 'test123',
   number: 87,
   title: 'this is an issue',
-  created_at: 'yesterday',
-  html_url: 'https://github.com',
-  project: sampleProject1,
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
   epic: null,
   task: null,
 };

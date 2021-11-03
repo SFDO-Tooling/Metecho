@@ -10,9 +10,9 @@ import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 import {
-  issue1,
   sampleEpic1,
   sampleEpic2,
+  sampleIssue,
   sampleProject1,
 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -144,7 +144,7 @@ const defaultState = {
     onboarded_at: 'now',
   },
   issues: {
-    issue1,
+    sampleIssue,
   },
 };
 
@@ -551,18 +551,18 @@ describe('<ProjectDetail />', () => {
         results: [],
       });
       const { queryByText, getByText, getByTitle } = setup();
-      fireEvent.click(getByText('Create Epic From Github Issue'));
+      fireEvent.click(getByText('Create Epic From GitHub Issue'));
 
-      expect(getByText('Select Github Issue to Develop')).toBeVisible();
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
 
       fireEvent.click(getByTitle('Cancel'));
 
-      expect(queryByText('Select Github Issue to Develop')).toBeNull();
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
     });
 
     test('creates a task from issue', async () => {
       fetchMock.get(`end:is_attached=false`, {
-        results: [issue1],
+        results: [sampleIssue],
       });
 
       fetchMock.get(`/api/issues/?project=p1&is_attached=true`, {
@@ -570,20 +570,20 @@ describe('<ProjectDetail />', () => {
       });
 
       const { queryByText, getByText, findByLabelText } = setup();
-      fireEvent.click(getByText('Create Epic From Github Issue'));
+      fireEvent.click(getByText('Create Epic From GitHub Issue'));
 
-      expect(getByText('Select Github Issue to Develop')).toBeVisible();
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
       const radio = await findByLabelText('#87: this is an issue');
       fireEvent.click(radio);
       fireEvent.click(getByText('Create Task'));
 
-      expect(queryByText('Select Github Issue to Develop')).toBeNull();
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
       expect(queryByText('#87: this is an issue')).toBeVisible();
     });
 
     test('creates an epic from issue', async () => {
       fetchMock.get(`end:is_attached=false`, {
-        results: [issue1],
+        results: [sampleIssue],
       });
 
       fetchMock.get(`/api/issues/?project=p1&is_attached=true`, {
@@ -591,14 +591,14 @@ describe('<ProjectDetail />', () => {
       });
 
       const { queryByText, getByText, findByLabelText } = setup();
-      fireEvent.click(getByText('Create Epic From Github Issue'));
+      fireEvent.click(getByText('Create Epic From GitHub Issue'));
 
-      expect(getByText('Select Github Issue to Develop')).toBeVisible();
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
       const radio = await findByLabelText('#87: this is an issue');
       fireEvent.click(radio);
       fireEvent.click(getByText('Create Epic'));
 
-      expect(queryByText('Select Github Issue to Develop')).toBeNull();
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
       expect(queryByText('#87: this is an issue')).toBeVisible();
     });
   });

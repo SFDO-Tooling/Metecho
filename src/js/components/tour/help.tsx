@@ -105,6 +105,22 @@ const HelpTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
+    {
+      target: '.tour-create-task-from-issue',
+      title: i18n.t('Create Task from GitHub Issue'),
+      content: (
+        <Trans i18nKey="walkthroughHelpCreateTaskFromIssue">
+          If you want to help as a Developer on this Project, one option is to
+          browse the list of GitHub Issues. Issues are items in GitHub’s bug and
+          enhancement tracking system. Select an Issue to work on, and create an
+          Epic or Task. Create an Epic for an Issue if it will require multiple
+          Tasks to complete. If you’re unsure, begin with a Task and create an
+          Epic later, as needed.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
     getFinalStep(),
   ];
 

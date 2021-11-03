@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { GithubIssue } from 'src/js/store/projects/reducer';
 
 import { ThunkDispatch } from '@/js/store';
+import { GitHubIssue } from '@/js/store/projects/reducer';
 import { addUrlParams } from '@/js/utils/api';
 import apiFetch from '@/js/utils/api';
 
 export default ({
   projectId,
-  isOpen,
   isAttached,
+  isOpen,
 }: {
   projectId: string;
   isAttached: boolean;
   isOpen: boolean;
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const [issues, setIssues] = useState<GithubIssue[]>();
+  const [issues, setIssues] = useState<GitHubIssue[]>();
 
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();

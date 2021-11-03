@@ -11,8 +11,8 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
+import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
-import CreateIssueModal from '@/js/components/projects/createIssue';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
@@ -39,7 +39,7 @@ import {
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
 import { Org } from '@/js/store/orgs/reducer';
-import { GithubIssue } from '@/js/store/projects/reducer';
+import { GitHubIssue } from '@/js/store/projects/reducer';
 import { onboarded } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -60,8 +60,10 @@ const ProjectDetail = (
 ) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
-  const [createIssueModalOpen, setCreateIssueModalOpen] = useState(false);
-  const [issue, setIssue] = useState<GithubIssue | null>(null);
+  const [selectIssueModalOpen, setSelectIssueModalOpen] = useState<
+    false | 'epic' | 'task'
+  >(false);
+  const [issue, setIssue] = useState<GitHubIssue | null>(null);
   const [createEpicModalOpen, setCreateEpicModalOpen] = useState(false);
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
@@ -145,37 +147,40 @@ const ProjectDetail = (
     setCreateOrgModalOpen(false);
     setCreateTaskModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
     setConvertOrgData(null);
+    setIssue(null);
   }, []);
   const closeCreateEpicModal = useCallback(() => {
     setCreateEpicModalOpen(false);
   }, []);
 
   // "create issue" modal related
-  const openCreateIssueModal = useCallback(() => {
-    setCreateIssueModalOpen(true);
+  const openSelectIssueModal = useCallback((type: 'epic' | 'task') => {
+    setSelectIssueModalOpen(type);
     setCreateEpicModalOpen(false);
     setCreateOrgModalOpen(false);
     setCreateTaskModalOpen(false);
     setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setIssue(null);
   }, []);
-
-  const closeCreateIssueModal = useCallback(() => {
-    setCreateIssueModalOpen(false);
+  const closeSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(false);
   }, []);
-
   const setIssueAndCreateEpicOrTask = useCallback(
-    (selectedIssue: GithubIssue | null, createEpicfromIssue: boolean) => {
-      if (selectedIssue) {
-        setIssue(selectedIssue);
-        if (createEpicfromIssue) {
-          setCreateEpicModalOpen(true);
-          setCreateTaskModalOpen(false);
-        } else {
-          setCreateTaskModalOpen(true);
-          setCreateEpicModalOpen(false);
-        }
+    (selectedIssue: GitHubIssue | null, type: 'epic' | 'task') => {
+      setIssue(selectedIssue);
+      if (type === 'epic') {
+        setCreateEpicModalOpen(true);
+        setCreateTaskModalOpen(false);
+      } else {
+        setCreateTaskModalOpen(true);
+        setCreateEpicModalOpen(false);
       }
+      setCreateOrgModalOpen(false);
+      setContributeModalOpen(false);
+      setConvertOrgData(null);
     },
     [],
   );
@@ -185,7 +190,9 @@ const ProjectDetail = (
     setCreateEpicModalOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
     setConvertOrgData(null);
+    setIssue(null);
   }, []);
   const closeCreateTaskModal = useCallback(() => {
     setCreateTaskModalOpen(false);
@@ -197,7 +204,9 @@ const ProjectDetail = (
     setCreateEpicModalOpen(false);
     setCreateTaskModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
     setConvertOrgData(null);
+    setIssue(null);
   }, []);
   const closeCreateOrgModal = useCallback(() => {
     setCreateOrgModalOpen(false);
@@ -209,7 +218,9 @@ const ProjectDetail = (
     setCreateEpicModalOpen(false);
     setCreateTaskModalOpen(false);
     setCreateOrgModalOpen(false);
+    setSelectIssueModalOpen(false);
     setConvertOrgData(null);
+    setIssue(null);
   };
   const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
@@ -225,7 +236,8 @@ const ProjectDetail = (
         setCreateTaskModalOpen(false);
       }
       setCreateOrgModalOpen(false);
-      setContributeModalOpen(false);
+      setSelectIssueModalOpen(false);
+      setIssue(null);
     },
     [],
   );
@@ -459,10 +471,14 @@ const ProjectDetail = (
                 heading={i18n.t('Create Epics to group Tasks')}
               />
               <Button
-                label={i18n.t('Create Epic From Github Issue')}
+                label={i18n.t('Create Epic from GitHub Issue')}
                 variant="outline-brand"
-                onClick={openCreateIssueModal}
-                className="tour-create-epic"
+                onClick={() => openSelectIssueModal('epic')}
+                className="tour-create-epic-from-issue"
+                disabled={
+                  !tourRunning &&
+                  (!project.has_push_permission || !epics?.fetched)
+                }
               />
             </div>
             <EpicTable
@@ -539,10 +555,13 @@ const ProjectDetail = (
                 }
               />
               <Button
-                label={i18n.t('Create Task From Github Issue')}
+                label={i18n.t('Create Task from GitHub Issue')}
                 variant="outline-brand"
-                onClick={openCreateIssueModal}
-                className="tour-create-epic"
+                onClick={() => openSelectIssueModal('task')}
+                className="tour-create-task-from-issue"
+                disabled={
+                  !tourRunning && (!project.has_push_permission || !tasks)
+                }
               />
             </div>
             <TasksTableComponent
@@ -567,11 +586,11 @@ const ProjectDetail = (
             />
           </TabsPanel>
         </Tabs>
-        <CreateIssueModal
+        <SelectIssueModal
           projectId={project.id}
-          isOpen={createIssueModalOpen}
-          closeIssueModal={closeCreateIssueModal}
-          createEpicOrTask={setIssueAndCreateEpicOrTask}
+          isOpen={selectIssueModalOpen}
+          closeIssueModal={closeSelectIssueModal}
+          issueSelected={setIssueAndCreateEpicOrTask}
         />
         <CreateEpicModal
           user={user}

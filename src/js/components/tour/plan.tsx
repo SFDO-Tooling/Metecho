@@ -103,6 +103,22 @@ const PlanTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
+    {
+      target: '.tour-create-epic-from-issue',
+      title: i18n.t('Create Epic from GitHub Issue'),
+      content: (
+        <Trans i18nKey="walkthroughPlanCreateEpicFromIssue">
+          One way to start planning work for an Epic or a Task is to browse the
+          list of GitHub Issues. Issues are items in GitHub’s bug and
+          enhancement tracking system. Select an Issue to work on, and create an
+          Epic or Task. Create an Epic for an Issue if it will require multiple
+          Tasks to complete. If you’re unsure, begin with a Task and create an
+          Epic later, as needed.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
     getFinalStep(),
   ];
 

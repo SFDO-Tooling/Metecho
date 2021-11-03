@@ -320,7 +320,6 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
-    setContributeModalOpen(false);
   }, []);
 
   // "Next Steps" action handler

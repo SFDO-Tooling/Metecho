@@ -37,7 +37,7 @@ export interface ProjectsState {
   refreshing: boolean;
 }
 
-export interface GithubIssue {
+export interface GitHubIssue {
   id: string;
   number: number;
   title: string;
