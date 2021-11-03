@@ -16,7 +16,7 @@ asgiref==3.4.1
     #   channels-redis
     #   daphne
     #   django
-async-timeout==3.0.1
+async-timeout==4.0.0
     # via aioredis
 attrs==21.2.0
     # via
@@ -409,6 +409,7 @@ txaio==21.2.1
     # via autobahn
 typing-extensions==3.10.0.2
     # via
+    #   async-timeout
     #   cumulusci
     #   pydantic
     #   snowfakery
