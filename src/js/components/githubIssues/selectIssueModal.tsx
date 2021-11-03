@@ -64,11 +64,13 @@ const SelectIssueModal = ({
   };
 
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedIssue(event.target.value || '');
+    setSelectedIssue(event.target.value || /* istanbul ignore next */ '');
   };
 
   const onSubmit = (issueId: string, type: 'epic' | 'task') => {
-    const issue = (issues && issues?.find((i) => i.id === issueId)) || null;
+    const issue =
+      (issues && issues?.find((i) => i.id === issueId)) ||
+      /* istanbul ignore next */ null;
     issueSelected(issue, type);
     closeForm();
   };

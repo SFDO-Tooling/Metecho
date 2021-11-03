@@ -12,7 +12,8 @@ import routes from '@/js/utils/routes';
 import {
   sampleEpic1,
   sampleEpic2,
-  sampleIssue,
+  sampleIssue1,
+  sampleIssue2,
   sampleProject1,
 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -559,10 +560,10 @@ describe('<ProjectDetail />', () => {
 
     test('creates a task from issue', async () => {
       fetchMock.getOnce('end:is_attached=false', {
-        results: [sampleIssue],
+        results: [sampleIssue1],
       });
       fetchMock.getOnce('end:is_attached=true', {
-        results: [],
+        results: [sampleIssue2],
       });
       const {
         queryByText,
@@ -603,10 +604,10 @@ describe('<ProjectDetail />', () => {
 
     test('creates an epic from issue', async () => {
       fetchMock.get('end:is_attached=false', {
-        results: [sampleIssue],
+        results: [sampleIssue1],
       });
       fetchMock.get('end:is_attached=true', {
-        results: [],
+        results: [sampleIssue2],
       });
       const {
         queryByText,

@@ -28,7 +28,7 @@ export default ({
         }),
         dispatch,
       });
-      setIssues(payload?.results || []);
+      setIssues(payload?.results || /* istanbul ignore next */ []);
     };
     if (projectId && isOpen) {
       fetchIssues();

@@ -774,7 +774,7 @@ export const sampleScratchOrg = {
   valid_target_directories: {},
 };
 
-export const sampleIssue = {
+export const sampleIssue1 = {
   id: 'test123',
   number: 87,
   title: 'this is an issue',
@@ -782,5 +782,16 @@ export const sampleIssue = {
   html_url: 'https://example.com',
   project: sampleProject1.id,
   epic: null,
+  task: null,
+};
+
+export const sampleIssue2 = {
+  id: 'test456',
+  number: 93,
+  title: 'this is another issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: sampleEpic1.id,
   task: null,
 };
