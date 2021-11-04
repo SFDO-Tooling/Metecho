@@ -442,44 +442,64 @@ const ProjectDetail = (
               </div>
             }
           >
-            <div className="slds-m-bottom_medium slds-is-relative">
-              <Button
-                label={
-                  epics?.fetched || tourRunning
-                    ? i18n.t('Create an Epic')
-                    : i18n.t('Loading Epics…')
-                }
-                variant="brand"
-                onClick={openCreateEpicModal}
-                className="tour-create-epic"
-                disabled={
-                  !tourRunning &&
-                  (!project.has_push_permission || !epics?.fetched)
-                }
-              />
-              <TourPopover
-                id="tour-project-create-epic"
-                align="top left"
-                body={
-                  <Trans i18nKey="tourCreateEpic">
-                    Create an Epic to make a group of related Tasks. Invite
-                    multiple Collaborators to your Epic and assign people as
-                    Developers and Testers for each Task. Epics are equivalent
-                    to GitHub branches, just like Tasks.
-                  </Trans>
-                }
-                heading={i18n.t('Create Epics to group Tasks')}
-              />
-              <Button
-                label={i18n.t('Create Epic from GitHub Issue')}
-                variant="outline-brand"
-                onClick={() => openSelectIssueModal('epic')}
-                className="tour-create-epic-from-issue"
-                disabled={
-                  !tourRunning &&
-                  (!project.has_push_permission || !epics?.fetched)
-                }
-              />
+            <div className="slds-m-bottom_medium">
+              <span className="slds-is-relative">
+                <Button
+                  label={
+                    epics?.fetched || tourRunning
+                      ? i18n.t('Create an Epic')
+                      : i18n.t('Loading Epics…')
+                  }
+                  variant="brand"
+                  onClick={openCreateEpicModal}
+                  className="tour-create-epic"
+                  disabled={
+                    !tourRunning &&
+                    (!project.has_push_permission || !epics?.fetched)
+                  }
+                />
+                <TourPopover
+                  id="tour-project-create-epic"
+                  align="top left"
+                  body={
+                    <Trans i18nKey="tourCreateEpic">
+                      Create an Epic to make a group of related Tasks. Invite
+                      multiple Collaborators to your Epic and assign people as
+                      Developers and Testers for each Task. Epics are equivalent
+                      to GitHub branches, just like Tasks.
+                    </Trans>
+                  }
+                  heading={i18n.t('Create Epics to group Tasks')}
+                />
+              </span>
+              <span className="slds-is-relative">
+                <Button
+                  label={i18n.t('Create Epic from GitHub Issue')}
+                  variant="outline-brand"
+                  onClick={() => openSelectIssueModal('epic')}
+                  className="tour-create-epic-from-issue slds-m-left_xx-small"
+                  disabled={
+                    !tourRunning &&
+                    (!project.has_push_permission || !epics?.fetched)
+                  }
+                />
+                <TourPopover
+                  id="tour-project-create-epic-from-issue"
+                  align="top left"
+                  body={
+                    <Trans i18nKey="tourCreateEpicFromIssue">
+                      If you want to help as a Developer on this Project, one
+                      option is to browse the list of GitHub Issues. Issues are
+                      items in GitHub’s bug and enhancement tracking system.
+                      Select an Issue to work on, and create an Epic or Task.
+                      Create an Epic for an Issue if it will require multiple
+                      Tasks to complete. If you’re unsure, begin with a Task and
+                      create an Epic later, as needed.
+                    </Trans>
+                  }
+                  heading={i18n.t('Create Epic from GitHub Issue')}
+                />
+              </span>
             </div>
             <EpicTable
               epics={
@@ -527,42 +547,62 @@ const ProjectDetail = (
               </div>
             }
           >
-            <div className="slds-m-bottom_medium slds-is-relative">
-              <Button
-                label={
-                  tasks || tourRunning
-                    ? i18n.t('Create a Task')
-                    : i18n.t('Loading Tasks…')
-                }
-                variant="brand"
-                className="tour-create-task"
-                onClick={openCreateTaskModal}
-                disabled={
-                  !tourRunning && (!project.has_push_permission || !tasks)
-                }
-              />
-              <TourPopover
-                id="tour-project-add-task"
-                align="top left"
-                heading={i18n.t('Create a Task to contribute')}
-                body={
-                  <Trans i18nKey="tourProjectCreateTask">
-                    To get started contributing to this Project, create a Task.
-                    Tasks represent small changes to this Project; each one has
-                    a Developer and a Tester. Tasks are equivalent to GitHub
-                    branches.
-                  </Trans>
-                }
-              />
-              <Button
-                label={i18n.t('Create Task from GitHub Issue')}
-                variant="outline-brand"
-                onClick={() => openSelectIssueModal('task')}
-                className="tour-create-task-from-issue"
-                disabled={
-                  !tourRunning && (!project.has_push_permission || !tasks)
-                }
-              />
+            <div className="slds-m-bottom_medium">
+              <span className="slds-is-relative">
+                <Button
+                  label={
+                    tasks || tourRunning
+                      ? i18n.t('Create a Task')
+                      : i18n.t('Loading Tasks…')
+                  }
+                  variant="brand"
+                  className="tour-create-task"
+                  onClick={openCreateTaskModal}
+                  disabled={
+                    !tourRunning && (!project.has_push_permission || !tasks)
+                  }
+                />
+                <TourPopover
+                  id="tour-project-add-task"
+                  align="top left"
+                  heading={i18n.t('Create a Task to contribute')}
+                  body={
+                    <Trans i18nKey="tourProjectCreateTask">
+                      To get started contributing to this Project, create a
+                      Task. Tasks represent small changes to this Project; each
+                      one has a Developer and a Tester. Tasks are equivalent to
+                      GitHub branches.
+                    </Trans>
+                  }
+                />
+              </span>
+              <span className="slds-is-relative">
+                <Button
+                  label={i18n.t('Create Task from GitHub Issue')}
+                  variant="outline-brand"
+                  onClick={() => openSelectIssueModal('task')}
+                  className="tour-create-task-from-issue slds-m-left_xx-small"
+                  disabled={
+                    !tourRunning && (!project.has_push_permission || !tasks)
+                  }
+                />
+                <TourPopover
+                  id="tour-project-create-task-from-issue"
+                  align="top left"
+                  body={
+                    <Trans i18nKey="tourCreateTaskFromIssue">
+                      If you want to help as a Developer on this Project, one
+                      option is to browse the list of GitHub Issues. Issues are
+                      items in GitHub’s bug and enhancement tracking system.
+                      Select an Issue to work on, and create an Epic or Task.
+                      Create an Epic for an Issue if it will require multiple
+                      Tasks to complete. If you’re unsure, begin with a Task and
+                      create an Epic later, as needed.
+                    </Trans>
+                  }
+                  heading={i18n.t('Create Task from GitHub Issue')}
+                />
+              </span>
             </div>
             <TasksTableComponent
               projectId={project.id}
