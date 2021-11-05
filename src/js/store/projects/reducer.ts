@@ -44,8 +44,20 @@ export interface GitHubIssue {
   created_at: string;
   html_url: string;
   project: string;
-  epic: string | null;
-  task: string | null;
+  epic: {
+    id: string;
+    name: string;
+    status: string;
+    slug: string;
+  } | null;
+  task: {
+    id: string;
+    name: string;
+    status: string;
+    review_status: string;
+    epic_slug: string;
+    slug: string;
+  } | null;
 }
 
 const defaultState = {

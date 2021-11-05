@@ -6,6 +6,7 @@ import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 import {
   ExternalLink,
@@ -13,6 +14,7 @@ import {
   useFetchIssues,
 } from '@/js/components/utils';
 import { GitHubIssue } from '@/js/store/projects/reducer';
+import routes from '@/js/utils/routes';
 
 export type issueSelectedCallback = (
   issue: GitHubIssue | null,
@@ -24,6 +26,7 @@ interface Props {
   isOpen: false | 'epic' | 'task';
   closeIssueModal: () => void;
   issueSelected: issueSelectedCallback;
+  projectSlug: string;
 }
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
@@ -44,6 +47,7 @@ const SelectIssueModal = ({
   isOpen,
   closeIssueModal,
   issueSelected,
+  projectSlug,
 }: Props) => {
   const { issues } = useFetchIssues({
     projectId,
@@ -164,6 +168,33 @@ const SelectIssueModal = ({
                           value={issue.id}
                           disabled
                         />
+                        {issue.task ? (
+                          <>
+                            <p>{i18n.t('Task')}: </p>
+                            <Link
+                              to={routes.project_task_detail(
+                                projectSlug,
+                                issue.task.slug,
+                              )}
+                            >
+                              {issue.task.name}
+                            </Link>
+                            <p>{issue.task.status}</p>
+                          </>
+                        ) : (
+                          <>
+                            <p>{i18n.t('Epic')}: </p>
+                            <Link
+                              to={routes.epic_detail(
+                                projectSlug,
+                                issue.epic.slug,
+                              )}
+                            >
+                              {issue.epic.name}
+                            </Link>
+                            <p>{issue.epic?.status}</p>
+                          </>
+                        )}
                       </div>
                     ))
                   ) : (

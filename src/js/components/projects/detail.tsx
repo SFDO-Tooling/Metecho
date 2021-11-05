@@ -628,6 +628,7 @@ const ProjectDetail = (
         </Tabs>
         <SelectIssueModal
           projectId={project.id}
+          projectSlug={project.slug}
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
           issueSelected={setIssueAndCreateEpicOrTask}
