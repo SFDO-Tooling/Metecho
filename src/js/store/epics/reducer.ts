@@ -24,6 +24,7 @@ export interface Epic {
   github_users: string[];
   status: EpicStatuses;
   latest_sha: string;
+  issue: string;
 }
 
 export interface EpicsByProjectState {

@@ -54,6 +54,9 @@ import {
 import { getBranchLink, getCompletedTasks } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
+import IssueCard from '../githubIssues/issueCard';
+import SelectIssueModal from '../githubIssues/selectIssueModal';
+
 const EpicDetail = (
   props: RouteComponentProps<any, any, { [CREATE_TASK_FROM_ORG]?: OrgData }>,
 ) => {
@@ -79,12 +82,46 @@ const EpicDetail = (
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [issue, setIssue] = useState<GitHubIssue | null>(null);
+  const [selectIssueModalOpen, setSelectIssueModalOpen] = useState<
+    false | 'epic' | 'task'
+  >(false);
   const {
     history,
     location: { state },
   } = props;
 
   const playgroundOrg = (orgs || [])[0] as Org | undefined;
+
+  const openSelectIssueModal = useCallback((type: 'epic' | 'task') => {
+    setSelectIssueModalOpen(type);
+    setCreateOrgModalOpen(false);
+    setCreateTaskModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setIssue(null);
+  }, []);
+
+  const closeSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(false);
+  }, []);
+
+  const setIssueAndCreateEpicOrTask = useCallback(
+    (selectedIssue: GitHubIssue | null, type: 'epic' | 'task') => {
+      setIssue(selectedIssue);
+      if (type === 'epic') {
+        setCreateEpicModalOpen(true);
+        setCreateTaskModalOpen(false);
+      } else {
+        setCreateTaskModalOpen(true);
+        setCreateEpicModalOpen(false);
+      }
+      setCreateOrgModalOpen(false);
+      setContributeModalOpen(false);
+      setConvertOrgData(null);
+    },
+    [],
+  );
 
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -536,6 +573,19 @@ const EpicDetail = (
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
+            <h2 className="slds-text-heading_medium slds-p-bottom_small">
+              {i18n.t('Github Issues')}
+            </h2>
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
+              {epic.issue ? (
+                <IssueCard epic={epic} />
+              ) : (
+                <Button
+                  label={i18n.t('Attach Issue To Epic')}
+                  onClick={openSelectIssueModal}
+                />
+              )}
+            </div>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {project.has_push_permission || epicCollaborators.length
@@ -809,6 +859,15 @@ const EpicDetail = (
           epic={epic}
           isOpen={createOrgModalOpen}
           closeModal={closeCreateOrgModal}
+        />
+        <SelectIssueModal
+          projectId={project.id}
+          projectSlug={project.slug}
+          isOpen={selectIssueModalOpen}
+          closeIssueModal={closeSelectIssueModal}
+          issueSelected={setIssueAndCreateEpicOrTask}
+          attach={true}
+          epic={epic}
         />
       </DetailPageLayout>
     </DocumentTitle>

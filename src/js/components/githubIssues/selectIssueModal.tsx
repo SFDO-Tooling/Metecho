@@ -6,14 +6,20 @@ import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Epic } from 'src/js/store/epics/reducer';
+import { Task } from 'src/js/store/tasks/reducer';
 
 import {
   ExternalLink,
   SpinnerWrapper,
   useFetchIssues,
 } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { updateObject } from '@/js/store/actions';
 import { GitHubIssue } from '@/js/store/projects/reducer';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 export type issueSelectedCallback = (
@@ -27,6 +33,9 @@ interface Props {
   closeIssueModal: () => void;
   issueSelected: issueSelectedCallback;
   projectSlug: string;
+  attach: boolean;
+  task?: Task;
+  epic?: Epic;
 }
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
@@ -48,6 +57,9 @@ const SelectIssueModal = ({
   closeIssueModal,
   issueSelected,
   projectSlug,
+  attach,
+  epic,
+  task,
 }: Props) => {
   const { issues } = useFetchIssues({
     projectId,
@@ -61,6 +73,8 @@ const SelectIssueModal = ({
   });
 
   const [selectedIssue, setSelectedIssue] = useState<string>('');
+
+  const dispatch = useDispatch<ThunkDispatch>();
 
   const closeForm = () => {
     closeIssueModal();
@@ -79,6 +93,33 @@ const SelectIssueModal = ({
     closeForm();
   };
 
+  const onAttach = (issueId: string) => {
+    if (epic) {
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.EPIC,
+          url: window.api_urls.epic_detail(epic.id),
+          data: {
+            ...epic,
+            issue: issueId,
+          },
+        }),
+      );
+    } else {
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_detail(task.id),
+          data: {
+            ...task,
+            issue: issueId,
+          },
+        }),
+      );
+    }
+    closeIssueModal();
+  };
+
   return (
     <Modal
       isOpen={Boolean(isOpen)}
@@ -86,25 +127,47 @@ const SelectIssueModal = ({
       heading={i18n.t('Select GitHub Issue to Develop')}
       onRequestClose={closeForm}
       assistiveText={{ closeButton: i18n.t('Cancel') }}
-      footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={closeForm} />,
-        <Button
-          key="createEpic"
-          type="submit"
-          variant={isOpen === 'epic' ? 'brand' : 'outline-brand'}
-          disabled={!selectedIssue}
-          label={i18n.t('Create an Epic')}
-          onClick={() => onSubmit(selectedIssue, 'epic')}
-        />,
-        <Button
-          key="createTask"
-          type="submit"
-          variant={isOpen === 'task' ? 'brand' : 'outline-brand'}
-          disabled={!selectedIssue}
-          label={i18n.t('Create a Task')}
-          onClick={() => onSubmit(selectedIssue, 'task')}
-        />,
-      ]}
+      footer={
+        attach
+          ? [
+              <Button
+                key="cancel"
+                label={i18n.t('Cancel')}
+                onClick={closeForm}
+              />,
+              <Button
+                key="attach"
+                type="submit"
+                variant={'brand'}
+                disabled={!selectedIssue}
+                label={i18n.t('Attach')}
+                onClick={() => onAttach(selectedIssue)}
+              />,
+            ]
+          : [
+              <Button
+                key="cancel"
+                label={i18n.t('Cancel')}
+                onClick={closeForm}
+              />,
+              <Button
+                key="createEpic"
+                type="submit"
+                variant={isOpen === 'epic' ? 'brand' : 'outline-brand'}
+                disabled={!selectedIssue}
+                label={i18n.t('Create an Epic')}
+                onClick={() => onSubmit(selectedIssue, 'epic')}
+              />,
+              <Button
+                key="createTask"
+                type="submit"
+                variant={isOpen === 'task' ? 'brand' : 'outline-brand'}
+                disabled={!selectedIssue}
+                label={i18n.t('Create a Task')}
+                onClick={() => onSubmit(selectedIssue, 'task')}
+              />,
+            ]
+      }
     >
       <div className="slds-is-relative slds-p-around_large">
         <p>

@@ -11,6 +11,7 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { GitHubIssue } from 'src/js/store/projects/reducer';
 
 import FourOhFour from '@/js/components/404';
 import CommitList from '@/js/components/commits/list';
@@ -67,6 +68,9 @@ import {
 import { getBranchLink, getTaskCommits } from '@/js/utils/helpers';
 import routes from '@/js/utils/routes';
 
+import IssueCard from '../githubIssues/issueCard';
+import SelectIssueModal from '../githubIssues/selectIssueModal';
+
 const ResubmitButton = ({
   canSubmit,
   onClick,
@@ -104,6 +108,10 @@ const TaskDetail = (
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
+  const [issue, setIssue] = useState<GitHubIssue | null>(null);
+  const [selectIssueModalOpen, setSelectIssueModalOpen] = useState<
+    false | 'epic' | 'task'
+  >(false);
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -220,6 +228,35 @@ const TaskDetail = (
     testOrgIsDeleting ||
     testOrgIsRefreshing ||
     testOrgSubmittingReview;
+
+  const openSelectIssueModal = useCallback((type: 'epic' | 'task') => {
+    setSelectIssueModalOpen(type);
+    setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setIssue(null);
+  }, []);
+
+  const closeSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(false);
+  }, []);
+
+  const setIssueAndCreateEpicOrTask = useCallback(
+    (selectedIssue: GitHubIssue | null, type: 'epic' | 'task') => {
+      setIssue(selectedIssue);
+      if (type === 'epic') {
+        setCreateEpicModalOpen(true);
+        setCreateTaskModalOpen(false);
+      } else {
+        setCreateTaskModalOpen(true);
+        setCreateEpicModalOpen(false);
+      }
+      setCreateOrgModalOpen(false);
+      setContributeModalOpen(false);
+      setConvertOrgData(null);
+    },
+    [],
+  );
 
   const openSubmitReviewModal = () => {
     setSubmitReviewModalOpen(true);
@@ -865,6 +902,19 @@ const TaskDetail = (
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
+            <h2 className="slds-text-heading_medium slds-p-bottom_small">
+              {i18n.t('Github Issues')}
+            </h2>
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
+              {task.issue ? (
+                <IssueCard epic={epic} />
+              ) : (
+                <Button
+                  label={i18n.t('Attach Issue To Task')}
+                  onClick={openSelectIssueModal}
+                />
+              )}
+            </div>
             <div
               className="slds-m-bottom_x-large
                 metecho-secondary-block
@@ -1119,6 +1169,15 @@ const TaskDetail = (
             />
           </>
         ) : null}
+        <SelectIssueModal
+          projectId={project.id}
+          projectSlug={project.slug}
+          isOpen={selectIssueModalOpen}
+          closeIssueModal={closeSelectIssueModal}
+          issueSelected={setIssueAndCreateEpicOrTask}
+          attach={true}
+          task={task}
+        />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>
