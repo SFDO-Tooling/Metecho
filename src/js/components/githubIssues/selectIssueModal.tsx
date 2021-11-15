@@ -252,7 +252,7 @@ const SelectIssueModal = ({
                             <Link
                               to={routes.epic_detail(
                                 projectSlug,
-                                issue.epic.slug,
+                                issue.epic ? issue.epic.slug : '',
                               )}
                             >
                               {issue.epic?.name}
