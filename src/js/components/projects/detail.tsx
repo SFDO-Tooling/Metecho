@@ -472,12 +472,12 @@ const ProjectDetail = (
                   heading={i18n.t('Create Epics to group Tasks')}
                 />
               </span>
-              <span className="slds-is-relative">
+              <span className="slds-is-relative slds-m-left_medium">
                 <Button
                   label={i18n.t('Create Epic from GitHub Issue')}
                   variant="outline-brand"
                   onClick={() => openSelectIssueModal('epic')}
-                  className="tour-create-epic-from-issue slds-m-left_xx-small"
+                  className="tour-create-epic-from-issue"
                   disabled={
                     !tourRunning &&
                     (!project.has_push_permission || !epics?.fetched)
@@ -576,12 +576,12 @@ const ProjectDetail = (
                   }
                 />
               </span>
-              <span className="slds-is-relative">
+              <span className="slds-is-relative slds-m-left_medium">
                 <Button
                   label={i18n.t('Create Task from GitHub Issue')}
                   variant="outline-brand"
                   onClick={() => openSelectIssueModal('task')}
-                  className="tour-create-task-from-issue slds-m-left_xx-small"
+                  className="tour-create-task-from-issue"
                   disabled={
                     !tourRunning && (!project.has_push_permission || !tasks)
                   }
