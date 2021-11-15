@@ -632,6 +632,7 @@ const ProjectDetail = (
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
           issueSelected={setIssueAndCreateEpicOrTask}
+          attach={false}
         />
         <CreateEpicModal
           user={user}

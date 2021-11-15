@@ -11,7 +11,6 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { GitHubIssue } from 'src/js/store/projects/reducer';
 
 import FourOhFour from '@/js/components/404';
 import CommitList from '@/js/components/commits/list';
@@ -108,7 +107,6 @@ const TaskDetail = (
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
-  const [issue, setIssue] = useState<GitHubIssue | null>(null);
   const [selectIssueModalOpen, setSelectIssueModalOpen] = useState<
     false | 'epic' | 'task'
   >(false);
@@ -234,29 +232,11 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
     setConvertOrgData(null);
-    setIssue(null);
   }, []);
 
   const closeSelectIssueModal = useCallback(() => {
     setSelectIssueModalOpen(false);
   }, []);
-
-  const setIssueAndCreateEpicOrTask = useCallback(
-    (selectedIssue: GitHubIssue | null, type: 'epic' | 'task') => {
-      setIssue(selectedIssue);
-      if (type === 'epic') {
-        setCreateEpicModalOpen(true);
-        setCreateTaskModalOpen(false);
-      } else {
-        setCreateTaskModalOpen(true);
-        setCreateEpicModalOpen(false);
-      }
-      setCreateOrgModalOpen(false);
-      setContributeModalOpen(false);
-      setConvertOrgData(null);
-    },
-    [],
-  );
 
   const openSubmitReviewModal = () => {
     setSubmitReviewModalOpen(true);
@@ -1174,7 +1154,7 @@ const TaskDetail = (
           projectSlug={project.slug}
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
-          issueSelected={setIssueAndCreateEpicOrTask}
+          issueSelected={null}
           attach={true}
           task={task}
         />

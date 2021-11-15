@@ -31,7 +31,7 @@ interface Props {
   projectId: string;
   isOpen: false | 'epic' | 'task';
   closeIssueModal: () => void;
-  issueSelected: issueSelectedCallback;
+  issueSelected: issueSelectedCallback | null;
   projectSlug: string;
   attach: boolean;
   task?: Task;
@@ -89,7 +89,9 @@ const SelectIssueModal = ({
     const issue =
       (issues && issues?.find((i) => i.id === issueId)) ||
       /* istanbul ignore next */ null;
-    issueSelected(issue, type);
+    if (issueSelected) {
+      issueSelected(issue, type);
+    }
     closeForm();
   };
 
@@ -109,7 +111,7 @@ const SelectIssueModal = ({
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
-          url: window.api_urls.task_detail(task.id),
+          url: window.api_urls.task_detail(task?.id),
           data: {
             ...task,
             issue: issueId,
@@ -253,7 +255,7 @@ const SelectIssueModal = ({
                                 issue.epic.slug,
                               )}
                             >
-                              {issue.epic.name}
+                              {issue.epic?.name}
                             </Link>
                             <p>{issue.epic?.status}</p>
                           </>

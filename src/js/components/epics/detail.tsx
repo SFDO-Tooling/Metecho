@@ -82,7 +82,6 @@ const EpicDetail = (
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
-  const [issue, setIssue] = useState<GitHubIssue | null>(null);
   const [selectIssueModalOpen, setSelectIssueModalOpen] = useState<
     false | 'epic' | 'task'
   >(false);
@@ -99,29 +98,11 @@ const EpicDetail = (
     setCreateTaskModalOpen(false);
     setContributeModalOpen(false);
     setConvertOrgData(null);
-    setIssue(null);
   }, []);
 
   const closeSelectIssueModal = useCallback(() => {
     setSelectIssueModalOpen(false);
   }, []);
-
-  const setIssueAndCreateEpicOrTask = useCallback(
-    (selectedIssue: GitHubIssue | null, type: 'epic' | 'task') => {
-      setIssue(selectedIssue);
-      if (type === 'epic') {
-        setCreateEpicModalOpen(true);
-        setCreateTaskModalOpen(false);
-      } else {
-        setCreateTaskModalOpen(true);
-        setCreateEpicModalOpen(false);
-      }
-      setCreateOrgModalOpen(false);
-      setContributeModalOpen(false);
-      setConvertOrgData(null);
-    },
-    [],
-  );
 
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -865,7 +846,7 @@ const EpicDetail = (
           projectSlug={project.slug}
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
-          issueSelected={setIssueAndCreateEpicOrTask}
+          issueSelected={null}
           attach={true}
           epic={epic}
         />
