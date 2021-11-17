@@ -103,6 +103,7 @@ deprecated==1.2.13
     # via
     #   cumulusci
     #   jwcrypto
+    #   redis
 dj-database-url==0.5.0
     # via -r requirements/prod.in
 django==3.2.8
@@ -298,7 +299,7 @@ pyyaml==5.4.1
     #   cumulusci
     #   drf-spectacular
     #   snowfakery
-redis==3.5.3
+redis==4.0.0
     # via
     #   django-redis
     #   django-rq
