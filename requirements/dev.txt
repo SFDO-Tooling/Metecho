@@ -87,7 +87,7 @@ ipython==7.28.0
     # via -r requirements/dev.in
 isort==5.9.3
     # via -r requirements/dev.in
-jedi==0.18.0
+jedi==0.18.1
     # via ipython
 jinja2==2.11.3
     # via
