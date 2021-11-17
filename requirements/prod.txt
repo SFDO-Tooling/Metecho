@@ -390,7 +390,7 @@ six==1.16.0
     #   snowfakery
 snowfakery==2.1
     # via cumulusci
-soupsieve==2.2.1
+soupsieve==2.3.1
     # via beautifulsoup4
 sqlalchemy==1.4.25
     # via
