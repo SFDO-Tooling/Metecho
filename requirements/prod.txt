@@ -139,7 +139,7 @@ django-parler==2.2
     # via -r requirements/prod.in
 django-redis==5.0.0
     # via -r requirements/prod.in
-django-rq==2.4.1
+django-rq==2.5.0
     # via -r requirements/prod.in
 djangorestframework==3.12.4
     # via
