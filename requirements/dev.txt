@@ -192,7 +192,7 @@ six==1.16.0
     #   -c requirements/prod.txt
     #   python-dateutil
     #   sphinxcontrib-httpdomain
-snowballstemmer==2.1.0
+snowballstemmer==2.2.0
     # via sphinx
 sphinx==4.2.0
     # via
