@@ -121,7 +121,7 @@ django==3.2.8
     #   djangorestframework
     #   drf-spectacular
     #   sfdo-template-helpers
-django-allauth==0.45.0
+django-allauth==0.46.0
     # via -r requirements/prod.in
 django-anymail[mailgun]==8.4
     # via -r requirements/prod.in
