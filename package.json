@@ -101,7 +101,7 @@
     "@testing-library/react-hooks": "^7.0.2",
     "@types/classnames": "^2.3.1",
     "@types/core-js": "^2.5.5",
-    "@types/js-cookie": "^3.0.0",
+    "@types/js-cookie": "^3.0.1",
     "@types/lodash": "^4.14.175",
     "@types/react": "^17.0.27",
     "@types/react-document-title": "^2.0.5",
