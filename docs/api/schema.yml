@@ -1530,10 +1530,15 @@ components:
               type: string
             review_status:
               type: string
+            review_valid:
+              type: boolean
+            pr_is_open:
+              type: boolean
             slug:
               type: string
             epic_slug:
               type: string
+              nullable: true
           nullable: true
           readOnly: true
       required:
