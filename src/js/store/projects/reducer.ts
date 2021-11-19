@@ -1,13 +1,10 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
+import { Epic } from '@/js/store/epics/reducer';
 import { ProjectsAction } from '@/js/store/projects/actions';
+import { Task } from '@/js/store/tasks/reducer';
 import { LogoutAction } from '@/js/store/user/actions';
 import { GitHubUser } from '@/js/store/user/reducer';
-import {
-  EpicStatuses,
-  OBJECT_TYPES,
-  ReviewStatuses,
-  TaskStatuses,
-} from '@/js/utils/constants';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 export interface OrgConfig {
   key: string;
@@ -49,21 +46,16 @@ export interface GitHubIssue {
   created_at: string;
   html_url: string;
   project: string;
-  epic: {
-    id: string;
-    name: string;
-    status: EpicStatuses;
-    slug: string;
-  } | null;
+  epic: Pick<Epic, 'id' | 'name' | 'status' | 'slug'> | null;
   task: {
-    id: string;
-    name: string;
-    status: TaskStatuses;
-    review_status: ReviewStatuses | '';
-    review_valid: boolean;
-    pr_is_open: boolean;
-    slug: string;
-    epic_slug: string | null;
+    id: Task['id'];
+    name: Task['name'];
+    status: Task['status'];
+    review_status: Task['review_status'];
+    review_valid: Task['review_valid'];
+    pr_is_open: Task['pr_is_open'];
+    slug: Task['slug'];
+    epic_slug: Epic['slug'] | null;
   } | null;
 }
 
