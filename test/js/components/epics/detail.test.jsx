@@ -983,4 +983,17 @@ describe('<EpicDetail/>', () => {
       });
     });
   });
+
+  describe('<SelectIssueModal />', () => {
+    test('opens/closes modal', () => {
+      const { queryByText, getByText, getByTitle } = setup();
+      fireEvent.click(getByText('Attach Issue to Epic'));
+
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      fireEvent.click(getByTitle('Cancel'));
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+    });
+  });
 });

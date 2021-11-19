@@ -42,6 +42,7 @@ const IssueCard = ({ issueId, epicId, taskId }: Props) => {
     }
   }, [dispatch, epicId, taskId]);
 
+  // If we have an attached issue id but can't find the issue, detach it.
   useEffect(() => {
     if (issue === null) {
       unlink();
