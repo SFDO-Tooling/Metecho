@@ -292,6 +292,10 @@ paths:
       description: GitHub Issues
       parameters:
       - in: query
+        name: id
+        schema:
+          type: string
+      - in: query
         name: is_attached
         schema:
           type: boolean
