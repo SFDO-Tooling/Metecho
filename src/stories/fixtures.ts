@@ -792,6 +792,51 @@ export const sampleIssue2 = {
   created_at: '2019-10-24T20:03:52.159440Z',
   html_url: 'https://example.com',
   project: sampleProject1.id,
-  epic: sampleEpic1.id,
+  epic: {
+    id: sampleEpic1.id,
+    name: sampleEpic1.name,
+    status: sampleEpic1.status,
+    slug: sampleEpic1.slug,
+  },
   task: null,
+};
+
+export const sampleIssue3 = {
+  id: 'test789',
+  number: 3,
+  title: 'this is a third issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: null,
+  task: {
+    id: sampleTask1.id,
+    name: sampleTask1.name,
+    status: sampleTask1.status,
+    review_status: sampleTask1.review_status,
+    review_valid: sampleTask1.review_valid,
+    pr_is_open: sampleTask1.pr_is_open,
+    slug: sampleTask1.slug,
+    epic_slug: sampleTask1.epic.slug,
+  },
+};
+
+export const sampleIssue4 = {
+  id: 'test4',
+  number: 4,
+  title: 'this is a fourth issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: null,
+  task: {
+    id: sampleTask1.id,
+    name: sampleTask1.name,
+    status: sampleTask1.status,
+    review_status: sampleTask1.review_status,
+    review_valid: sampleTask1.review_valid,
+    pr_is_open: sampleTask1.pr_is_open,
+    slug: sampleTask1.slug,
+    epic_slug: null,
+  },
 };

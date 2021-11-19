@@ -139,8 +139,10 @@ class GitHubIssueSerializer(HashIdModelSerializer):
                 "name": {"type": "string"},
                 "status": {"type": "string"},
                 "review_status": {"type": "string"},
+                "review_valid": {"type": "boolean"},
+                "pr_is_open": {"type": "boolean"},
                 "slug": {"type": "string"},
-                "epic_slug": {"type": "string"},
+                "epic_slug": {"type": "string", "nullable": True},
             },
             "nullable": True,
         }
@@ -152,8 +154,10 @@ class GitHubIssueSerializer(HashIdModelSerializer):
                 "name": issue.task.name,
                 "status": issue.task.status,
                 "review_status": issue.task.review_status,
+                "review_valid": issue.task.review_valid,
+                "pr_is_open": issue.task.pr_is_open,
                 "slug": issue.task.slug,
-                "epic_slug": issue.task.epic.slug,
+                "epic_slug": issue.task.epic.slug if issue.task.epic else None,
             }
         except Task.DoesNotExist:
             return None

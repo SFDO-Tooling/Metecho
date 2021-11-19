@@ -140,7 +140,10 @@ const TaskStatusSteps = ({
       // Complete if we have commits (without rejected review)
       complete: hasValidCommits,
       assignee: devUser,
-      action: devOrgLoading || !hasPermissions ? undefined : 'retrieve-changes',
+      action:
+        devOrgLoading || !hasPermissions || !userIsDevOrgOwner
+          ? undefined
+          : 'retrieve-changes',
     },
     {
       label: taskIsSubmitting
