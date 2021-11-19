@@ -39,6 +39,20 @@ export interface ProjectsState {
   refreshing: boolean;
 }
 
+interface IssueTask
+  extends Pick<
+    Task,
+    | 'id'
+    | 'name'
+    | 'status'
+    | 'review_status'
+    | 'review_valid'
+    | 'pr_is_open'
+    | 'slug'
+  > {
+  epic_slug: Epic['slug'] | null;
+}
+
 export interface GitHubIssue {
   id: string;
   number: number;
@@ -47,16 +61,7 @@ export interface GitHubIssue {
   html_url: string;
   project: string;
   epic: Pick<Epic, 'id' | 'name' | 'status' | 'slug'> | null;
-  task: {
-    id: Task['id'];
-    name: Task['name'];
-    status: Task['status'];
-    review_status: Task['review_status'];
-    review_valid: Task['review_valid'];
-    pr_is_open: Task['pr_is_open'];
-    slug: Task['slug'];
-    epic_slug: Epic['slug'] | null;
-  } | null;
+  task: IssueTask | null;
 }
 
 const defaultState = {
