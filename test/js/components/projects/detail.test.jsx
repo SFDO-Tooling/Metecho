@@ -14,6 +14,8 @@ import {
   sampleEpic2,
   sampleIssue1,
   sampleIssue2,
+  sampleIssue3,
+  sampleIssue4,
   sampleProject1,
 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -607,7 +609,7 @@ describe('<ProjectDetail />', () => {
         results: [sampleIssue1],
       });
       fetchMock.get('end:is_attached=true', {
-        results: [sampleIssue2],
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
       });
       const {
         queryByText,

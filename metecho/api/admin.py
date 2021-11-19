@@ -151,7 +151,7 @@ class TaskAdmin(admin.ModelAdmin):
     fields = (
         "name",
         ("project", "epic"),
-        "issue" "description",
+        ("issue", "description"),
         ("branch_name", "org_config_name"),
         ("commits", "get_all_users_in_commits"),
         "origin_sha",

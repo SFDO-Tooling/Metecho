@@ -2,7 +2,12 @@ import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
 import { ProjectsAction } from '@/js/store/projects/actions';
 import { LogoutAction } from '@/js/store/user/actions';
 import { GitHubUser } from '@/js/store/user/reducer';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import {
+  EpicStatuses,
+  OBJECT_TYPES,
+  ReviewStatuses,
+  TaskStatuses,
+} from '@/js/utils/constants';
 
 export interface OrgConfig {
   key: string;
@@ -47,16 +52,18 @@ export interface GitHubIssue {
   epic: {
     id: string;
     name: string;
-    status: string;
+    status: EpicStatuses;
     slug: string;
   } | null;
   task: {
     id: string;
     name: string;
-    status: string;
-    review_status: string;
-    epic_slug: string;
+    status: TaskStatuses;
+    review_status: ReviewStatuses | '';
+    review_valid: boolean;
+    pr_is_open: boolean;
     slug: string;
+    epic_slug: string | null;
   } | null;
 }
 

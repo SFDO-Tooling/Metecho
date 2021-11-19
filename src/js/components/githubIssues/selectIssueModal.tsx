@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 
 import {
   ExternalLink,
+  getEpicStatus,
+  getTaskStatus,
   SpinnerWrapper,
   useFetchIssues,
 } from '@/js/components/utils';
@@ -23,10 +25,10 @@ export type issueSelectedCallback = (
 
 interface Props {
   projectId: string;
+  projectSlug: string;
   isOpen: false | 'epic' | 'task';
   closeIssueModal: () => void;
   issueSelected: issueSelectedCallback;
-  projectSlug: string;
 }
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
@@ -44,10 +46,10 @@ export const GitHubIssueLink = ({ url }: { url: string }) => (
 
 const SelectIssueModal = ({
   projectId,
+  projectSlug,
   isOpen,
   closeIssueModal,
   issueSelected,
-  projectSlug,
 }: Props) => {
   const { issues } = useFetchIssues({
     projectId,
@@ -151,39 +153,52 @@ const SelectIssueModal = ({
                 <h2 className="slds-text-heading_small">
                   {i18n.t('Attached Issues')}
                 </h2>
-                <RadioGroup
-                  assistiveText={{
-                    label: i18n.t('Attached Issues'),
-                  }}
-                  className="slds-form-element_stacked slds-p-left_none"
-                  name="attached-github-issue"
-                >
-                  {attachedIssues.length ? (
-                    attachedIssues.map((issue, idx) => (
-                      <div key={idx} className="slds-p-vertical_x-small">
-                        <Radio
-                          labels={{ label: `#${issue.number}: ${issue.title}` }}
-                          name="attached-github-issue"
-                          checked
-                          value={issue.id}
-                          disabled
-                        />
-                        {issue.task ? (
-                          <>
-                            <p>{i18n.t('Task')}: </p>
+                {attachedIssues.length ? (
+                  attachedIssues.map((issue, idx) => (
+                    <div key={idx} className="slds-p-vertical_x-small">
+                      <Radio
+                        labels={{ label: `#${issue.number}: ${issue.title}` }}
+                        checked
+                        value={issue.id}
+                        disabled
+                      />
+                      {/* eslint-disable-next-line no-nested-ternary */}
+                      {issue.task ? (
+                        <>
+                          <p>
+                            {i18n.t('Task')}:{' '}
                             <Link
-                              to={routes.project_task_detail(
-                                projectSlug,
-                                issue.task.slug,
-                              )}
+                              to={
+                                issue.task.epic_slug
+                                  ? routes.epic_task_detail(
+                                      projectSlug,
+                                      issue.task.epic_slug,
+                                      issue.task.slug,
+                                    )
+                                  : routes.project_task_detail(
+                                      projectSlug,
+                                      issue.task.slug,
+                                    )
+                              }
                             >
                               {issue.task.name}
                             </Link>
-                            <p>{issue.task.status}</p>
-                          </>
-                        ) : (
-                          <>
-                            <p>{i18n.t('Epic')}: </p>
+                          </p>
+                          <p>
+                            {
+                              getTaskStatus({
+                                taskStatus: issue.task.status,
+                                reviewStatus: issue.task.review_status,
+                                reviewValid: issue.task.review_valid,
+                                prIsOpen: issue.task.pr_is_open,
+                              }).status
+                            }
+                          </p>
+                        </>
+                      ) : issue.epic ? (
+                        <>
+                          <p>
+                            {i18n.t('Epic')}:{' '}
                             <Link
                               to={routes.epic_detail(
                                 projectSlug,
@@ -192,15 +207,20 @@ const SelectIssueModal = ({
                             >
                               {issue.epic.name}
                             </Link>
-                            <p>{issue.epic?.status}</p>
-                          </>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p>{i18n.t('No Attached Issues')}</p>
-                  )}
-                </RadioGroup>
+                          </p>
+                          <p>
+                            {
+                              getEpicStatus({ epicStatus: issue.epic.status })
+                                .status
+                            }
+                          </p>
+                        </>
+                      ) : /* istanbul ignore next */ null}
+                    </div>
+                  ))
+                ) : (
+                  <p>{i18n.t('No Attached Issues')}</p>
+                )}
               </div>
             </div>
           </form>

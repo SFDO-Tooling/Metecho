@@ -47,6 +47,8 @@ class TestGitHubIssueSerializer:
             "name",
             "status",
             "review_status",
+            "review_valid",
+            "pr_is_open",
             "slug",
             "epic_slug",
         )
