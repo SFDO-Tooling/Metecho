@@ -8,8 +8,6 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Epic } from 'src/js/store/epics/reducer';
-import { Task } from 'src/js/store/tasks/reducer';
 
 import {
   ExternalLink,
@@ -20,7 +18,9 @@ import {
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { updateObject } from '@/js/store/actions';
+import { Epic } from '@/js/store/epics/reducer';
 import { GitHubIssue } from '@/js/store/projects/reducer';
+import { Task } from '@/js/store/tasks/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
@@ -32,12 +32,11 @@ export type issueSelectedCallback = (
 interface Props {
   projectId: string;
   projectSlug: string;
-  isOpen: false | 'epic' | 'task';
+  isOpen: boolean | 'epic' | 'task';
   closeIssueModal: () => void;
-  issueSelected: issueSelectedCallback | null;
-  attach: boolean;
-  task?: Task;
-  epic?: Epic;
+  issueSelected?: issueSelectedCallback;
+  attachingToTask?: Task;
+  attachingToEpic?: Epic;
 }
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
@@ -59,10 +58,10 @@ const SelectIssueModal = ({
   isOpen,
   closeIssueModal,
   issueSelected,
-  attach,
-  epic,
-  task,
+  attachingToTask,
+  attachingToEpic,
 }: Props) => {
+  const dispatch = useDispatch<ThunkDispatch>();
   const { issues } = useFetchIssues({
     projectId,
     isAttached: false,
@@ -75,8 +74,6 @@ const SelectIssueModal = ({
   });
 
   const [selectedIssue, setSelectedIssue] = useState<string>('');
-
-  const dispatch = useDispatch<ThunkDispatch>();
 
   const closeForm = () => {
     closeIssueModal();
@@ -91,37 +88,33 @@ const SelectIssueModal = ({
     const issue =
       (issues && issues?.find((i) => i.id === issueId)) ||
       /* istanbul ignore next */ null;
-    if (issueSelected) {
-      issueSelected(issue, type);
-    }
+    issueSelected?.(issue, type);
     closeForm();
   };
 
-  const onAttach = (issueId: string) => {
-    if (epic) {
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.EPIC,
-          url: window.api_urls.epic_detail(epic.id),
-          data: {
-            ...epic,
-            issue: issueId,
-          },
-        }),
-      );
-    } else {
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.TASK,
-          url: window.api_urls.task_detail(task?.id),
-          data: {
-            ...task,
-            issue: issueId,
-          },
-        }),
-      );
+  const onAttach = () => {
+    if (selectedIssue) {
+      if (attachingToEpic) {
+        dispatch(
+          updateObject({
+            objectType: OBJECT_TYPES.EPIC,
+            url: window.api_urls.epic_detail(attachingToEpic.id),
+            data: { issue: selectedIssue },
+            patch: true,
+          }),
+        );
+      } else if (attachingToTask) {
+        dispatch(
+          updateObject({
+            objectType: OBJECT_TYPES.TASK,
+            url: window.api_urls.task_detail(attachingToTask.id),
+            data: { issue: selectedIssue },
+            patch: true,
+          }),
+        );
+      }
     }
-    closeIssueModal();
+    closeForm();
   };
 
   return (
@@ -132,7 +125,7 @@ const SelectIssueModal = ({
       onRequestClose={closeForm}
       assistiveText={{ closeButton: i18n.t('Cancel') }}
       footer={
-        attach
+        attachingToTask || attachingToEpic
           ? [
               <Button
                 key="cancel"
@@ -142,10 +135,14 @@ const SelectIssueModal = ({
               <Button
                 key="attach"
                 type="submit"
-                variant={'brand'}
+                variant="brand"
                 disabled={!selectedIssue}
-                label={i18n.t('Attach')}
-                onClick={() => onAttach(selectedIssue)}
+                label={
+                  attachingToTask
+                    ? i18n.t('Attach Issue to Task')
+                    : i18n.t('Attach Issue to Epic')
+                }
+                onClick={onAttach}
               />,
             ]
           : [
@@ -267,10 +264,10 @@ const SelectIssueModal = ({
                             <Link
                               to={routes.epic_detail(
                                 projectSlug,
-                                issue.epic ? issue.epic.slug : '',
+                                issue.epic.slug,
                               )}
                             >
-                              {issue.epic?.name}
+                              {issue.epic.name}
                             </Link>
                           </p>
                           <p>
