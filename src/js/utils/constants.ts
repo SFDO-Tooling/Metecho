@@ -6,7 +6,8 @@ export type ObjectTypes =
   | 'scratch_org'
   | 'scratch_org_commit'
   | 'task_pr'
-  | 'epic_pr';
+  | 'epic_pr'
+  | 'issue';
 
 export const OBJECT_TYPES = {
   USER: 'user' as const,
@@ -17,6 +18,7 @@ export const OBJECT_TYPES = {
   COMMIT: 'scratch_org_commit' as const,
   TASK_PR: 'task_pr' as const,
   EPIC_PR: 'epic_pr' as const,
+  GITHUB_ISSUE: 'issue' as const,
 };
 
 export const DEFAULT_ORG_CONFIG_NAME = 'dev';

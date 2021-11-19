@@ -42,6 +42,7 @@ export const getDemoEpic = ({
     status: EPIC_STATUSES.IN_PROGRESS,
     github_users: /* istanbul ignore next */ github_id ? [github_id] : [],
     latest_sha: '',
+    issue: null,
   };
 };
 

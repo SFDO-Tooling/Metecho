@@ -18,7 +18,8 @@ import {
   useTransientMessage,
 } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
-import { GitHubIssue, Project } from '@/js/store/projects/reducer';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
+import { Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,

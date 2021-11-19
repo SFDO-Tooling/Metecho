@@ -897,7 +897,7 @@ const TaskDetail = (
                 {i18n.t('GitHub Issue')}
               </h2>
               {task.issue ? (
-                <IssueCard task={task} />
+                <IssueCard issueId={task.issue} taskId={task.id} />
               ) : (
                 <Button
                   label={i18n.t('Attach Issue to Task')}

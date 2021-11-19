@@ -570,7 +570,7 @@ const EpicDetail = (
                 {i18n.t('GitHub Issue')}
               </h2>
               {epic.issue ? (
-                <IssueCard epic={epic} />
+                <IssueCard issueId={epic.issue} epicId={epic.id} />
               ) : (
                 <Button
                   label={i18n.t('Attach Issue to Epic')}

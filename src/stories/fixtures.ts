@@ -147,6 +147,7 @@ export const sampleEpic1 = {
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
   task_count: 6,
+  issue: null,
 };
 
 export const sampleEpic2 = {
@@ -178,6 +179,7 @@ export const sampleEpic2 = {
   status: EPIC_STATUSES.IN_PROGRESS,
   latest_sha: 'abc123',
   task_count: 1,
+  issue: null,
 };
 
 export const sampleEpic3 = {
@@ -201,6 +203,7 @@ export const sampleEpic3 = {
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
   task_count: 0,
+  issue: null,
 };
 
 export const sampleEpic4 = {
@@ -225,6 +228,7 @@ export const sampleEpic4 = {
   status: EPIC_STATUSES.MERGED,
   latest_sha: 'abc123',
   task_count: 5,
+  issue: null,
 };
 
 export const sampleEpic5 = {
@@ -249,6 +253,7 @@ export const sampleEpic5 = {
   status: EPIC_STATUSES.REVIEW,
   latest_sha: 'abc123',
   task_count: 3,
+  issue: null,
 };
 
 export const sampleTask1 = {
@@ -287,6 +292,7 @@ export const sampleTask1 = {
   review_status: REVIEW_STATUSES.APPROVED,
   review_sha: '617a512',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask2 = {
@@ -325,6 +331,7 @@ export const sampleTask2 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask3 = {
@@ -364,6 +371,7 @@ export const sampleTask3 = {
   review_status: REVIEW_STATUSES.APPROVED,
   review_sha: '617a512',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask4 = {
@@ -403,6 +411,7 @@ export const sampleTask4 = {
   review_status: REVIEW_STATUSES.CHANGES_REQUESTED,
   review_sha: '617a512',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask5 = {
@@ -441,6 +450,7 @@ export const sampleTask5 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask6 = {
@@ -479,6 +489,7 @@ export const sampleTask6 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleProject1 = {

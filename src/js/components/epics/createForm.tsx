@@ -21,7 +21,8 @@ import {
   useIsMounted,
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
-import { GitHubIssue, Project } from '@/js/store/projects/reducer';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
+import { Project } from '@/js/store/projects/reducer';
 import { User } from '@/js/store/user/reducer';
 import apiFetch from '@/js/utils/api';
 import { CREATE_TASK_FROM_ORG, OBJECT_TYPES } from '@/js/utils/constants';

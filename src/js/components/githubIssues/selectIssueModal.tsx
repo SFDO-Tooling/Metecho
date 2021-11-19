@@ -19,7 +19,7 @@ import {
 import { ThunkDispatch } from '@/js/store';
 import { updateObject } from '@/js/store/actions';
 import { Epic } from '@/js/store/epics/reducer';
-import { GitHubIssue } from '@/js/store/projects/reducer';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';

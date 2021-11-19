@@ -50,6 +50,7 @@ export const getDemoTask = ({
     assigned_qa: null,
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,
+    issue: null,
   };
 };
 

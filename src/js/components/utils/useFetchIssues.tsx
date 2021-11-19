@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ThunkDispatch } from '@/js/store';
-import { GitHubIssue } from '@/js/store/projects/reducer';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { addUrlParams } from '@/js/utils/api';
 import apiFetch from '@/js/utils/api';
 

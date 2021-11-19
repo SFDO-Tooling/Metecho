@@ -23,6 +23,7 @@ export { default as useAssignUserToTask } from './useAssignUserToTask';
 export { default as useFetchEpicIfMissing } from './useFetchEpicIfMissing';
 export { default as useFetchEpicTasksIfMissing } from './useFetchEpicTasksIfMissing';
 export { default as useFetchEpicsIfMissing } from './useFetchEpicsIfMissing';
+export { default as useFetchIssueIfMissing } from './useFetchIssueIfMissing';
 export { default as useFetchIssues } from './useFetchIssues';
 export { default as useFetchOrgsIfMissing } from './useFetchOrgsIfMissing';
 export { default as useFetchProjectIfMissing } from './useFetchProjectIfMissing';

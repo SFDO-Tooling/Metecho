@@ -38,8 +38,8 @@ import {
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Org } from '@/js/store/orgs/reducer';
-import { GitHubIssue } from '@/js/store/projects/reducer';
 import { onboarded } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';

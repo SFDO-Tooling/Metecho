@@ -10,6 +10,7 @@ def slug_is_active(queryset, name, value):
 
 
 class GitHubIssueFilter(filters.FilterSet):
+    id = filters.CharFilter()
     search = filters.CharFilter(
         label="Search",
         method="do_search",
@@ -23,7 +24,7 @@ class GitHubIssueFilter(filters.FilterSet):
 
     class Meta:
         model = GitHubIssue
-        fields = ("project",)
+        fields = ("project", "id")
 
     def do_search(self, queryset, name, query):
         return queryset.filter(Q(title__icontains=query) | Q(number__icontains=query))

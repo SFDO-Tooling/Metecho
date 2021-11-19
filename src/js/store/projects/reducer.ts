@@ -1,7 +1,5 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
-import { Epic } from '@/js/store/epics/reducer';
 import { ProjectsAction } from '@/js/store/projects/actions';
-import { Task } from '@/js/store/tasks/reducer';
 import { LogoutAction } from '@/js/store/user/actions';
 import { GitHubUser } from '@/js/store/user/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
@@ -37,31 +35,6 @@ export interface ProjectsState {
   next: string | null;
   notFound: string[];
   refreshing: boolean;
-}
-
-interface IssueTask
-  extends Pick<
-    Task,
-    | 'id'
-    | 'name'
-    | 'status'
-    | 'review_status'
-    | 'review_valid'
-    | 'pr_is_open'
-    | 'slug'
-  > {
-  epic_slug: Epic['slug'] | null;
-}
-
-export interface GitHubIssue {
-  id: string;
-  number: number;
-  title: string;
-  created_at: string;
-  html_url: string;
-  project: string;
-  epic: Pick<Epic, 'id' | 'name' | 'status' | 'slug'> | null;
-  task: IssueTask | null;
 }
 
 const defaultState = {
