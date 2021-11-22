@@ -3,7 +3,7 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
@@ -199,10 +199,10 @@ const AssigneeTableCell = ({
   } else if (canAssign) {
     switch (type) {
       case ORG_TYPES.DEV:
-        title = i18n.t('Assign Developer');
+        title = t('Assign Developer');
         break;
       case ORG_TYPES.QA:
-        title = i18n.t('Assign Tester');
+        title = t('Assign Tester');
         break;
     }
 
@@ -237,7 +237,7 @@ const AssigneeTableCell = ({
       </>
     );
   } else if (type === ORG_TYPES.QA && currentUser?.github_id) {
-    title = i18n.t('Self-Assign as Tester');
+    title = t('Self-Assign as Tester');
     contents = (
       <Button
         className="slds-m-left_xx-small"
@@ -295,11 +295,11 @@ const TaskTable = ({
             key="name"
             label={
               <>
-                {i18n.t('Task')}
+                {t('Task')}
                 <TourPopover
                   id="tour-task-name-column"
                   align="top left"
-                  heading={i18n.t('Task names')}
+                  heading={t('Task names')}
                   body={
                     <Trans i18nKey="tourTaskNameColumn">
                       A Task’s name describes the work being done. Select a name
@@ -321,11 +321,11 @@ const TaskTable = ({
               key="epic"
               label={
                 <>
-                  {i18n.t('Epic')}
+                  {t('Epic')}
                   <TourPopover
                     id="tour-task-epic-name-column"
                     align="top left"
-                    heading={i18n.t('Epic names')}
+                    heading={t('Epic names')}
                     body={
                       <Trans i18nKey="tourTaskEpicNameColumn">
                         Tasks can be grouped together in an Epic. Select the
@@ -345,11 +345,11 @@ const TaskTable = ({
             key="status"
             label={
               <div className="tour-task-status-column">
-                {i18n.t('Status')}
+                {t('Status')}
                 <TourPopover
                   id="tour-task-status-column"
                   align="top"
-                  heading={i18n.t('Task statuses')}
+                  heading={t('Task statuses')}
                   body={
                     <Trans i18nKey="tourTaskStatusColumn">
                       A Task begins with a status of <b>Planned</b>. When a Dev
@@ -376,11 +376,11 @@ const TaskTable = ({
             key="assigned_dev"
             label={
               <>
-                {i18n.t('Dev')}
+                {t('Dev')}
                 <TourPopover
                   id="tour-task-developer-column"
                   align="top"
-                  heading={i18n.t('Task Developers')}
+                  heading={t('Task Developers')}
                   body={
                     <Trans i18nKey="tourTaskDeveloperColumn">
                       A <b>Developer</b> is the person assigned to do the work
@@ -411,11 +411,11 @@ const TaskTable = ({
             key="assigned_qa"
             label={
               <div className="tour-task-tester-column">
-                {i18n.t('Test')}
+                {t('Test')}
                 <TourPopover
                   id="tour-task-tester-column"
                   align="top"
-                  heading={i18n.t('Task Testers')}
+                  heading={t('Task Testers')}
                   body={
                     <Trans i18nKey="tourTaskTesterColumn">
                       Assign yourself or someone else as a Tester to help on a
@@ -445,7 +445,7 @@ const TaskTable = ({
         </DataTable>
       ) : (
         <EmptyIllustration
-          heading={i18n.t('No Tasks')}
+          heading={t('No Tasks')}
           message={
             <Trans i18nKey="noTasks">
               Tasks in Metecho represent small changes to this Project; each one

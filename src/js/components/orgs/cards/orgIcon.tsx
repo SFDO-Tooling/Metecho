@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { ExternalLink } from '@/js/components/utils';
@@ -35,12 +35,12 @@ const OrgIcon = ({
       <Button
         label={iconLink}
         variant="link"
-        title={i18n.t('View Org')}
-        assistiveText={{ icon: i18n.t('View Org') }}
+        title={t('View Org')}
+        assistiveText={{ icon: t('View Org') }}
         onClick={openRefreshOrgModal}
       />
     ) : (
-      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
+      <ExternalLink url={orgUrl} title={t('View Org')}>
         {iconLink}
       </ExternalLink>
     );

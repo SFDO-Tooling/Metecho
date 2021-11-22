@@ -3,7 +3,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -65,18 +65,18 @@ const SubmitModal = ({
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this Task for testing');
-      submittingLabel = i18n.t('Submitting Task for Testing…');
-      toSubmitLabel = i18n.t('Submit Task for Testing');
+      heading = t('Submit this Task for testing');
+      submittingLabel = t('Submitting Task for Testing…');
+      toSubmitLabel = t('Submit Task for Testing');
       break;
     case OBJECT_TYPES.EPIC:
       objectType = {
         objectType: OBJECT_TYPES.EPIC_PR,
         url: window.api_urls.epic_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this Epic for review on GitHub');
-      submittingLabel = i18n.t('Submitting Epic for Review on GitHub…');
-      toSubmitLabel = i18n.t('Submit Epic for Review on GitHub');
+      heading = t('Submit this Epic for review on GitHub');
+      submittingLabel = t('Submitting Epic for Review on GitHub…');
+      toSubmitLabel = t('Submit Epic for Review on GitHub');
       break;
   }
 
@@ -136,7 +136,7 @@ const SubmitModal = ({
     setInputs({ ...inputs, alert_assigned_qa: !inputs.alert_assigned_qa });
   };
   const alertLabelText = assignee
-    ? i18n.t('Notify {{username}} by email', { username: assignee.login })
+    ? t('Notify {{username}} by email', { username: assignee.login })
     : '';
   const alertLabel = assignee ? (
     <div className="metecho-avatar-container" onClick={toggleAlertAssignee}>
@@ -168,14 +168,14 @@ const SubmitModal = ({
       isOpen={isOpen}
       size="medium"
       disableClose={submittingReview}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       heading={heading}
       directional
       footer={[
         <AlertAssignee key="alert-qa" />,
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={handleClose}
           disabled={submittingReview}
         />,
@@ -213,7 +213,7 @@ const SubmitModal = ({
             </div>
             <Input
               id="pr-title"
-              label={i18n.t('Title')}
+              label={t('Title')}
               className="slds-p-bottom_small"
               name="title"
               value={inputs.title}
@@ -224,7 +224,7 @@ const SubmitModal = ({
             />
             <Textarea
               id="pr-critical-changes"
-              label={i18n.t(
+              label={t(
                 'Describe any critical changes which might impact existing functionality',
               )}
               className="metecho-textarea slds-p-bottom_small"
@@ -235,7 +235,7 @@ const SubmitModal = ({
             />
             <Textarea
               id="pr-additional-changes"
-              label={i18n.t(
+              label={t(
                 'Describe additional changes including instructions for users for any post-upgrade Tasks',
               )}
               className="metecho-textarea slds-p-bottom_small"
@@ -246,7 +246,7 @@ const SubmitModal = ({
             />
             <Textarea
               id="pr-notes"
-              label={i18n.t('Developer notes')}
+              label={t('Developer notes')}
               className="metecho-textarea slds-p-bottom_small"
               name="notes"
               value={inputs.notes}
@@ -268,42 +268,42 @@ const SubmitModal = ({
                   slds-button_outline-brand
                   slds-m-bottom_medium"
               >
-                {i18n.t('Compare Changes')}
+                {t('Compare Changes')}
               </ExternalLink>
             )}
             <div className="submit-guide">
               <h3 className="slds-m-bottom_medium slds-text-heading_small">
-                {i18n.t('Markdown Guide')}
+                {t('Markdown Guide')}
               </h3>
               <div className="markdown-block slds-m-vertical_medium">
-                <pre>## {i18n.t('Heading')}</pre>
-                <pre>### {i18n.t('Subheading')}</pre>
+                <pre>## {t('Heading')}</pre>
+                <pre>### {t('Subheading')}</pre>
               </div>
               <div className="markdown-block slds-m-vertical_medium">
-                <pre>*{i18n.t('This becomes italic text')}*</pre>
-                <pre>**{i18n.t('This becomes bold text')}**</pre>
+                <pre>*{t('This becomes italic text')}*</pre>
+                <pre>**{t('This becomes bold text')}**</pre>
               </div>
               <div className="markdown-block slds-m-vertical_medium">
-                <pre>- {i18n.t('Unordered list')}</pre>
+                <pre>- {t('Unordered list')}</pre>
                 {/* prettier-ignore */}
-                <pre>  - {i18n.t('Double space to nest')}</pre>
+                <pre>  - {t('Double space to nest')}</pre>
               </div>
               <div className="markdown-block slds-m-vertical_medium">
-                <pre>- [x] {i18n.t('Completed item')}</pre>
-                <pre>- [ ] {i18n.t('Incomplete item')}</pre>
+                <pre>- [x] {t('Completed item')}</pre>
+                <pre>- [ ] {t('Incomplete item')}</pre>
               </div>
               <p className="slds-m-top_medium">
-                <b>{i18n.t('Example')}</b>
+                <b>{t('Example')}</b>
               </p>
-              <pre>## {i18n.t('Stops widget from refreshing')}</pre>
-              <pre>{i18n.t('This includes:')}</pre>
+              <pre>## {t('Stops widget from refreshing')}</pre>
+              <pre>{t('This includes:')}</pre>
               <div className="markdown-block">
-                <pre>- {i18n.t('Renders incomplete bobble')}</pre>
-                <pre>- {i18n.t('Prevents fire from building')}</pre>
+                <pre>- {t('Renders incomplete bobble')}</pre>
+                <pre>- {t('Prevents fire from building')}</pre>
                 {/* prettier-ignore */}
-                <pre>  - {i18n.t('Prevents fire duplication')}</pre>
+                <pre>  - {t('Prevents fire duplication')}</pre>
                 {/* prettier-ignore */}
-                <pre>  - {i18n.t('Prevents fire spread')}</pre>
+                <pre>  - {t('Prevents fire spread')}</pre>
               </div>
               <div className="slds-m-vertical_x-large">---</div>
               <p>

@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -49,7 +49,7 @@ const TourPopover = ({
     >
       <Button
         variant="icon"
-        assistiveText={{ icon: i18n.t('Learn More') }}
+        assistiveText={{ icon: t('Learn More') }}
         iconCategory="utility"
         iconName={isViewed ? 'success' : 'info'}
         className={classNames('popover-button', {

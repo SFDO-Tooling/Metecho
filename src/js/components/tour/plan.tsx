@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
@@ -17,13 +17,13 @@ export const getDemoEpic = ({
   project: string;
   github_id: string | null;
 }): Epic => {
-  const description = i18n.t(
+  const description = t(
     'This is a sample description to show where the description of the Epic would appear.',
   );
 
   return {
     id: 'demo-epic',
-    name: i18n.t('This is a Sample Epic'),
+    name: t('This is a Sample Epic'),
     description,
     description_rendered: `<p>${description}</p>`,
     slug: 'this-is-a-sample-epic',
@@ -54,7 +54,7 @@ const PlanTour = (props: TourProps) => {
   const steps: Step[] = [
     {
       target: '.tour-project-tasks-list',
-      title: i18n.t('List of Tasks'),
+      title: t('List of Tasks'),
       content: (
         <Trans i18nKey="walkthroughPlanListTasks">
           Select the Tasks tab to see a list of all the work being done on this
@@ -67,7 +67,7 @@ const PlanTour = (props: TourProps) => {
     },
     {
       target: '.tour-create-task',
-      title: i18n.t('Create a Task to contribute'),
+      title: t('Create a Task to contribute'),
       content: (
         <Trans i18nKey="walkthroughPlanCreateTask">
           To get started contributing to this Project, create a Task. Tasks
@@ -80,7 +80,7 @@ const PlanTour = (props: TourProps) => {
     },
     {
       target: '.tour-project-epics-list',
-      title: i18n.t('List of Epics'),
+      title: t('List of Epics'),
       content: (
         <Trans i18nKey="walkthroughPlanListEpics">
           Select the Epics tab to see a list of all the Epics for this Project.
@@ -92,7 +92,7 @@ const PlanTour = (props: TourProps) => {
     },
     {
       target: '.tour-create-epic',
-      title: i18n.t('Create Epics to group Tasks'),
+      title: t('Create Epics to group Tasks'),
       content: (
         <Trans i18nKey="walkthroughPlanCreateEpic">
           Epics represent larger changes to the Project. You can invite multiple
@@ -105,7 +105,7 @@ const PlanTour = (props: TourProps) => {
     },
     {
       target: '.tour-create-epic-from-issue',
-      title: i18n.t('Create Epic from GitHub Issue'),
+      title: t('Create Epic from GitHub Issue'),
       content: (
         <Trans i18nKey="walkthroughPlanCreateEpicFromIssue">
           One way to start planning work for an Epic or a Task is to browse the

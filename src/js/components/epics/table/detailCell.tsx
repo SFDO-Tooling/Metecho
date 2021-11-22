@@ -1,7 +1,7 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -56,7 +56,7 @@ const DetailTableCell = ({
               slds-text-color_weak
               slds-truncate"
           >
-            {i18n.t('Branch:')}{' '}
+            {t('Branch:')}{' '}
             <ExternalLink url={branch_url}>
               {branch_name}
               <Icon

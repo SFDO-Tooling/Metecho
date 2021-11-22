@@ -3,7 +3,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
@@ -116,13 +116,11 @@ const AssignTaskRoleModal = ({
   };
 
   const heading =
-    orgType === ORG_TYPES.QA
-      ? i18n.t('Assign Tester')
-      : i18n.t('Assign Developer');
+    orgType === ORG_TYPES.QA ? t('Assign Tester') : t('Assign Developer');
   const checkboxLabel =
     orgType === ORG_TYPES.QA
-      ? i18n.t('Notify Assigned Tester by Email')
-      : i18n.t('Notify Assigned Developer by Email');
+      ? t('Notify Assigned Tester by Email')
+      : t('Notify Assigned Developer by Email');
   const alertType =
     orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
 
@@ -130,7 +128,7 @@ const AssignTaskRoleModal = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={handleClose}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       heading={heading}
       directional
       size="small"
@@ -144,10 +142,10 @@ const AssignTaskRoleModal = ({
           checked={shouldAlertAssignee}
           onChange={handleAlertAssignee}
         />,
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button key="cancel" label={t('Cancel')} onClick={handleClose} />,
         <Button
           key="submit"
-          label={i18n.t('Save')}
+          label={t('Save')}
           variant="brand"
           disabled={!selection}
           onClick={handleSave}
@@ -158,7 +156,7 @@ const AssignTaskRoleModal = ({
         <>
           <div className="slds-p-around_medium">
             <h3 className="slds-text-heading_small slds-m-bottom_x-small">
-              {i18n.t('Currently Assigned')}
+              {t('Currently Assigned')}
             </h3>
             <GitHubUserButton
               user={selectedUser}
@@ -182,7 +180,7 @@ const AssignTaskRoleModal = ({
                 Epic Collaborator.
               </Trans>
             ) : (
-              i18n.t('Assign any GitHub Collaborator to this role.')
+              t('Assign any GitHub Collaborator to this role.')
             )}
           </p>
         </div>
@@ -210,13 +208,13 @@ const AssignTaskRoleModal = ({
             value={findText}
             onChange={handleFindTextChange}
             iconRight={<InputIcon name="search" category="utility" />}
-            placeholder={i18n.t('Search for user')}
+            placeholder={t('Search for user')}
           />
         </div>
         {epicUsers ? (
           <div className="slds-p-horizontal_medium slds-p-bottom_medium">
             <h3 className="slds-text-heading_small slds-m-bottom_x-small">
-              {i18n.t('Epic Collaborators')}
+              {t('Epic Collaborators')}
             </h3>
             {filteredEpicUsers.length ? (
               <ul>
@@ -233,8 +231,8 @@ const AssignTaskRoleModal = ({
             ) : (
               <p className="slds-p-left_x-small">
                 {findText
-                  ? i18n.t('No users found.')
-                  : i18n.t('There are no available Epic Collaborators.')}
+                  ? t('No users found.')
+                  : t('There are no available Epic Collaborators.')}
               </p>
             )}
           </div>
@@ -242,8 +240,8 @@ const AssignTaskRoleModal = ({
         <div className="slds-p-horizontal_medium slds-p-bottom_medium">
           <h3 className="slds-text-heading_small slds-m-bottom_x-small">
             {epicUsers
-              ? i18n.t('Other GitHub Collaborators')
-              : i18n.t('GitHub Collaborators')}
+              ? t('Other GitHub Collaborators')
+              : t('GitHub Collaborators')}
           </h3>
           {filteredGitHubUsers.length ? (
             <ul>
@@ -260,8 +258,8 @@ const AssignTaskRoleModal = ({
           ) : (
             <p className="slds-p-left_x-small">
               {findText
-                ? i18n.t('No users found.')
-                : i18n.t('There are no available GitHub Collaborators.')}
+                ? t('No users found.')
+                : t('There are no available GitHub Collaborators.')}
             </p>
           )}
         </div>

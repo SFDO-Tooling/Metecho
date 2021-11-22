@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -25,13 +25,11 @@ const CustomDomainForm = ({
   return (
     <form className="slds-p-around_large" onSubmit={handleCustomDomainConnect}>
       <div className="slds-form-element__help slds-p-bottom_small">
-        {i18n.t(
-          'To go to your company’s login page, enter the custom domain name.',
-        )}
+        {t('To go to your company’s login page, enter the custom domain name.')}
       </div>
       <Input
         id="login-custom-domain"
-        label={i18n.t('Custom Domain')}
+        label={t('Custom Domain')}
         value={url}
         onChange={handleChange}
         aria-describedby="login-custom-domain-help"
@@ -112,8 +110,8 @@ const ConnectModal = ({
   return (
     <Modal
       isOpen={isOpen && !isConnected}
-      heading={i18n.t('Connect to Salesforce')}
-      assistiveText={{ closeButton: i18n.t('Close') }}
+      heading={t('Connect to Salesforce')}
+      assistiveText={{ closeButton: t('Close') }}
       tagline={
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce Org with Dev Hub enabled is required to
@@ -130,14 +128,10 @@ const ConnectModal = ({
       }
       footer={
         isCustomDomain && [
-          <Button
-            key="back"
-            label={i18n.t('Back')}
-            onClick={closeCustomDomain}
-          />,
+          <Button key="back" label={t('Back')} onClick={closeCustomDomain} />,
           <Button
             key="submit"
-            label={i18n.t('Continue')}
+            label={t('Continue')}
             variant="brand"
             onClick={handleCustomDomainConnect}
           />,
@@ -154,7 +148,7 @@ const ConnectModal = ({
       ) : (
         <div className="slds-p-around_large">
           <Button
-            label={i18n.t('Connect to Salesforce')}
+            label={t('Connect to Salesforce')}
             variant="brand"
             className="slds-size_full
               slds-p-vertical_x-small
@@ -162,7 +156,7 @@ const ConnectModal = ({
             onClick={handleConnect}
           />
           <Button
-            label={i18n.t('Use Custom Domain')}
+            label={t('Use Custom Domain')}
             variant="outline-brand"
             className="slds-size_full slds-p-vertical_x-small slds-m-left_none"
             onClick={openCustomDomain}

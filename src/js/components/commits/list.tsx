@@ -4,7 +4,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -55,7 +55,7 @@ const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
     >
       <Avatar
         variant="user"
-        imgAlt={i18n.t('avatar for user {{username}}', { username: author })}
+        imgAlt={t('avatar for user {{username}}', { username: author })}
         imgSrc={item.author.avatar_url}
         title={author}
         size="small"
@@ -104,7 +104,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
         <TourPopover
           id="tour-task-commits"
           align="top left"
-          heading={i18n.t('List of retrieved Task changes')}
+          heading={t('List of retrieved Task changes')}
           body={
             <Trans i18nKey="tourTaskCommits">
               A “commit” represents changes retrieved from the Dev Org. This
@@ -119,7 +119,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
             slds-m-top_large
             slds-m-bottom_x-small"
         >
-          {i18n.t('Commit History')}
+          {t('Commit History')}
         </h2>
       </div>
       <DataTable
@@ -130,7 +130,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
       >
         <DataTableColumn
           key="sha"
-          label={i18n.t('Commit')}
+          label={t('Commit')}
           property="id"
           primaryColumn
           width="0"
@@ -139,7 +139,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
         </DataTableColumn>
         <DataTableColumn
           key="author"
-          label={i18n.t('Author')}
+          label={t('Author')}
           property="author"
           width="2.5rem"
         >
@@ -147,7 +147,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
         </DataTableColumn>
         <DataTableColumn
           key="message"
-          label={i18n.t('Message')}
+          label={t('Message')}
           property="message"
           width="100%"
         >
@@ -155,7 +155,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
         </DataTableColumn>
         <DataTableColumn
           key="timestamp"
-          label={i18n.t('Timestamp')}
+          label={t('Timestamp')}
           property="timestamp"
           width="0"
         >

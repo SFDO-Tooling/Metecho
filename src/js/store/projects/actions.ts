@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { ThunkResult } from '@/js/store';
 import { fetchObjects, FetchObjectsSucceeded } from '@/js/store/actions';
@@ -108,7 +108,7 @@ export const projectsRefreshError =
   (dispatch) => {
     dispatch(
       addToast({
-        heading: i18n.t('Uh oh. There was an error re-syncing Projects.'),
+        heading: t('Uh oh. There was an error re-syncing Projects.'),
         details: message,
         variant: 'error',
       }),
@@ -157,7 +157,7 @@ export const projectError =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “{{project_name}}.”',
             { project_name: model.name },
           ),
