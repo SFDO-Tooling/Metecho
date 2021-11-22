@@ -1,6 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -57,14 +57,12 @@ const IssueCard = ({ issueId, epicId, taskId }: Props) => {
     <Card
       bodyClassName="slds-card__body_inner"
       heading={
-        issue
-          ? `#${issue.number}: ${issue.title}`
-          : i18n.t('Loading GitHub Issue…')
+        issue ? `#${issue.number}: ${issue.title}` : t('Loading GitHub Issue…')
       }
       headerActions={
         <Dropdown
           align="right"
-          assistiveText={{ icon: i18n.t('GitHub Issue Actions') }}
+          assistiveText={{ icon: t('GitHub Issue Actions') }}
           buttonClassName="slds-button_icon-x-small"
           buttonVariant="icon"
           iconCategory="utility"
@@ -75,9 +73,7 @@ const IssueCard = ({ issueId, epicId, taskId }: Props) => {
           options={[
             {
               id: 0,
-              label: epicId
-                ? i18n.t('Remove from Epic')
-                : i18n.t('Remove from Task'),
+              label: epicId ? t('Remove from Epic') : t('Remove from Task'),
             },
           ]}
           onSelect={unlink}

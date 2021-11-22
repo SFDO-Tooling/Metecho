@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -25,7 +25,7 @@ const RefreshOrgModal = ({
     closeRefreshOrgModal();
   };
 
-  let heading = i18n.t('Test Org Behind Latest');
+  let heading = t('Test Org Behind Latest');
   if (missingCommits > 0) {
     heading = `${heading}: ${getOrgBehindLatestMsg(missingCommits, true)}`;
   }
@@ -34,7 +34,7 @@ const RefreshOrgModal = ({
       isOpen={isOpen}
       heading={heading}
       size="small"
-      assistiveText={{ closeButton: i18n.t('Close') }}
+      assistiveText={{ closeButton: t('Close') }}
       onRequestClose={closeRefreshOrgModal}
     >
       <div className="slds-p-around_large">
@@ -44,7 +44,7 @@ const RefreshOrgModal = ({
           version.
         </Trans>
         <Button
-          label={i18n.t('Refresh Test Org')}
+          label={t('Refresh Test Org')}
           variant="brand"
           className="slds-size_full slds-m-top_medium"
           onClick={handleSubmit}
@@ -62,7 +62,7 @@ const RefreshOrgModal = ({
             slds-m-top_medium
             slds-m-horizontal_none"
         >
-          {i18n.t('Proceed to Outdated Org')}
+          {t('Proceed to Outdated Org')}
         </ExternalLink>
       </div>
     </Modal>

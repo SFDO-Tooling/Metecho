@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { ThunkResult } from '@/js/store';
 import { isCurrentUser } from '@/js/store/helpers';
@@ -42,11 +42,11 @@ export const createTaskPR =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Successfully submitted Task for testing: “{{task_name}}.”',
             { task_name: model.name },
           ),
-          linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
+          linkText: model.pr_url ? t('View pull request.') : undefined,
           linkUrl: model.pr_url ? model.pr_url : undefined,
           openLinkInNewWindow: true,
         }),
@@ -70,7 +70,7 @@ export const createTaskPRFailed =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Uh oh. There was an error submitting Task for testing: “{{task_name}}.”',
             { task_name: model.name },
           ),
@@ -98,11 +98,11 @@ export const submitReview =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Successfully submitted review for Task: “{{task_name}}.”',
             { task_name: model.name },
           ),
-          linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
+          linkText: model.pr_url ? t('View pull request.') : undefined,
           linkUrl: model.pr_url ? model.pr_url : undefined,
           openLinkInNewWindow: true,
         }),
@@ -126,7 +126,7 @@ export const submitReviewFailed =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Uh oh. There was an error submitting review for Task: “{{task_name}}.”',
             { task_name: model.name },
           ),

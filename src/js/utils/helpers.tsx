@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
@@ -23,11 +23,11 @@ export const getOrgStatusMsg = (org: Org) => {
       totalChanges,
       'change',
     )}`;
-    return i18n.t('orgStatusMsg', statusMsgDefault, {
+    return t('orgStatusMsg', statusMsgDefault, {
       count: totalChanges,
     });
   }
-  return i18n.t('up to date');
+  return t('up to date');
 };
 
 export const getOrgBehindLatestMsg = (
@@ -40,7 +40,7 @@ export const getOrgBehindLatestMsg = (
       ? `${missingCommits} ${pluralize(missingCommits, 'Commit')}`
       : `${missingCommits} ${pluralize(missingCommits, 'commit')}`;
     const name = titleCase ? 'orgBehindTitle' : 'orgBehindMsg';
-    return i18n.t(name, msgDefault, {
+    return t(name, msgDefault, {
       count: missingCommits,
     });
   }
@@ -59,8 +59,8 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
       ))
   ) {
     branchLink = object.pr_url;
-    branchLinkText = i18n.t('View Pull Request');
-    const heading = i18n.t('View GitHub pull request');
+    branchLinkText = t('View Pull Request');
+    const heading = t('View GitHub pull request');
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
@@ -95,8 +95,8 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
       );
   } else if (object.has_unmerged_commits && object.branch_diff_url) {
     branchLink = object.branch_diff_url;
-    branchLinkText = i18n.t('View Changes');
-    const heading = i18n.t('View changes on GitHub');
+    branchLinkText = t('View Changes');
+    const heading = t('View changes on GitHub');
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
@@ -127,13 +127,13 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
       );
   } else if (object.branch_url) {
     branchLink = object.branch_url;
-    branchLinkText = i18n.t('View Branch');
+    branchLinkText = t('View Branch');
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
           id="tour-epic-branch"
           align="bottom right"
-          heading={i18n.t('View GitHub branch for this Epic')}
+          heading={t('View GitHub branch for this Epic')}
           body={
             <Trans i18nKey="tourViewEpicBranch">
               Select this button to leave Metecho and access the Epic’s branch
@@ -148,7 +148,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         <TourPopover
           id="tour-task-branch"
           align="bottom right"
-          heading={i18n.t('View GitHub branch for this Task')}
+          heading={t('View GitHub branch for this Task')}
           body={
             <Trans i18nKey="tourViewTaskBranch">
               Select this button to leave Metecho and access the Task’s branch

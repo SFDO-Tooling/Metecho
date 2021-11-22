@@ -1,6 +1,6 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -29,7 +29,7 @@ const Header = () => {
         <TourPopover
           id="tour-user"
           align="bottom right"
-          heading={i18n.t('Account & connection info')}
+          heading={t('Account & connection info')}
           body={
             <Trans i18nKey="tourUser">
               Here you can check which GitHub account is logged in, connect and
@@ -54,7 +54,7 @@ const Header = () => {
         <TourPopover
           id="tour-metecho-name"
           align="bottom left"
-          heading={i18n.t('What’s in a name?')}
+          heading={t('What’s in a name?')}
           body={
             <Trans i18nKey="tourMetechoName">
               Metecho makes it easier for you to view, test, and contribute to

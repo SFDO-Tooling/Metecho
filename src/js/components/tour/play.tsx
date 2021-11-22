@@ -1,5 +1,5 @@
 import { addDays, subHours } from 'date-fns';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
@@ -21,7 +21,7 @@ export const getDemoOrg = ({
   Org,
   'project' | 'owner' | 'owner_gh_username' | 'owner_gh_id' | 'latest_commit'
 >): Org => {
-  const description = i18n.t(
+  const description = t(
     'This is a sample description to show where the description of the Org would appear.',
   );
   const expires_at = addDays(subHours(new Date(), 12), 30).toISOString();
@@ -71,7 +71,7 @@ const PlayTour = (props: TourProps) => {
   const steps: Step[] = [
     {
       target: '.walkthrough-metecho-name',
-      title: i18n.t('What’s in a name?'),
+      title: t('What’s in a name?'),
       content: (
         <Trans i18nKey="walkthroughPlayMetechoName">
           Metecho makes it easier for you to view, test, and contribute to
@@ -89,7 +89,7 @@ const PlayTour = (props: TourProps) => {
     },
     {
       target: '.tour-create-scratch-org',
-      title: i18n.t('View & play with a Project'),
+      title: t('View & play with a Project'),
       content: (
         <Trans i18nKey="walkthroughPlayCreateScratchOrg">
           Scratch Orgs are a temporary place for you to view the work on this
@@ -102,7 +102,7 @@ const PlayTour = (props: TourProps) => {
     },
     {
       target: '.tour-scratch-org',
-      title: i18n.t('Project Scratch Org'),
+      title: t('Project Scratch Org'),
       content: (
         <Trans i18nKey="walkthroughPlayScratchOrg">
           This is a sample Scratch Org for this Project. Select “View Org” to
@@ -114,7 +114,7 @@ const PlayTour = (props: TourProps) => {
     },
     {
       target: '.tour-scratch-org-contribute',
-      title: i18n.t('Contribute your work'),
+      title: t('Contribute your work'),
       content: (
         <Trans i18nKey="walkthroughPlayScratchOrgContribute">
           To contribute your own work from a Scratch Org, you need “push”
@@ -129,7 +129,7 @@ const PlayTour = (props: TourProps) => {
     },
     {
       target: '.tour-project-tasks-list',
-      title: i18n.t('List of Tasks'),
+      title: t('List of Tasks'),
       content: (
         <Trans i18nKey="walkthroughPlayListTasks">
           Select the Tasks tab to see a list of all the work being done on this
@@ -143,7 +143,7 @@ const PlayTour = (props: TourProps) => {
     },
     {
       target: '.tour-project-epics-list',
-      title: i18n.t('List of Epics'),
+      title: t('List of Epics'),
       content: (
         <Trans i18nKey="walkthroughPlayListEpics">
           Select the Epics tab to see a list of all the Epics for this Project.

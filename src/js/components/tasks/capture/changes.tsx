@@ -4,7 +4,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useState } from 'react';
 
 import {
@@ -42,7 +42,7 @@ const ChangesList = ({
   expandedPanels: BooleanObject;
   handlePanelToggle: (groupName: string) => void;
   handleSelectGroup: (
-    t: 'changes' | 'ignored',
+    groupType: 'changes' | 'ignored',
     groupName: string,
     checked: boolean,
   ) => void;
@@ -231,7 +231,7 @@ const ChangesForm = ({
               <Checkbox
                 id="select-all-changes"
                 labels={{
-                  label: i18n.t('All Changes'),
+                  label: t('All Changes'),
                 }}
                 checked={allChangesChecked}
                 indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
@@ -264,7 +264,7 @@ const ChangesForm = ({
             <AccordionPanel
               expanded={Boolean(expandedPanels['all-ignored'])}
               id="all-ignored"
-              title={i18n.t('All Ignored Changes')}
+              title={t('All Ignored Changes')}
               onTogglePanel={() => handlePanelToggle('all-ignored')}
               panelContentActions={
                 <div className="form-grid">
@@ -272,7 +272,7 @@ const ChangesForm = ({
                     <Checkbox
                       id="select-all-ignored"
                       labels={{
-                        label: i18n.t('All Ignored Changes'),
+                        label: t('All Ignored Changes'),
                       }}
                       className="slds-float_left"
                       checked={allIgnoredChecked}
@@ -282,7 +282,7 @@ const ChangesForm = ({
                       onChange={handleSelectAllIgnored}
                     />
                     <Tooltip
-                      content={i18n.t(
+                      content={t(
                         'Changes placed here will remain ignored until you un-ignore them.',
                       )}
                       position="overflowBoundaryElement"

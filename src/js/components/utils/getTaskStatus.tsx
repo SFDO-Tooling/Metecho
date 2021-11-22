@@ -1,6 +1,6 @@
 import Icon from '@salesforce/design-system-react/components/icon';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import {
@@ -28,24 +28,24 @@ const getTaskStatus = ({
       : taskStatus;
   switch (status) {
     case TASK_STATUSES.PLANNED:
-      displayStatus = i18n.t('Planned');
+      displayStatus = t('Planned');
       icon = <ProgressRing value={0} />;
       break;
     case TASK_STATUSES.IN_PROGRESS:
       if (prIsOpen) {
-        displayStatus = i18n.t('Test');
+        displayStatus = t('Test');
         icon = <ProgressRing value={60} flowDirection="fill" theme="active" />;
       } else {
-        displayStatus = i18n.t('In Progress');
+        displayStatus = t('In Progress');
         icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
       }
       break;
     case TASK_STATUSES.COMPLETED:
-      displayStatus = i18n.t('Complete');
+      displayStatus = t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
     case TASK_STATUSES.CANCELED:
-      displayStatus = i18n.t('Canceled');
+      displayStatus = t('Canceled');
       icon = (
         <ProgressRing
           value={0}
@@ -55,13 +55,13 @@ const getTaskStatus = ({
       );
       break;
     case REVIEW_STATUSES.CHANGES_REQUESTED:
-      displayStatus = i18n.t('Changes Requested');
+      displayStatus = t('Changes Requested');
       icon = (
         <ProgressRing value={60} flowDirection="fill" theme="warning" hasIcon />
       );
       break;
     case REVIEW_STATUSES.APPROVED:
-      displayStatus = i18n.t('Approved');
+      displayStatus = t('Approved');
       icon = <ProgressRing value={80} flowDirection="fill" />;
       break;
   }

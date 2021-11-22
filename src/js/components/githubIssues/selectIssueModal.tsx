@@ -3,7 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -41,7 +41,7 @@ interface Props {
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
   <ExternalLink url={url}>
-    {i18n.t('View on GitHub')}
+    {t('View on GitHub')}
     <Icon
       category="utility"
       name="new_window"
@@ -126,17 +126,13 @@ const SelectIssueModal = ({
     <Modal
       isOpen={Boolean(isOpen)}
       size="small"
-      heading={i18n.t('Select GitHub Issue to Develop')}
+      heading={t('Select GitHub Issue to Develop')}
       onRequestClose={closeForm}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={
         attachingToTask || attachingToEpic
           ? [
-              <Button
-                key="cancel"
-                label={i18n.t('Cancel')}
-                onClick={closeForm}
-              />,
+              <Button key="cancel" label={t('Cancel')} onClick={closeForm} />,
               <Button
                 key="attach"
                 type="submit"
@@ -144,24 +140,20 @@ const SelectIssueModal = ({
                 disabled={!selectedIssue}
                 label={
                   attachingToTask
-                    ? i18n.t('Attach Issue to Task')
-                    : i18n.t('Attach Issue to Epic')
+                    ? t('Attach Issue to Task')
+                    : t('Attach Issue to Epic')
                 }
                 onClick={onAttach}
               />,
             ]
           : [
-              <Button
-                key="cancel"
-                label={i18n.t('Cancel')}
-                onClick={closeForm}
-              />,
+              <Button key="cancel" label={t('Cancel')} onClick={closeForm} />,
               <Button
                 key="createEpic"
                 type="submit"
                 variant={isOpen === 'epic' ? 'brand' : 'outline-brand'}
                 disabled={!selectedIssue}
-                label={i18n.t('Create an Epic')}
+                label={t('Create an Epic')}
                 onClick={() => onSubmit(selectedIssue, 'epic')}
               />,
               <Button
@@ -169,7 +161,7 @@ const SelectIssueModal = ({
                 type="submit"
                 variant={isOpen === 'task' ? 'brand' : 'outline-brand'}
                 disabled={!selectedIssue}
-                label={i18n.t('Create a Task')}
+                label={t('Create a Task')}
                 onClick={() => onSubmit(selectedIssue, 'task')}
               />,
             ]
@@ -187,12 +179,12 @@ const SelectIssueModal = ({
             <div className="slds-grid slds-gutters">
               <div className="slds-col slds-size_1-of-2">
                 <h2 className="slds-text-heading_small">
-                  {i18n.t('Available Issues')}
+                  {t('Available Issues')}
                 </h2>
                 <RadioGroup
                   assistiveText={{
-                    label: i18n.t('Available Issues'),
-                    required: i18n.t('Required'),
+                    label: t('Available Issues'),
+                    required: t('Required'),
                   }}
                   className="slds-form-element_stacked slds-p-left_none"
                   name="github-issue"
@@ -212,13 +204,13 @@ const SelectIssueModal = ({
                       </div>
                     ))
                   ) : (
-                    <p>{i18n.t('No Available Issues')}</p>
+                    <p>{t('No Available Issues')}</p>
                   )}
                 </RadioGroup>
               </div>
               <div className="slds-col slds-size_1-of-2">
                 <h2 className="slds-text-heading_small">
-                  {i18n.t('Attached Issues')}
+                  {t('Attached Issues')}
                 </h2>
                 {attachedIssues.length ? (
                   attachedIssues.map((issue, idx) => (
@@ -233,7 +225,7 @@ const SelectIssueModal = ({
                       {issue.task ? (
                         <>
                           <p>
-                            {i18n.t('Task')}:{' '}
+                            {t('Task')}:{' '}
                             <Link
                               to={
                                 issue.task.epic_slug
@@ -265,7 +257,7 @@ const SelectIssueModal = ({
                       ) : issue.epic ? (
                         <>
                           <p>
-                            {i18n.t('Epic')}:{' '}
+                            {t('Epic')}:{' '}
                             <Link
                               to={routes.epic_detail(
                                 projectSlug,
@@ -286,7 +278,7 @@ const SelectIssueModal = ({
                     </div>
                   ))
                 ) : (
-                  <p>{i18n.t('No Attached Issues')}</p>
+                  <p>{t('No Attached Issues')}</p>
                 )}
               </div>
             </div>

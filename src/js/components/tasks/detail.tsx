@@ -4,7 +4,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -690,7 +690,7 @@ const TaskDetail = (
           <TourPopover
             id="tour-task-edit"
             align="left"
-            heading={i18n.t('Edit or delete this Task')}
+            heading={t('Edit or delete this Task')}
             body={
               <Trans i18nKey="tourEditTask">
                 Here you can change the name and description of this Task. You
@@ -721,11 +721,11 @@ const TaskDetail = (
     const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Submitting Task for Testing…')}
+        label={t('Submitting Task for Testing…')}
         variant={isPrimary ? 'inverse' : 'base'}
       />
     ) : (
-      i18n.t('Submit Task for Testing')
+      t('Submit Task for Testing')
     );
     submitButton = (
       <div className="slds-is-relative">
@@ -739,7 +739,7 @@ const TaskDetail = (
         <TourPopover
           id="tour-task-submit"
           align="top left"
-          heading={i18n.t('Submit changes for testing')}
+          heading={t('Submit changes for testing')}
           body={
             <Trans i18nKey="tourTaskSubmit">
               When the work is complete, it’s time to submit the changes so that
@@ -759,9 +759,7 @@ const TaskDetail = (
     !taskIsMerged &&
     (readyToCaptureChanges || orgHasBeenVisited)
   ) {
-    let captureButtonText: JSX.Element = i18n.t(
-      'Check for Unretrieved Changes',
-    );
+    let captureButtonText: JSX.Element = t('Check for Unretrieved Changes');
     const isPrimary =
       (orgHasChanges || !readyToSubmit) &&
       (!task.pr_is_open || hasReviewRejected);
@@ -769,7 +767,7 @@ const TaskDetail = (
       /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Retrieving Selected Changes…')}
+          label={t('Retrieving Selected Changes…')}
           variant={isPrimary ? 'inverse' : 'base'}
         />
       );
@@ -777,7 +775,7 @@ const TaskDetail = (
       /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Checking for Unretrieved Changes…')}
+          label={t('Checking for Unretrieved Changes…')}
           variant={isPrimary ? 'inverse' : 'base'}
         />
       );
@@ -785,12 +783,12 @@ const TaskDetail = (
       /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Reassigning Org Ownership…')}
+          label={t('Reassigning Org Ownership…')}
           variant={isPrimary ? 'inverse' : 'base'}
         />
       );
     } else if (orgHasChanges) {
-      captureButtonText = i18n.t('Retrieve Changes from Dev Org');
+      captureButtonText = t('Retrieve Changes from Dev Org');
     }
     captureButton = (
       <div className="slds-is-relative">
@@ -811,7 +809,7 @@ const TaskDetail = (
         <TourPopover
           id="tour-task-retrieve"
           align="right"
-          heading={i18n.t('Retrieve changes')}
+          heading={t('Retrieve changes')}
           body={
             <Trans i18nKey="tourTaskRetrieve">
               After you’ve made changes, come back to Metecho to save or
@@ -846,10 +844,8 @@ const TaskDetail = (
     <DocumentTitle
       title={
         epic
-          ? `${task.name} | ${epic.name} | ${project.name} | ${i18n.t(
-              'Metecho',
-            )}`
-          : `${task.name} | ${project.name} | ${i18n.t('Metecho')}`
+          ? `${task.name} | ${epic.name} | ${project.name} | ${t('Metecho')}`
+          : `${task.name} | ${project.name} | ${t('Metecho')}`
       }
     >
       <DetailPageLayout
@@ -859,7 +855,7 @@ const TaskDetail = (
           <TourPopover
             id="tour-task-name"
             align="bottom left"
-            heading={i18n.t('Task name & GitHub link')}
+            heading={t('Task name & GitHub link')}
             body={
               <Trans i18nKey="tourTaskName">
                 This is the name of the Task you are viewing. Select the link
@@ -884,7 +880,7 @@ const TaskDetail = (
                 url: epicUrl as string,
               }
             : {
-                name: i18n.t('no Epic'),
+                name: t('no Epic'),
                 emphasis: true,
               },
           { name: task.name },
@@ -894,13 +890,13 @@ const TaskDetail = (
           <>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                {i18n.t('GitHub Issue')}
+                {t('GitHub Issue')}
               </h2>
               {task.issue ? (
                 <IssueCard issueId={task.issue} taskId={task.id} />
               ) : (
                 <Button
-                  label={i18n.t('Attach Issue to Task')}
+                  label={t('Attach Issue to Task')}
                   variant="outline-brand"
                   onClick={openSelectIssueModal}
                 />
@@ -915,7 +911,7 @@ const TaskDetail = (
               <TourPopover
                 id="tour-task-path"
                 align="left"
-                heading={i18n.t('Task progress path')}
+                heading={t('Task progress path')}
                 body={
                   <Trans i18nKey="tourTaskPath">
                     A Task starts its journey as <b>Planned</b>. When a Dev Org
@@ -940,7 +936,7 @@ const TaskDetail = (
                 {task.status === TASK_STATUSES.CANCELED ? (
                   <>
                     <h3 className="slds-text-heading_medium slds-m-bottom_small">
-                      {i18n.t('Next Steps for this Task')}
+                      {t('Next Steps for this Task')}
                     </h3>
                     <p>
                       <Trans i18nKey="taskCanceledHelp">
@@ -975,7 +971,7 @@ const TaskDetail = (
                     <TourPopover
                       id="tour-task-next-steps"
                       align="top"
-                      heading={i18n.t('Wondering what to do next?')}
+                      heading={t('Wondering what to do next?')}
                       body={
                         <Trans i18nKey="tourTaskNextSteps">
                           The Next Steps section is designed as a quick
@@ -1029,7 +1025,7 @@ const TaskDetail = (
           <TourPopover
             id="tour-task-scratch-org"
             align="top left"
-            heading={i18n.t('View & play with a Task')}
+            heading={t('View & play with a Task')}
             body={
               <Trans i18nKey="tourTaskStratchOrg">
                 Your Scratch Org is a temporary place for you to view the work
@@ -1039,7 +1035,7 @@ const TaskDetail = (
             }
           />
           <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-            {i18n.t('My Task Scratch Org')}
+            {t('My Task Scratch Org')}
           </h2>
           {taskOrgs ? (
             <>
@@ -1066,7 +1062,7 @@ const TaskDetail = (
                 </div>
               ) : (
                 <Button
-                  label={i18n.t('Create Scratch Org')}
+                  label={t('Create Scratch Org')}
                   variant="outline-brand"
                   onClick={openCreateOrgModal}
                   disabled={Boolean(epic?.currently_creating_branch)}
@@ -1076,9 +1072,7 @@ const TaskDetail = (
           ) : (
             // Fetching scratch orgs from API
             <Button
-              label={
-                <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
-              }
+              label={<LabelWithSpinner label={t('Loading Scratch Orgs…')} />}
               disabled
             />
           )}

@@ -1,5 +1,5 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
@@ -19,14 +19,14 @@ const PageOptions = ({
 
   switch (modelType) {
     case OBJECT_TYPES.TASK:
-      assistiveText = i18n.t('Task Options');
-      editLabel = i18n.t('Edit Task');
-      deleteLabel = i18n.t('Delete Task');
+      assistiveText = t('Task Options');
+      editLabel = t('Edit Task');
+      deleteLabel = t('Delete Task');
       break;
     case OBJECT_TYPES.EPIC:
-      assistiveText = i18n.t('Epic Options');
-      editLabel = i18n.t('Edit Epic');
-      deleteLabel = i18n.t('Delete Epic');
+      assistiveText = t('Epic Options');
+      editLabel = t('Edit Epic');
+      deleteLabel = t('Delete Epic');
       break;
   }
   return (
