@@ -3,7 +3,7 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -95,19 +95,15 @@ const AssignEpicCollaboratorsModal = ({
     <Modal
       isOpen={isOpen}
       heading={heading}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={
         allUsers.length
           ? [
-              <Button
-                key="cancel"
-                label={i18n.t('Cancel')}
-                onClick={handleClose}
-              />,
+              <Button key="cancel" label={t('Cancel')} onClick={handleClose} />,
               <Button
                 key="submit"
                 type="submit"
-                label={i18n.t('Save')}
+                label={t('Save')}
                 variant="brand"
                 onClick={handleSubmit}
               />,
@@ -154,7 +150,7 @@ const AssignEpicCollaboratorsModal = ({
             onRowChange={updateSelection}
           >
             <DataTableColumn
-              label={i18n.t('GitHub Collaborators')}
+              label={t('GitHub Collaborators')}
               property="login"
               primaryColumn
               truncate

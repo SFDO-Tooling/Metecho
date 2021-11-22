@@ -9,6 +9,7 @@
     "bibhasdn.django-html",
     "csstools.postcss",
     "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
     "formulahendry.auto-rename-tag",
     "jounqin.vscode-mdx",
     "ms-azuretools.vscode-docker",
@@ -16,7 +17,6 @@
     "ms-python.vscode-pylance",
     "ms-vscode.sublime-keybindings",
     "naumovs.color-highlight",
-    "prettier.prettier-vscode",
     "stkb.rewrap",
     "stylelint.vscode-stylelint",
     "syler.sass-indented",
@@ -25,7 +25,12 @@
     "xabikos.javascriptsnippets"
   ],
   "settings": {
-    "terminal.integrated.shell.linux": null,
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "/bin/bash"
+      }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
     "editor.bracketPairColorization.enabled": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
@@ -42,6 +47,7 @@
     "javascript.suggestionActions.enabled": false,
     "typescript.preferences.quoteStyle": "single",
     "python.formatting.provider": "black",
+    "python.formatting.blackPath": "black",
     "python.languageServer": "Pylance",
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
@@ -76,7 +82,9 @@
       "editor.rulers": [80]
     },
     "[python]": {
-      "editor.rulers": [88]
+      "editor.rulers": [88],
+      "editor.tabSize": 4,
+      "editor.defaultFormatter": "ms-python.python"
     },
     "[scss]": {
       "editor.rulers": [80],

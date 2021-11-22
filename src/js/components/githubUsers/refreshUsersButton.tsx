@@ -1,5 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { some } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -37,14 +37,14 @@ const RefreshGitHubUsersButton = ({
       {isRefreshing ? (
         <Button
           label={
-            <LabelWithSpinner label={i18n.t('Syncing GitHub Collaborators…')} />
+            <LabelWithSpinner label={t('Syncing GitHub Collaborators…')} />
           }
           variant="outline-brand"
           disabled
         />
       ) : (
         <Button
-          label={i18n.t('Re-Sync GitHub Collaborators')}
+          label={t('Re-Sync GitHub Collaborators')}
           variant="outline-brand"
           iconCategory="utility"
           iconName="refresh"

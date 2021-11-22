@@ -84,7 +84,7 @@ module.exports = {
             options: {
               url: { filter: (url) => !url.startsWith('/') },
               sourceMap: true,
-              importLoaders: 1,
+              importLoaders: 2,
             },
           },
           {

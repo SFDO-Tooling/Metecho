@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { pick } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -286,7 +286,7 @@ const ProjectDetail = (
   }
 
   return (
-    <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
+    <DocumentTitle title={`${project.name} | ${t('Metecho')}`}>
       <DetailPageLayout
         type={OBJECT_TYPES.PROJECT}
         title={project.name}
@@ -294,7 +294,7 @@ const ProjectDetail = (
           <TourPopover
             id="tour-project-name"
             align="bottom left"
-            heading={i18n.t('Project name & GitHub link')}
+            heading={t('Project name & GitHub link')}
             body={
               <Trans i18nKey="tourProjectName">
                 View, test, and contribute to Salesforce Projects using Metecho!
@@ -321,7 +321,7 @@ const ProjectDetail = (
               <TourPopover
                 id="tour-project-scratch-org"
                 align="top"
-                heading={i18n.t('View & play with a Project')}
+                heading={t('View & play with a Project')}
                 body={
                   <Trans i18nKey="tourProjectScratchOrg">
                     Scratch Orgs are a temporary place for you to view the work
@@ -333,7 +333,7 @@ const ProjectDetail = (
                 }
               />
               <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-                {i18n.t('My Project Scratch Org')}
+                {t('My Project Scratch Org')}
               </h2>
             </div>
             {orgs || runningPlayTour ? (
@@ -356,7 +356,7 @@ const ProjectDetail = (
                 ) : (
                   <Button
                     className="tour-create-scratch-org"
-                    label={i18n.t('Create Scratch Org')}
+                    label={t('Create Scratch Org')}
                     variant="outline-brand"
                     onClick={openCreateOrgModal}
                   />
@@ -366,9 +366,7 @@ const ProjectDetail = (
               // Fetching scratch orgs from API
               <Button
                 className="tour-scratch-org"
-                label={
-                  <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
-                }
+                label={<LabelWithSpinner label={t('Loading Scratch Orgs…')} />}
                 disabled
               />
             )}
@@ -386,7 +384,7 @@ const ProjectDetail = (
                 <TourPopover
                   id="tour-project-epics-list"
                   align="top left"
-                  heading={i18n.t('List of Epics')}
+                  heading={t('List of Epics')}
                   body={
                     <Trans i18nKey="tourEpicsList">
                       Select the Epics tab to see a list of all Epics for this
@@ -394,7 +392,7 @@ const ProjectDetail = (
                     </Trans>
                   }
                 />
-                {i18n.t('Epics')}
+                {t('Epics')}
               </div>
             }
           >
@@ -402,8 +400,8 @@ const ProjectDetail = (
               <Button
                 label={
                   epics?.fetched || tourRunning
-                    ? i18n.t('Create an Epic')
-                    : i18n.t('Loading Epics…')
+                    ? t('Create an Epic')
+                    : t('Loading Epics…')
                 }
                 variant="brand"
                 onClick={openCreateEpicModal}
@@ -424,7 +422,7 @@ const ProjectDetail = (
                     to GitHub branches, just like Tasks.
                   </Trans>
                 }
-                heading={i18n.t('Create Epics to group Tasks')}
+                heading={t('Create Epics to group Tasks')}
               />
             </div>
             <EpicTable
@@ -445,9 +443,7 @@ const ProjectDetail = (
             {epics?.epics?.length && epics?.next ? (
               <div className="slds-m-top_large">
                 <Button
-                  label={
-                    fetchingEpics ? <LabelWithSpinner /> : i18n.t('Load More')
-                  }
+                  label={fetchingEpics ? <LabelWithSpinner /> : t('Load More')}
                   onClick={fetchMoreEpics}
                 />
               </div>
@@ -459,7 +455,7 @@ const ProjectDetail = (
                 <TourPopover
                   id="tour-project-tasks-list"
                   align="top left"
-                  heading={i18n.t('List of Tasks')}
+                  heading={t('List of Tasks')}
                   body={
                     <Trans i18nKey="tourTasksList">
                       Select the Tasks tab to see a list of all the work being
@@ -469,7 +465,7 @@ const ProjectDetail = (
                     </Trans>
                   }
                 />
-                {i18n.t('Tasks')}
+                {t('Tasks')}
               </div>
             }
           >
@@ -477,8 +473,8 @@ const ProjectDetail = (
               <Button
                 label={
                   tasks || tourRunning
-                    ? i18n.t('Create a Task')
-                    : i18n.t('Loading Tasks…')
+                    ? t('Create a Task')
+                    : t('Loading Tasks…')
                 }
                 variant="brand"
                 className="tour-create-task"
@@ -490,7 +486,7 @@ const ProjectDetail = (
               <TourPopover
                 id="tour-project-add-task"
                 align="top left"
-                heading={i18n.t('Create a Task to contribute')}
+                heading={t('Create a Task to contribute')}
                 body={
                   <Trans i18nKey="tourProjectCreateTask">
                     To get started contributing to this Project, create a Task.

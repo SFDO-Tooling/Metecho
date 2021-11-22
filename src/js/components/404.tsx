@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { ReactNode } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -27,7 +27,7 @@ export const EmptyIllustration = ({
 );
 
 const FourOhFour = ({ message }: { message?: ReactNode }) => (
-  <DocumentTitle title={`${i18n.t('404')} | ${i18n.t('Metecho')}`}>
+  <DocumentTitle title={`${t('404')} | ${t('Metecho')}`}>
     <EmptyIllustration
       message={
         message || (

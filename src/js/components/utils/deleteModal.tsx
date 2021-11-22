@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -56,7 +56,7 @@ const DeleteModal = ({
   let heading, message;
   switch (modelType) {
     case OBJECT_TYPES.EPIC:
-      heading = i18n.t('Confirm Deleting Epic');
+      heading = t('Confirm Deleting Epic');
       message = (
         <Trans i18nKey="confirmDeleteEpic">
           Are you sure you want to delete Epic “{{ name: model.name }}”? This
@@ -65,7 +65,7 @@ const DeleteModal = ({
       );
       break;
     case OBJECT_TYPES.TASK:
-      heading = i18n.t('Confirm Deleting Task');
+      heading = t('Confirm Deleting Task');
       message = (
         <Trans i18nKey="confirmDeleteTask">
           Are you sure you want to delete Task “{{ name: model.name }}”? This
@@ -79,7 +79,7 @@ const DeleteModal = ({
     <Modal
       isOpen={isOpen}
       size="small"
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       disableClose={isSaving}
       heading={heading}
       onRequestClose={handleClose}
@@ -87,7 +87,7 @@ const DeleteModal = ({
       footer={[
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={handleClose}
           disabled={isSaving}
         />,
@@ -96,9 +96,9 @@ const DeleteModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Deleting…')} variant="inverse" />
+              <LabelWithSpinner label={t('Deleting…')} variant="inverse" />
             ) : (
-              i18n.t('Delete')
+              t('Delete')
             )
           }
           variant="brand"
