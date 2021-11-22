@@ -19,6 +19,7 @@ export const selectIssueNotFound = createSelector(
 export const selectIssue = createSelector(
   [selectIssues, selectIssueId, selectIssueNotFound],
   (issues, id, notFound) => {
+    /* istanbul ignore if */
     if (!id) {
       return undefined;
     }

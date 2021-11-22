@@ -30,15 +30,19 @@ const IssueCard = ({ issueId, epicId, taskId }: Props) => {
           patch: true,
         }),
       );
-    } else if (taskId) {
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.TASK,
-          url: window.api_urls.task_detail(taskId),
-          data: { issue: null },
-          patch: true,
-        }),
-      );
+    } else {
+      /* istanbul ignore else */
+      // eslint-disable-next-line no-lonely-if
+      if (taskId) {
+        dispatch(
+          updateObject({
+            objectType: OBJECT_TYPES.TASK,
+            url: window.api_urls.task_detail(taskId),
+            data: { issue: null },
+            patch: true,
+          }),
+        );
+      }
     }
   }, [dispatch, epicId, taskId]);
 

@@ -93,6 +93,7 @@ const SelectIssueModal = ({
   };
 
   const onAttach = () => {
+    /* istanbul ignore else */
     if (selectedIssue) {
       if (attachingToEpic) {
         dispatch(
@@ -103,15 +104,19 @@ const SelectIssueModal = ({
             patch: true,
           }),
         );
-      } else if (attachingToTask) {
-        dispatch(
-          updateObject({
-            objectType: OBJECT_TYPES.TASK,
-            url: window.api_urls.task_detail(attachingToTask.id),
-            data: { issue: selectedIssue },
-            patch: true,
-          }),
-        );
+      } else {
+        /* istanbul ignore else */
+        // eslint-disable-next-line no-lonely-if
+        if (attachingToTask) {
+          dispatch(
+            updateObject({
+              objectType: OBJECT_TYPES.TASK,
+              url: window.api_urls.task_detail(attachingToTask.id),
+              data: { issue: selectedIssue },
+              patch: true,
+            }),
+          );
+        }
       }
     }
     closeForm();
