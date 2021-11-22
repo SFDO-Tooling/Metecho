@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import Path from '@/js/components/path';
@@ -12,12 +12,7 @@ interface Props {
 const EpicStatusPath = ({ status, prIsOpen }: Props) => {
   let activeIdx = 0;
   let isCompleted = false;
-  const steps = [
-    i18n.t('Planned'),
-    i18n.t('In progress'),
-    i18n.t('Review'),
-    i18n.t('Merged'),
-  ];
+  const steps = [t('Planned'), t('In progress'), t('Review'), t('Merged')];
   switch (status) {
     case EPIC_STATUSES.IN_PROGRESS:
       activeIdx = 1;

@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { AssignedUserTracker } from '@/js/components/orgs/taskOrgCards';
@@ -31,13 +31,13 @@ const ConfirmRemoveUserModal = ({
   };
 
   const heading = waitingToRemoveUser?.assignee
-    ? i18n.t('Confirm Changing Developer and Deleting Dev Org')
-    : i18n.t('Confirm Removing Developer and Deleting Dev Org');
+    ? t('Confirm Changing Developer and Deleting Dev Org')
+    : t('Confirm Removing Developer and Deleting Dev Org');
   const message = waitingToRemoveUser?.assignee
-    ? i18n.t(
+    ? t(
         'The existing Dev Org for this Task has unretrieved changes. Changing the assigned Developer will also delete the Org, and any changes will be lost. Are you sure you want to do that?',
       )
-    : i18n.t(
+    : t(
         'The existing Dev Org for this Task has unretrieved changes. Removing the assigned Developer will also delete the Org, and any changes will be lost. Are you sure you want to do that?',
       );
 
@@ -46,13 +46,13 @@ const ConfirmRemoveUserModal = ({
       isOpen={Boolean(isOpen && waitingToRemoveUser)}
       heading={heading}
       prompt="warning"
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       onRequestClose={handleCancel}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,
+        <Button key="cancel" label={t('Cancel')} onClick={handleCancel} />,
         <Button
           key="submit"
-          label={i18n.t('Confirm')}
+          label={t('Confirm')}
           variant="brand"
           onClick={handleSubmit}
         />,

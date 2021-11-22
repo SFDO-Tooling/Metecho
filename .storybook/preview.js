@@ -11,7 +11,7 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import fetchMock from 'fetch-mock';
-import i18n from 'i18next';
+import { use } from 'i18next';
 import React from 'react';
 import { initReactI18next } from 'react-i18next';
 import { MemoryRouter } from 'react-router-dom';
@@ -26,7 +26,7 @@ export const parameters = {
 };
 
 // Enable translations
-i18n.use(initReactI18next).init({
+use(initReactI18next).init({
   compatibilityJSON: 'v3',
   lng: 'en',
   resources: {

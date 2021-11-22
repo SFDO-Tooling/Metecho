@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { Org } from '@/js/store/orgs/reducer';
@@ -36,26 +36,26 @@ const ConfirmDeleteModal = ({
   let heading, warning, label, type;
   /* istanbul ignore if */
   if (org?.org_type === ORG_TYPES.QA) {
-    type = i18n.t('Test Org');
+    type = t('Test Org');
   } else if (org?.org_type === 'Dev') {
-    type = i18n.t('Dev Org');
+    type = t('Dev Org');
   } else {
-    type = i18n.t('Scratch Org');
+    type = t('Scratch Org');
   }
   if (actionType === CONFIRM_ORG_TRACKER.REFRESH) {
-    heading = i18n.t('Confirm Refreshing Org With Unretrieved Changes');
-    warning = i18n.t(
+    heading = t('Confirm Refreshing Org With Unretrieved Changes');
+    warning = t(
       'This {{type}} has unretrieved changes which will be lost. Are you sure you want to refresh this Org?',
       { type },
     );
-    label = i18n.t('Refresh Org');
+    label = t('Refresh Org');
   } else {
-    heading = i18n.t('Confirm Deleting Org With Unretrieved Changes');
-    warning = i18n.t(
+    heading = t('Confirm Deleting Org With Unretrieved Changes');
+    warning = t(
       'This {{type}} has unretrieved changes which will be lost. Are you sure you want to delete this Org?',
       { type },
     );
-    label = i18n.t('Delete Org');
+    label = t('Delete Org');
   }
 
   return (
@@ -63,10 +63,10 @@ const ConfirmDeleteModal = ({
       isOpen={isOpen}
       heading={heading}
       prompt="warning"
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       onRequestClose={handleCancel}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,
+        <Button key="cancel" label={t('Cancel')} onClick={handleCancel} />,
         <Button
           key="submit"
           label={label}

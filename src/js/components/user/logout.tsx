@@ -1,5 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -11,12 +11,7 @@ const Logout = (props: any) => {
     dispatch(logout());
   }, [dispatch]);
   return (
-    <Button
-      label={i18n.t('Log Out')}
-      variant="link"
-      onClick={doLogout}
-      {...props}
-    />
+    <Button label={t('Log Out')} variant="link" onClick={doLogout} {...props} />
   );
 };
 

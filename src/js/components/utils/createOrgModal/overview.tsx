@@ -1,5 +1,5 @@
 import Card from '@salesforce/design-system-react/components/card';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -22,13 +22,13 @@ const Overview = ({
   let isProject = false;
 
   if (task) {
-    type = i18n.t('Task');
+    type = t('Task');
     name = task.name;
   } else if (epic) {
-    type = i18n.t('Epic');
+    type = t('Epic');
     name = epic.name;
   } else {
-    type = i18n.t('Project');
+    type = t('Project');
     name = project.name;
     isProject = true;
   }

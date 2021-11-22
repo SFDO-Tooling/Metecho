@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -37,19 +37,19 @@ const ConfirmRemoveUserModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      heading={i18n.t(
+      heading={t(
         'confirmRemoveCollaboratorsHeading',
         'Confirm Removing Collaborator',
         { count },
       )}
       prompt="warning"
       onRequestClose={handleClose}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button key="cancel" label={t('Cancel')} onClick={handleClose} />,
         <Button
           key="submit"
-          label={i18n.t('Confirm')}
+          label={t('Confirm')}
           variant="brand"
           onClick={handleSubmit}
         />,

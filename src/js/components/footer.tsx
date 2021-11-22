@@ -1,5 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -39,7 +39,7 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
       />
       <div className="footer-item slds-grid">
         <p>
-          {i18n.t(
+          {t(
             'Copyright 2019–{{current_year}} Salesforce.org. All rights reserved.',
             { current_year: currentYear },
           )}
@@ -47,7 +47,7 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
         {showTermsModal && (
           <>
             <Button
-              label={i18n.t('Terms of Service')}
+              label={t('Terms of Service')}
               variant="link"
               className="slds-p-left_xxx-small"
               onClick={openTermsModal}

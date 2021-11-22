@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { Location } from 'history';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StaticContext } from 'react-router';
@@ -39,27 +39,24 @@ export const TermsModal = ({
   <Modal
     isOpen={isRequired || isOpen || false}
     disableClose={isRequired}
-    heading={i18n.t('Metecho Terms of Service')}
+    heading={t('Metecho Terms of Service')}
     size="medium"
-    assistiveText={{ closeButton: i18n.t('Close') }}
+    assistiveText={{ closeButton: t('Close') }}
     footer={
       isRequired
         ? [
             <Logout
               key="cancel"
-              label={i18n.t('Cancel and Log Out')}
+              label={t('Cancel and Log Out')}
               variant="neutral"
             />,
             <Button
               key="submit"
               label={
                 isSubmitting ? (
-                  <LabelWithSpinner
-                    label={i18n.t('Saving…')}
-                    variant="inverse"
-                  />
+                  <LabelWithSpinner label={t('Saving…')} variant="inverse" />
                 ) : (
-                  i18n.t('I Agree')
+                  t('I Agree')
                 )
               }
               variant="brand"

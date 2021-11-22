@@ -3,7 +3,7 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import Icon from '@salesforce/design-system-react/components/icon';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useState } from 'react';
 
 import {
@@ -43,14 +43,14 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
             <abbr className="slds-required" title="required">
               *
             </abbr>
-            {i18n.t('Commit Message')}
+            {t('Commit Message')}
           </>
         }
       >
         <Textarea
           id="commit-message"
           className="metecho-textarea"
-          assistiveText={{ label: i18n.t('Commit Message') }}
+          assistiveText={{ label: t('Commit Message') }}
           name="commit_message"
           value={inputs.commit_message}
           required
@@ -59,7 +59,7 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
           onChange={handleInputChange}
         />
       </ModalCard>
-      <ModalCard heading={i18n.t('Selected Changes')} noBodyPadding>
+      <ModalCard heading={t('Selected Changes')} noBodyPadding>
         <div data-form="task-capture">
           {Object.keys(inputs.changes)
             .sort()

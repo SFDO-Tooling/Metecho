@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { ReactNode, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -190,16 +190,16 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     }
   };
 
-  let ignoreLabel: React.ReactNode = i18n.t('Ignore Selected Changes');
+  let ignoreLabel: React.ReactNode = t('Ignore Selected Changes');
   if (ignoringChanges) {
     ignoreLabel = (
       <LabelWithSpinner
-        label={i18n.t('Saving Ignored Changes…')}
+        label={t('Saving Ignored Changes…')}
         variant={onlyIgnoredChecked ? 'inverse' : 'base'}
       />
     );
   } else if (onlyIgnoredChecked) {
-    ignoreLabel = i18n.t('Un-ignore Selected Changes');
+    ignoreLabel = t('Un-ignore Selected Changes');
   }
 
   const handleClose = () => {
@@ -220,7 +220,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
 
   const pages = [
     {
-      heading: i18n.t('Select the location to retrieve changes'),
+      heading: t('Select the location to retrieve changes'),
       contents: (
         <TargetDirectoriesForm
           key="page-1-contents"
@@ -233,7 +233,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       footer: (
         <Button
           key="page-1-button-1"
-          label={i18n.t('Save & Next')}
+          label={t('Save & Next')}
           variant="brand"
           onClick={nextPage}
           disabled={!dirSelected}
@@ -241,7 +241,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       ),
     },
     {
-      heading: i18n.t('Select the changes to retrieve or ignore'),
+      heading: t('Select the changes to retrieve or ignore'),
       contents: (
         <ChangesForm
           key="page-2-contents"
@@ -258,7 +258,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       footer: [
         <Button
           key="page-2-button-1"
-          label={i18n.t('Go Back')}
+          label={t('Go Back')}
           variant="outline-brand"
           onClick={prevPage}
           disabled={ignoringChanges}
@@ -274,7 +274,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
         />,
         <Button
           key="page-2-button-3"
-          label={i18n.t('Save & Next')}
+          label={t('Save & Next')}
           variant={onlyIgnoredChecked ? 'outline-brand' : 'brand'}
           onClick={nextPage}
           disabled={
@@ -284,7 +284,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       ],
     },
     {
-      heading: i18n.t('Describe the changes you are retrieving'),
+      heading: t('Describe the changes you are retrieving'),
       contents: (
         <CommitMessageForm
           key="page-3-contents"
@@ -296,7 +296,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       footer: [
         <Button
           key="page-3-button-1"
-          label={i18n.t('Go Back')}
+          label={t('Go Back')}
           variant="outline-brand"
           onClick={prevPage}
           disabled={capturingChanges}
@@ -307,11 +307,11 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
           label={
             capturingChanges ? (
               <LabelWithSpinner
-                label={i18n.t('Retrieving Selected Changes…')}
+                label={t('Retrieving Selected Changes…')}
                 variant="inverse"
               />
             ) : (
-              i18n.t('Retrieve Selected Changes')
+              t('Retrieve Selected Changes')
             )
           }
           variant="brand"
@@ -329,7 +329,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       disableClose={capturingChanges}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}
-      assistiveText={{ closeButton: i18n.t('Close') }}
+      assistiveText={{ closeButton: t('Close') }}
       directional={pageIndex > 0}
       onRequestClose={handleClose}
     >

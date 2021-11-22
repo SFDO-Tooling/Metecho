@@ -1,5 +1,5 @@
 import ProgressBar from '@salesforce/design-system-react/components/progress-bar';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -23,7 +23,7 @@ const EpicProgress = ({ range }: Props) => {
           <TourPopover
             id="tour-epic-progress-bar"
             align="top"
-            heading={i18n.t('Task progress bar')}
+            heading={t('Task progress bar')}
             body={
               <Trans i18nKey="tourTaskProgressBar">
                 A quick reference to show what percentage of an Epic is complete

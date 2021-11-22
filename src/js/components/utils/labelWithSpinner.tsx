@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { SpinnerWrapper } from '@/js/components/utils';
@@ -17,7 +17,7 @@ const LabelWithSpinner = ({
     <span className="slds-is-relative slds-m-right_large">
       <SpinnerWrapper variant={variant} size={size} />
     </span>
-    {label || i18n.t('Loading…')}
+    {label || t('Loading…')}
   </>
 );
 
