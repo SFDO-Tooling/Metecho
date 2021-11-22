@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import Joyride, {
@@ -26,7 +26,7 @@ interface Props extends TourProps {
 
 export const getFinalStep = (): Step => ({
   target: '.tour-walkthroughs',
-  title: i18n.t('Review walkthroughs any time'),
+  title: t('Review walkthroughs any time'),
   content: (
     <Trans i18nKey="walkthroughDropdown">
       If you would like to review this or any other walkthrough, simply click
@@ -68,10 +68,10 @@ const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
       steps={steps}
       run={run}
       locale={{
-        back: i18n.t('Back'),
-        close: i18n.t('Close'),
-        last: i18n.t('Close'),
-        next: i18n.t('Next'),
+        back: t('Back'),
+        close: t('Close'),
+        last: t('Close'),
+        next: t('Next'),
       }}
       continuous
       showProgress

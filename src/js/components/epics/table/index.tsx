@@ -1,7 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { orderBy } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
@@ -56,11 +56,11 @@ const EpicTable = ({
             key="details"
             label={
               <>
-                {i18n.t('Epic')}
+                {t('Epic')}
                 <TourPopover
                   id="tour-epic-name-column"
                   align="top left"
-                  heading={i18n.t('Epic names')}
+                  heading={t('Epic names')}
                   body={
                     <Trans i18nKey="tourEpicNameColumn">
                       An Epic’s name describes a group of related Tasks. Select
@@ -84,11 +84,11 @@ const EpicTable = ({
             key="taskCount"
             label={
               <>
-                {i18n.t('Tasks')}
+                {t('Tasks')}
                 <TourPopover
                   id="tour-epic-tasks-column"
                   align="top"
-                  heading={i18n.t('Epic Tasks')}
+                  heading={t('Epic Tasks')}
                   body={
                     <Trans i18nKey="tourEpicTasksColumn">
                       The Tasks column is a quick way to see how many Tasks are
@@ -107,11 +107,11 @@ const EpicTable = ({
             key="status"
             label={
               <>
-                {i18n.t('Status')}
+                {t('Status')}
                 <TourPopover
                   id="tour-epic-status-column"
                   align="top"
-                  heading={i18n.t('Epic statuses')}
+                  heading={t('Epic statuses')}
                   body={
                     <Trans i18nKey="tourEpicStatusColumn">
                       An Epic begins with a <b>Planned</b> status. The status
@@ -142,12 +142,12 @@ const EpicTable = ({
                   size="xx-small"
                   className="slds-m-bottom_xx-small"
                   containerClassName="slds-current-color"
-                  title={i18n.t('Collaborators')}
+                  title={t('Collaborators')}
                 />
                 <TourPopover
                   id="tour-epic-collaborators-column"
                   align="top"
-                  heading={i18n.t('Epic Collaborators')}
+                  heading={t('Epic Collaborators')}
                   body={
                     <Trans i18nKey="tourEpicCollaboratorsColumn">
                       The Collaborators column shows the number of people
@@ -166,7 +166,7 @@ const EpicTable = ({
         </DataTable>
       ) : (
         <EmptyIllustration
-          heading={i18n.t('No Epics')}
+          heading={t('No Epics')}
           message={
             userHasPermissions ? (
               <Trans i18nKey="createEpicHelpText">

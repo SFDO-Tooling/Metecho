@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { ScrollProps, withScroll } from 'react-fns';
@@ -106,7 +106,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
           <TourPopover
             id="tour-projects-list"
             align="top left"
-            heading={i18n.t('Metecho Project')}
+            heading={t('Metecho Project')}
             body={
               <Trans i18nKey="tourMetechoProject">
                 This is a Metecho <b>Project</b>. Projects are equivalent to
@@ -126,13 +126,13 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
   }
 
   return (
-    <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
+    <DocumentTitle title={`${t('Projects')} | ${t('Metecho')}`}>
       <>
         <div className="slds-is-relative page-title">
           <TourPopover
             id="tour-projects-select-project"
             align="bottom left"
-            heading={i18n.t('Begin exploring Projects')}
+            heading={t('Begin exploring Projects')}
             body={
               <Trans i18nKey="tourSelectProject">
                 Select a Metecho Project from the list to begin viewing or
@@ -147,7 +147,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
               slds-is-relative
               slds-p-around_x-large
               project-placeholder"
-            title={i18n.t('Select a Project')}
+            title={t('Select a Project')}
           />
         </div>
 
@@ -178,16 +178,14 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             >
               {refreshing ? (
                 <Button
-                  label={
-                    <LabelWithSpinner label={i18n.t('Syncing Projects…')} />
-                  }
+                  label={<LabelWithSpinner label={t('Syncing Projects…')} />}
                   variant="outline-brand"
                   disabled
                 />
               ) : (
                 <div className="slds-is-relative">
                   <Button
-                    label={i18n.t('Re-Sync Projects')}
+                    label={t('Re-Sync Projects')}
                     variant="outline-brand"
                     iconCategory="utility"
                     iconName="refresh"
@@ -197,7 +195,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   <TourPopover
                     id="tour-projects-resync-list"
                     align="left"
-                    heading={i18n.t('View an updated Project list')}
+                    heading={t('View an updated Project list')}
                     body={
                       <Trans i18nKey="tourUpdateProject">
                         If you have recently been added to a Project on GitHub,
@@ -226,7 +224,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
               <span className="slds-is-relative slds-m-right_large">
                 <SpinnerWrapper variant="brand" size="small" />
               </span>
-              {i18n.t('Loading…')}
+              {t('Loading…')}
             </div>
           ) : null}
         </div>

@@ -1,6 +1,6 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -20,8 +20,8 @@ const ErrorToast = ({ error }: { error: ErrorType }) => {
   return (
     <Toast
       labels={{
-        heading: i18n.t("Uh oh, we've encountered an error. You may need to"),
-        headingLink: i18n.t('reload the page.'),
+        heading: t("Uh oh, we've encountered an error. You may need to"),
+        headingLink: t('reload the page.'),
         details: error.message,
       }}
       variant="error"

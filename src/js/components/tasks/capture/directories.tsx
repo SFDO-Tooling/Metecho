@@ -1,7 +1,7 @@
 import Radio from '@salesforce/design-system-react/components/radio';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -38,10 +38,10 @@ const TargetDirectoriesForm = ({
     }
   });
   const headings = {
-    source: i18n.t('Package Directories'),
-    pre: i18n.t('Pre-Install Directories'),
-    post: i18n.t('Post-Install Directories'),
-    config: i18n.t('Optional Configuration Directories'),
+    source: t('Package Directories'),
+    pre: t('Pre-Install Directories'),
+    post: t('Post-Install Directories'),
+    config: t('Optional Configuration Directories'),
   };
   const help = {
     source: (

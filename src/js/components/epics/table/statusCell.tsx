@@ -1,7 +1,7 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { TableCellProps } from '@/js/components/epics/table';
@@ -16,19 +16,19 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   let display, icon;
   switch (status) {
     case EPIC_STATUSES.PLANNED:
-      display = i18n.t('Planned');
+      display = t('Planned');
       icon = <ProgressRing value={0} />;
       break;
     case EPIC_STATUSES.IN_PROGRESS:
-      display = i18n.t('In Progress');
+      display = t('In Progress');
       icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
       break;
     case EPIC_STATUSES.REVIEW:
-      display = i18n.t('Review');
+      display = t('Review');
       icon = <ProgressRing value={100} />;
       break;
     case EPIC_STATUSES.MERGED:
-      display = i18n.t('Merged');
+      display = t('Merged');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
   }

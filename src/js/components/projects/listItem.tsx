@@ -1,5 +1,5 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -28,7 +28,7 @@ const ProjectListItem = ({ project }: { project: Project }) => (
           <div>
             <img
               src={project.repo_image_url}
-              alt={i18n.t('social image for {{title}}', {
+              alt={t('social image for {{title}}', {
                 title: project.name,
               })}
             />

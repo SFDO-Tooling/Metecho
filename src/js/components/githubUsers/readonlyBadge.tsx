@@ -1,7 +1,7 @@
 import Badge from '@salesforce/design-system-react/components/badge';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -29,8 +29,8 @@ const ReadonlyBadge = ({
     )}
     dialogClassName="modal-tooltip"
   >
-    <span tabIndex={0} title={i18n.t('read-only')}>
-      <Badge content={i18n.t('read-only')} {...props} />
+    <span tabIndex={0} title={t('read-only')}>
+      <Badge content={t('read-only')} {...props} />
     </span>
   </Tooltip>
 );

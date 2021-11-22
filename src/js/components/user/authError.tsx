@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
@@ -15,9 +15,7 @@ const AuthError = () => {
   const user = useSelector(selectUserState);
 
   return (
-    <DocumentTitle
-      title={`${i18n.t('Authentication Error')} | ${i18n.t('Metecho')}`}
-    >
+    <DocumentTitle title={`${t('Authentication Error')} | ${t('Metecho')}`}>
       <>
         <EmptyIllustration
           message={

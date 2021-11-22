@@ -6,7 +6,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -206,13 +206,13 @@ const CreateEpicModal = ({
   const selection = branchOptions.find((branch) => branch.label === inputVal);
   let noOptionsFoundText = null;
   if (fetchingBranches) {
-    noOptionsFoundText = i18n.t('Loading existing branches…');
+    noOptionsFoundText = t('Loading existing branches…');
   } else {
     noOptionsFoundText = (
       <>
         {noFeatureBranches
-          ? i18n.t("There aren't any available branches at this time.")
-          : i18n.t('No matching branches found.')}{' '}
+          ? t("There aren't any available branches at this time.")
+          : t('No matching branches found.')}{' '}
         <Trans i18nKey="refreshProjectBranches">
           <Button variant="link" onClick={doGetBranches}>
             Check again
@@ -228,9 +228,9 @@ const CreateEpicModal = ({
 
   let heading;
   if (isContributingFromOrg) {
-    heading = i18n.t('Create an Epic to Contribute Work from Scratch Org');
+    heading = t('Create an Epic to Contribute Work from Scratch Org');
   } else {
-    heading = i18n.t('Create an Epic for {{project_name}}', {
+    heading = t('Create an Epic for {{project_name}}', {
       project_name: project.name,
     });
   }
@@ -242,11 +242,11 @@ const CreateEpicModal = ({
       disableClose={isSaving}
       heading={heading}
       onRequestClose={closeForm}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={[
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={closeForm}
           disabled={isSaving}
         />,
@@ -255,9 +255,9 @@ const CreateEpicModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
+              <LabelWithSpinner label={t('Creating…')} variant="inverse" />
             ) : (
-              i18n.t('Create')
+              t('Create')
             )
           }
           variant="brand"
@@ -273,8 +273,8 @@ const CreateEpicModal = ({
       >
         <RadioGroup
           assistiveText={{
-            label: i18n.t('Epic Branch'),
-            required: i18n.t('Required'),
+            label: t('Epic Branch'),
+            required: t('Required'),
           }}
           className="slds-form-element_stacked slds-p-left_none"
           name="epic-branch"
@@ -283,14 +283,14 @@ const CreateEpicModal = ({
         >
           <Radio
             id="epic-branch-new"
-            labels={{ label: i18n.t('Create new branch on GitHub') }}
+            labels={{ label: t('Create new branch on GitHub') }}
             checked={!fromBranchChecked}
             name="epic-branch"
             value="new"
           />
           <Radio
             id="epic-branch-existing"
-            labels={{ label: i18n.t('Use existing GitHub branch') }}
+            labels={{ label: t('Use existing GitHub branch') }}
             checked={fromBranchChecked}
             name="epic-branch"
             value="existing"
@@ -306,7 +306,7 @@ const CreateEpicModal = ({
               onBlur: handleBranchBlur,
             }}
             labels={{
-              label: i18n.t('Select a branch to use for this Epic'),
+              label: t('Select a branch to use for this Epic'),
               noOptionsFound: noOptionsFoundText,
             }}
             menuItemVisibleLength={5}
@@ -327,7 +327,7 @@ const CreateEpicModal = ({
         )}
         <Input
           id="epic-name"
-          label={i18n.t('Epic Name')}
+          label={t('Epic Name')}
           className="slds-form-element_stacked slds-p-left_none"
           name="name"
           value={inputs.name}
@@ -338,7 +338,7 @@ const CreateEpicModal = ({
         />
         <Textarea
           id="epic-description"
-          label={i18n.t('Description')}
+          label={t('Description')}
           classNameContainer="slds-form-element_stacked slds-p-left_none"
           className="metecho-textarea"
           name="description"
