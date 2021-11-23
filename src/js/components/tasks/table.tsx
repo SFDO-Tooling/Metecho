@@ -5,7 +5,7 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import Icon from '@salesforce/design-system-react/components/icon';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
@@ -119,24 +119,24 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   let displayStatus, icon;
   switch (status) {
     case TASK_STATUSES.PLANNED:
-      displayStatus = i18n.t('Planned');
+      displayStatus = t('Planned');
       icon = <ProgressRing value={0} />;
       break;
     case TASK_STATUSES.IN_PROGRESS:
       if (item.pr_is_open) {
-        displayStatus = i18n.t('Test');
+        displayStatus = t('Test');
         icon = <ProgressRing value={60} flowDirection="fill" theme="active" />;
       } else {
-        displayStatus = i18n.t('In Progress');
+        displayStatus = t('In Progress');
         icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
       }
       break;
     case TASK_STATUSES.COMPLETED:
-      displayStatus = i18n.t('Complete');
+      displayStatus = t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
     case TASK_STATUSES.CANCELED:
-      displayStatus = i18n.t('Canceled');
+      displayStatus = t('Canceled');
       icon = (
         <ProgressRing
           value={0}
@@ -146,13 +146,13 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       );
       break;
     case REVIEW_STATUSES.CHANGES_REQUESTED:
-      displayStatus = i18n.t('Changes Requested');
+      displayStatus = t('Changes Requested');
       icon = (
         <ProgressRing value={60} flowDirection="fill" theme="warning" hasIcon />
       );
       break;
     case REVIEW_STATUSES.APPROVED:
-      displayStatus = i18n.t('Approved');
+      displayStatus = t('Approved');
       icon = <ProgressRing value={80} flowDirection="fill" />;
       break;
   }
@@ -242,10 +242,10 @@ const AssigneeTableCell = ({
   } else if (canAssign) {
     switch (type) {
       case ORG_TYPES.DEV:
-        title = i18n.t('Assign Developer');
+        title = t('Assign Developer');
         break;
       case ORG_TYPES.QA:
-        title = i18n.t('Assign Tester');
+        title = t('Assign Tester');
         break;
     }
 
@@ -280,7 +280,7 @@ const AssigneeTableCell = ({
       </>
     );
   } else if (type === ORG_TYPES.QA && currentUser?.github_id) {
-    title = i18n.t('Self-Assign as Tester');
+    title = t('Self-Assign as Tester');
     contents = (
       <Button
         className="slds-m-left_xx-small"
@@ -338,11 +338,11 @@ const TaskTable = ({
             key="name"
             label={
               <>
-                {i18n.t('Task')}
+                {t('Task')}
                 <TourPopover
                   id="tour-task-name-column"
                   align="top left"
-                  heading={i18n.t('Task names')}
+                  heading={t('Task names')}
                   body={
                     <Trans i18nKey="tourTaskNameColumn">
                       A Task’s name describes the work being done. Select a name
@@ -364,11 +364,11 @@ const TaskTable = ({
               key="epic"
               label={
                 <>
-                  {i18n.t('Epic')}
+                  {t('Epic')}
                   <TourPopover
                     id="tour-task-epic-name-column"
                     align="top left"
-                    heading={i18n.t('Epic names')}
+                    heading={t('Epic names')}
                     body={
                       <Trans i18nKey="tourTaskEpicNameColumn">
                         Tasks can be grouped together in an Epic. Select the
@@ -388,11 +388,11 @@ const TaskTable = ({
             key="status"
             label={
               <div className="tour-task-status-column">
-                {i18n.t('Status')}
+                {t('Status')}
                 <TourPopover
                   id="tour-task-status-column"
                   align="top"
-                  heading={i18n.t('Task statuses')}
+                  heading={t('Task statuses')}
                   body={
                     <Trans i18nKey="tourTaskStatusColumn">
                       A Task begins with a status of <b>Planned</b>. When a Dev
@@ -419,11 +419,11 @@ const TaskTable = ({
             key="assigned_dev"
             label={
               <>
-                {i18n.t('Dev')}
+                {t('Dev')}
                 <TourPopover
                   id="tour-task-developer-column"
                   align="top"
-                  heading={i18n.t('Task Developers')}
+                  heading={t('Task Developers')}
                   body={
                     <Trans i18nKey="tourTaskDeveloperColumn">
                       A <b>Developer</b> is the person assigned to do the work
@@ -454,11 +454,11 @@ const TaskTable = ({
             key="assigned_qa"
             label={
               <div className="tour-task-tester-column">
-                {i18n.t('Test')}
+                {t('Test')}
                 <TourPopover
                   id="tour-task-tester-column"
                   align="top"
-                  heading={i18n.t('Task Testers')}
+                  heading={t('Task Testers')}
                   body={
                     <Trans i18nKey="tourTaskTesterColumn">
                       Assign yourself or someone else as a Tester to help on a
@@ -488,7 +488,7 @@ const TaskTable = ({
         </DataTable>
       ) : (
         <EmptyIllustration
-          heading={i18n.t('No Tasks')}
+          heading={t('No Tasks')}
           message={
             <Trans i18nKey="noTasks">
               Tasks in Metecho represent small changes to this Project; each one

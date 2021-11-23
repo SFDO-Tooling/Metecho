@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { pick } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
@@ -23,7 +23,7 @@ export const getDemoTask = ({
 
   return {
     id: 'demo-task',
-    name: i18n.t('This is a Sample Task'),
+    name: t('This is a Sample Task'),
     description: '',
     description_rendered: '',
     epic: pick(epic, ['id', 'name', 'slug', 'github_users']),
@@ -62,7 +62,7 @@ const HelpTour = (props: TourProps) => {
   const steps: Step[] = [
     {
       target: '.tour-project-tasks-list',
-      title: i18n.t('List of Tasks'),
+      title: t('List of Tasks'),
       content: (
         <Trans i18nKey="walkthroughHelpListTasks">
           Select the Tasks tab to see a list of all the work being done on this
@@ -75,7 +75,7 @@ const HelpTour = (props: TourProps) => {
     },
     {
       target: '.tour-task-tester-column',
-      title: i18n.t('Task Testers'),
+      title: t('Task Testers'),
       content: (
         <Trans i18nKey="walkthroughHelpTaskTester">
           Assign yourself or someone else as a Tester to help on a Task for this
@@ -89,7 +89,7 @@ const HelpTour = (props: TourProps) => {
     },
     {
       target: '.tour-task-status-column',
-      title: i18n.t('Task statuses'),
+      title: t('Task statuses'),
       content: (
         <Trans i18nKey="walkthroughHelpTaskStatus">
           A Task begins with a status of <b>Planned</b>. When a Dev Org is

@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
@@ -79,7 +79,7 @@ const TourDropdown = ({
       align="bottom right"
       className={classNames(className, 'slds-popover_small')}
       hasNoCloseButton
-      heading={i18n.t('How to Use Metecho')}
+      heading={t('How to Use Metecho')}
       classNameBody="slds-p-horizontal_none"
       isOpen={isOpen}
       onClick={handleOpenClose}
@@ -94,7 +94,7 @@ const TourDropdown = ({
             >
               <li className="slds-p-horizontal_small">
                 <Button
-                  label={i18n.t('Play Walkthrough')}
+                  label={t('Play Walkthrough')}
                   variant="base"
                   iconPosition="left"
                   iconSize="large"
@@ -109,7 +109,7 @@ const TourDropdown = ({
               {
                 <li className="slds-p-horizontal_small">
                   <Button
-                    label={i18n.t('Help Walkthrough')}
+                    label={t('Help Walkthrough')}
                     variant="base"
                     iconPosition="left"
                     iconSize="large"
@@ -124,7 +124,7 @@ const TourDropdown = ({
               }
               <li className="slds-p-horizontal_small">
                 <Button
-                  label={i18n.t('Plan Walkthrough')}
+                  label={t('Plan Walkthrough')}
                   variant="base"
                   iconPosition="left"
                   iconSize="large"
@@ -147,7 +147,7 @@ const TourDropdown = ({
     >
       <Button
         variant="icon"
-        assistiveText={{ icon: i18n.t('Get Help') }}
+        assistiveText={{ icon: t('Get Help') }}
         className={triggerClassName}
         iconCategory="utility"
         iconName="question"

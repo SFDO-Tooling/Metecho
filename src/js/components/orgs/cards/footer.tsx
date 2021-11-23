@@ -1,5 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { ExternalLink } from '@/js/components/utils';
@@ -28,7 +28,7 @@ const Footer = ({
   readyForReview?: boolean;
   openRefreshOrgModal?: () => void;
 }) => {
-  const loadingMsg: JSX.Element = i18n.t(
+  const loadingMsg: JSX.Element = t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
@@ -36,19 +36,19 @@ const Footer = ({
     return loadingMsg;
   }
   if (isDeleting) {
-    return i18n.t('Deleting Org…') as JSX.Element;
+    return t('Deleting Org…') as JSX.Element;
   }
   if (isRefreshingChanges) {
-    return i18n.t('Checking for Unretrieved Changes…') as JSX.Element;
+    return t('Checking for Unretrieved Changes…') as JSX.Element;
   }
   if (isReassigningOrg) {
-    return i18n.t('Reassigning Org Ownership…') as JSX.Element;
+    return t('Reassigning Org Ownership…') as JSX.Element;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {
       return (
         <>
-          {i18n.t('Retrieving Selected Changes…')}
+          {t('Retrieving Selected Changes…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
         </>
       );
@@ -59,15 +59,13 @@ const Footer = ({
       if (testOrgOutOfDate) {
         return (
           <Button
-            label={i18n.t('View Org')}
+            label={t('View Org')}
             variant="link"
             onClick={openRefreshOrgModal}
           />
         );
       }
-      const label = readyForReview
-        ? i18n.t('Test Changes in Org')
-        : i18n.t('View Org');
+      const label = readyForReview ? t('Test Changes in Org') : t('View Org');
       return <ExternalLink url={orgUrl}>{label}</ExternalLink>;
     }
   }

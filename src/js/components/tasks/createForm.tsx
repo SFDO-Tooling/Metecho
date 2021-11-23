@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -158,13 +158,13 @@ const CreateTaskModal = ({
 
   let heading;
   if (isContributingFromOrg) {
-    heading = i18n.t('Create a Task to Contribute Work from Scratch Org');
+    heading = t('Create a Task to Contribute Work from Scratch Org');
   } else if (epic) {
-    heading = i18n.t('Create a Task for {{epic_name}}', {
+    heading = t('Create a Task for {{epic_name}}', {
       epic_name: epic.name,
     });
   } else {
-    heading = i18n.t('Create a Task for {{project_name}}', {
+    heading = t('Create a Task for {{project_name}}', {
       project_name: project.name,
     });
   }
@@ -175,7 +175,7 @@ const CreateTaskModal = ({
       size="small"
       disableClose={isSaving || isSavingBatch}
       heading={heading}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       onRequestClose={closeModal}
       footer={[
         isShowingTransientMessage && (
@@ -187,12 +187,12 @@ const CreateTaskModal = ({
               slds-p-top_xx-small
               metecho-transition-out"
           >
-            {i18n.t('A Task was successfully created.')}
+            {t('A Task was successfully created.')}
           </span>
         ),
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={closeModal}
           disabled={isSaving || isSavingBatch}
         />,
@@ -201,9 +201,9 @@ const CreateTaskModal = ({
             key="create-new"
             label={
               isSavingBatch ? (
-                <LabelWithSpinner label={i18n.t('Creating…')} />
+                <LabelWithSpinner label={t('Creating…')} />
               ) : (
-                i18n.t('Create & New')
+                t('Create & New')
               )
             }
             onClick={batchSubmitClicked}
@@ -215,9 +215,9 @@ const CreateTaskModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
+              <LabelWithSpinner label={t('Creating…')} variant="inverse" />
             ) : (
-              i18n.t('Create')
+              t('Create')
             )
           }
           variant="brand"
@@ -229,14 +229,14 @@ const CreateTaskModal = ({
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
         {!epic && !isContributingFromOrg && (
           <p className="slds-align_absolute-center slds-m-bottom_small">
-            {i18n.t(
+            {t(
               'You are creating a Task for this Project. To group multiple Tasks together, create an Epic.',
             )}
           </p>
         )}
         <Input
           id="task-name"
-          label={i18n.t('Task Name')}
+          label={t('Task Name')}
           className="slds-form-element_stacked slds-p-left_none"
           name="name"
           value={inputs.name}
@@ -247,7 +247,7 @@ const CreateTaskModal = ({
         />
         <Textarea
           id="task-description"
-          label={i18n.t('Description')}
+          label={t('Description')}
           classNameContainer="slds-form-element_stacked slds-p-left_none"
           className="metecho-textarea"
           name="description"

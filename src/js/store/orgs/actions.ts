@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { AppState, ThunkResult } from '@/js/store';
 import { selectEpicById } from '@/js/store/epics/selectors';
@@ -85,22 +85,22 @@ const getOrgParent = (
   const task = selectTaskById(state, org.task);
   const epic = selectEpicById(state, org.epic);
   const project = selectProjectById(state, org.project);
-  let typeTitle = i18n.t('Scratch Org');
+  let typeTitle = t('Scratch Org');
 
   if (org.org_type === ORG_TYPES.QA) {
-    typeTitle = i18n.t('Test Org');
+    typeTitle = t('Test Org');
   } else if (org.org_type === ORG_TYPES.DEV) {
-    typeTitle = i18n.t('Dev Org');
+    typeTitle = t('Dev Org');
   }
 
   if (task) {
-    return { name: task.name, parent: i18n.t('Task'), orgType: typeTitle };
+    return { name: task.name, parent: t('Task'), orgType: typeTitle };
   } else if (epic) {
-    return { name: epic.name, parent: i18n.t('Epic'), orgType: typeTitle };
+    return { name: epic.name, parent: t('Epic'), orgType: typeTitle };
   } else if (project) {
     return {
       name: project.name,
-      parent: i18n.t('Project'),
+      parent: t('Project'),
       orgType: typeTitle,
     };
   }
@@ -120,19 +120,20 @@ export const provisionOrg =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t('Successfully created {{orgType}}.', { orgType });
+      let msg = t('Successfully created {{orgType}}.', { orgType });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
-          'Successfully created {{orgType}} for {{parent}} “{{name}}.”',
-          { parent, name, orgType },
-        );
+        msg = t('Successfully created {{orgType}} for {{parent}} “{{name}}.”', {
+          parent,
+          name,
+          orgType,
+        });
       }
       dispatch(
         addToast({
           heading: msg,
-          linkText: model.is_created ? i18n.t('View your new Org.') : undefined,
+          linkText: model.is_created ? t('View your new Org.') : undefined,
           linkUrl: model.is_created
             ? window.api_urls.scratch_org_redirect(model.id)
             : undefined,
@@ -161,14 +162,13 @@ export const provisionFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
-        'Uh oh. There was an error creating your new {{orgType}}.',
-        { orgType },
-      );
+      let msg = t('Uh oh. There was an error creating your new {{orgType}}.', {
+        orgType,
+      });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error creating your new {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -243,14 +243,14 @@ export const updateFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
+      let msg = t(
         'Uh oh. There was an error checking for changes on your {{orgType}}.',
         { orgType },
       );
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error checking for changes on your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -299,7 +299,7 @@ export const deleteOrg =
       if (message) {
         dispatch(
           addToast({
-            heading: i18n.t(
+            heading: t(
               'Uh oh. There was an error communicating with your {{orgType}}.',
               { orgType },
             ),
@@ -308,11 +308,11 @@ export const deleteOrg =
           }),
         );
       } else {
-        let msg = i18n.t('Successfully deleted {{orgType}}.', { orgType });
+        let msg = t('Successfully deleted {{orgType}}.', { orgType });
 
         /* istanbul ignore else */
         if (name && parent) {
-          msg = i18n.t(
+          msg = t(
             'Successfully deleted {{orgType}} for {{parent}} “{{name}}.”',
             { parent, name, orgType },
           );
@@ -341,13 +341,13 @@ export const deleteFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t('Uh oh. There was an error deleting your {{orgType}}.', {
+      let msg = t('Uh oh. There was an error deleting your {{orgType}}.', {
         orgType,
       });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error deleting your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -379,14 +379,13 @@ export const commitSucceeded =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
-        'Successfully retrieved changes from your {{orgType}}.',
-        { orgType },
-      );
+      let msg = t('Successfully retrieved changes from your {{orgType}}.', {
+        orgType,
+      });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Successfully retrieved changes from your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -418,14 +417,14 @@ export const commitFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
+      let msg = t(
         'Uh oh. There was an error retrieving changes from your {{orgType}}.',
         { orgType },
       );
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error retrieving changes from your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -482,11 +481,11 @@ export const orgRefreshed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t('Successfully refreshed your {{orgType}}.', { orgType });
+      let msg = t('Successfully refreshed your {{orgType}}.', { orgType });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Successfully refreshed your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -511,16 +510,13 @@ export const refreshError =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
-        'Uh oh. There was an error refreshing your {{orgType}}.',
-        {
-          orgType,
-        },
-      );
+      let msg = t('Uh oh. There was an error refreshing your {{orgType}}.', {
+        orgType,
+      });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error refreshing your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -578,16 +574,13 @@ export const orgReassignFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
-        'Uh oh. There was an error reassigning this {{orgType}}.',
-        {
-          orgType,
-        },
-      );
+      let msg = t('Uh oh. There was an error reassigning this {{orgType}}.', {
+        orgType,
+      });
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error reassigning the {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
@@ -644,14 +637,14 @@ export const orgConvertFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = i18n.t(
+      let msg = t(
         'Uh oh. There was an error contributing work from your {{orgType}}.',
         { orgType },
       );
 
       /* istanbul ignore else */
       if (name && parent) {
-        msg = i18n.t(
+        msg = t(
           'Uh oh. There was an error contributing work from your {{orgType}} on {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );

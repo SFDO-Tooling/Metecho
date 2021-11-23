@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import Path from '@/js/components/path';
@@ -10,12 +10,10 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
   let isCompleted = false;
   let isLost = false;
   const steps = [
-    i18n.t('Planned'),
-    i18n.t('In progress'),
-    task.status === TASK_STATUSES.CANCELED
-      ? i18n.t('Canceled')
-      : i18n.t('Test'),
-    i18n.t('Merged'),
+    t('Planned'),
+    t('In progress'),
+    task.status === TASK_STATUSES.CANCELED ? t('Canceled') : t('Test'),
+    t('Merged'),
   ];
   const status =
     task.review_valid && task.status === TASK_STATUSES.IN_PROGRESS

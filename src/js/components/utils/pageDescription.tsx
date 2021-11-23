@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 const PageDescription = ({
@@ -13,7 +13,7 @@ const PageDescription = ({
   const descriptionHasTitle =
     description?.startsWith('<h1>') || description?.startsWith('<h2>');
 
-  const renderedTitle = i18n.t('About {{title}}', { title });
+  const renderedTitle = t('About {{title}}', { title });
 
   const renderedDescription = (
     <>
@@ -44,10 +44,7 @@ const PageDescription = ({
               slds-m-left_xx-small
               metecho-repo-image-wrapper"
           >
-            <img
-              src={image}
-              alt={i18n.t('social image for {{title}}', { title })}
-            />
+            <img src={image} alt={t('social image for {{title}}', { title })} />
           </div>
           <div
             className="slds-media__body

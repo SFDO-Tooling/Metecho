@@ -6,7 +6,7 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { render } from 'react-dom';
@@ -71,7 +71,7 @@ const App = withRouter(
     );
 
     return (
-      <DocumentTitle title={i18n.t('Metecho')}>
+      <DocumentTitle title={t('Metecho')}>
         <div
           className="slds-grid
             slds-grid_frame

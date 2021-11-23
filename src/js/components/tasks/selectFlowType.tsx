@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -62,11 +62,11 @@ const SelectFlowType = ({
     >
       {isLoading && /* istanbul ignore next */ <SpinnerWrapper size="small" />}
       <legend className="slds-form-element__legend slds-form-element__label">
-        <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
+        <span className="slds-p-right_xx-small">{t('Org Type')}</span>
         <Tooltip
           content={
             orgConfigHelp ||
-            i18n.t(
+            t(
               'CumulusCI Projects can set up different kinds of Org environments. Which one would you like to work on for this Task?',
             )
           }
@@ -76,9 +76,9 @@ const SelectFlowType = ({
         />
         <Button
           assistiveText={{
-            icon: i18n.t('refresh list of available Org types'),
+            icon: t('refresh list of available Org types'),
           }}
-          title={i18n.t('refresh list of available Org types')}
+          title={t('refresh list of available Org types')}
           variant="icon"
           iconCategory="utility"
           iconName="refresh"
@@ -94,7 +94,7 @@ const SelectFlowType = ({
             displayLabel = `${displayLabel} - ${description}`;
           }
           if (key === DEFAULT_ORG_CONFIG_NAME) {
-            displayLabel = `${displayLabel} (${i18n.t('recommended')})`;
+            displayLabel = `${displayLabel} (${t('recommended')})`;
           }
           return (
             <Radio
@@ -121,9 +121,7 @@ const SelectFlowType = ({
           })}
         >
           {isDisabled &&
-            i18n.t(
-              'Org Type cannot be changed while an Org exists for this Task.',
-            )}
+            t('Org Type cannot be changed while an Org exists for this Task.')}
           {errors}
         </div>
       )}

@@ -1,6 +1,6 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -43,7 +43,7 @@ const DetailPageLayout = ({
 }) => {
   const showHeaderImage = Boolean(image && !description);
   let popover = null;
-  const popoverHeading = i18n.t('Navigation breadcrumb');
+  const popoverHeading = t('Navigation breadcrumb');
 
   switch (type) {
     case OBJECT_TYPES.EPIC:
@@ -104,7 +104,7 @@ const DetailPageLayout = ({
               <div className="metecho-repo-image-header">
                 <img
                   src={image}
-                  alt={i18n.t('social image for {{title}}', { title })}
+                  alt={t('social image for {{title}}', { title })}
                 />
               </div>
             ) : undefined
@@ -122,7 +122,7 @@ const DetailPageLayout = ({
           <BreadCrumb
             trail={[
               <Link to={routes.home()} key="home">
-                {i18n.t('Home')}
+                {t('Home')}
               </Link>,
             ].concat(
               breadcrumb.map((crumb, idx) => {

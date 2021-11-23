@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
@@ -40,14 +40,14 @@ export const UserCard = ({
       headerActions={
         removeUser ? (
           <Button
-            assistiveText={{ icon: i18n.t('Remove') }}
+            assistiveText={{ icon: t('Remove') }}
             className="overflow-shadow"
             iconCategory="utility"
             iconName="close"
             iconSize="small"
             iconVariant="border-filled"
             variant="icon"
-            title={i18n.t('Remove')}
+            title={t('Remove')}
             onClick={removeUser}
           />
         ) : null
