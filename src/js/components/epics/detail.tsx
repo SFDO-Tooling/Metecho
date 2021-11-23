@@ -855,6 +855,7 @@ const EpicDetail = (
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
           attachingToEpic={epic}
+          currentlyFetching={project.currently_fetching_issues}
         />
       </DetailPageLayout>
     </DocumentTitle>

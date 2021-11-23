@@ -24,6 +24,8 @@ import { Task } from '@/js/store/tasks/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
+import ResyncIssuesButton from './resyncIssuesButton';
+
 export type issueSelectedCallback = (
   issue: GitHubIssue | null,
   type: 'epic' | 'task',
@@ -37,6 +39,7 @@ interface Props {
   issueSelected?: issueSelectedCallback;
   attachingToTask?: Task;
   attachingToEpic?: Epic;
+  currentlyFetching: boolean;
 }
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
@@ -60,6 +63,7 @@ const SelectIssueModal = ({
   issueSelected,
   attachingToTask,
   attachingToEpic,
+  currentlyFetching,
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { issues } = useFetchIssues({
@@ -174,6 +178,10 @@ const SelectIssueModal = ({
             Select from these open Issues, and create a Task or Epic.
           </Trans>
         </p>
+        <ResyncIssuesButton
+          projectId={projectId}
+          isRefreshing={currentlyFetching}
+        />
         {issues && attachedIssues ? (
           <form className="slds-form slds-p-top_large">
             <div className="slds-grid slds-gutters">

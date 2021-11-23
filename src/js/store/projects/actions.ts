@@ -54,6 +54,11 @@ interface RefreshOrgConfigsAction {
   payload: string;
 }
 
+interface RefreshGitHubIssuesAccepted {
+  type: 'REFRESH_GH_ISSUES_ACCEPTED';
+  payload: string;
+}
+
 export type ProjectsAction =
   | ProjectUpdated
   | ProjectUpdateError
@@ -188,6 +193,28 @@ export const refreshOrgConfigs =
       });
     } catch (err) {
       dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
+      throw err;
+    }
+  };
+
+export const refreshGitHubIssues =
+  (projectId: string): ThunkResult<Promise<RefreshGitHubIssuesAccepted>> =>
+  async (dispatch) => {
+    dispatch({ type: 'REFRESH_GH_ISSUES_REQUESTED', payload: projectId });
+    try {
+      await apiFetch({
+        url: window.api_urls.project_refresh_github_issues(projectId),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESH_GH_ISSUES_ACCEPTED' as const,
+        payload: projectId,
+      });
+    } catch (err) {
+      dispatch({ type: 'REFRESH_GH_ISSUES_REJECTED', payload: projectId });
       throw err;
     }
   };
