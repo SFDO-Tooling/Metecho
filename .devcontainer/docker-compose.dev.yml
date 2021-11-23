@@ -2,7 +2,6 @@ version: '3'
 
 services:
   web:
-    platform: linux/amd64
     volumes:
       - .:/app:delegated
       - vscode-server:/root/.vscode-server:cached
