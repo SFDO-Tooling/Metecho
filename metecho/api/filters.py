@@ -24,7 +24,8 @@ class GitHubIssueFilter(filters.FilterSet):
 
     class Meta:
         model = GitHubIssue
-        fields = ("project", "id")  # Filtering by ID allows the front-end to reuse existing logic
+        # Filtering by ID allows the front-end to reuse existing logic
+        fields = ("project", "id")
 
     def do_search(self, queryset, name, query):
         return queryset.filter(Q(title__icontains=query) | Q(number__icontains=query))
