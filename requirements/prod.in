@@ -1,5 +1,5 @@
 Django==3.2.8
-autobahn==21.3.1
+autobahn==21.11.1
 beautifulsoup4==4.10.0
 bleach==3.3.1
 channels-redis==3.3.1
