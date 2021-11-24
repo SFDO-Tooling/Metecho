@@ -21,7 +21,7 @@ furl==2.1.3
 github3-py==2.0.0
 honcho==1.0.1
 logfmt==0.4
-markdown==3.3.4
+markdown==3.3.6
 
 # psycopg2 is used as the database driver for Django to connect to PostgreSQL.
 # It is LGPL-licensed and we must follow these rules for compliance with Salesforce 3rd-party software policy:

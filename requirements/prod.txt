@@ -200,6 +200,7 @@ importlib-metadata==4.8.1
     # via
     #   cumulusci
     #   keyring
+    #   markdown
     #   snowfakery
 incremental==21.3.0
     # via twisted
@@ -228,7 +229,7 @@ logfmt==0.4
     #   sfdo-template-helpers
 lxml==4.6.3
     # via cumulusci
-markdown==3.3.4
+markdown==3.3.6
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
