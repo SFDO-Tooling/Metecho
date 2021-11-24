@@ -12,7 +12,7 @@ django-hashid-field==3.3.1
 django-js-reverse==0.9.1
 django-log-request-id==1.6.0
 django-model-utils==4.1.1
-django-parler==2.2
+django-parler==2.3
 django-redis==5.0.0
 django-rq==2.4.1
 djangorestframework==3.12.4

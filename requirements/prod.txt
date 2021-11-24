@@ -116,6 +116,7 @@ django==3.2.8
     #   django-js-reverse
     #   django-log-request-id
     #   django-model-utils
+    #   django-parler
     #   django-redis
     #   django-rq
     #   djangorestframework
@@ -135,7 +136,7 @@ django-log-request-id==1.6.0
     # via -r requirements/prod.in
 django-model-utils==4.1.1
     # via -r requirements/prod.in
-django-parler==2.2
+django-parler==2.3
     # via -r requirements/prod.in
 django-redis==5.0.0
     # via -r requirements/prod.in
