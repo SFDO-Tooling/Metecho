@@ -237,7 +237,7 @@ markupsafe==2.0.1
     #   cumulusci
     #   jinja2
     #   snowfakery
-msgpack==1.0.2
+msgpack==1.0.3
     # via channels-redis
 oauthlib==3.1.1
     # via requests-oauthlib
