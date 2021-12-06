@@ -1,5 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -14,7 +14,7 @@ interface Props {
 
 const ResyncIssuesButton = ({ isRefreshing, projectId }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const refreshUsers = useCallback(() => {
+  const refreshIssues = useCallback(() => {
     dispatch(refreshGitHubIssues(projectId));
   }, [dispatch, projectId]);
 
@@ -22,20 +22,18 @@ const ResyncIssuesButton = ({ isRefreshing, projectId }: Props) => {
     <>
       {isRefreshing ? (
         <Button
-          label={
-            <LabelWithSpinner label={i18n.t('Syncing GitHub Issues...')} />
-          }
+          label={<LabelWithSpinner label={t('Syncing GitHub Issues…')} />}
           variant="outline-brand"
           disabled
         />
       ) : (
         <Button
-          label={i18n.t('Re-Sync Issues')}
+          label={t('Re-Sync Issues')}
           variant="outline-brand"
           iconCategory="utility"
           iconName="refresh"
           iconPosition="left"
-          onClick={refreshUsers}
+          onClick={refreshIssues}
         />
       )}
     </>

@@ -1160,6 +1160,7 @@ const TaskDetail = (
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
           attachingToTask={task}
+          currentlyFetching={project.currently_fetching_issues}
         />
         <CommitList commits={task.commits} />
       </DetailPageLayout>

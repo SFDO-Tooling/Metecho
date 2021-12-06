@@ -9,6 +9,7 @@ import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
+import ResyncIssuesButton from '@/js/components/githubIssues/resyncIssuesButton';
 import {
   ExternalLink,
   getEpicStatus,
@@ -23,8 +24,6 @@ import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
-
-import ResyncIssuesButton from './resyncIssuesButton';
 
 export type issueSelectedCallback = (
   issue: GitHubIssue | null,
@@ -171,19 +170,34 @@ const SelectIssueModal = ({
             ]
       }
     >
-      <div className="slds-is-relative slds-p-around_large">
-        <p>
-          <Trans i18nKey="githubIssuesHelp">
-            Issues are items in GitHub’s bug and enhancement tracking system.
-            Select from these open Issues, and create a Task or Epic.
-          </Trans>
-        </p>
-        <ResyncIssuesButton
-          projectId={projectId}
-          isRefreshing={currentlyFetching}
-        />
+      <div
+        className="slds-grid
+          slds-grid_vertical-align-start
+          slds-p-around_medium"
+      >
+        <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+          <p>
+            <Trans i18nKey="githubIssuesHelp">
+              Issues are items in GitHub’s bug and enhancement tracking system.
+              Select from these open Issues, and create a Task or Epic.
+            </Trans>
+          </p>
+        </div>
+        <div
+          className="slds-grid
+            slds-grow
+            slds-shrink-none
+            slds-grid_align-end"
+        >
+          <ResyncIssuesButton
+            projectId={projectId}
+            isRefreshing={currentlyFetching}
+          />
+        </div>
+      </div>
+      <div className="slds-is-relative slds-p-around_medium">
         {issues && attachedIssues ? (
-          <form className="slds-form slds-p-top_large">
+          <form className="slds-form">
             <div className="slds-grid slds-gutters">
               <div className="slds-col slds-size_1-of-2">
                 <h2 className="slds-text-heading_small">
@@ -212,7 +226,9 @@ const SelectIssueModal = ({
                       </div>
                     ))
                   ) : (
-                    <p>{t('No Available Issues')}</p>
+                    <p className="slds-p-top_x-small">
+                      {t('No Available Issues')}
+                    </p>
                   )}
                 </RadioGroup>
               </div>
@@ -286,17 +302,18 @@ const SelectIssueModal = ({
                     </div>
                   ))
                 ) : (
-                  <p>{t('No Attached Issues')}</p>
+                  <p className="slds-p-top_x-small">
+                    {t('No Attached Issues')}
+                  </p>
                 )}
               </div>
             </div>
           </form>
         ) : (
           // Fetching isues from API
-          <div className="slds-is-relative slds-p-around_xx-large">
-            <SpinnerWrapper />
-          </div>
+          <SpinnerWrapper />
         )}
+        {currentlyFetching && <SpinnerWrapper />}
       </div>
     </Modal>
   );

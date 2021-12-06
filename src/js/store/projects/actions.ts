@@ -46,16 +46,23 @@ interface RefreshGitHubUsersRejected {
   type: 'REFRESH_GH_USERS_REJECTED';
   payload: string;
 }
+interface RefreshGitHubIssuesRequested {
+  type: 'REFRESH_GH_ISSUES_REQUESTED';
+  payload: string;
+}
+interface RefreshGitHubIssuesAccepted {
+  type: 'REFRESH_GH_ISSUES_ACCEPTED';
+  payload: string;
+}
+interface RefreshGitHubIssuesRejected {
+  type: 'REFRESH_GH_ISSUES_REJECTED';
+  payload: string;
+}
 interface RefreshOrgConfigsAction {
   type:
     | 'REFRESH_ORG_CONFIGS_REQUESTED'
     | 'REFRESH_ORG_CONFIGS_ACCEPTED'
     | 'REFRESH_ORG_CONFIGS_REJECTED';
-  payload: string;
-}
-
-interface RefreshGitHubIssuesAccepted {
-  type: 'REFRESH_GH_ISSUES_ACCEPTED';
   payload: string;
 }
 
@@ -71,6 +78,9 @@ export type ProjectsAction =
   | RefreshGitHubUsersRequested
   | RefreshGitHubUsersAccepted
   | RefreshGitHubUsersRejected
+  | RefreshGitHubIssuesRequested
+  | RefreshGitHubIssuesAccepted
+  | RefreshGitHubIssuesRejected
   | RefreshOrgConfigsAction;
 
 export const refreshProjects =
