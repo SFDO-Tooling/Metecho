@@ -199,6 +199,12 @@ const SelectIssueModal = ({
             <ResyncIssuesButton
               projectId={projectId}
               isRefreshing={currentlyResyncing}
+              forceResync={Boolean(
+                issues &&
+                  attachedIssues &&
+                  !issues.length &&
+                  !attachedIssues.length,
+              )}
             />
           </div>
         </div>

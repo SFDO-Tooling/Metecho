@@ -18,7 +18,7 @@ export default ({
   currentlyResyncing: boolean;
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const [issues, setIssues] = useState<GitHubIssue[]>([]);
+  const [issues, setIssues] = useState<GitHubIssue[]>();
   const [currentlyFetching, setCurrentlyFetching] = useState(false);
 
   useEffect(() => {
