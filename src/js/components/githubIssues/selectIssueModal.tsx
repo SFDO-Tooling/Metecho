@@ -38,7 +38,7 @@ interface Props {
   issueSelected?: issueSelectedCallback;
   attachingToTask?: Task;
   attachingToEpic?: Epic;
-  currentlyFetching: boolean;
+  currentlyResyncing: boolean;
 }
 
 export const GitHubIssueLink = ({ url }: { url: string }) => (
@@ -62,18 +62,23 @@ const SelectIssueModal = ({
   issueSelected,
   attachingToTask,
   attachingToEpic,
-  currentlyFetching,
+  currentlyResyncing,
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const { issues } = useFetchIssues({
+  const { issues, currentlyFetching } = useFetchIssues({
     projectId,
     isAttached: false,
     isOpen: Boolean(isOpen),
+    currentlyResyncing,
   });
-  const { issues: attachedIssues } = useFetchIssues({
+  const {
+    issues: attachedIssues,
+    currentlyFetching: currentlyFetchingAttached,
+  } = useFetchIssues({
     projectId,
     isAttached: true,
     isOpen: Boolean(isOpen),
+    currentlyResyncing,
   });
 
   const [selectedIssue, setSelectedIssue] = useState<string>('');
@@ -170,150 +175,146 @@ const SelectIssueModal = ({
             ]
       }
     >
-      <div
-        className="slds-grid
-          slds-grid_vertical-align-start
-          slds-p-around_medium"
-      >
-        <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
-          <p>
-            <Trans i18nKey="githubIssuesHelp">
-              Issues are items in GitHub’s bug and enhancement tracking system.
-              Select from these open Issues, and create a Task or Epic.
-            </Trans>
-          </p>
-        </div>
+      <div className="slds-is-relative slds-p-around_large">
         <div
           className="slds-grid
-            slds-grow
-            slds-shrink-none
-            slds-grid_align-end"
+            slds-grid_vertical-align-start
+            slds-p-bottom_large"
         >
-          <ResyncIssuesButton
-            projectId={projectId}
-            isRefreshing={currentlyFetching}
-          />
+          <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+            <p>
+              <Trans i18nKey="githubIssuesHelp">
+                Issues are items in GitHub’s bug and enhancement tracking
+                system. Select from these open Issues, and create a Task or
+                Epic.
+              </Trans>
+            </p>
+          </div>
+          <div
+            className="slds-grid
+              slds-grow
+              slds-shrink-none
+              slds-grid_align-end"
+          >
+            <ResyncIssuesButton
+              projectId={projectId}
+              isRefreshing={currentlyResyncing}
+            />
+          </div>
         </div>
-      </div>
-      <div className="slds-is-relative slds-p-around_medium">
-        {issues && attachedIssues ? (
-          <form className="slds-form">
-            <div className="slds-grid slds-gutters">
-              <div className="slds-col slds-size_1-of-2">
-                <h2 className="slds-text-heading_small">
-                  {t('Available Issues')}
-                </h2>
-                <RadioGroup
-                  assistiveText={{
-                    label: t('Available Issues'),
-                    required: t('Required'),
-                  }}
-                  className="slds-form-element_stacked slds-p-left_none"
-                  name="github-issue"
-                  required
-                  onChange={changeSelection}
-                >
-                  {issues.length ? (
-                    issues.map((issue, idx) => (
-                      <div key={idx} className="slds-p-vertical_x-small">
-                        <Radio
-                          labels={{ label: `#${issue.number}: ${issue.title}` }}
-                          name="github-issue"
-                          value={issue.id}
-                          checked={selectedIssue === issue.id}
-                        />
-                        <GitHubIssueLink url={issue.html_url} />
-                      </div>
-                    ))
-                  ) : (
-                    <p className="slds-p-top_x-small">
-                      {t('No Available Issues')}
-                    </p>
-                  )}
-                </RadioGroup>
-              </div>
-              <div className="slds-col slds-size_1-of-2">
-                <h2 className="slds-text-heading_small">
-                  {t('Attached Issues')}
-                </h2>
-                {attachedIssues.length ? (
-                  attachedIssues.map((issue, idx) => (
+        <form className="slds-form">
+          <div className="slds-grid slds-gutters">
+            <div className="slds-col slds-size_1-of-2">
+              <h2 className="slds-text-heading_small">
+                {t('Available Issues')}
+              </h2>
+              <RadioGroup
+                assistiveText={{
+                  label: t('Available Issues'),
+                  required: t('Required'),
+                }}
+                className="slds-form-element_stacked slds-p-left_none"
+                name="github-issue"
+                required
+                onChange={changeSelection}
+              >
+                {issues?.length ? (
+                  issues.map((issue, idx) => (
                     <div key={idx} className="slds-p-vertical_x-small">
                       <Radio
                         labels={{ label: `#${issue.number}: ${issue.title}` }}
-                        checked
+                        name="github-issue"
                         value={issue.id}
-                        disabled
+                        checked={selectedIssue === issue.id}
                       />
-                      {/* eslint-disable-next-line no-nested-ternary */}
-                      {issue.task ? (
-                        <>
-                          <p>
-                            {t('Task')}:{' '}
-                            <Link
-                              to={
-                                issue.task.epic_slug
-                                  ? routes.epic_task_detail(
-                                      projectSlug,
-                                      issue.task.epic_slug,
-                                      issue.task.slug,
-                                    )
-                                  : routes.project_task_detail(
-                                      projectSlug,
-                                      issue.task.slug,
-                                    )
-                              }
-                            >
-                              {issue.task.name}
-                            </Link>
-                          </p>
-                          <p>
-                            {
-                              getTaskStatus({
-                                taskStatus: issue.task.status,
-                                reviewStatus: issue.task.review_status,
-                                reviewValid: issue.task.review_valid,
-                                prIsOpen: issue.task.pr_is_open,
-                              }).status
-                            }
-                          </p>
-                        </>
-                      ) : issue.epic ? (
-                        <>
-                          <p>
-                            {t('Epic')}:{' '}
-                            <Link
-                              to={routes.epic_detail(
-                                projectSlug,
-                                issue.epic.slug,
-                              )}
-                            >
-                              {issue.epic.name}
-                            </Link>
-                          </p>
-                          <p>
-                            {
-                              getEpicStatus({ epicStatus: issue.epic.status })
-                                .status
-                            }
-                          </p>
-                        </>
-                      ) : /* istanbul ignore next */ null}
+                      <GitHubIssueLink url={issue.html_url} />
                     </div>
                   ))
                 ) : (
                   <p className="slds-p-top_x-small">
-                    {t('No Attached Issues')}
+                    {t('No Available Issues')}
                   </p>
                 )}
-              </div>
+              </RadioGroup>
             </div>
-          </form>
-        ) : (
-          // Fetching isues from API
-          <SpinnerWrapper />
-        )}
-        {currentlyFetching && <SpinnerWrapper />}
+            <div className="slds-col slds-size_1-of-2">
+              <h2 className="slds-text-heading_small">
+                {t('Attached Issues')}
+              </h2>
+              {attachedIssues?.length ? (
+                attachedIssues.map((issue, idx) => (
+                  <div key={idx} className="slds-p-vertical_x-small">
+                    <Radio
+                      labels={{ label: `#${issue.number}: ${issue.title}` }}
+                      checked
+                      value={issue.id}
+                      disabled
+                    />
+                    {/* eslint-disable-next-line no-nested-ternary */}
+                    {issue.task ? (
+                      <>
+                        <p>
+                          {t('Task')}:{' '}
+                          <Link
+                            to={
+                              issue.task.epic_slug
+                                ? routes.epic_task_detail(
+                                    projectSlug,
+                                    issue.task.epic_slug,
+                                    issue.task.slug,
+                                  )
+                                : routes.project_task_detail(
+                                    projectSlug,
+                                    issue.task.slug,
+                                  )
+                            }
+                          >
+                            {issue.task.name}
+                          </Link>
+                        </p>
+                        <p>
+                          {
+                            getTaskStatus({
+                              taskStatus: issue.task.status,
+                              reviewStatus: issue.task.review_status,
+                              reviewValid: issue.task.review_valid,
+                              prIsOpen: issue.task.pr_is_open,
+                            }).status
+                          }
+                        </p>
+                      </>
+                    ) : issue.epic ? (
+                      <>
+                        <p>
+                          {t('Epic')}:{' '}
+                          <Link
+                            to={routes.epic_detail(
+                              projectSlug,
+                              issue.epic.slug,
+                            )}
+                          >
+                            {issue.epic.name}
+                          </Link>
+                        </p>
+                        <p>
+                          {
+                            getEpicStatus({ epicStatus: issue.epic.status })
+                              .status
+                          }
+                        </p>
+                      </>
+                    ) : /* istanbul ignore next */ null}
+                  </div>
+                ))
+              ) : (
+                <p className="slds-p-top_x-small">{t('No Attached Issues')}</p>
+              )}
+            </div>
+          </div>
+        </form>
+        {(currentlyResyncing ||
+          currentlyFetching ||
+          currentlyFetchingAttached) && <SpinnerWrapper />}
       </div>
     </Modal>
   );

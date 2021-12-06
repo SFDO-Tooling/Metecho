@@ -628,7 +628,7 @@ const ProjectDetail = (
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
           issueSelected={setIssueAndCreateEpicOrTask}
-          currentlyFetching={project.currently_fetching_issues}
+          currentlyResyncing={project.currently_fetching_issues}
         />
         <CreateEpicModal
           user={user}

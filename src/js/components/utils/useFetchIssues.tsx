@@ -10,17 +10,21 @@ export default ({
   projectId,
   isAttached,
   isOpen,
+  currentlyResyncing,
 }: {
   projectId: string;
   isAttached: boolean;
   isOpen: boolean;
+  currentlyResyncing: boolean;
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const [issues, setIssues] = useState<GitHubIssue[]>();
+  const [issues, setIssues] = useState<GitHubIssue[]>([]);
+  const [currentlyFetching, setCurrentlyFetching] = useState(false);
 
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();
     const fetchIssues = async () => {
+      setCurrentlyFetching(true);
       const payload = await apiFetch({
         url: addUrlParams(baseUrl, {
           project: projectId,
@@ -29,11 +33,12 @@ export default ({
         dispatch,
       });
       setIssues(payload?.results || /* istanbul ignore next */ []);
+      setCurrentlyFetching(false);
     };
-    if (projectId && isOpen) {
+    if (projectId && isOpen && !currentlyResyncing) {
       fetchIssues();
     }
-  }, [dispatch, projectId, isOpen, isAttached]);
+  }, [dispatch, projectId, isOpen, isAttached, currentlyResyncing]);
 
-  return { issues };
+  return { issues, currentlyFetching };
 };
