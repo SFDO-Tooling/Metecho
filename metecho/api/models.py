@@ -289,6 +289,7 @@ class Project(
     repo_name = StringField()
     name = StringField(unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
+    has_truncated_issues = models.BooleanField(default=False)
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
     repo_image_url = models.URLField(blank=True)

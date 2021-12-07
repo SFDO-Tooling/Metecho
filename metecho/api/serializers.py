@@ -250,6 +250,7 @@ class ProjectSerializer(HashIdModelSerializer):
             "repo_url",
             "repo_owner",
             "repo_name",
+            "has_truncated_issues",
             "has_push_permission",
             "description",
             "description_rendered",
@@ -266,6 +267,7 @@ class ProjectSerializer(HashIdModelSerializer):
             "currently_fetching_issues",
         )
         extra_kwargs = {
+            "has_truncated_issues": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
             "currently_fetching_github_users": {"read_only": True},
             "latest_sha": {"read_only": True},

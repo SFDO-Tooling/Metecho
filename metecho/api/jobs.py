@@ -738,12 +738,14 @@ def refresh_github_issues(project, *, originating_user_id):
         # Unfortunately the GitHub API includes pull requests when querying for issues,
         # and we can't filter them out in the request. Instead we manually filter out
         # pull requests until we have enough issues.
+        project.has_truncated_issues = True
         issues = repo.issues()
         count = 0
         while count < settings.GITHUB_ISSUE_LIMIT:
             try:
                 issue = next(issues)
             except StopIteration:
+                project.has_truncated_issues = False
                 break
             if issue.pull_request_urls is not None:
                 continue  # Issue is actually a pull request, skip

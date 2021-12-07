@@ -255,7 +255,10 @@ class TestCreateBranchesOnGitHub:
 
 @pytest.mark.django_db
 class TestRefreshGitHubIssues:
-    def test_filter_pull_requests(self, mocker, project_factory, short_issue_factory):
+    def test_filter_pull_requests(
+        self, mocker, settings, project_factory, short_issue_factory
+    ):
+        settings.GITHUB_ISSUE_LIMIT = 5
         get_repo_info = mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
         # Repo with 2 issues and 1 PR
         get_repo_info.return_value.issues.return_value.__next__.side_effect = (
@@ -269,6 +272,7 @@ class TestRefreshGitHubIssues:
 
         project.refresh_from_db()
         assert project.issues.count() == 2
+        assert not project.has_truncated_issues
         assert not project.currently_fetching_issues
 
     def test_limit(self, mocker, settings, project_factory, short_issue_factory):
@@ -284,6 +288,7 @@ class TestRefreshGitHubIssues:
 
         project.refresh_from_db()
         assert project.issues.count() == 5
+        assert project.has_truncated_issues
         assert not project.currently_fetching_issues
 
     def test_idempotent(self, mocker, project_factory, short_issue_factory):
