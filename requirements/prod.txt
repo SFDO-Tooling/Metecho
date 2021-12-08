@@ -345,7 +345,7 @@ robotframework-stacktrace==0.4.1
     # via
     #   cumulusci
     #   robotframework-pabot
-rq==1.10.0
+rq==1.10.1
     # via
     #   django-rq
     #   rq-scheduler
