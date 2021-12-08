@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 # Use the presence of $PORT as a proxy for "are we local or Heroku?"
 if [ -z ${PORT+x} ];
 then
