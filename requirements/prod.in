@@ -1,10 +1,10 @@
-Django==3.2.9
+Django==3.2.10
 autobahn==21.11.1
 beautifulsoup4==4.10.0
 bleach==3.3.1
 channels-redis==3.3.1
 channels==3.0.4
-cumulusci==3.47.0
+cumulusci==3.48.2
 dj-database-url==0.5.0
 django-allauth==0.46.0
 django-anymail[mailgun]==8.4
@@ -13,15 +13,15 @@ django-js-reverse==0.9.1
 django-log-request-id==1.7.0
 django-model-utils==4.2.0
 django-parler==2.3
-django-redis==5.0.0
+django-redis==5.1.0
 django-rq==2.5.1
 djangorestframework==3.12.4
 drf-spectacular==0.21.0
 furl==2.1.3
-github3-py==2.0.0
+github3-py==3.0.0
 honcho==1.1.0
 logfmt==0.4
-markdown==3.3.6
+markdown==3.3.4
 
 # psycopg2 is used as the database driver for Django to connect to PostgreSQL.
 # It is LGPL-licensed and we must follow these rules for compliance with Salesforce 3rd-party software policy:
@@ -33,5 +33,5 @@ psycopg2-binary==2.9.2
 rq-scheduler==0.11.0
 sentry-sdk==1.5.0
 service_identity==21.1.0
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.18.0.tar.gz
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.19.0.tar.gz
 whitenoise==5.3.0

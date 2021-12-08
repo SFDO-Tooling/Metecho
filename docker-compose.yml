@@ -35,7 +35,7 @@ services:
     # Wait for Postgres DB to be ready before running server
     command:
       bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;
-      /start-server.sh'
+      /app/start-server.sh'
 
   # Runs the database process:
   postgres:
