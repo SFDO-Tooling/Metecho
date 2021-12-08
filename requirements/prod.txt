@@ -80,7 +80,7 @@ contextvars==2.4
     # via
     #   cumulusci
     #   snowfakery
-croniter==1.0.15
+croniter==1.1.0
     # via rq-scheduler
 cryptography==3.4.8
     # via
@@ -103,10 +103,9 @@ deprecated==1.2.13
     # via
     #   cumulusci
     #   jwcrypto
-    #   redis
 dj-database-url==0.5.0
     # via -r requirements/prod.in
-django==3.2.9
+django==3.2.10
     # via
     #   -r requirements/prod.in
     #   channels
@@ -139,7 +138,7 @@ django-model-utils==4.2.0
     # via -r requirements/prod.in
 django-parler==2.3
     # via -r requirements/prod.in
-django-redis==5.0.0
+django-redis==5.1.0
     # via -r requirements/prod.in
 django-rq==2.5.1
     # via -r requirements/prod.in
@@ -301,7 +300,7 @@ pyyaml==5.4.1
     #   cumulusci
     #   drf-spectacular
     #   snowfakery
-redis==4.0.2
+redis==3.5.3
     # via
     #   django-redis
     #   django-rq
@@ -348,7 +347,7 @@ robotframework-stacktrace==0.4.1
     # via
     #   cumulusci
     #   robotframework-pabot
-rq==1.10.0
+rq==1.10.1
     # via
     #   django-rq
     #   rq-scheduler

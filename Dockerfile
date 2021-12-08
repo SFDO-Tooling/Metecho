@@ -1,4 +1,4 @@
-FROM oddbirds/pyjs:v0.5.0
+FROM oddbirds/pyjs:py3.9-node14
 
 ARG BUILD_ENV=development
 
@@ -19,7 +19,7 @@ RUN if [ "${BUILD_ENV}" = "development" ] ; then \
     fi
 
 # Install sfdx
-RUN mkdir sfdx && wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1 && ./sfdx/install && rm -rf sfdx
+RUN npm install --global sfdx-cli --ignore-scripts
 
 # JS client setup:
 COPY ./package.json /app/package.json
