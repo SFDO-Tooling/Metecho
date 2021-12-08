@@ -291,8 +291,6 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 
@@ -405,17 +403,13 @@ JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 REDIS_LOCATION = "{0}/{1}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": REDIS_LOCATION,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "IGNORE_EXCEPTIONS": True,
-        },
     }
 }
 RQ_QUEUES = {
     "default": {
-        "USE_REDIS_CACHE": "default",
+        "URL": REDIS_LOCATION,
         "DEFAULT_TIMEOUT": env("REDIS_JOB_TIMEOUT", type_=int, default=3600),
         "DEFAULT_RESULT_TTL": 720,
     }
