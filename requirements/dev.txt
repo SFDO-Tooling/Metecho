@@ -19,7 +19,7 @@ babel==2.9.1
     # via sphinx
 backcall==0.2.0
     # via ipython
-black==21.11b1
+black==21.12b0
     # via -r requirements/dev.in
 certifi==2021.10.8
     # via
@@ -33,7 +33,7 @@ click==7.1.2
     # via
     #   -c requirements/prod.txt
     #   black
-coverage[toml]==6.1.2
+coverage[toml]==6.2
     # via
     #   coveralls
     #   pytest-cov
@@ -41,7 +41,7 @@ coveralls==3.3.1
     # via -r requirements/dev.in
 decorator==5.1.0
     # via ipython
-django==3.2.9
+django==3.2.10
     # via
     #   -c requirements/prod.txt
     #   django-extensions
@@ -61,7 +61,7 @@ factory-boy==3.2.1
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==8.14.0
+faker==9.8.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -69,9 +69,9 @@ flake8==4.0.1
     # via
     #   -r requirements/dev.in
     #   flake8-bugbear
-flake8-bugbear==21.9.2
+flake8-bugbear==21.11.29
     # via -r requirements/dev.in
-idna==3.2
+idna==3.3
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -83,7 +83,7 @@ inflection==0.5.1
     #   pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
-ipython==7.29.0
+ipython==7.30.1
     # via -r requirements/dev.in
 isort==5.10.1
     # via -r requirements/dev.in
@@ -109,7 +109,7 @@ packaging==21.3
     #   pytest
     #   pytest-sugar
     #   sphinx
-parso==0.8.2
+parso==0.8.3
     # via jedi
 pathspec==0.9.0
     # via black
@@ -123,7 +123,7 @@ platformdirs==2.4.0
     # via black
 pluggy==1.0.0
     # via pytest
-prompt-toolkit==3.0.22
+prompt-toolkit==3.0.23
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -157,7 +157,7 @@ pytest-asyncio==0.16.0
     # via -r requirements/dev.in
 pytest-cov==3.0.0
     # via -r requirements/dev.in
-pytest-django==4.4.0
+pytest-django==4.5.2
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
     # via -r requirements/dev.in
@@ -176,8 +176,6 @@ pytz==2021.3
     #   -c requirements/prod.txt
     #   babel
     #   django
-regex==2021.11.10
-    # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in
 requests==2.26.0
@@ -194,7 +192,7 @@ six==1.16.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==4.3.0
+sphinx==4.3.1
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
