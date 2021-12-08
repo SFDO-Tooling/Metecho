@@ -1,5 +1,6 @@
 import html
 import logging
+from contextlib import suppress
 from datetime import timedelta
 from typing import Dict, Optional, Tuple
 
@@ -1370,6 +1371,8 @@ def ensure_slug_handler(sender, *, created, instance, **kwargs):
         instance.slug_class.objects.create(
             parent=instance.slug_parent, slug=slug, is_active=True
         )
+    with suppress(AttributeError):
+        del instance.slug_cache  # Clear cached property
 
 
 post_save.connect(ensure_slug_handler, sender=Project)
