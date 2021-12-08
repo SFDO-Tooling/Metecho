@@ -80,7 +80,7 @@ contextvars==2.4
     # via
     #   cumulusci
     #   snowfakery
-croniter==1.0.15
+croniter==1.1.0
     # via rq-scheduler
 cryptography==3.4.8
     # via
