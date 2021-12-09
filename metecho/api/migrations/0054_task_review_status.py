@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 choices=[
                     ("Approved", "Approved"),
-                    ("Changes requested", "Changes requested"),
+                    ("Changes requested", "Changes Requested"),
                 ],
                 max_length=32,
                 null=True,
