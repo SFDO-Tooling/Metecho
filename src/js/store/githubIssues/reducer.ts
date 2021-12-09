@@ -4,7 +4,7 @@ import { Task } from '@/js/store/tasks/reducer';
 import { LogoutAction } from '@/js/store/user/actions';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
-interface IssueTask
+export interface IssueTask
   extends Pick<
     Task,
     | 'id'
@@ -18,6 +18,8 @@ interface IssueTask
   epic_slug: Epic['slug'] | null;
 }
 
+export type IssueEpic = Pick<Epic, 'id' | 'name' | 'status' | 'slug'>;
+
 export interface GitHubIssue {
   id: string;
   number: number;
@@ -25,7 +27,7 @@ export interface GitHubIssue {
   created_at: string;
   html_url: string;
   project: string;
-  epic: Pick<Epic, 'id' | 'name' | 'status' | 'slug'> | null;
+  epic: IssueEpic | null;
   task: IssueTask | null;
 }
 
