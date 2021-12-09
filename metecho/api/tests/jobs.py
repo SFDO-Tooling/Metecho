@@ -30,7 +30,7 @@ from ..jobs import (
     submit_review,
     user_reassign,
 )
-from ..models import SCRATCH_ORG_TYPES
+from ..models import ScratchOrgType
 
 Author = namedtuple("Author", ("avatar_url", "login"))
 Commit = namedtuple(
@@ -303,7 +303,7 @@ def test_create_org_and_run_flow():
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
-        scratch_org = MagicMock(org_type=SCRATCH_ORG_TYPES.Dev)
+        scratch_org = MagicMock(org_type=ScratchOrgType.DEV)
         _create_org_and_run_flow(
             scratch_org,
             user=MagicMock(),
@@ -346,7 +346,7 @@ def test_create_org_and_run_flow__fall_back_to_cases():
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
         _create_org_and_run_flow(
-            MagicMock(org_type=SCRATCH_ORG_TYPES.Dev, org_config_name="dev"),
+            MagicMock(org_type=ScratchOrgType.DEV, org_config_name="dev"),
             user=MagicMock(),
             repo_id=123,
             repo_branch=MagicMock(),
@@ -464,7 +464,7 @@ class TestConvertScratchOrg:
     def test_convert_to_dev_org(self, mocker, scratch_org_factory, _task_factory):
         task = _task_factory()
         scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+            org_type=ScratchOrgType.PLAYGROUND, task=None, epic=task.epic
         )
         _create_branches_on_github = mocker.patch(
             f"{PATCH_ROOT}._create_branches_on_github"
@@ -479,14 +479,14 @@ class TestConvertScratchOrg:
         scratch_org.refresh_from_db()
         assert scratch_org.epic is None
         assert scratch_org.task == task
-        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Dev
+        assert scratch_org.org_type == ScratchOrgType.DEV
 
     def test_convert_to_dev_org__error(
         self, mocker, caplog, scratch_org_factory, task_factory
     ):
         task = task_factory(epic__project__repo_id=123)
         scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+            org_type=ScratchOrgType.PLAYGROUND, task=None, epic=task.epic
         )
         mocker.patch(f"{PATCH_ROOT}._create_branches_on_github", side_effect=Exception)
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
@@ -500,7 +500,7 @@ class TestConvertScratchOrg:
         scratch_org.refresh_from_db()
         assert scratch_org.epic == task.epic
         assert scratch_org.task is None
-        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Playground
+        assert scratch_org.org_type == ScratchOrgType.PLAYGROUND
 
 
 @pytest.mark.django_db

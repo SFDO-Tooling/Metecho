@@ -12,7 +12,7 @@ from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
 
-from ..models import SCRATCH_ORG_TYPES
+from ..models import ScratchOrgType
 
 Branch = namedtuple("Branch", ["name"])
 
@@ -619,7 +619,7 @@ class TestScratchOrgViewSet:
     ):
         other_user = user_factory()
         scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground,
+            org_type=ScratchOrgType.PLAYGROUND,
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
@@ -639,7 +639,7 @@ class TestScratchOrgViewSet:
     ):
         other_user = user_factory()
         scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground,
+            org_type=ScratchOrgType.PLAYGROUND,
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
@@ -656,7 +656,7 @@ class TestScratchOrgViewSet:
     def test_list_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
             scratch_org_factory(
-                org_type=SCRATCH_ORG_TYPES.Dev,
+                org_type=ScratchOrgType.DEV,
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
@@ -677,7 +677,7 @@ class TestScratchOrgViewSet:
     def test_retrieve_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
             scratch_org = scratch_org_factory(
-                org_type=SCRATCH_ORG_TYPES.Dev,
+                org_type=ScratchOrgType.DEV,
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,

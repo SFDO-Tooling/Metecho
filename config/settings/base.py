@@ -440,9 +440,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "2019–2021, Salesforce.org",
     "VERSION": "0.1.0",
     "ENUM_NAME_OVERRIDES": {
-        "TaskStatusEnum": "metecho.api.models.TASK_STATUSES",
-        "EpicStatusEnum": "metecho.api.models.EPIC_STATUSES",
-        "ReviewStatusEnum": "metecho.api.models.TASK_REVIEW_STATUS",
+        "TaskStatusEnum": "metecho.api.models.TaskStatus.choices",
+        "EpicStatusEnum": "metecho.api.models.EpicStatus.choices",
+        "ReviewStatusEnum": "metecho.api.models.TaskReviewStatus.choices",
     },
     "SERVE_INCLUDE_SCHEMA": False,  # Don't include schema view in docs
 }
