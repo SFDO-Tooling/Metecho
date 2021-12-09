@@ -11,7 +11,7 @@ class Response(dict):
 
 # Required by Django >= 4 on middleware instantiation
 def get_response(request):
-    return
+    return  # pragma: nocover
 
 
 @pytest.mark.django_db
