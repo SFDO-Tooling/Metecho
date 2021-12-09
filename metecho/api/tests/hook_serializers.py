@@ -8,7 +8,7 @@ from ..hook_serializers import (
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from ..models import TASK_STATUSES
+from ..models import TaskStatus
 
 fixture = pytest.lazy_fixture
 
@@ -100,9 +100,7 @@ class TestPrHookSerializer:
     def test_process_hook__mark_matching_tasks_as_completed(
         self, _task_factory, task_data
     ):
-        task = _task_factory(
-            **task_data, pr_number=456, status=TASK_STATUSES["In progress"]
-        )
+        task = _task_factory(**task_data, pr_number=456, status=TaskStatus.IN_PROGRESS)
         data = {
             "action": "closed",
             "number": 456,
@@ -119,13 +117,13 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
         task.refresh_from_db()
-        assert task.status == TASK_STATUSES.Completed
+        assert task.status == TaskStatus.COMPLETED
 
     def test_process_hook__closed_not_merged(self, task_factory):
         task = task_factory(
             pr_number=456,
             epic__project__repo_id=123,
-            status=TASK_STATUSES["In progress"],
+            status=TaskStatus.IN_PROGRESS,
         )
         data = {
             "action": "closed",
@@ -143,14 +141,14 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
         task.refresh_from_db()
-        assert task.status == TASK_STATUSES.Canceled
+        assert task.status == TaskStatus.CANCELED
         assert not task.pr_is_open
 
     def test_process_hook__reopened(self, task_factory):
         task = task_factory(
             pr_number=456,
             epic__project__repo_id=123,
-            status=TASK_STATUSES["In progress"],
+            status=TaskStatus.IN_PROGRESS,
         )
         data = {
             "action": "reopened",
@@ -168,7 +166,7 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
         task.refresh_from_db()
-        assert task.status == TASK_STATUSES["In progress"]
+        assert task.status == TaskStatus.IN_PROGRESS
         assert task.pr_is_open
 
     def test_process_hook__close_matching_epics(self, project_factory, epic_factory):

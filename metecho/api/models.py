@@ -24,7 +24,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from model_utils import Choices, FieldTracker
+from model_utils import FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from requests.exceptions import HTTPError
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -48,19 +48,42 @@ from .validators import validate_unicode_branch
 
 logger = logging.getLogger(__name__)
 
-ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
-SCRATCH_ORG_TYPES = Choices("Dev", "QA", "Playground")
-EPIC_STATUSES = Choices("Planned", "In progress", "Review", "Merged")
-TASK_STATUSES = Choices(
-    ("Planned", "Planned"),
-    ("In progress", "In progress"),
-    ("Completed", "Completed"),
-    ("Canceled", "Canceled"),
-)
-TASK_REVIEW_STATUS = Choices(
-    ("Approved", "Approved"), ("Changes requested", "Changes requested")
-)
-ISSUE_STATES = Choices(("open", "Open"), ("closed", "Closed"))
+
+class OrgType(models.TextChoices):
+    PRODUCTION = ("Production", "Production")
+    SCRATCH = ("Scratch", "Scratch")
+    SANDBOX = ("Sandbox", "Sandbox")
+    DEVELOPER = ("Developer", "Developer")
+
+
+class ScratchOrgType(models.TextChoices):
+    DEV = ("Dev", "Dev")
+    QA = ("QA", "QA")
+    PLAYGROUND = ("Playground", "Playground")
+
+
+class EpicStatus(models.TextChoices):
+    PLANNED = ("Planned", "Planned")
+    IN_PROGRESS = ("In progress", "In progress")
+    REVIEW = ("Review", "Review")
+    MERGED = ("Merged", "Merged")
+
+
+class TaskStatus(models.TextChoices):
+    PLANNED = ("Planned", "Planned")
+    IN_PROGRESS = ("In progress", "In progress")
+    COMPLETED = ("Completed", "Completed")
+    CANCELED = ("Canceled", "Canceled")
+
+
+class TaskReviewStatus(models.TextChoices):
+    APPROVED = ("Approved", "Approved")
+    CHANGES_REQUESTED = ("Changes requested", "Changes requested")
+
+
+class IssueStates(models.TextChoices):
+    OPEN = ("open", "Open")
+    CLOSED = ("closed", "Closed")
 
 
 class SiteProfile(TranslatableModel):
@@ -185,13 +208,13 @@ class User(HashIdMixin, AbstractUser):
         if org_type is None or is_sandbox is None:
             return None
         if org_type == "Developer Edition" and not is_sandbox:
-            return ORG_TYPES.Developer
+            return OrgType.DEVELOPER
         if org_type != "Developer Edition" and not is_sandbox:
-            return ORG_TYPES.Production
+            return OrgType.PRODUCTION
         if is_sandbox and not has_expiration:
-            return ORG_TYPES.Sandbox
+            return OrgType.SANDBOX
         if is_sandbox and has_expiration:
-            return ORG_TYPES.Scratch
+            return OrgType.SCRATCH
 
     @property
     def instance_url(self) -> Optional[str]:
@@ -259,7 +282,7 @@ class User(HashIdMixin, AbstractUser):
             return True
         if not self.salesforce_account:
             return False
-        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
+        if self.full_org_type in (OrgType.SCRATCH, OrgType.SANDBOX):
             return False
 
         try:
@@ -484,7 +507,7 @@ class GitHubIssue(HashIdMixin):
     github_id = models.PositiveIntegerField(db_index=True)
     title = StringField()
     number = models.PositiveIntegerField()
-    state = models.CharField(choices=ISSUE_STATES, max_length=50)
+    state = models.CharField(choices=IssueStates.choices, max_length=50)
     html_url = models.URLField()
     project = models.ForeignKey(
         Project, related_name="issues", on_delete=models.CASCADE
@@ -528,7 +551,7 @@ class Epic(
     pr_is_open = models.BooleanField(default=False)
     pr_is_merged = models.BooleanField(default=False)
     status = models.CharField(
-        max_length=20, choices=EPIC_STATUSES, default=EPIC_STATUSES.Planned
+        max_length=20, choices=EpicStatus.choices, default=EpicStatus.PLANNED
     )
     latest_sha = StringField(blank=True)
 
@@ -605,7 +628,7 @@ class Epic(
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
         return task_statuses and any(
-            status != TASK_STATUSES.Planned for status in task_statuses
+            status != TaskStatus.PLANNED for status in task_statuses
         )
 
     def should_update_review(self):
@@ -618,10 +641,10 @@ class Epic(
         return (
             task_statuses
             and all(
-                status in [TASK_STATUSES.Completed, TASK_STATUSES.Canceled]
+                status in [TaskStatus.COMPLETED, TaskStatus.CANCELED]
                 for status in task_statuses
             )
-            and any(status == TASK_STATUSES.Completed for status in task_statuses)
+            and any(status == TaskStatus.COMPLETED for status in task_statuses)
         )
 
     def should_update_merged(self):
@@ -629,20 +652,20 @@ class Epic(
 
     def should_update_status(self):
         if self.should_update_merged():
-            return self.status != EPIC_STATUSES.Merged
+            return self.status != EpicStatus.MERGED
         elif self.should_update_review():
-            return self.status != EPIC_STATUSES.Review
+            return self.status != EpicStatus.REVIEW
         elif self.should_update_in_progress():
-            return self.status != EPIC_STATUSES["In progress"]
+            return self.status != EpicStatus.IN_PROGRESS
         return False
 
     def update_status(self):
         if self.should_update_merged():
-            self.status = EPIC_STATUSES.Merged
+            self.status = EpicStatus.MERGED
         elif self.should_update_review():
-            self.status = EPIC_STATUSES.Review
+            self.status = EpicStatus.REVIEW
         elif self.should_update_in_progress():
-            self.status = EPIC_STATUSES["In progress"]
+            self.status = EpicStatus.IN_PROGRESS
 
     def notify_created(self, originating_user_id=None):
         # Notify all users about the new epic
@@ -742,13 +765,13 @@ class Task(
     review_submitted_at = models.DateTimeField(null=True, blank=True)
     review_valid = models.BooleanField(default=False)
     review_status = models.CharField(
-        choices=TASK_REVIEW_STATUS, blank=True, default="", max_length=32
+        choices=TaskReviewStatus.choices, blank=True, default="", max_length=32
     )
     review_sha = StringField(blank=True, default="")
     reviewers = models.JSONField(default=list, blank=True)
 
     status = models.CharField(
-        choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
+        choices=TaskStatus.choices, default=TaskStatus.PLANNED, max_length=16
     )
 
     # GitHub IDs of task assignees
@@ -926,7 +949,7 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_status_completed(self, pr_number, *, originating_user_id):
-        self.status = TASK_STATUSES.Completed
+        self.status = TaskStatus.COMPLETED
         self.has_unmerged_commits = False
         self.pr_number = pr_number
         self.pr_is_open = False
@@ -937,7 +960,7 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, pr_number, *, originating_user_id):
-        self.status = TASK_STATUSES.Canceled
+        self.status = TaskStatus.CANCELED
         self.pr_number = pr_number
         self.pr_is_open = False
         self.review_valid = False
@@ -945,7 +968,7 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_opened(self, pr_number, *, originating_user_id):
-        self.status = TASK_STATUSES["In progress"]
+        self.status = TaskStatus.IN_PROGRESS
         self.pr_number = pr_number
         self.pr_is_open = True
         self.pr_is_merged = False
@@ -953,14 +976,14 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_provision(self, *, originating_user_id):
-        if self.status == TASK_STATUSES.Planned:
-            self.status = TASK_STATUSES["In progress"]
+        if self.status == TaskStatus.PLANNED:
+            self.status = TaskStatus.IN_PROGRESS
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_commit_changes(self, *, originating_user_id):
-        if self.status != TASK_STATUSES["In progress"]:
-            self.status = TASK_STATUSES["In progress"]
+        if self.status != TaskStatus.IN_PROGRESS:
+            self.status = TaskStatus.IN_PROGRESS
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)
 
@@ -1016,7 +1039,7 @@ class Task(
                 type_="TASK_SUBMIT_REVIEW", originating_user_id=originating_user_id
             )
             deletable_org = (
-                org and org.task == self and org.org_type == SCRATCH_ORG_TYPES.QA
+                org and org.task == self and org.org_type == ScratchOrgType.QA
             )
             if delete_org and deletable_org:
                 org.queue_delete(originating_user_id=originating_user_id)
@@ -1047,7 +1070,7 @@ class ScratchOrg(
         blank=True,
     )
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    org_type = StringField(choices=SCRATCH_ORG_TYPES)
+    org_type = StringField(choices=ScratchOrgType.choices)
     org_config_name = StringField()
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     last_modified_at = models.DateTimeField(null=True, blank=True)
@@ -1127,7 +1150,7 @@ class ScratchOrg(
             raise ValidationError(
                 _("A Scratch Org must belong to either a Project, an Epic, or a Task.")
             )
-        if self.org_type != SCRATCH_ORG_TYPES.Playground and not self.task:
+        if self.org_type != ScratchOrgType.PLAYGROUND and not self.task:
             raise ValidationError(
                 {"org_type": _("Dev and Test Orgs must belong to a Task.")}
             )
@@ -1245,7 +1268,7 @@ class ScratchOrg(
             )
             return
 
-        self.org_type = SCRATCH_ORG_TYPES.Dev
+        self.org_type = ScratchOrgType.DEV
         self.task = task
         self.epic = None
         self.project = None

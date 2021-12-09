@@ -39,7 +39,7 @@ services:
 
   # Runs the database process:
   postgres:
-    image: postgres:12.5
+    image: postgres:12.9
     restart: always
     environment:
       POSTGRES_USER: metecho
@@ -49,4 +49,4 @@ services:
 
   # Runs the queue process:
   redis:
-    image: redis:6.0
+    image: redis:6.2
