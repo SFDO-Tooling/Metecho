@@ -50,35 +50,35 @@ logger = logging.getLogger(__name__)
 
 
 class OrgType(models.TextChoices):
-    PRODUCTION = ("Production", "Production")
-    SCRATCH = ("Scratch", "Scratch")
-    SANDBOX = ("Sandbox", "Sandbox")
-    DEVELOPER = ("Developer", "Developer")
+    PRODUCTION = "Production"
+    SCRATCH = "Scratch"
+    SANDBOX = "Sandbox"
+    DEVELOPER = "Developer"
 
 
 class ScratchOrgType(models.TextChoices):
-    DEV = ("Dev", "Dev")
+    DEV = "Dev"
     QA = ("QA", "QA")
-    PLAYGROUND = ("Playground", "Playground")
+    PLAYGROUND = "Playground"
 
 
 class EpicStatus(models.TextChoices):
-    PLANNED = ("Planned", "Planned")
-    IN_PROGRESS = ("In progress", "In progress")
-    REVIEW = ("Review", "Review")
-    MERGED = ("Merged", "Merged")
+    PLANNED = "Planned"
+    IN_PROGRESS = "In progress"
+    REVIEW = "Review"
+    MERGED = "Merged"
 
 
 class TaskStatus(models.TextChoices):
-    PLANNED = ("Planned", "Planned")
-    IN_PROGRESS = ("In progress", "In progress")
-    COMPLETED = ("Completed", "Completed")
-    CANCELED = ("Canceled", "Canceled")
+    PLANNED = "Planned"
+    IN_PROGRESS = "In progress"
+    COMPLETED = "Completed"
+    CANCELED = "Canceled"
 
 
 class TaskReviewStatus(models.TextChoices):
-    APPROVED = ("Approved", "Approved")
-    CHANGES_REQUESTED = ("Changes requested", "Changes requested")
+    APPROVED = "Approved"
+    CHANGES_REQUESTED = "Changes requested"
 
 
 class IssueStates(models.TextChoices):

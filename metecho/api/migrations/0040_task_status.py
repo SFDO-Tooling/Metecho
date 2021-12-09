@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ("Planned", "Planned"),
-                    ("In progress", "In progress"),
+                    ("In progress", "In Progress"),
                     ("Completed", "Completed"),
                 ],
                 default="Planned",
