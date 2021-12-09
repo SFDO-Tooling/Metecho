@@ -82,8 +82,8 @@ class TaskReviewStatus(models.TextChoices):
 
 
 class IssueStates(models.TextChoices):
-    OPEN = ("open", "Open")
-    CLOSED = ("closed", "Closed")
+    OPEN = "open"
+    CLOSED = "closed"
 
 
 class SiteProfile(TranslatableModel):
