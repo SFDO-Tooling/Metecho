@@ -105,7 +105,7 @@ deprecated==1.2.13
     #   jwcrypto
 dj-database-url==0.5.0
     # via -r requirements/prod.in
-django==3.2.10
+django==4.0
     # via
     #   -r requirements/prod.in
     #   channels
@@ -117,7 +117,6 @@ django==3.2.10
     #   django-log-request-id
     #   django-model-utils
     #   django-parler
-    #   django-redis
     #   django-rq
     #   djangorestframework
     #   drf-spectacular
@@ -130,15 +129,13 @@ django-filter==21.1
     # via sfdo-template-helpers
 django-hashid-field==3.3.3
     # via -r requirements/prod.in
-django-js-reverse==0.9.1
+django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
     # via -r requirements/prod.in
 django-log-request-id==1.7.0
     # via -r requirements/prod.in
 django-model-utils==4.2.0
     # via -r requirements/prod.in
 django-parler==2.3
-    # via -r requirements/prod.in
-django-redis==5.1.0
     # via -r requirements/prod.in
 django-rq==2.5.1
     # via -r requirements/prod.in
@@ -293,7 +290,6 @@ python3-openid==3.2.0
 pytz==2021.3
     # via
     #   cumulusci
-    #   django
     #   fs
 pyyaml==6.0
     # via
@@ -302,7 +298,6 @@ pyyaml==6.0
     #   snowfakery
 redis==3.5.3
     # via
-    #   django-redis
     #   django-rq
     #   rq
 requests==2.26.0
