@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.utils import timezone
 
-from ..models import SCRATCH_ORG_TYPES, Task
+from ..models import ScratchOrgType, Task
 from ..serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
@@ -486,8 +486,8 @@ class TestTaskAssigneeSerializer:
         repo = git_hub_repository_factory(
             repo_id=project.repo_id, permissions={"push": True}
         )
-        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
+        so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
 
         data = {"assigned_dev": "123456", "assigned_qa": "456789"}
         r = rf.get("/")
@@ -514,8 +514,8 @@ class TestTaskAssigneeSerializer:
             assigned_dev="123",
             assigned_qa="123",
         )
-        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
+        so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
         data = {
             "assigned_dev": None,
             "assigned_qa": None,
@@ -746,14 +746,14 @@ class TestTaskAssigneeSerializer:
         scratch_org_factory(
             owner_sf_username="test",
             task=task,
-            org_type=SCRATCH_ORG_TYPES.Dev,
+            org_type=ScratchOrgType.DEV,
             latest_commit="abc123",
             deleted_at=timezone.now(),
         )
         scratch_org_factory(
             owner_sf_username="test",
             task=task,
-            org_type=SCRATCH_ORG_TYPES.QA,
+            org_type=ScratchOrgType.QA,
             latest_commit="abc123",
             deleted_at=timezone.now(),
         )
