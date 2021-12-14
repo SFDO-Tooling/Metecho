@@ -1,10 +1,15 @@
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import {
+  fireEvent,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/js/components/projects/detail';
 import { createObject, fetchObject, fetchObjects } from '@/js/store/actions';
+import { refreshGitHubIssues } from '@/js/store/projects/actions';
 import { onboarded } from '@/js/store/user/actions';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
@@ -22,17 +27,20 @@ import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/js/store/actions');
 jest.mock('@/js/store/user/actions');
+jest.mock('@/js/store/projects/actions');
 
 onboarded.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshGitHubIssues.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   onboarded.mockClear();
   createObject.mockClear();
+  refreshGitHubIssues.mockClear();
 });
 
 const defaultOrg = {
@@ -647,31 +655,28 @@ describe('<ProjectDetail />', () => {
       );
       const { getByText } = setup();
       fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect.assertions(2);
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
 
       const btn = await getByText('Re-Sync Issues');
       fireEvent.click(btn);
-      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      expect(refreshGitHubIssues).toHaveBeenCalledTimes(1);
     });
 
-    test('refreshes issues by retriveing them from githbub when none locally', async () => {
+    test('refreshes issues by retrieving them from github when none locally', async () => {
       fetchMock.get('end:is_attached=true', {
         results: [],
       });
       fetchMock.get('end:is_attached=false', {
         results: [],
       });
-      fetchMock.postOnce(
-        window.api_urls.project_refresh_github_issues(sampleIssue1.project),
-        202,
-      );
       const { getByText } = setup();
       fireEvent.click(getByText('Create Epic from GitHub Issue'));
-      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
 
-      const btn = await getByText('Re-Sync Issues');
-      fireEvent.click(btn);
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+      await waitFor(() => expect(refreshGitHubIssues).toHaveBeenCalledTimes(1));
     });
   });
 
