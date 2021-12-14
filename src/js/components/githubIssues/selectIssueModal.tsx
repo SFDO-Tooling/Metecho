@@ -239,8 +239,8 @@ const SelectIssueModal = ({
           </div>
         </div>
         <form className="slds-form">
-          <div className="slds-grid slds-gutters">
-            <div className="slds-col slds-size_1-of-2">
+          <div className="slds-grid slds-gutters slds-wrap">
+            <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
               <h2 className="slds-text-heading_small">
                 {t('Available Issues')}
               </h2>
@@ -273,7 +273,7 @@ const SelectIssueModal = ({
                 )}
               </RadioGroup>
             </div>
-            <div className="slds-col slds-size_1-of-2">
+            <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
               <h2 className="slds-text-heading_small">
                 {t('Attached Issues')}
               </h2>
