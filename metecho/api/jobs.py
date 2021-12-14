@@ -30,7 +30,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import TASK_REVIEW_STATUS
+from .models import TaskReviewStatus
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -738,12 +738,14 @@ def refresh_github_issues(project, *, originating_user_id):
         # Unfortunately the GitHub API includes pull requests when querying for issues,
         # and we can't filter them out in the request. Instead we manually filter out
         # pull requests until we have enough issues.
+        project.has_truncated_issues = True
         issues = repo.issues()
         count = 0
         while count < settings.GITHUB_ISSUE_LIMIT:
             try:
                 issue = next(issues)
             except StopIteration:
+                project.has_truncated_issues = False
                 break
             if issue.pull_request_urls is not None:
                 continue  # Issue is actually a pull request, skip
@@ -808,8 +810,8 @@ def submit_review(*, user, task, data, originating_user_id):
         state_for_status = {
             # "": "pending",
             # "": "error",
-            TASK_REVIEW_STATUS.Approved: "success",
-            TASK_REVIEW_STATUS["Changes requested"]: "failure",
+            TaskReviewStatus.APPROVED: "success",
+            TaskReviewStatus.CHANGES_REQUESTED: "failure",
         }.get(status)
 
         target_url = get_user_facing_url(path=task.get_absolute_url())

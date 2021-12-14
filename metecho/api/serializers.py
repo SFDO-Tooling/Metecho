@@ -13,14 +13,14 @@ from rest_framework.fields import JSONField
 from .email_utils import get_user_facing_url
 from .fields import MarkdownField
 from .models import (
-    SCRATCH_ORG_TYPES,
-    TASK_REVIEW_STATUS,
     Epic,
     GitHubIssue,
     Project,
     ScratchOrg,
+    ScratchOrgType,
     SiteProfile,
     Task,
+    TaskReviewStatus,
 )
 from .sf_run_flow import is_org_good
 from .validators import CaseInsensitiveUniqueTogetherValidator, UnattachedIssueValidator
@@ -250,6 +250,7 @@ class ProjectSerializer(HashIdModelSerializer):
             "repo_url",
             "repo_owner",
             "repo_name",
+            "has_truncated_issues",
             "has_push_permission",
             "description",
             "description_rendered",
@@ -266,6 +267,7 @@ class ProjectSerializer(HashIdModelSerializer):
             "currently_fetching_issues",
         )
         extra_kwargs = {
+            "has_truncated_issues": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
             "currently_fetching_github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
@@ -722,7 +724,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
         existing_assignee = getattr(instance, f"assigned_{type_}")
         assigned_user_has_changed = new_assignee != existing_assignee
         has_assigned_user = bool(new_assignee)
-        org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
+        org_type = {"dev": ScratchOrgType.DEV, "qa": ScratchOrgType.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
             if epic and new_assignee not in epic.github_users:
@@ -810,7 +812,7 @@ class CreatePrSerializer(serializers.Serializer):
 
 class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
-    status = serializers.ChoiceField(choices=TASK_REVIEW_STATUS)
+    status = serializers.ChoiceField(choices=TaskReviewStatus.choices)
     delete_org = serializers.BooleanField()
     org = serializers.PrimaryKeyRelatedField(
         queryset=ScratchOrg.objects.all(),
@@ -950,7 +952,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     def validate(self, data):
         if not self.instance:
             orgs = ScratchOrg.objects.active().filter(org_type=data["org_type"])
-            if data["org_type"] == SCRATCH_ORG_TYPES.Playground:
+            if data["org_type"] == ScratchOrgType.PLAYGROUND:
                 orgs = orgs.filter(
                     owner=data.get("owner", self.context["request"].user)
                 )

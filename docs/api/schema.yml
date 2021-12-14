@@ -2006,6 +2006,9 @@ components:
           type: string
         repo_name:
           type: string
+        has_truncated_issues:
+          type: boolean
+          readOnly: true
         has_push_permission:
           type: boolean
           readOnly: true
@@ -2056,6 +2059,7 @@ components:
       - currently_fetching_org_config_names
       - description_rendered
       - has_push_permission
+      - has_truncated_issues
       - id
       - latest_sha
       - name

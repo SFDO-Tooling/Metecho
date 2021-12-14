@@ -20,7 +20,11 @@ import {
 import { ThunkDispatch } from '@/js/store';
 import { updateObject } from '@/js/store/actions';
 import { Epic } from '@/js/store/epics/reducer';
-import { GitHubIssue } from '@/js/store/githubIssues/reducer';
+import {
+  GitHubIssue,
+  IssueEpic,
+  IssueTask,
+} from '@/js/store/githubIssues/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
@@ -53,6 +57,31 @@ export const GitHubIssueLink = ({ url }: { url: string }) => (
     />
   </ExternalLink>
 );
+
+const TaskStatus = ({ task }: { task: IssueTask }) => {
+  const { status, icon } = getTaskStatus({
+    taskStatus: task.status,
+    reviewStatus: task.review_status,
+    reviewValid: task.review_valid,
+    prIsOpen: task.pr_is_open,
+  });
+
+  return (
+    <span className="slds-m-left_x-small" title={status}>
+      {icon}
+    </span>
+  );
+};
+
+const EpicStatus = ({ epic }: { epic: IssueEpic }) => {
+  const { status, icon } = getEpicStatus({ epicStatus: epic.status });
+
+  return (
+    <span className="slds-m-left_x-small" title={status}>
+      {icon}
+    </span>
+  );
+};
 
 const SelectIssueModal = ({
   projectId,
@@ -186,7 +215,8 @@ const SelectIssueModal = ({
               <Trans i18nKey="githubIssuesHelp">
                 Issues are items in GitHub’s bug and enhancement tracking
                 system. Select from these open Issues, and create a Task or
-                Epic.
+                Epic. If you don’t see the Issue you’re looking for, try
+                re-syncing the list of Issues.
               </Trans>
             </p>
           </div>
@@ -260,7 +290,7 @@ const SelectIssueModal = ({
                     {issue.task ? (
                       <>
                         <p>
-                          {t('Task')}:{' '}
+                          {t('Task:')}{' '}
                           <Link
                             to={
                               issue.task.epic_slug
@@ -277,22 +307,13 @@ const SelectIssueModal = ({
                           >
                             {issue.task.name}
                           </Link>
-                        </p>
-                        <p>
-                          {
-                            getTaskStatus({
-                              taskStatus: issue.task.status,
-                              reviewStatus: issue.task.review_status,
-                              reviewValid: issue.task.review_valid,
-                              prIsOpen: issue.task.pr_is_open,
-                            }).status
-                          }
+                          <TaskStatus task={issue.task} />
                         </p>
                       </>
                     ) : issue.epic ? (
                       <>
                         <p>
-                          {t('Epic')}:{' '}
+                          {t('Epic:')}{' '}
                           <Link
                             to={routes.epic_detail(
                               projectSlug,
@@ -301,12 +322,7 @@ const SelectIssueModal = ({
                           >
                             {issue.epic.name}
                           </Link>
-                        </p>
-                        <p>
-                          {
-                            getEpicStatus({ epicStatus: issue.epic.status })
-                              .status
-                          }
+                          <EpicStatus epic={issue.epic} />
                         </p>
                       </>
                     ) : /* istanbul ignore next */ null}

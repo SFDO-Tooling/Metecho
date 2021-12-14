@@ -8,7 +8,7 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: /start-server.sh
+  web: /app/start-server.sh
   worker:
     command:
       - python manage.py rqworker default
