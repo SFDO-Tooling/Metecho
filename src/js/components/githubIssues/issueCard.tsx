@@ -57,7 +57,13 @@ const IssueCard = ({ issueId, epicId, taskId }: Props) => {
     <Card
       bodyClassName="slds-card__body_inner"
       heading={
-        issue ? `#${issue.number}: ${issue.title}` : t('Loading GitHub Issue…')
+        issue ? (
+          <>
+            <strong>#{issue.number}</strong>: {issue.title}
+          </>
+        ) : (
+          t('Loading GitHub Issue…')
+        )
       }
       headerActions={
         <Dropdown
