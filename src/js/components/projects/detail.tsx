@@ -440,8 +440,8 @@ const ProjectDetail = (
               </div>
             }
           >
-            <div className="slds-m-bottom_medium">
-              <span className="slds-is-relative">
+            <div className="slds-m-bottom_x-small">
+              <span className="slds-is-relative metecho-btn-container">
                 <Button
                   label={
                     epics?.fetched || tourRunning
@@ -450,7 +450,7 @@ const ProjectDetail = (
                   }
                   variant="brand"
                   onClick={openCreateEpicModal}
-                  className="tour-create-epic"
+                  className="slds-m-bottom_x-small tour-create-epic"
                   disabled={
                     !tourRunning &&
                     (!project.has_push_permission || !epics?.fetched)
@@ -470,12 +470,12 @@ const ProjectDetail = (
                   heading={t('Create Epics to group Tasks')}
                 />
               </span>
-              <span className="slds-is-relative slds-m-left_medium">
+              <span className="slds-is-relative metecho-btn-container">
                 <Button
                   label={t('Create Epic from GitHub Issue')}
                   variant="outline-brand"
                   onClick={() => openSelectIssueModal('epic')}
-                  className="tour-create-epic-from-issue"
+                  className="slds-m-bottom_x-small tour-create-epic-from-issue"
                   disabled={
                     !tourRunning &&
                     (!project.has_push_permission || !epics?.fetched)
@@ -543,8 +543,8 @@ const ProjectDetail = (
               </div>
             }
           >
-            <div className="slds-m-bottom_medium">
-              <span className="slds-is-relative">
+            <div className="slds-m-bottom_x-small">
+              <span className="slds-is-relative metecho-btn-container">
                 <Button
                   label={
                     tasks || tourRunning
@@ -552,7 +552,7 @@ const ProjectDetail = (
                       : t('Loading Tasks…')
                   }
                   variant="brand"
-                  className="tour-create-task"
+                  className="slds-m-bottom_x-small tour-create-task"
                   onClick={openCreateTaskModal}
                   disabled={
                     !tourRunning && (!project.has_push_permission || !tasks)
@@ -572,12 +572,12 @@ const ProjectDetail = (
                   }
                 />
               </span>
-              <span className="slds-is-relative slds-m-left_medium">
+              <span className="slds-is-relative metecho-btn-container">
                 <Button
                   label={t('Create Task from GitHub Issue')}
                   variant="outline-brand"
                   onClick={() => openSelectIssueModal('task')}
-                  className="tour-create-task-from-issue"
+                  className="slds-m-bottom_x-small tour-create-task-from-issue"
                   disabled={
                     !tourRunning && (!project.has_push_permission || !tasks)
                   }
