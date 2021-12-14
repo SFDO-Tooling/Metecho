@@ -633,6 +633,28 @@ describe('<ProjectDetail />', () => {
 
       expect(getByText('#87: this is an issue')).toBeVisible();
     });
+
+    test('refreshes issues', async () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [sampleIssue1],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
+      });
+      const {
+        queryByText,
+        getByText,
+        findByLabelText,
+        getAllByText,
+        findByText,
+      } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const btn = await getByText('Re-Sync Issues');
+      fireEvent.click(btn);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+    });
   });
 
   describe('<CreateEpicModal />', () => {
