@@ -17,7 +17,8 @@ export const api_urls = {
   current_user_guided_tour: () => '/api/user/guided_tour/',
   project_list: () => '/api/projects/',
   project_detail: (slug: string) => `/api/projects/${slug}/`,
-  project_refresh_github_issues: (id: string) => `/api/projects/${id}/refesh_github_issues`,
+  project_refresh_github_issues: (id: string) =>
+    `/api/projects/${id}/refesh_github_issues`,
   project_refresh_github_users: (id: string) =>
     `/api/projects/${id}/refresh_github_users/`,
   epic_list: () => '/api/epics/',
