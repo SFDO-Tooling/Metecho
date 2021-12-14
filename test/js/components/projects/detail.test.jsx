@@ -633,6 +633,46 @@ describe('<ProjectDetail />', () => {
 
       expect(getByText('#87: this is an issue')).toBeVisible();
     });
+
+    test('refreshes issues', async () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [sampleIssue1],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
+      });
+      fetchMock.postOnce(
+        window.api_urls.project_refresh_github_issues(sampleIssue1.project),
+        202,
+      );
+      const { getByText } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const btn = await getByText('Re-Sync Issues');
+      fireEvent.click(btn);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+    });
+
+    test('refreshes issues by retriveing them from githbub when none locally', async () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [],
+      });
+      fetchMock.postOnce(
+        window.api_urls.project_refresh_github_issues(sampleIssue1.project),
+        202,
+      );
+      const { getByText } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const btn = await getByText('Re-Sync Issues');
+      fireEvent.click(btn);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+    });
   });
 
   describe('<CreateEpicModal />', () => {
