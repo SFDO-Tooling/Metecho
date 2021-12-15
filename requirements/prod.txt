@@ -141,7 +141,7 @@ django-redis==5.0.0
     # via -r requirements/prod.in
 django-rq==2.4.1
     # via -r requirements/prod.in
-djangorestframework==3.12.4
+djangorestframework==3.13.0
     # via
     #   -r requirements/prod.in
     #   drf-spectacular
@@ -292,6 +292,7 @@ pytz==2021.1
     # via
     #   cumulusci
     #   django
+    #   djangorestframework
     #   fs
 pyyaml==5.4.1
     # via
