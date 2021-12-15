@@ -489,7 +489,7 @@ describe('<TaskDetail/>', () => {
     test('renders issue', () => {
       const { getByText } = result;
 
-      expect(getByText('#87: this is an issue')).toBeVisible();
+      expect(getByText('#87')).toBeVisible();
     });
 
     test('can detach issue from task', () => {

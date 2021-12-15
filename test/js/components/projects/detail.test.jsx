@@ -665,6 +665,32 @@ describe('<ProjectDetail />', () => {
       expect(refreshGitHubIssues).toHaveBeenCalledTimes(1);
     });
 
+    test('displays loading btn while refreshing', () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [sampleIssue1],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
+      });
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            ...defaultState.projects,
+            projects: [
+              {
+                ...defaultState.projects.projects[0],
+                currently_fetching_issues: true,
+              },
+            ],
+          },
+        },
+      });
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect(getByText('Syncing GitHub Issues…')).toBeVisible();
+    });
+
     test('refreshes issues by retrieving them from github when none locally', async () => {
       fetchMock.get('end:is_attached=true', {
         results: [],
