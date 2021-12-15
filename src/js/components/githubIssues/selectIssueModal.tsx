@@ -52,7 +52,7 @@ export const GitHubIssueLink = ({ url }: { url: string }) => (
       category="utility"
       name="new_window"
       size="xx-small"
-      className="slds-button__icon slds-button__icon_right"
+      className="slds-button__icon slds-button__icon_right slds-m-bottom_xx-small"
       containerClassName="slds-icon_container slds-current-color"
     />
   </ExternalLink>
@@ -239,8 +239,8 @@ const SelectIssueModal = ({
           </div>
         </div>
         <form className="slds-form">
-          <div className="slds-grid slds-gutters">
-            <div className="slds-col slds-size_1-of-2">
+          <div className="slds-grid slds-gutters slds-wrap">
+            <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
               <h2 className="slds-text-heading_small">
                 {t('Available Issues')}
               </h2>
@@ -273,7 +273,7 @@ const SelectIssueModal = ({
                 )}
               </RadioGroup>
             </div>
-            <div className="slds-col slds-size_1-of-2">
+            <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
               <h2 className="slds-text-heading_small">
                 {t('Attached Issues')}
               </h2>
