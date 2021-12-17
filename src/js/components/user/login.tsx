@@ -27,9 +27,7 @@ interface Props
 
 export const LoginButton = withRouter(
   ({ id = 'login', label, from = {}, location }: Props) => {
-    const action = window.api_urls.github_login
-      ? window.api_urls.github_login()
-      : '';
+    const action = window.api_urls.github_login?.();
     let { pathname } = location.state?.from || from;
     pathname = pathname || window.location.pathname;
 
