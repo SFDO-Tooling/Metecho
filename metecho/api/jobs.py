@@ -728,6 +728,54 @@ def refresh_github_users(project, *, originating_user_id):
 refresh_github_users_job = job(refresh_github_users)
 
 
+def refresh_github_issues(project, *, originating_user_id):
+    try:
+        project.refresh_from_db()
+        repo = get_repo_info(
+            None, repo_owner=project.repo_owner, repo_name=project.repo_name
+        )
+
+        # Unfortunately the GitHub API includes pull requests when querying for issues,
+        # and we can't filter them out in the request. Instead we manually filter out
+        # pull requests until we have enough issues.
+        project.has_truncated_issues = True
+        issues = repo.issues()
+        count = 0
+        while count < settings.GITHUB_ISSUE_LIMIT:
+            try:
+                issue = next(issues)
+            except StopIteration:
+                project.has_truncated_issues = False
+                break
+            if issue.pull_request_urls is not None:
+                continue  # Issue is actually a pull request, skip
+            project.issues.update_or_create(
+                github_id=issue.id,
+                defaults={
+                    "title": issue.title,
+                    "number": issue.number,
+                    "state": issue.state,
+                    "html_url": issue.html_url,
+                    "created_at": issue.created_at,
+                    "updated_at": issue.updated_at,
+                },
+            )
+            count += 1
+
+    except Exception as e:
+        project.finalize_refresh_github_issues(
+            error=e, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_refresh_github_issues(originating_user_id=originating_user_id)
+
+
+refresh_github_issues_job = job(refresh_github_issues)
+
+
 def submit_review(*, user, task, data, originating_user_id):
     try:
         review_sha = ""

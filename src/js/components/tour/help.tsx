@@ -50,6 +50,7 @@ export const getDemoTask = ({
     assigned_qa: null,
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,
+    issue: null,
   };
 };
 
@@ -100,6 +101,22 @@ const HelpTour = (props: TourProps) => {
           Tester’s review. If the Developer retrieves new changes, the status
           moves back to <b>In Progress</b>. Once the Task is added to the
           Project on GitHub, the status is <b>Complete</b>.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-create-task-from-issue',
+      title: t('Create Task from GitHub Issue'),
+      content: (
+        <Trans i18nKey="walkthroughHelpCreateTaskFromIssue">
+          If you want to help as a Developer on this Project, one option is to
+          browse the list of GitHub Issues. Issues are items in GitHub’s bug and
+          enhancement tracking system. Select an Issue to work on, and create an
+          Epic or Task. Create an Epic for an Issue if it will require multiple
+          Tasks to complete. If you’re unsure, begin with a Task and create an
+          Epic later, as needed.
         </Trans>
       ),
       placement: 'right',

@@ -2,11 +2,12 @@ import factory
 import pytest
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
 
-from .api.models import Epic, GitHubRepository, Project, ScratchOrg, Task
+from .api.models import Epic, GitHubIssue, GitHubRepository, Project, ScratchOrg, Task
 
 User = get_user_model()
 
@@ -76,6 +77,19 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class GitHubIssueFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GitHubIssue
+
+    github_id = factory.Sequence(lambda n: n)
+    number = factory.Sequence(lambda n: 100 + n)
+    project = factory.SubFactory(ProjectFactory)
+    state = "open"
+    created_at = factory.LazyFunction(now)
+    updated_at = factory.LazyFunction(now)
+
+
+@register
 class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GitHubRepository
@@ -92,6 +106,7 @@ class EpicFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence("Epic {}".format)
     project = factory.SubFactory(ProjectFactory)
+    issue = factory.SubFactory(GitHubIssueFactory)
 
 
 @register
@@ -102,6 +117,7 @@ class TaskFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence("Task {}".format)
     epic = factory.SubFactory(EpicFactory)
     org_config_name = "dev"
+    issue = factory.SubFactory(GitHubIssueFactory)
 
 
 @register
@@ -123,6 +139,22 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     org_type = "Dev"
     org_config_name = "dev"
     valid_target_directories = {"source": []}
+
+
+@register
+class ShortIssueFactory(factory.StubFactory):
+    """
+    Stub for github3.issues.issue.ShortIssue
+    """
+
+    id = factory.Sequence(lambda n: n)
+    title = factory.Faker("sentence")
+    number = factory.Sequence(lambda n: 100 + n)
+    state = "open"
+    html_url = factory.Faker("url")
+    created_at = factory.Faker("date_time_this_year")
+    updated_at = factory.Faker("date_time_this_year")
+    pull_request_urls = ["http://a.com", "http://b.com"]
 
 
 @pytest.fixture

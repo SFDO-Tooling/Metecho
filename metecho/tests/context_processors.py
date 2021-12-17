@@ -11,5 +11,6 @@ def test_env(rf):
 
     assert "GLOBALS" in result
     assert "SENTRY_DSN" in result["GLOBALS"]
+    assert "GITHUB_ISSUE_LIMIT" in result["GLOBALS"]
     assert "SITE" in result["GLOBALS"]
     assert "ORG_RECHECK_MINUTES" in result["GLOBALS"]

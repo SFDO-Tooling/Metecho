@@ -6,6 +6,7 @@ from rest_framework import routers
 from .views import (
     CurrentUserViewSet,
     EpicViewSet,
+    GitHubIssueViewSet,
     HookView,
     ProjectViewSet,
     ScratchOrgViewSet,
@@ -16,6 +17,7 @@ from .views import (
 router = routers.DefaultRouter()
 router.register("users", UserViewSet, basename="user")
 router.register("user", CurrentUserViewSet, basename="current-user")
+router.register("issues", GitHubIssueViewSet, basename="issue")
 router.register("projects", ProjectViewSet, basename="project")
 router.register("epics", EpicViewSet, basename="epic")
 router.register("tasks", TaskViewSet, basename="task")

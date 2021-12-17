@@ -24,16 +24,22 @@ export interface Epic {
   github_users: string[];
   status: EpicStatuses;
   latest_sha: string;
+  issue: string | null;
 }
 
 export interface EpicsByProjectState {
+  // list of all (fetched) epics for this project
   epics: Epic[];
+  // URL of next page, if there are more than one page
   next: string | null;
+  // list of any epic slugs that have been fetched and do not exist (404)
   notFound: string[];
+  // - whether the first page of epics for this project have been fetched
   fetched: boolean;
 }
 
 export interface EpicsState {
+  // `key` is a `project.id`
   [key: string]: EpicsByProjectState;
 }
 

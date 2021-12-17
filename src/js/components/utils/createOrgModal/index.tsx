@@ -167,6 +167,7 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
       size="small"
       disableClose={isSaving}
       heading={pages[pageIndex].heading}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={pages[pageIndex].footer}
       onRequestClose={handleClose}
     >

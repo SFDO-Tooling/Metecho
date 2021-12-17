@@ -17,6 +17,8 @@ export const api_urls = {
   current_user_guided_tour: () => '/api/user/guided_tour/',
   project_list: () => '/api/projects/',
   project_detail: (slug: string) => `/api/projects/${slug}/`,
+  project_refresh_github_issues: (id: string) =>
+    `/api/projects/${id}/refresh_github_issues`,
   project_refresh_github_users: (id: string) =>
     `/api/projects/${id}/refresh_github_users/`,
   epic_list: () => '/api/epics/',
@@ -38,6 +40,7 @@ export const api_urls = {
     `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
+  issue_list: () => '/api/issues/',
 };
 
 export const sampleUser1 = {
@@ -146,6 +149,7 @@ export const sampleEpic1 = {
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
   task_count: 6,
+  issue: null,
 };
 
 export const sampleEpic2 = {
@@ -177,6 +181,7 @@ export const sampleEpic2 = {
   status: EPIC_STATUSES.IN_PROGRESS,
   latest_sha: 'abc123',
   task_count: 1,
+  issue: null,
 };
 
 export const sampleEpic3 = {
@@ -200,6 +205,7 @@ export const sampleEpic3 = {
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
   task_count: 0,
+  issue: null,
 };
 
 export const sampleEpic4 = {
@@ -224,6 +230,7 @@ export const sampleEpic4 = {
   status: EPIC_STATUSES.MERGED,
   latest_sha: 'abc123',
   task_count: 5,
+  issue: null,
 };
 
 export const sampleEpic5 = {
@@ -248,6 +255,7 @@ export const sampleEpic5 = {
   status: EPIC_STATUSES.REVIEW,
   latest_sha: 'abc123',
   task_count: 3,
+  issue: null,
 };
 
 export const sampleTask1 = {
@@ -286,6 +294,7 @@ export const sampleTask1 = {
   review_status: REVIEW_STATUSES.APPROVED,
   review_sha: '617a512',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask2 = {
@@ -324,6 +333,7 @@ export const sampleTask2 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask3 = {
@@ -363,6 +373,7 @@ export const sampleTask3 = {
   review_status: REVIEW_STATUSES.APPROVED,
   review_sha: '617a512',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask4 = {
@@ -402,6 +413,7 @@ export const sampleTask4 = {
   review_status: REVIEW_STATUSES.CHANGES_REQUESTED,
   review_sha: '617a512',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask5 = {
@@ -440,6 +452,7 @@ export const sampleTask5 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleTask6 = {
@@ -478,6 +491,7 @@ export const sampleTask6 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+  issue: null,
 };
 
 export const sampleProject1 = {
@@ -497,6 +511,7 @@ export const sampleProject1 = {
     'https://repository-images.githubusercontent.com/123456/123-456',
   currently_fetching_org_config_names: false,
   currently_fetching_github_users: false,
+  currently_fetching_issues: false,
   org_config_names: [],
   latest_sha: 'abc123',
   has_push_permission: true,
@@ -771,4 +786,71 @@ export const sampleScratchOrg = {
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+};
+
+export const sampleIssue1 = {
+  id: 'test123',
+  number: 87,
+  title: 'this is an issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: null,
+  task: null,
+};
+
+export const sampleIssue2 = {
+  id: 'test456',
+  number: 93,
+  title: 'this is another issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: {
+    id: sampleEpic1.id,
+    name: sampleEpic1.name,
+    status: sampleEpic1.status,
+    slug: sampleEpic1.slug,
+  },
+  task: null,
+};
+
+export const sampleIssue3 = {
+  id: 'test789',
+  number: 3,
+  title: 'this is a third issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: null,
+  task: {
+    id: sampleTask1.id,
+    name: sampleTask1.name,
+    status: sampleTask1.status,
+    review_status: sampleTask1.review_status,
+    review_valid: sampleTask1.review_valid,
+    pr_is_open: sampleTask1.pr_is_open,
+    slug: sampleTask1.slug,
+    epic_slug: sampleTask1.epic.slug,
+  },
+};
+
+export const sampleIssue4 = {
+  id: 'test4',
+  number: 4,
+  title: 'this is a fourth issue',
+  created_at: '2019-10-24T20:03:52.159440Z',
+  html_url: 'https://example.com',
+  project: sampleProject1.id,
+  epic: null,
+  task: {
+    id: sampleTask1.id,
+    name: sampleTask1.name,
+    status: sampleTask1.status,
+    review_status: sampleTask1.review_status,
+    review_valid: sampleTask1.review_valid,
+    pr_is_open: sampleTask1.pr_is_open,
+    slug: sampleTask1.slug,
+    epic_slug: null,
+  },
 };

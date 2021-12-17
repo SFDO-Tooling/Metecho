@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from github3.exceptions import ConnectionError, ResponseError
-from rest_framework import mixins, status
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -17,13 +17,27 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
-from .filters import EpicFilter, ProjectFilter, ScratchOrgFilter, TaskFilter
+from .filters import (
+    EpicFilter,
+    GitHubIssueFilter,
+    ProjectFilter,
+    ScratchOrgFilter,
+    TaskFilter,
+)
 from .hook_serializers import (
     PrHookSerializer,
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import Epic, EpicStatus, Project, ScratchOrg, ScratchOrgType, Task
+from .models import (
+    Epic,
+    EpicStatus,
+    GitHubIssue,
+    Project,
+    ScratchOrg,
+    ScratchOrgType,
+    Task,
+)
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -32,6 +46,7 @@ from .serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubIssueSerializer,
     GuidedTourSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
@@ -183,6 +198,17 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     queryset = User.objects.all()
 
 
+class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
+    """GitHub Issues"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GitHubIssueSerializer
+    pagination_class = CustomPaginator
+    queryset = GitHubIssue.objects.select_related("epic", "task", "task__epic")
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = GitHubIssueFilter
+
+
 class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """Read-only information about Metecho Projects."""
 
@@ -212,6 +238,14 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         """Queue a job to refresh the list of GitHub users for a Project."""
         project = self.get_object()
         project.queue_refresh_github_users(originating_user_id=str(request.user.id))
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=None, responses={202: None})
+    @action(detail=True, methods=["POST"])
+    def refresh_github_issues(self, request, pk=None):
+        """Queue a job to refresh the list of GitHub Issues for a Project"""
+        instance = self.get_object()
+        instance.queue_refresh_github_issues(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @extend_schema(request=None, responses={202: None})

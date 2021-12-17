@@ -520,6 +520,8 @@ LOGGING = {
 
 API_PAGE_SIZE = env("API_PAGE_SIZE", type_=int, default=50)
 
+GITHUB_ISSUE_LIMIT = env("GITHUB_ISSUE_LIMIT", type_=int, default=1000)
+
 # New feature branch prefix:
 BRANCH_PREFIX = env("BRANCH_PREFIX", default=None)
 
