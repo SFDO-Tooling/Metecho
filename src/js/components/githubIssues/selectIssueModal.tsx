@@ -69,7 +69,10 @@ const TaskStatus = ({ task }: { task: IssueTask }) => {
   });
 
   return (
-    <span className="slds-m-left_x-small" title={status}>
+    <span
+      className="slds-m-left_x-small v-align-center icon-text-block"
+      title={status}
+    >
       {icon}
     </span>
   );
@@ -79,7 +82,10 @@ const EpicStatus = ({ epic }: { epic: IssueEpic }) => {
   const { status, icon } = getEpicStatus({ epicStatus: epic.status });
 
   return (
-    <span className="slds-m-left_x-small" title={status}>
+    <span
+      className="slds-m-left_x-small v-align-center icon-text-block"
+      title={status}
+    >
       {icon}
     </span>
   );
