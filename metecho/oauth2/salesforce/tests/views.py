@@ -9,19 +9,19 @@ from ..views import SalesforceOAuth2Adapter
 
 class TestSalesforceOAuth2Adapter:
     def test_base_url(self, rf):
-        request = rf.get("/")
+        request = rf.post("/")
         request.session = {}
         adapter = SalesforceOAuth2Adapter(request)
         assert adapter.base_url == "https://login.salesforce.com"
 
     def test_base_url__custom_domain(self, rf):
-        request = rf.get("/?custom_domain=foo-bar.baz")
+        request = rf.post("/", {"custom_domain": "foo-bar.baz"})
         request.session = {}
         adapter = SalesforceOAuth2Adapter(request)
         assert adapter.base_url == "https://foo-bar.baz.my.salesforce.com"
 
     def test_base_url__invalid_domain(self, rf):
-        request = rf.get("/?custom_domain=google.com?-")
+        request = rf.post("/", {"custom_domain": "google.com?-"})
         request.session = {}
         with pytest.raises(SuspiciousOperation):
             SalesforceOAuth2Adapter(request).base_url
@@ -37,7 +37,7 @@ class TestSalesforceOAuth2Adapter:
             "urls": mock.MagicMock(),
         }
         get.side_effect = [userinfo_mock, mock.MagicMock(), mock.MagicMock()]
-        request = rf.get("/")
+        request = rf.post("/")
         request.session = {"socialaccount_state": (None, "some-verifier")}
         adapter = SalesforceOAuth2Adapter(request)
         adapter.get_provider = mock.MagicMock()
@@ -62,7 +62,7 @@ class TestSalesforceOAuth2Adapter:
         assert "token" == fernet_decrypt(token.token)
 
     def test_validate_org_id__invalid(self, rf):
-        request = rf.get("/")
+        request = rf.post("/")
         adapter = SalesforceOAuth2Adapter(request)
         with pytest.raises(SuspiciousOperation):
             adapter._validate_org_id("bogus")

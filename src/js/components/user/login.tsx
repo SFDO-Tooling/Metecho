@@ -2,6 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { Location } from 'history';
 import { t } from 'i18next';
+import cookies from 'js-cookie';
 import React, { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -11,7 +12,6 @@ import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 import welcomeMatBG from '@/img/welcome-mat-bg.png';
 import welcomeMatFG from '@/img/welcome-mat-fg.png';
 import { selectUserState } from '@/js/store/user/selectors';
-import { addUrlParams } from '@/js/utils/api';
 import routes from '@/js/utils/routes';
 
 interface Props
@@ -27,29 +27,32 @@ interface Props
 
 export const LoginButton = withRouter(
   ({ id = 'login', label, from = {}, location }: Props) => {
-    const handleClick = () => {
-      /* istanbul ignore else */
-      if (window.api_urls.github_login) {
-        let { pathname } = location.state?.from || from;
-        if (!pathname) {
-          pathname = window.location.pathname;
-        }
-        window.location.assign(
-          addUrlParams(window.api_urls.github_login(), {
-            next: pathname,
-          }),
-        );
-      }
-    };
+    const action = window.api_urls.github_login?.();
+    let { pathname } = location.state?.from || from;
+    pathname = pathname || window.location.pathname;
 
     return (
-      <Button
-        id={id}
-        label={label === undefined ? t('Log In With GitHub') : label}
-        variant="brand"
-        disabled={!window.api_urls.github_login}
-        onClick={handleClick}
-      />
+      /* POSTing instead of redirecting to the login endpoint is more secure */
+      <form action={action} method="POST">
+        <input
+          type="hidden"
+          name="csrfmiddlewaretoken"
+          value={cookies.get('csrftoken')}
+        />
+        <input
+          type="hidden"
+          name="next"
+          value={pathname}
+          data-testid="gh-login-next"
+        />
+        <Button
+          id={id}
+          type="submit"
+          label={label === undefined ? t('Log In With GitHub') : label}
+          variant="brand"
+          disabled={!action}
+        />
+      </form>
     );
   },
 );
