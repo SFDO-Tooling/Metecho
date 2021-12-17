@@ -28,7 +28,7 @@ class SalesforcePermissionsError(Exception):
 class SalesforceOAuth2Adapter(SalesforceOAuth2BaseAdapter):
     @property
     def base_url(self):
-        custom_domain = self.request.GET.get(
+        custom_domain = self.request.POST.get(
             "custom_domain", self.request.session.get("custom_domain")
         )
         if custom_domain and not CUSTOM_DOMAIN_RE.match(custom_domain):
