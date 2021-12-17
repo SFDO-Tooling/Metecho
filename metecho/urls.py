@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import RedirectView, TemplateView
 
 from .routing import websockets
@@ -37,9 +38,10 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/", include("metecho.api.urls")),
     # Routes to pass through to the front end JS route-handler
+    # Ensure the CSRF token is always present via a cookie to be read by JS
     re_path(
         r"^($|login\/?$|terms\/?$|projects(\/|$)|accounts(\/|$))",
-        TemplateView.as_view(template_name="index.html"),
+        ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")),
         name="frontend",
     ),
     # Add WebSocket routes so that non-HTTP paths can be accessible by
