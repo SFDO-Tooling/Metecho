@@ -8,23 +8,35 @@ import { renderWithRedux } from './../../utils';
 
 describe('<Login />', () => {
   test('renders login form', () => {
-    const { getByText } = renderWithRedux(
+    const { getByText, getByTestId } = renderWithRedux(
       <MemoryRouter>
         <Login />
       </MemoryRouter>,
     );
 
     expect(getByText('Log In With GitHub')).toBeVisible();
+    expect(getByTestId('gh-login-next')).toHaveValue(window.location.pathname);
   });
 
   test('can use custom label and `from` path', () => {
-    const { getByText } = renderWithRedux(
+    const { getByText, getByTestId } = renderWithRedux(
       <MemoryRouter>
         <LoginButton label="Hi" from={{ pathname: '/custom' }} />
       </MemoryRouter>,
     );
 
     expect(getByText('Hi')).toBeVisible();
+    expect(getByTestId('gh-login-next')).toHaveValue('/custom');
+  });
+
+  test('can use `location.state.from` path', () => {
+    const { getByTestId } = renderWithRedux(
+      <StaticRouter location={{ state: { from: { pathname: '/custom' } } }}>
+        <LoginButton />
+      </StaticRouter>,
+    );
+
+    expect(getByTestId('gh-login-next')).toHaveValue('/custom');
   });
 
   describe('already logged in', () => {

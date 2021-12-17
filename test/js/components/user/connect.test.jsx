@@ -19,9 +19,10 @@ describe('<ConnectModal />', () => {
   };
 
   test('renders login form', () => {
-    const { getAllByText } = setup();
+    const { getAllByText, getByTestId } = setup();
 
     expect(getAllByText('Connect to Salesforce')[1]).toBeVisible();
+    expect(getByTestId('sf-login-next')).toHaveValue(window.location.pathname);
   });
 
   describe('CustomDomainForm', () => {
@@ -32,20 +33,33 @@ describe('<ConnectModal />', () => {
       fireEvent.click(result.getByText('Use Custom Domain'));
     });
 
+    test('renders login form', () => {
+      const { getByLabelText, getByTestId } = setup();
+
+      expect(getByLabelText('Custom Domain')).toBeVisible();
+      expect(getByTestId('sf-login-custom-domain-next')).toHaveValue(
+        window.location.pathname,
+      );
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
+    });
+
     test('updates label when input changes', () => {
       const { getByLabelText, getByTestId } = result;
       const input = getByLabelText('Custom Domain');
 
       expect(input).toBeVisible();
       expect(getByTestId('custom-domain')).toHaveTextContent('domain');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
 
       fireEvent.change(input, { target: { value: ' ' } });
 
       expect(getByTestId('custom-domain')).toHaveTextContent('domain');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
 
       fireEvent.change(input, { target: { value: ' foobar' } });
 
       expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('foobar');
     });
 
     describe('"back" click', () => {

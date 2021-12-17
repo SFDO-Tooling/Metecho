@@ -107,8 +107,18 @@ const ConnectModal = ({
           onSubmit={handleCustomDomainConnect}
         >
           <input type="hidden" name="csrfmiddlewaretoken" value={csrftoken} />
-          <input type="hidden" name="next" value={window.location.pathname} />
-          <input type="hidden" name="custom_domain" value={customDomain} />
+          <input
+            type="hidden"
+            name="next"
+            value={window.location.pathname}
+            data-testid="sf-login-custom-domain-next"
+          />
+          <input
+            type="hidden"
+            name="custom_domain"
+            value={customDomain}
+            data-testid="sf-login-custom-domain"
+          />
           <input type="hidden" name="process" value="connect" />
           <div className="slds-form-element__help slds-p-bottom_small">
             {t(
@@ -142,7 +152,12 @@ const ConnectModal = ({
           {/* POSTing instead of redirecting to the login endpoint is more secure */}
           <form action={window.api_urls.salesforce_login?.()} method="POST">
             <input type="hidden" name="csrfmiddlewaretoken" value={csrftoken} />
-            <input type="hidden" name="next" value={window.location.pathname} />
+            <input
+              type="hidden"
+              name="next"
+              value={window.location.pathname}
+              data-testid="sf-login-next"
+            />
             <input type="hidden" name="custom_domain" value="login" />
             <input type="hidden" name="process" value="connect" />
             <Button

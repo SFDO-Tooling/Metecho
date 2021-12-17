@@ -39,7 +39,12 @@ export const LoginButton = withRouter(
           name="csrfmiddlewaretoken"
           value={cookies.get('csrftoken')}
         />
-        <input type="hidden" name="next" value={pathname} />
+        <input
+          type="hidden"
+          name="next"
+          value={pathname}
+          data-testid="gh-login-next"
+        />
         <Button
           id={id}
           type="submit"
