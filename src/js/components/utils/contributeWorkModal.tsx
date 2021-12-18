@@ -56,10 +56,10 @@ const ContributeWorkModal = ({
     closeModal();
   }, [closeModal, hasDevOrg]);
 
-  const handleSubmit = useCallback(
-    () => doContribute(orgData, { useExistingTask, createEpicLessTask }),
-    [doContribute, orgData, useExistingTask, createEpicLessTask],
-  );
+  const handleSubmit = useCallback(() => {
+    doContribute(orgData, { useExistingTask, createEpicLessTask });
+    doClose();
+  }, [doContribute, orgData, useExistingTask, createEpicLessTask, doClose]);
 
   let contents = null;
   if (!hasPermissions) {
@@ -228,6 +228,7 @@ const ContributeWorkModal = ({
       ]}
       prompt={hasPermissions ? undefined : 'warning'}
       onRequestClose={doClose}
+      assistiveText={{ closeButton: t('Cancel') }}
     >
       <div className="slds-grid slds-wrap slds-p-around_medium">
         <div

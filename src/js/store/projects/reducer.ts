@@ -27,6 +27,7 @@ export interface Project {
   org_config_names: OrgConfig[];
   currently_fetching_org_config_names: boolean;
   currently_fetching_github_users: boolean;
+  currently_fetching_issues: boolean;
   latest_sha: string;
   has_push_permission: boolean;
 }

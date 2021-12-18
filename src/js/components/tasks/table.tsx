@@ -2,8 +2,6 @@ import Button from '@salesforce/design-system-react/components/button';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import Icon from '@salesforce/design-system-react/components/icon';
-import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
 import { t } from 'i18next';
 import { sortBy } from 'lodash';
@@ -16,18 +14,13 @@ import { EmptyIllustration } from '@/js/components/404';
 import AssignTaskRoleModal from '@/js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import TourPopover from '@/js/components/tour/popover';
-import { SpinnerWrapper } from '@/js/components/utils';
+import { getTaskStatus, SpinnerWrapper } from '@/js/components/utils';
 import { AppState } from '@/js/store';
 import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { Task } from '@/js/store/tasks/reducer';
 import { GitHubUser, User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
-import {
-  ORG_TYPES,
-  OrgTypes,
-  REVIEW_STATUSES,
-  TASK_STATUSES,
-} from '@/js/utils/constants';
+import { ORG_TYPES, OrgTypes, TASK_STATUSES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 type AssignUserAction = ({
@@ -112,59 +105,23 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   if (!item) {
     return null;
   }
-  const status =
-    item.review_valid && item.status === TASK_STATUSES.IN_PROGRESS
-      ? item.review_status
-      : item.status;
-  let displayStatus, icon;
-  switch (status) {
-    case TASK_STATUSES.PLANNED:
-      displayStatus = t('Planned');
-      icon = <ProgressRing value={0} />;
-      break;
-    case TASK_STATUSES.IN_PROGRESS:
-      if (item.pr_is_open) {
-        displayStatus = t('Test');
-        icon = <ProgressRing value={60} flowDirection="fill" theme="active" />;
-      } else {
-        displayStatus = t('In Progress');
-        icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
-      }
-      break;
-    case TASK_STATUSES.COMPLETED:
-      displayStatus = t('Complete');
-      icon = <ProgressRing value={100} theme="complete" hasIcon />;
-      break;
-    case TASK_STATUSES.CANCELED:
-      displayStatus = t('Canceled');
-      icon = (
-        <ProgressRing
-          value={0}
-          hasIcon
-          icon={<Icon category="utility" name="close" />}
-        />
-      );
-      break;
-    case REVIEW_STATUSES.CHANGES_REQUESTED:
-      displayStatus = t('Changes Requested');
-      icon = (
-        <ProgressRing value={60} flowDirection="fill" theme="warning" hasIcon />
-      );
-      break;
-    case REVIEW_STATUSES.APPROVED:
-      displayStatus = t('Approved');
-      icon = <ProgressRing value={80} flowDirection="fill" />;
-      break;
-  }
+
+  const { status, icon } = getTaskStatus({
+    taskStatus: item.status,
+    reviewStatus: item.review_status,
+    reviewValid: item.review_valid,
+    prIsOpen: item.pr_is_open,
+  });
+
   return (
     <DataTableCell
       {...props}
-      title={displayStatus || status}
+      title={status}
       className={classNames(className, 'status-cell truncated-cell')}
     >
       <span className="status-cell-icon">{icon}</span>
       <span className="slds-m-left_x-small status-cell-text slds-truncate">
-        {displayStatus || status}
+        {status}
       </span>
     </DataTableCell>
   );

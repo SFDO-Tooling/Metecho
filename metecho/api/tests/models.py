@@ -937,11 +937,16 @@ class TestScratchOrg:
         assert scratch_org.config == {"anything else": "good"}
 
 
-@pytest.mark.django_db
 class TestGitHubRepository:
     def test_str(self, git_hub_repository_factory):
-        gh_repo = git_hub_repository_factory()
+        gh_repo = git_hub_repository_factory.build()
         assert str(gh_repo) == "https://github.com/test/repo.git"
+
+
+class TestGitHubIssue:
+    def test_str(self, git_hub_issue_factory):
+        gh_issue = git_hub_issue_factory.build(title="Hello world")
+        assert str(gh_issue) == "Hello world"
 
 
 @pytest.mark.django_db

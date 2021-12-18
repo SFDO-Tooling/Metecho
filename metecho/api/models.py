@@ -81,6 +81,11 @@ class TaskReviewStatus(models.TextChoices):
     CHANGES_REQUESTED = "Changes requested"
 
 
+class IssueStates(models.TextChoices):
+    OPEN = "open"
+    CLOSED = "closed"
+
+
 class SiteProfile(TranslatableModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE)
 
@@ -308,6 +313,7 @@ class Project(
     repo_name = StringField()
     name = StringField(unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
+    has_truncated_issues = models.BooleanField(default=False)
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
     repo_image_url = models.URLField(blank=True)
@@ -340,6 +346,7 @@ class Project(
     currently_fetching_org_config_names = models.BooleanField(default=False)
     currently_fetching_github_users = models.BooleanField(default=False)
     latest_sha = StringField(blank=True)
+    currently_fetching_issues = models.BooleanField(default=False)
 
     slug_class = ProjectSlug
     tracker = FieldTracker(fields=["name"])
@@ -403,6 +410,25 @@ class Project(
 
     def finalize_refresh_github_users(self, *, error=None, originating_user_id):
         self.currently_fetching_github_users = False
+        self.save()
+        if error is None:
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
+            self.notify_error(error, originating_user_id=originating_user_id)
+
+    def queue_refresh_github_issues(self, *, originating_user_id):
+        from .jobs import refresh_github_issues_job
+
+        if not self.currently_fetching_issues:
+            self.currently_fetching_issues = True
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
+            refresh_github_issues_job.delay(
+                self, originating_user_id=originating_user_id
+            )
+
+    def finalize_refresh_github_issues(self, *, error=None, originating_user_id):
+        self.currently_fetching_issues = False
         self.save()
         if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
@@ -479,6 +505,29 @@ class GitHubRepository(HashIdMixin, models.Model):
         return self.repo_url
 
 
+class GitHubIssue(HashIdMixin):
+    github_id = models.PositiveIntegerField(db_index=True)
+    title = StringField()
+    number = models.PositiveIntegerField()
+    state = models.CharField(choices=IssueStates.choices, max_length=50)
+    html_url = models.URLField()
+    project = models.ForeignKey(
+        Project, related_name="issues", on_delete=models.CASCADE
+    )
+
+    # These are not automated timestamp fields, they are part of the GitHub API response
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "GitHub issue"
+        verbose_name_plural = "GitHub issues"
+
+    def __str__(self):
+        return self.title
+
+
 class EpicSlug(AbstractSlug):
     parent = models.ForeignKey("Epic", on_delete=models.CASCADE, related_name="slugs")
 
@@ -510,6 +559,13 @@ class Epic(
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
     github_users = models.JSONField(default=list, blank=True)
+    issue = models.OneToOneField(
+        GitHubIssue,
+        related_name="epic",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     slug_class = EpicSlug
     tracker = FieldTracker(fields=["name"])
@@ -690,6 +746,13 @@ class Task(
     )
     org_config_name = StringField()
 
+    issue = models.OneToOneField(
+        GitHubIssue,
+        related_name="task",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     commits = models.JSONField(default=list, blank=True)
     origin_sha = StringField(blank=True, default="")
     metecho_commits = models.JSONField(default=list, blank=True)

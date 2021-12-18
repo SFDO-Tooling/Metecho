@@ -13,6 +13,8 @@ import ConfirmRemoveUserModal from '@/js/components/epics/confirmRemoveUserModal
 import EpicStatusPath from '@/js/components/epics/path';
 import EpicProgress from '@/js/components/epics/progress';
 import EpicStatusSteps from '@/js/components/epics/steps';
+import IssueCard from '@/js/components/githubIssues/issueCard';
+import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
 import AssignEpicCollaboratorsModal from '@/js/components/githubUsers/assignEpicCollaborators';
 import UserCards from '@/js/components/githubUsers/cards';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
@@ -79,12 +81,29 @@ const EpicDetail = (
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [selectIssueModalOpen, setSelectIssueModalOpen] = useState(false);
   const {
     history,
     location: { state },
   } = props;
 
   const playgroundOrg = (orgs || [])[0] as Org | undefined;
+
+  const openSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(true);
+    setAssignUsersModalOpen(false);
+    setContributeModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
+    setCreateOrgModalOpen(false);
+  }, []);
+
+  const closeSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(false);
+  }, []);
 
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -96,6 +115,7 @@ const EpicDetail = (
     setCreateTaskModalOpen(false);
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
+    setSelectIssueModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -184,6 +204,7 @@ const EpicDetail = (
         setCreateTaskModalOpen(false);
         setConvertOrgData(null);
         setCreateOrgModalOpen(false);
+        setSelectIssueModalOpen(false);
       } else {
         updateEpicUsers(users);
       }
@@ -212,6 +233,7 @@ const EpicDetail = (
         setCreateTaskModalOpen(false);
         setConvertOrgData(null);
         setCreateOrgModalOpen(false);
+        setSelectIssueModalOpen(false);
       } else {
         updateEpicUsers(users);
       }
@@ -229,6 +251,7 @@ const EpicDetail = (
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const currentlySubmitting = Boolean(epic?.currently_creating_pr);
   const readyToSubmit = Boolean(
@@ -247,6 +270,7 @@ const EpicDetail = (
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -262,6 +286,7 @@ const EpicDetail = (
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -277,6 +302,7 @@ const EpicDetail = (
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeCreateModal = () => {
     setCreateTaskModalOpen(false);
@@ -293,6 +319,7 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeCreateOrgModal = () => {
     setCreateOrgModalOpen(false);
@@ -308,6 +335,7 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
@@ -320,7 +348,7 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
-    setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   }, []);
 
   // "Next Steps" action handler
@@ -535,6 +563,20 @@ const EpicDetail = (
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {t('GitHub Issue')}
+              </h2>
+              {epic.issue ? (
+                <IssueCard issueId={epic.issue} epicId={epic.id} />
+              ) : (
+                <Button
+                  label={t('Attach Issue to Epic')}
+                  variant="outline-brand"
+                  onClick={openSelectIssueModal}
+                />
+              )}
+            </div>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {project.has_push_permission || epicCollaborators.length
@@ -806,6 +848,14 @@ const EpicDetail = (
           epic={epic}
           isOpen={createOrgModalOpen}
           closeModal={closeCreateOrgModal}
+        />
+        <SelectIssueModal
+          projectId={project.id}
+          projectSlug={project.slug}
+          isOpen={selectIssueModalOpen}
+          closeIssueModal={closeSelectIssueModal}
+          attachingToEpic={epic}
+          currentlyResyncing={project.currently_fetching_issues}
         />
       </DetailPageLayout>
     </DocumentTitle>

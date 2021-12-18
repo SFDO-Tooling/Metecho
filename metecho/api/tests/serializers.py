@@ -9,6 +9,7 @@ from ..serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubIssueSerializer,
     ScratchOrgSerializer,
     TaskAssigneeSerializer,
     TaskSerializer,
@@ -24,6 +25,33 @@ class TestFullUserSerializer:
         user = user_factory()
         serializer = FullUserSerializer(user)
         assert serializer.data["sf_username"] is None
+
+
+@pytest.mark.django_db
+class TestGitHubIssueSerializer:
+    def test_epic(self, epic_factory):
+        epic = epic_factory()
+        serializer = GitHubIssueSerializer(epic.issue)
+        assert tuple(serializer.data["epic"]) == (
+            "id",
+            "name",
+            "status",
+            "slug",
+        )
+
+    def test_task(self, task_factory):
+        task = task_factory()
+        serializer = GitHubIssueSerializer(task.issue)
+        assert tuple(serializer.data["task"]) == (
+            "id",
+            "name",
+            "status",
+            "review_status",
+            "review_valid",
+            "pr_is_open",
+            "slug",
+            "epic_slug",
+        )
 
 
 @pytest.mark.django_db
@@ -249,6 +277,37 @@ class TestEpicSerializer:
         serializer = EpicSerializer(epic)
         assert serializer.data["pr_url"] is None
 
+    @pytest.mark.parametrize(
+        "issue_type, success",
+        (
+            ("with_task", False),
+            ("with_epic", False),
+            ("unattached", True),
+            ("same", True),
+            ("none", True),
+        ),
+    )
+    def test_validate_issue(
+        self, task_factory, epic_factory, git_hub_issue_factory, issue_type, success
+    ):
+        epic = epic_factory()
+        issues = {
+            "with_task": str(task_factory().issue_id),
+            "with_epic": str(epic_factory().issue_id),
+            "unattached": str(git_hub_issue_factory().id),
+            "same": str(epic.issue_id),
+            "none": None,
+        }
+        issue = issues[issue_type]
+
+        serializer = EpicSerializer(epic, data={"issue": issue}, partial=True)
+
+        if success:
+            assert serializer.is_valid()
+        else:
+            assert not serializer.is_valid()
+            assert "issue" in serializer.errors, serializer.errors
+
 
 @pytest.mark.django_db
 class TestEpicCollaboratorsSerializer:
@@ -456,6 +515,37 @@ class TestTaskSerializer:
         task = task_factory(name="Test task")
         serializer = TaskSerializer(task)
         assert serializer.data["pr_url"] is None
+
+    @pytest.mark.parametrize(
+        "issue_type, success",
+        (
+            ("with_task", False),
+            ("with_epic", False),
+            ("unattached", True),
+            ("same", True),
+            ("none", True),
+        ),
+    )
+    def test_validate_issue(
+        self, task_factory, epic_factory, git_hub_issue_factory, issue_type, success
+    ):
+        task = task_factory()
+        issues = {
+            "with_task": str(task_factory().issue_id),
+            "with_epic": str(epic_factory().issue_id),
+            "unattached": str(git_hub_issue_factory().id),
+            "same": str(task.issue_id),
+            "none": None,
+        }
+        issue = issues[issue_type]
+
+        serializer = TaskSerializer(task, data={"issue": issue}, partial=True)
+
+        if success:
+            assert serializer.is_valid()
+        else:
+            assert not serializer.is_valid()
+            assert "issue" in serializer.errors, serializer.errors
 
 
 @pytest.mark.django_db
