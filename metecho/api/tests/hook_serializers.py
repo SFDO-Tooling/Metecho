@@ -100,9 +100,7 @@ class TestPrHookSerializer:
     def test_process_hook__mark_matching_tasks_as_completed(
         self, _task_factory, task_data
     ):
-        task = _task_factory(
-            **task_data, pr_number=456, status=TaskStatus.IN_PROGRESS
-        )
+        task = _task_factory(**task_data, pr_number=456, status=TaskStatus.IN_PROGRESS)
         data = {
             "action": "closed",
             "number": 456,
