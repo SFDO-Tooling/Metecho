@@ -469,7 +469,9 @@ class Project(
         for epic in matching_epics:
             epic.add_commits(commits)
 
-        matching_tasks = Task.objects.filter(branch_name=ref, epic__project=self)
+        matching_tasks = Task.objects.filter(
+            Q(branch_name=ref, project=self) | Q(branch_name=ref, epic__project=self)
+        )
         for task in matching_tasks:
             task.add_commits(commits, sender)
 
