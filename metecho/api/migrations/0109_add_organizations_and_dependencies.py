@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0106_project_tasks"),
+        ("api", "0108_project_has_truncated_issues"),
     ]
 
     operations = [
