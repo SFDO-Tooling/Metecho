@@ -2053,10 +2053,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         expires_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         latest_commit:
           type: string
           readOnly: true
@@ -2068,10 +2070,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         last_checked_unsaved_changes_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         url:
           type: string
           format: uri
@@ -2119,12 +2123,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         owner_gh_username:
           type: string
           readOnly: true
         owner_gh_id:
           type: string
           readOnly: true
+          nullable: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -2206,6 +2212,7 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         review_valid:
           type: boolean
           readOnly: true
@@ -2230,6 +2237,7 @@ components:
         assigned_qa:
           type: string
           readOnly: true
+          nullable: true
         dev_org:
           type: string
           format: HashID
@@ -2402,10 +2410,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         expires_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         latest_commit:
           type: string
           readOnly: true
@@ -2417,10 +2427,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         last_checked_unsaved_changes_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         url:
           type: string
           format: uri
@@ -2468,12 +2480,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         owner_gh_username:
           type: string
           readOnly: true
         owner_gh_id:
           type: string
           readOnly: true
+          nullable: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -2584,6 +2598,7 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         review_valid:
           type: boolean
           readOnly: true
@@ -2608,6 +2623,7 @@ components:
         assigned_qa:
           type: string
           readOnly: true
+          nullable: true
         dev_org:
           type: string
           format: HashID
