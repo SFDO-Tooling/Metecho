@@ -10,3 +10,8 @@
     }
   }
 }
+
+// adds spacing when sibling buttons exist, and can wrap
+.metecho-btn-container:not(:last-of-type) {
+  padding-right: #{$spacing-x-small};
+}

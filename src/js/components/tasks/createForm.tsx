@@ -7,6 +7,7 @@ import React, { useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
+import { GitHubIssueLink } from '@/js/components/githubIssues/selectIssueModal';
 import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
@@ -17,6 +18,7 @@ import {
   useTransientMessage,
 } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
@@ -31,6 +33,7 @@ interface Props {
   isOpen: boolean;
   playgroundOrgData?: OrgData | null;
   closeCreateModal: () => void;
+  issue?: GitHubIssue | null;
 }
 
 const CreateTaskModal = ({
@@ -39,6 +42,7 @@ const CreateTaskModal = ({
   isOpen,
   playgroundOrgData,
   closeCreateModal,
+  issue,
 }: Props) => {
   const history = useHistory();
   const isMounted = useIsMounted();
@@ -68,6 +72,7 @@ const CreateTaskModal = ({
   const additionalData: { [key: string]: any } = {
     epic: epic?.id,
     project: epic ? undefined : project.id,
+    issue: issue ? issue.id : undefined,
   };
 
   if (isContributingFromOrg) {
@@ -226,52 +231,62 @@ const CreateTaskModal = ({
         />,
       ]}
     >
-      <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
+      <div className="slds-p-around_large">
         {!epic && !isContributingFromOrg && (
-          <p className="slds-align_absolute-center slds-m-bottom_small">
+          <p className="slds-m-bottom_small">
             {t(
               'You are creating a Task for this Project. To group multiple Tasks together, create an Epic.',
             )}
           </p>
         )}
-        <Input
-          id="task-name"
-          label={t('Task Name')}
-          className="slds-form-element_stacked slds-p-left_none"
-          name="name"
-          value={inputs.name}
-          required
-          aria-required
-          errorText={errors.name}
-          onChange={handleInputChange}
-        />
-        <Textarea
-          id="task-description"
-          label={t('Description')}
-          classNameContainer="slds-form-element_stacked slds-p-left_none"
-          className="metecho-textarea"
-          name="description"
-          value={inputs.description}
-          errorText={errors.description}
-          onChange={handleInputChange}
-        />
-        <SelectFlowType
-          orgConfigs={project.org_config_names || []}
-          projectId={project.id}
-          value={inputs.org_config_name}
-          errors={errors.org_config_name}
-          isLoading={project.currently_fetching_org_config_names}
-          className={useExistingOrgConfig ? 'slds-hide' : ''}
-          handleSelect={handleInputChange}
-        />
-        {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={isSaving || isSavingBatch}
-        />
-      </form>
+        {issue && (
+          <p className="slds-m-bottom_small">
+            <strong>{t('Attached Issue:')}</strong> #{issue.number}:{' '}
+            {issue.title}
+            <br />
+            <GitHubIssueLink url={issue.html_url} />
+          </p>
+        )}
+        <form onSubmit={doSubmit} className="slds-form">
+          <Input
+            id="task-name"
+            label={t('Task Name')}
+            className="slds-form-element_stacked slds-p-left_none"
+            name="name"
+            value={inputs.name}
+            required
+            aria-required
+            errorText={errors.name}
+            onChange={handleInputChange}
+          />
+          <Textarea
+            id="task-description"
+            label={t('Description')}
+            classNameContainer="slds-form-element_stacked slds-p-left_none"
+            className="metecho-textarea"
+            name="description"
+            value={inputs.description}
+            errorText={errors.description}
+            onChange={handleInputChange}
+          />
+          <SelectFlowType
+            orgConfigs={project.org_config_names || []}
+            projectId={project.id}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isLoading={project.currently_fetching_org_config_names}
+            className={useExistingOrgConfig ? 'slds-hide' : ''}
+            handleSelect={handleInputChange}
+          />
+          {/* Clicking hidden button allows for native browser form validation */}
+          <button
+            ref={submitButton}
+            type="submit"
+            style={{ display: 'none' }}
+            disabled={isSaving || isSavingBatch}
+          />
+        </form>
+      </div>
     </Modal>
   );
 };

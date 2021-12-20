@@ -13,6 +13,7 @@ describe('reducer', () => {
         'projects',
         'socket',
         'tasks',
+        'issues',
         'user',
       ].sort(),
     );

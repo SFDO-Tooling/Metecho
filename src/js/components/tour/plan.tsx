@@ -42,6 +42,7 @@ export const getDemoEpic = ({
     status: EPIC_STATUSES.IN_PROGRESS,
     github_users: /* istanbul ignore next */ github_id ? [github_id] : [],
     latest_sha: '',
+    issue: null,
   };
 };
 
@@ -98,6 +99,22 @@ const PlanTour = (props: TourProps) => {
           Epics represent larger changes to the Project. You can invite multiple
           Collaborators to your Epic and assign different people as Developers
           and Testers for each Task.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-create-epic-from-issue',
+      title: t('Create Epic from GitHub Issue'),
+      content: (
+        <Trans i18nKey="walkthroughPlanCreateEpicFromIssue">
+          One way to start planning work for an Epic or a Task is to browse the
+          list of GitHub Issues. Issues are items in GitHub’s bug and
+          enhancement tracking system. Select an Issue to work on, and create an
+          Epic or Task. Create an Epic for an Issue if it will require multiple
+          Tasks to complete. If you’re unsure, begin with a Task and create an
+          Epic later, as needed.
         </Trans>
       ),
       placement: 'right',

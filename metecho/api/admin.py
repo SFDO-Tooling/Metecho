@@ -12,6 +12,7 @@ from . import gh
 from .models import (
     Epic,
     EpicSlug,
+    GitHubIssue,
     GitHubOrganization,
     GitHubRepository,
     Project,
@@ -135,12 +136,22 @@ class GitHubRepositoryAdmin(admin.ModelAdmin):
     search_fields = ("repo_url", "repo_id")
 
 
+@admin.register(GitHubIssue)
+class GitHubIssueAdmin(admin.ModelAdmin):
+    date_hierarchy = "created_at"
+    list_display = ("title", "number", "state", "project", "created_at")
+    list_filter = ("project", "state")
+    list_select_related = ("project",)
+    search_fields = ("number", "title")
+
+
 @admin.register(Epic)
 class EpicAdmin(admin.ModelAdmin):
     list_display = ("name", "status", "project", "created_at", "deleted_at")
     list_filter = (SoftDeletedListFilter, "status", "project")
     list_select_related = ("project",)
     search_fields = ("name", "branch_name")
+    raw_id_fields = ("issue",)
 
 
 @admin.register(EpicSlug)
@@ -159,7 +170,7 @@ class TaskAdmin(admin.ModelAdmin):
     fields = (
         "name",
         ("project", "epic"),
-        "description",
+        ("issue", "description"),
         ("branch_name", "org_config_name"),
         ("commits", "get_all_users_in_commits"),
         "origin_sha",
@@ -179,6 +190,7 @@ class TaskAdmin(admin.ModelAdmin):
         "reviewers",
         "get_all_users_in_commits",
     )
+    raw_id_fields = ("issue", "epic")
 
 
 @admin.register(TaskSlug)

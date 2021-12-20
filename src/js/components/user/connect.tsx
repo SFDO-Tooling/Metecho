@@ -2,51 +2,12 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { t } from 'i18next';
-import React, { useState } from 'react';
+import cookies from 'js-cookie';
+import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
-import { addUrlParams } from '@/js/utils/api';
-
-const CustomDomainForm = ({
-  url,
-  setUrl,
-  handleCustomDomainConnect,
-}: {
-  url: string;
-  setUrl: React.Dispatch<React.SetStateAction<string>>;
-  handleCustomDomainConnect: (event: React.FormEvent<HTMLFormElement>) => void;
-}) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUrl(event.target.value);
-  };
-
-  return (
-    <form className="slds-p-around_large" onSubmit={handleCustomDomainConnect}>
-      <div className="slds-form-element__help slds-p-bottom_small">
-        {t('To go to your company’s login page, enter the custom domain name.')}
-      </div>
-      <Input
-        id="login-custom-domain"
-        label={t('Custom Domain')}
-        value={url}
-        onChange={handleChange}
-        aria-describedby="login-custom-domain-help"
-      >
-        <div
-          id="login-custom-domain-help"
-          className="slds-form-element__help slds-truncate slds-p-top_small"
-          data-testid="custom-domain"
-        >
-          https://
-          {url.trim() ? url.trim() : <em>domain</em>}
-          .my.salesforce.com
-        </div>
-      </Input>
-    </form>
-  );
-};
 
 const ConnectModal = ({
   user,
@@ -59,6 +20,7 @@ const ConnectModal = ({
 }) => {
   const [url, setUrl] = useState('');
   const [isCustomDomain, setIsCustomDomain] = useState(false);
+  const customDomainSubmitButton = useRef<HTMLButtonElement | null>(null);
 
   const handleClose = () => {
     setUrl('');
@@ -75,37 +37,33 @@ const ConnectModal = ({
     setIsCustomDomain(false);
   };
 
-  const handleConnect = () => {
-    window.location.assign(
-      addUrlParams(window.api_urls.salesforce_login(), {
-        custom_domain: 'login',
-        process: 'connect',
-        next: window.location.pathname,
-      }),
-    );
+  const handleCustomDomainChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setUrl(event.target.value);
   };
 
+  const customDomain = url.trim();
+
+  /* istanbul ignore next */
   const handleCustomDomainConnect = (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
-    event.preventDefault();
-    const val = url.trim();
-    if (!val) {
-      return;
+    if (!customDomain) {
+      event.preventDefault();
     }
-    const baseUrl = window.api_urls.salesforce_login();
-    window.location.assign(
-      addUrlParams(baseUrl, {
-        custom_domain: val,
-        process: 'connect',
-        next: window.location.pathname,
-      }),
-    );
   };
 
   const isConnected = Boolean(
     user.valid_token_for || user.devhub_username || user.uses_global_devhub,
   );
+
+  const csrftoken = cookies.get('csrftoken');
+
+  /* istanbul ignore next */
+  const submitClicked = () => {
+    customDomainSubmitButton.current?.click();
+  };
 
   return (
     <Modal
@@ -133,28 +91,84 @@ const ConnectModal = ({
             key="submit"
             label={t('Continue')}
             variant="brand"
-            onClick={handleCustomDomainConnect}
+            onClick={submitClicked}
+            disabled={!customDomain}
           />,
         ]
       }
       onRequestClose={handleClose}
     >
       {isCustomDomain ? (
-        <CustomDomainForm
-          url={url}
-          setUrl={setUrl}
-          handleCustomDomainConnect={handleCustomDomainConnect}
-        />
+        /* POSTing instead of redirecting to the login endpoint is more secure */
+        <form
+          className="slds-p-around_large"
+          action={window.api_urls.salesforce_login?.()}
+          method="POST"
+          onSubmit={handleCustomDomainConnect}
+        >
+          <input type="hidden" name="csrfmiddlewaretoken" value={csrftoken} />
+          <input
+            type="hidden"
+            name="next"
+            value={window.location.pathname}
+            data-testid="sf-login-custom-domain-next"
+          />
+          <input
+            type="hidden"
+            name="custom_domain"
+            value={customDomain}
+            data-testid="sf-login-custom-domain"
+          />
+          <input type="hidden" name="process" value="connect" />
+          <div className="slds-form-element__help slds-p-bottom_small">
+            {t(
+              'To go to your company’s login page, enter the custom domain name.',
+            )}
+          </div>
+          <Input
+            id="login-custom-domain"
+            label={t('Custom Domain')}
+            value={url}
+            onChange={handleCustomDomainChange}
+            aria-describedby="login-custom-domain-help"
+          >
+            <div
+              id="login-custom-domain-help"
+              className="slds-form-element__help slds-truncate slds-p-top_small"
+              data-testid="custom-domain"
+            >
+              https://{customDomain || <em>domain</em>}.my.salesforce.com
+            </div>
+          </Input>
+          <button
+            ref={customDomainSubmitButton}
+            type="submit"
+            style={{ display: 'none' }}
+            disabled={!customDomain}
+          />
+        </form>
       ) : (
         <div className="slds-p-around_large">
-          <Button
-            label={t('Connect to Salesforce')}
-            variant="brand"
-            className="slds-size_full
-              slds-p-vertical_x-small
-              slds-m-bottom_large"
-            onClick={handleConnect}
-          />
+          {/* POSTing instead of redirecting to the login endpoint is more secure */}
+          <form action={window.api_urls.salesforce_login?.()} method="POST">
+            <input type="hidden" name="csrfmiddlewaretoken" value={csrftoken} />
+            <input
+              type="hidden"
+              name="next"
+              value={window.location.pathname}
+              data-testid="sf-login-next"
+            />
+            <input type="hidden" name="custom_domain" value="login" />
+            <input type="hidden" name="process" value="connect" />
+            <Button
+              type="submit"
+              label={t('Connect to Salesforce')}
+              variant="brand"
+              className="slds-size_full
+                slds-p-vertical_x-small
+                slds-m-bottom_large"
+            />
+          </form>
           <Button
             label={t('Use Custom Domain')}
             variant="outline-brand"

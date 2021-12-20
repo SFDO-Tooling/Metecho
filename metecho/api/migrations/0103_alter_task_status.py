@@ -2,22 +2,22 @@
 
 from django.db import migrations, models
 
-from metecho.api.models import TASK_STATUSES
+from metecho.api.models import TaskStatus
 
 
 def set_task_canceled_statuses(apps, schema_editor):
     Task = apps.get_model("api", "Task")
     for instance in Task.objects.filter(
-        status=TASK_STATUSES["In progress"], pr_is_open=False, pr_number__isnull=False
+        status=TaskStatus.IN_PROGRESS, pr_is_open=False, pr_number__isnull=False
     ):
-        instance.status = TASK_STATUSES.Canceled
+        instance.status = TaskStatus.CANCELED
         instance.save()
 
 
 def unset_task_canceled_statuses(apps, schema_editor):
     Task = apps.get_model("api", "Task")
-    for instance in Task.objects.filter(status=TASK_STATUSES.Canceled):
-        instance.status = TASK_STATUSES["In progress"]
+    for instance in Task.objects.filter(status=TaskStatus.CANCELED):
+        instance.status = TaskStatus.IN_PROGRESS
         instance.save()
 
 
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ("Planned", "Planned"),
-                    ("In progress", "In progress"),
+                    ("In progress", "In Progress"),
                     ("Completed", "Completed"),
                     ("Canceled", "Canceled"),
                 ],

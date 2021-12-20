@@ -1,4 +1,5 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ import {
 import { CREATE_TASK_FROM_ORG, EPIC_STATUSES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
+import { sampleIssue1, sampleIssue2 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/js/store/actions');
@@ -235,6 +237,10 @@ const defaultState = {
     github_id: 'user-id',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
+  },
+  issues: {
+    issues: [],
+    notFound: [],
   },
 };
 
@@ -456,6 +462,112 @@ describe('<EpicDetail/>', () => {
         filters: { project: 'p1', epic: 'epic1' },
         objectType: 'task',
       });
+    });
+  });
+
+  describe('issue not fetched', () => {
+    test('fetches issue from API', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          epics: {
+            p1: {
+              ...defaultState.epics.p1,
+              epics: [
+                {
+                  ...defaultState.epics.p1.epics[0],
+                  issue: 'an-issue-id',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('Loading GitHub Issue…')).toBeVisible();
+      expect(fetchObject).toHaveBeenCalledWith({
+        filters: { id: 'an-issue-id' },
+        objectType: 'issue',
+      });
+    });
+  });
+
+  describe('issue not found', () => {
+    test('detaches issue from epic', () => {
+      setup({
+        initialState: {
+          ...defaultState,
+          epics: {
+            p1: {
+              ...defaultState.epics.p1,
+              epics: [
+                {
+                  ...defaultState.epics.p1.epics[0],
+                  issue: 'an-issue-id',
+                },
+              ],
+            },
+          },
+          issues: {
+            issues: [],
+            notFound: ['an-issue-id'],
+          },
+        },
+      });
+
+      expect(updateObject).toHaveBeenCalledTimes(1);
+
+      const args = updateObject.mock.calls[0][0];
+
+      expect(args.objectType).toBe('epic');
+      expect(args.data).toEqual({ issue: null });
+    });
+  });
+
+  describe('has issue attached', () => {
+    let result;
+
+    beforeEach(() => {
+      result = setup({
+        initialState: {
+          ...defaultState,
+          epics: {
+            p1: {
+              ...defaultState.epics.p1,
+              epics: [
+                {
+                  ...defaultState.epics.p1.epics[0],
+                  issue: sampleIssue1.id,
+                },
+              ],
+            },
+          },
+          issues: {
+            issues: [sampleIssue1],
+            notFound: [],
+          },
+        },
+      });
+    });
+
+    test('renders issue', () => {
+      const { getByText } = result;
+
+      expect(getByText('#87')).toBeVisible();
+    });
+
+    test('can detach issue from epic', () => {
+      const { getByText } = result;
+
+      fireEvent.click(getByText('GitHub Issue Actions'));
+      fireEvent.click(getByText('Remove from Epic'));
+
+      expect(updateObject).toHaveBeenCalledTimes(1);
+
+      const args = updateObject.mock.calls[0][0];
+
+      expect(args.objectType).toBe('epic');
+      expect(args.data).toEqual({ issue: null });
     });
   });
 
@@ -874,13 +986,13 @@ describe('<EpicDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
+        const { getByText, queryByText, getByTitle } = result;
 
         expect(
           getByText('You are creating a Scratch Org', { exact: false }),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(
           queryByText('You are creating a Scratch Org', { exact: false }),
@@ -911,12 +1023,12 @@ describe('<EpicDetail/>', () => {
   describe('<ContributeWorkModal />', () => {
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = setup();
+        const { getByText, queryByText, getByTitle } = setup();
         fireEvent.click(getByText('Contribute Work'));
 
         expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
       });
@@ -980,6 +1092,46 @@ describe('<EpicDetail/>', () => {
         expect(
           getByText('You do not have “push” access', { exact: false }),
         ).toBeVisible();
+      });
+    });
+  });
+
+  describe('<SelectIssueModal />', () => {
+    test('opens/closes modal', () => {
+      fetchMock.get(`begin:${window.api_urls.issue_list()}`, {
+        results: [],
+      });
+      const { queryByText, getByText, getByTitle } = setup();
+      fireEvent.click(getByText('Attach Issue to Epic'));
+
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      fireEvent.click(getByTitle('Cancel'));
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+    });
+
+    test('attaches issue to epic', async () => {
+      fetchMock.getOnce('end:is_attached=false', {
+        results: [sampleIssue1],
+      });
+      fetchMock.getOnce('end:is_attached=true', {
+        results: [sampleIssue2],
+      });
+      const { queryByText, getByText, getAllByText, findByLabelText } = setup();
+      fireEvent.click(getByText('Attach Issue to Epic'));
+
+      expect.assertions(4);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const radio = await findByLabelText('#87: this is an issue');
+      fireEvent.click(radio);
+      fireEvent.click(getAllByText('Attach Issue to Epic')[1]);
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data).toEqual({
+        issue: sampleIssue1.id,
       });
     });
   });

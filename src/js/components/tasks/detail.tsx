@@ -14,6 +14,8 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/js/components/404';
 import CommitList from '@/js/components/commits/list';
+import IssueCard from '@/js/components/githubIssues/issueCard';
+import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
 import SubmitReviewModal from '@/js/components/orgs/cards/submitReview';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import TaskOrgCards, {
@@ -104,6 +106,7 @@ const TaskDetail = (
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
+  const [selectIssueModalOpen, setSelectIssueModalOpen] = useState(false);
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -221,6 +224,21 @@ const TaskDetail = (
     testOrgIsRefreshing ||
     testOrgSubmittingReview;
 
+  const openSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(true);
+    setSubmitReviewModalOpen(false);
+    setCaptureModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+  }, []);
+  const closeSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(false);
+  }, []);
   const openSubmitReviewModal = () => {
     setSubmitReviewModalOpen(true);
     setCaptureModalOpen(false);
@@ -231,6 +249,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeSubmitReviewModal = () => {
     setSubmitReviewModalOpen(false);
@@ -245,6 +264,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeCaptureModal = () => {
     setCaptureModalOpen(false);
@@ -259,6 +279,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   // edit modal related...
   const openEditModal = () => {
@@ -271,6 +292,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -286,6 +308,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -302,6 +325,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(null);
@@ -318,6 +342,7 @@ const TaskDetail = (
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeCreateOrgModal = () => {
     setCreateOrgModalOpen(false);
@@ -334,6 +359,7 @@ const TaskDetail = (
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
   };
   const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
@@ -350,6 +376,7 @@ const TaskDetail = (
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
+    setSelectIssueModalOpen(false);
   }, []);
   const closeCreateModal = () => {
     setConvertOrgData(null);
@@ -427,7 +454,6 @@ const TaskDetail = (
 
   const doContributeFromScratchOrg: ContributeCallback = useCallback(
     (orgData, { useExistingTask }) => {
-      closeContributeModal();
       // eslint-disable-next-line no-negated-condition
       if (!useExistingTask) {
         openCreateModal(orgData);
@@ -462,14 +488,7 @@ const TaskDetail = (
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      closeContributeModal,
-      openCreateModal,
-      devOrg,
-      task?.id,
-      user.github_id,
-      userIsAssignedDev,
-    ],
+    [openCreateModal, devOrg, task?.id, user.github_id, userIsAssignedDev],
   );
 
   const handleStepAction = useCallback(
@@ -869,6 +888,20 @@ const TaskDetail = (
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {t('GitHub Issue')}
+              </h2>
+              {task.issue ? (
+                <IssueCard issueId={task.issue} taskId={task.id} />
+              ) : (
+                <Button
+                  label={t('Attach Issue to Task')}
+                  variant="outline-brand"
+                  onClick={openSelectIssueModal}
+                />
+              )}
+            </div>
             <div
               className="slds-m-bottom_x-large
                 metecho-secondary-block
@@ -1121,6 +1154,14 @@ const TaskDetail = (
             />
           </>
         ) : null}
+        <SelectIssueModal
+          projectId={project.id}
+          projectSlug={project.slug}
+          isOpen={selectIssueModalOpen}
+          closeIssueModal={closeSelectIssueModal}
+          attachingToTask={task}
+          currentlyResyncing={project.currently_fetching_issues}
+        />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>
