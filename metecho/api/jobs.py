@@ -16,6 +16,7 @@ from cumulusci.cli.runtime import CliRuntime
 from cumulusci.utils import temporary_dir
 from django.conf import settings
 from django.db import transaction
+from django.db.models.query_utils import Q
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
@@ -811,7 +812,10 @@ def refresh_commits(*, project, branch_name, originating_user_id):
         epic.latest_sha = commits[0].sha if commits else ""
         epic.finalize_epic_update(originating_user_id=originating_user_id)
 
-    tasks = Task.objects.filter(epic__project=project, branch_name=branch_name)
+    tasks = Task.objects.filter(
+        Q(project=project, branch_name=branch_name)
+        | Q(epic__project=project, branch_name=branch_name)
+    )
     for task in tasks:
         origin_sha_index = [commit.sha for commit in commits].index(task.origin_sha)
         task.commits = [

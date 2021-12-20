@@ -499,14 +499,28 @@ class TestProjectViewset:
 
 @pytest.mark.django_db
 class TestHookView:
+    @pytest.mark.parametrize(
+        "_task_factory, task_data",
+        (
+            pytest.param(
+                fixture("task_with_project_factory"),
+                {"project__repo_id": 123},
+                id="With Project",
+            ),
+            pytest.param(
+                fixture("task_factory"),
+                {"epic__project__repo_id": 123},
+                id="With Epic",
+            ),
+        ),
+    )
     def test_202__push_task_commits(
         self,
         settings,
         client,
-        project_factory,
         git_hub_repository_factory,
-        epic_factory,
-        task_factory,
+        _task_factory,
+        task_data,
     ):
         settings.GITHUB_HOOK_SECRET = b""
         with ExitStack() as stack:
@@ -526,10 +540,8 @@ class TestHookView:
             )
             gh.normalize_commit.return_value = "1234abcd"
 
-            project = project_factory(repo_id=123)
             git_hub_repository_factory(repo_id=123)
-            epic = epic_factory(project=project, branch_name="test-epic")
-            task = task_factory(epic=epic, branch_name="test-task")
+            task = _task_factory(**task_data, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
                 patch("metecho.api.jobs.refresh_commits_job", autospec=True)
