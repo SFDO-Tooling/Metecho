@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useState } from 'react';
 
 import {
@@ -112,7 +112,7 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
   const CancelBtn = (
     <Button
       key="cancel"
-      label={i18n.t('Cancel')}
+      label={t('Cancel')}
       onClick={handleClose}
       disabled={isSaving}
     />
@@ -120,20 +120,20 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
 
   const pages = [
     {
-      heading: i18n.t('Create Scratch Org'),
+      heading: t('Create Scratch Org'),
       contents: <Overview project={project} epic={epic} task={task} />,
       footer: [
         CancelBtn,
         <Button
           key="page-1-submit"
-          label={i18n.t('Next')}
+          label={t('Next')}
           variant="brand"
           onClick={nextPage}
         />,
       ],
     },
     {
-      heading: i18n.t('Create Scratch Org'),
+      heading: t('Create Scratch Org'),
       contents: (
         <CreateOrgForm
           project={project}
@@ -148,9 +148,9 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
           key="page-2-submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
+              <LabelWithSpinner label={t('Creating…')} variant="inverse" />
             ) : (
-              i18n.t('Create Org')
+              t('Create Org')
             )
           }
           variant="brand"
@@ -167,6 +167,7 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
       size="small"
       disableClose={isSaving}
       heading={pages[pageIndex].heading}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={pages[pageIndex].footer}
       onRequestClose={handleClose}
     >

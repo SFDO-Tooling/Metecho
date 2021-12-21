@@ -9,7 +9,6 @@ const path = require('path');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const svgToMiniDataURI = require('mini-svg-data-uri');
 
 module.exports = {
   context: path.join(__dirname, 'src', 'js'),
@@ -84,7 +83,7 @@ module.exports = {
             options: {
               url: { filter: (url) => !url.startsWith('/') },
               sourceMap: true,
-              importLoaders: 1,
+              importLoaders: 2,
             },
           },
           {
@@ -108,10 +107,7 @@ module.exports = {
       {
         test: /\.svg$/i,
         resourceQuery: { not: [/raw/] },
-        type: 'asset/inline',
-        generator: {
-          dataUrl: (content) => svgToMiniDataURI(content.toString()),
-        },
+        type: 'asset/resource',
       },
     ],
   },

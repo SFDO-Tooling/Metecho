@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -13,6 +13,8 @@ import ConfirmRemoveUserModal from '@/js/components/epics/confirmRemoveUserModal
 import EpicStatusPath from '@/js/components/epics/path';
 import EpicProgress from '@/js/components/epics/progress';
 import EpicStatusSteps from '@/js/components/epics/steps';
+import IssueCard from '@/js/components/githubIssues/issueCard';
+import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
 import AssignEpicCollaboratorsModal from '@/js/components/githubUsers/assignEpicCollaborators';
 import UserCards from '@/js/components/githubUsers/cards';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
@@ -79,12 +81,29 @@ const EpicDetail = (
   const [convertOrgData, setConvertOrgData] = useState<OrgData | null>(null);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [selectIssueModalOpen, setSelectIssueModalOpen] = useState(false);
   const {
     history,
     location: { state },
   } = props;
 
   const playgroundOrg = (orgs || [])[0] as Org | undefined;
+
+  const openSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(true);
+    setAssignUsersModalOpen(false);
+    setContributeModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateTaskModalOpen(false);
+    setConvertOrgData(null);
+    setCreateOrgModalOpen(false);
+  }, []);
+
+  const closeSelectIssueModal = useCallback(() => {
+    setSelectIssueModalOpen(false);
+  }, []);
 
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -96,6 +115,7 @@ const EpicDetail = (
     setCreateTaskModalOpen(false);
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
+    setSelectIssueModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -184,6 +204,7 @@ const EpicDetail = (
         setCreateTaskModalOpen(false);
         setConvertOrgData(null);
         setCreateOrgModalOpen(false);
+        setSelectIssueModalOpen(false);
       } else {
         updateEpicUsers(users);
       }
@@ -212,6 +233,7 @@ const EpicDetail = (
         setCreateTaskModalOpen(false);
         setConvertOrgData(null);
         setCreateOrgModalOpen(false);
+        setSelectIssueModalOpen(false);
       } else {
         updateEpicUsers(users);
       }
@@ -229,6 +251,7 @@ const EpicDetail = (
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const currentlySubmitting = Boolean(epic?.currently_creating_pr);
   const readyToSubmit = Boolean(
@@ -247,6 +270,7 @@ const EpicDetail = (
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -262,6 +286,7 @@ const EpicDetail = (
     setConvertOrgData(null);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -277,6 +302,7 @@ const EpicDetail = (
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeCreateModal = () => {
     setCreateTaskModalOpen(false);
@@ -293,6 +319,7 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeCreateOrgModal = () => {
     setCreateOrgModalOpen(false);
@@ -308,6 +335,7 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
+    setSelectIssueModalOpen(false);
   };
   const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
@@ -320,7 +348,7 @@ const EpicDetail = (
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
-    setContributeModalOpen(false);
+    setSelectIssueModalOpen(false);
   }, []);
 
   // "Next Steps" action handler
@@ -403,11 +431,11 @@ const EpicDetail = (
   if (readyToSubmit && project.has_push_permission) {
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Submitting Epic for Review on GitHub…')}
+        label={t('Submitting Epic for Review on GitHub…')}
         variant="inverse"
       />
     ) : (
-      i18n.t('Submit Epic for Review on GitHub')
+      t('Submit Epic for Review on GitHub')
     );
     submitButton = (
       <div className="slds-is-relative">
@@ -421,7 +449,7 @@ const EpicDetail = (
         <TourPopover
           id="tour-epic-submit-review"
           align="right"
-          heading={i18n.t('Submit this Epic for review')}
+          heading={t('Submit this Epic for review')}
           body={
             <Trans i18nKey="tourEpicSubmitReview">
               When an Epic has completed Tasks, it can be submitted for review.
@@ -456,7 +484,7 @@ const EpicDetail = (
           <TourPopover
             id="tour-epic-edit"
             align="left"
-            heading={i18n.t('Edit or delete this Epic')}
+            heading={t('Edit or delete this Epic')}
             body={
               <Trans i18nKey="tourEditEpic">
                 Here you can change the name and description of this Epic. You
@@ -493,19 +521,17 @@ const EpicDetail = (
     headerUrlText = `${project.repo_owner}/${project.repo_name}`;
   }
 
-  let taskHeader = i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name });
+  let taskHeader = t('Tasks for {{epic_name}}', { epic_name: epic.name });
   if (!epicHasTasks && !epicIsMerged) {
     taskHeader = project.has_push_permission
-      ? i18n.t('Create a Task for {{epic_name}}', {
+      ? t('Create a Task for {{epic_name}}', {
           epic_name: epic.name,
         })
-      : i18n.t('No Tasks for {{epic_name}}', { epic_name: epic.name });
+      : t('No Tasks for {{epic_name}}', { epic_name: epic.name });
   }
 
   return (
-    <DocumentTitle
-      title={`${epic.name} | ${project.name} | ${i18n.t('Metecho')}`}
-    >
+    <DocumentTitle title={`${epic.name} | ${project.name} | ${t('Metecho')}`}>
       <DetailPageLayout
         type={OBJECT_TYPES.EPIC}
         title={epic.name}
@@ -513,7 +539,7 @@ const EpicDetail = (
           <TourPopover
             id="tour-epic-name"
             align="bottom left"
-            heading={i18n.t('Epic name & GitHub link')}
+            heading={t('Epic name & GitHub link')}
             body={
               <Trans i18nKey="tourEpicName">
                 This is the name of the Epic you are viewing. Select the link
@@ -539,22 +565,36 @@ const EpicDetail = (
           <>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {t('GitHub Issue')}
+              </h2>
+              {epic.issue ? (
+                <IssueCard issueId={epic.issue} epicId={epic.id} />
+              ) : (
+                <Button
+                  label={t('Attach Issue to Epic')}
+                  variant="outline-brand"
+                  onClick={openSelectIssueModal}
+                />
+              )}
+            </div>
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {project.has_push_permission || epicCollaborators.length
-                  ? i18n.t('Collaborators')
-                  : i18n.t('No Collaborators')}
+                  ? t('Collaborators')
+                  : t('No Collaborators')}
               </h2>
               {project.has_push_permission && (
                 <>
                   <div className="slds-is-relative">
                     <Button
-                      label={i18n.t('Add or Remove Collaborators')}
+                      label={t('Add or Remove Collaborators')}
                       variant="outline-brand"
                       onClick={openAssignUsersModal}
                     />
                     <TourPopover
                       id="tour-epic-collaborators"
                       align="top"
-                      heading={i18n.t('Epic Collaborators')}
+                      heading={t('Epic Collaborators')}
                       body={
                         <Trans i18nKey="tourEpicCollaborators">
                           Add Collaborators to help develop and test the Tasks
@@ -570,7 +610,7 @@ const EpicDetail = (
                   <AssignEpicCollaboratorsModal
                     allUsers={project.github_users}
                     selectedUsers={epicCollaborators}
-                    heading={i18n.t(
+                    heading={t(
                       'Add or Remove Collaborators for {{epic_name}}',
                       { epic_name: epic.name },
                     )}
@@ -614,7 +654,7 @@ const EpicDetail = (
               <TourPopover
                 id="tour-epic-next-steps"
                 align="top"
-                heading={i18n.t('Wondering what to do next?')}
+                heading={t('Wondering what to do next?')}
                 body={
                   <Trans i18nKey="tourEpicNextSteps">
                     The Next Steps section is designed as a quick reference to
@@ -634,7 +674,7 @@ const EpicDetail = (
           <TourPopover
             id="tour-epic-progress"
             align="bottom left"
-            heading={i18n.t('Epic progress path')}
+            heading={t('Epic progress path')}
             body={
               <Trans i18nKey="tourEpicProgress">
                 An Epic starts its journey as <b>Planned</b>. The Epic is{' '}
@@ -654,7 +694,7 @@ const EpicDetail = (
             <TourPopover
               id="tour-epic-scratch-org"
               align="top left"
-              heading={i18n.t('View & play with an Epic')}
+              heading={t('View & play with an Epic')}
               body={
                 <Trans i18nKey="tourEpicScratchOrg">
                   Your Scratch Org is a temporary place for you to view the work
@@ -664,7 +704,7 @@ const EpicDetail = (
               }
             />
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {i18n.t('My Epic Scratch Org')}
+              {t('My Epic Scratch Org')}
             </h2>
           </div>
           {orgs ? (
@@ -692,7 +732,7 @@ const EpicDetail = (
                 </div>
               ) : (
                 <Button
-                  label={i18n.t('Create Scratch Org')}
+                  label={t('Create Scratch Org')}
                   variant="outline-brand"
                   onClick={openCreateOrgModal}
                   disabled={epic.currently_creating_branch}
@@ -702,9 +742,7 @@ const EpicDetail = (
           ) : (
             // Fetching scratch orgs from API
             <Button
-              label={
-                <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
-              }
+              label={<LabelWithSpinner label={t('Loading Scratch Orgs…')} />}
               disabled
             />
           )}
@@ -717,7 +755,7 @@ const EpicDetail = (
             {project.has_push_permission && !epicIsMerged ? (
               <div className="slds-is-relative">
                 <Button
-                  label={i18n.t('Create a Task')}
+                  label={t('Create a Task')}
                   variant="brand"
                   onClick={openCreateModal}
                   className="slds-m-bottom_large"
@@ -725,7 +763,7 @@ const EpicDetail = (
                 <TourPopover
                   id="tour-epic-add-task"
                   align="top left"
-                  heading={i18n.t('Create a Task to contribute')}
+                  heading={t('Create a Task to contribute')}
                   body={
                     <Trans i18nKey="tourCreateTask">
                       To get started contributing to this Epic, create a Task.
@@ -810,6 +848,14 @@ const EpicDetail = (
           epic={epic}
           isOpen={createOrgModalOpen}
           closeModal={closeCreateOrgModal}
+        />
+        <SelectIssueModal
+          projectId={project.id}
+          projectSlug={project.slug}
+          isOpen={selectIssueModalOpen}
+          closeIssueModal={closeSelectIssueModal}
+          attachingToEpic={epic}
+          currentlyResyncing={project.currently_fetching_issues}
         />
       </DetailPageLayout>
     </DocumentTitle>

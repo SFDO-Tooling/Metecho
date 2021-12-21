@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { pick } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
@@ -23,7 +23,7 @@ export const getDemoTask = ({
 
   return {
     id: 'demo-task',
-    name: i18n.t('This is a Sample Task'),
+    name: t('This is a Sample Task'),
     description: '',
     description_rendered: '',
     epic: pick(epic, ['id', 'name', 'slug', 'github_users']),
@@ -50,6 +50,7 @@ export const getDemoTask = ({
     assigned_qa: null,
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,
+    issue: null,
   };
 };
 
@@ -62,7 +63,7 @@ const HelpTour = (props: TourProps) => {
   const steps: Step[] = [
     {
       target: '.tour-project-tasks-list',
-      title: i18n.t('List of Tasks'),
+      title: t('List of Tasks'),
       content: (
         <Trans i18nKey="walkthroughHelpListTasks">
           Select the Tasks tab to see a list of all the work being done on this
@@ -75,7 +76,7 @@ const HelpTour = (props: TourProps) => {
     },
     {
       target: '.tour-task-tester-column',
-      title: i18n.t('Task Testers'),
+      title: t('Task Testers'),
       content: (
         <Trans i18nKey="walkthroughHelpTaskTester">
           Assign yourself or someone else as a Tester to help on a Task for this
@@ -89,7 +90,7 @@ const HelpTour = (props: TourProps) => {
     },
     {
       target: '.tour-task-status-column',
-      title: i18n.t('Task statuses'),
+      title: t('Task statuses'),
       content: (
         <Trans i18nKey="walkthroughHelpTaskStatus">
           A Task begins with a status of <b>Planned</b>. When a Dev Org is
@@ -100,6 +101,22 @@ const HelpTour = (props: TourProps) => {
           Tester’s review. If the Developer retrieves new changes, the status
           moves back to <b>In Progress</b>. Once the Task is added to the
           Project on GitHub, the status is <b>Complete</b>.
+        </Trans>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-create-task-from-issue',
+      title: t('Create Task from GitHub Issue'),
+      content: (
+        <Trans i18nKey="walkthroughHelpCreateTaskFromIssue">
+          If you want to help as a Developer on this Project, one option is to
+          browse the list of GitHub Issues. Issues are items in GitHub’s bug and
+          enhancement tracking system. Select an Issue to work on, and create an
+          Epic or Task. Create an Epic for an Issue if it will require multiple
+          Tasks to complete. If you’re unsure, begin with a Task and create an
+          Epic later, as needed.
         </Trans>
       ),
       placement: 'right',

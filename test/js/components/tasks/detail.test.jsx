@@ -1,4 +1,5 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -21,6 +22,7 @@ import {
 } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
+import { sampleIssue1, sampleIssue2 } from '../../../../src/stories/fixtures';
 import {
   renderWithRedux,
   reRenderWithRedux,
@@ -190,6 +192,10 @@ const defaultState = {
       epics: [],
       tasks: ['task1'],
     },
+  },
+  issues: {
+    issues: [],
+    notFound: [],
   },
 };
 
@@ -425,6 +431,82 @@ describe('<TaskDetail/>', () => {
     });
   });
 
+  describe('issue not fetched', () => {
+    test('fetches issue from API', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  issue: 'an-issue-id',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('Loading GitHub Issue…')).toBeVisible();
+      expect(fetchObject).toHaveBeenCalledWith({
+        filters: { id: 'an-issue-id' },
+        objectType: 'issue',
+      });
+    });
+  });
+
+  describe('has issue attached', () => {
+    let result;
+
+    beforeEach(() => {
+      result = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            p1: {
+              ...defaultState.tasks.p1,
+              tasks: [
+                {
+                  ...defaultState.tasks.p1.tasks[0],
+                  issue: sampleIssue1.id,
+                },
+              ],
+            },
+          },
+          issues: {
+            issues: [sampleIssue1],
+            notFound: [],
+          },
+        },
+      });
+    });
+
+    test('renders issue', () => {
+      const { getByText } = result;
+
+      expect(getByText('#87')).toBeVisible();
+    });
+
+    test('can detach issue from task', () => {
+      const { getByText } = result;
+
+      fireEvent.click(getByText('GitHub Issue Actions'));
+      fireEvent.click(getByText('Remove from Task'));
+
+      expect(updateObject).toHaveBeenCalledTimes(1);
+
+      const args = updateObject.mock.calls[0][0];
+
+      expect(args.objectType).toBe('task');
+      expect(args.data).toEqual({ issue: null });
+    });
+  });
+
   describe('project does not exist', () => {
     test('renders <ProjectNotFound />', () => {
       const { getByText, queryByText } = setup({
@@ -473,7 +555,7 @@ describe('<TaskDetail/>', () => {
     test('redirects to epic_task_detail with new slug', () => {
       const { context } = setup({ taskSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.epic_task_detail('project-1', 'epic-1', 'task-1'),
       );
@@ -485,7 +567,7 @@ describe('<TaskDetail/>', () => {
         taskSlug: 'old-slug-2',
       });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(
         routes.project_task_detail('project-1', 'task-2'),
       );
@@ -519,7 +601,7 @@ describe('<TaskDetail/>', () => {
 
       const refetchArgs = refetchOrg.mock.calls[0][0];
 
-      expect(refetchArgs.id).toEqual('org-id');
+      expect(refetchArgs.id).toBe('org-id');
 
       expect(
         getByText('Select the location to retrieve changes'),
@@ -625,7 +707,7 @@ describe('<TaskDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, getByLabelText, queryByText } = setup({
+        const { getByText, getByLabelText, queryByText, getByTitle } = setup({
           initialState: {
             ...defaultState,
             orgs,
@@ -641,7 +723,7 @@ describe('<TaskDetail/>', () => {
         fireEvent.click(
           getByLabelText('Convert Scratch Org into Dev Org for this Task'),
         );
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
       });
@@ -1320,13 +1402,13 @@ describe('<TaskDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
+        const { getByText, queryByText, getByTitle } = result;
 
         expect(
           getByText('You are creating a Scratch Org', { exact: false }),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(
           queryByText('You are creating a Scratch Org', { exact: false }),
@@ -1348,10 +1430,48 @@ describe('<TaskDetail/>', () => {
 
         expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
-        expect(createObject.mock.calls[0][0].data.task).toEqual('task1');
-        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
-          'dev',
-        );
+        expect(createObject.mock.calls[0][0].data.task).toBe('task1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toBe('dev');
+      });
+    });
+  });
+
+  describe('<SelectIssueModal />', () => {
+    test('opens/closes modal', () => {
+      fetchMock.get(`begin:${window.api_urls.issue_list()}`, {
+        results: [],
+      });
+      const { queryByText, getByText, getByTitle } = setup();
+      fireEvent.click(getByText('Attach Issue to Task'));
+
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      fireEvent.click(getByTitle('Cancel'));
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+    });
+
+    test('attaches issue to task', async () => {
+      fetchMock.getOnce('end:is_attached=false', {
+        results: [sampleIssue1],
+      });
+      fetchMock.getOnce('end:is_attached=true', {
+        results: [sampleIssue2],
+      });
+      const { queryByText, getByText, getAllByText, findByLabelText } = setup();
+      fireEvent.click(getByText('Attach Issue to Task'));
+
+      expect.assertions(4);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const radio = await findByLabelText('#87: this is an issue');
+      fireEvent.click(radio);
+      fireEvent.click(getAllByText('Attach Issue to Task')[1]);
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data).toEqual({
+        issue: sampleIssue1.id,
       });
     });
   });

@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import { omit } from 'lodash';
 import React, { useRef, useState } from 'react';
 
@@ -140,12 +140,12 @@ const EditModal = ({
   let heading, nameLabel; // eslint-disable-line one-var
   switch (modelType) {
     case OBJECT_TYPES.TASK:
-      nameLabel = i18n.t('Task Name');
-      heading = i18n.t('Edit Task');
+      nameLabel = t('Task Name');
+      heading = t('Edit Task');
       break;
     case OBJECT_TYPES.EPIC:
-      nameLabel = i18n.t('Epic Name');
-      heading = i18n.t('Edit Epic');
+      nameLabel = t('Epic Name');
+      heading = t('Edit Epic');
       break;
   }
 
@@ -153,14 +153,14 @@ const EditModal = ({
     <Modal
       isOpen={isOpen}
       size="small"
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       disableClose={isSaving}
       heading={heading}
       onRequestClose={doClose}
       footer={[
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={doClose}
           disabled={isSaving}
         />,
@@ -169,9 +169,9 @@ const EditModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
+              <LabelWithSpinner label={t('Saving…')} variant="inverse" />
             ) : (
-              i18n.t('Save')
+              t('Save')
             )
           }
           variant="brand"
@@ -194,7 +194,7 @@ const EditModal = ({
         />
         <Textarea
           id="edit-description"
-          label={i18n.t('Description')}
+          label={t('Description')}
           className="metecho-textarea"
           name="description"
           value={inputs.description}

@@ -2,16 +2,16 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 import backpackIcon from '@/img/backpack-sm.svg';
 import mapIcon from '@/img/map-sm.svg';
 import seesawIcon from '@/img/seesaw-sm.svg';
 import { useIsMounted } from '@/js/components/utils';
-import { AppState, ThunkDispatch } from '@/js/store';
+import { AppState, RouteProps, ThunkDispatch } from '@/js/store';
 import { selectProject } from '@/js/store/projects/selectors';
 import { updateTour } from '@/js/store/user/actions';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -31,14 +31,12 @@ const TourDropdown = ({
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
-  const match =
-    useRouteMatch<{
-      projectSlug?: string;
-    }>(routePatterns.project_detail) ||
-    ({ params: {} } as Match<{ projectSlug?: string }>);
+  const match = useRouteMatch(routePatterns.project_detail) || {
+    params: {},
+  };
   const selectProjectWithProps = useCallback(selectProject, []);
   const project = useSelector((state: AppState) =>
-    selectProjectWithProps(state, { match }),
+    selectProjectWithProps(state, { match } as RouteProps),
   );
   const projectUrl = project ? routes.project_detail(project.slug) : null;
   const user = useSelector(selectUserState);
@@ -81,7 +79,7 @@ const TourDropdown = ({
       align="bottom right"
       className={classNames(className, 'slds-popover_small')}
       hasNoCloseButton
-      heading={i18n.t('How to Use Metecho')}
+      heading={t('How to Use Metecho')}
       classNameBody="slds-p-horizontal_none"
       isOpen={isOpen}
       onClick={handleOpenClose}
@@ -96,7 +94,7 @@ const TourDropdown = ({
             >
               <li className="slds-p-horizontal_small">
                 <Button
-                  label={i18n.t('Play Walkthrough')}
+                  label={t('Play Walkthrough')}
                   variant="base"
                   iconPosition="left"
                   iconSize="large"
@@ -111,7 +109,7 @@ const TourDropdown = ({
               {
                 <li className="slds-p-horizontal_small">
                   <Button
-                    label={i18n.t('Help Walkthrough')}
+                    label={t('Help Walkthrough')}
                     variant="base"
                     iconPosition="left"
                     iconSize="large"
@@ -126,7 +124,7 @@ const TourDropdown = ({
               }
               <li className="slds-p-horizontal_small">
                 <Button
-                  label={i18n.t('Plan Walkthrough')}
+                  label={t('Plan Walkthrough')}
                   variant="base"
                   iconPosition="left"
                   iconSize="large"
@@ -149,7 +147,7 @@ const TourDropdown = ({
     >
       <Button
         variant="icon"
-        assistiveText={{ icon: i18n.t('Get Help') }}
+        assistiveText={{ icon: t('Get Help') }}
         className={triggerClassName}
         iconCategory="utility"
         iconName="question"

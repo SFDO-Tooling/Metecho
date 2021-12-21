@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
@@ -79,8 +79,8 @@ const StepsItem = ({
               'slds-m-left_small': hasAssignee || !someAssignees,
             },
           )}
-          title={i18n.t('Complete')}
-          assistiveText={{ label: i18n.t('Complete') }}
+          title={t('Complete')}
+          assistiveText={{ label: t('Complete') }}
         />
       ) : (
         <div
@@ -90,7 +90,7 @@ const StepsItem = ({
           })}
         >
           {isActive && (
-            <span className="slds-assistive-text">{i18n.t('Active')}</span>
+            <span className="slds-assistive-text">{t('Active')}</span>
           )}
         </div>
       )}

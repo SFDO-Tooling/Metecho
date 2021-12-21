@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
@@ -17,7 +17,7 @@ const UserActions = ({
   assignedUserId: string | null;
   currentUserId: string | null;
   userHasPermissions: boolean;
-  openAssignUserModal: (t: OrgTypes) => void;
+  openAssignUserModal: (orgType: OrgTypes) => void;
   setUser: (user: string | null, shouldAlertAssignee: boolean) => void;
 }) => {
   if (assignedUserId) {
@@ -37,14 +37,14 @@ const UserActions = ({
     if (userHasPermissions) {
       const actionLabels =
         type === ORG_TYPES.QA
-          ? [i18n.t('Change Tester'), i18n.t('Remove Tester')]
-          : [i18n.t('Change Developer'), i18n.t('Remove Developer')];
+          ? [t('Change Tester'), t('Remove Tester')]
+          : [t('Change Developer'), t('Remove Developer')];
       options = [
         { id: 'edit', label: actionLabels[0] },
         { id: 'remove', label: actionLabels[1] },
       ];
     } else if (assignedUserId === currentUserId) {
-      options = [{ id: 'remove', label: i18n.t('Remove Tester') }];
+      options = [{ id: 'remove', label: t('Remove Tester') }];
     } else {
       return null;
     }
@@ -52,13 +52,14 @@ const UserActions = ({
     return (
       <Dropdown
         align="right"
-        assistiveText={{ icon: i18n.t('User Actions') }}
+        assistiveText={{ icon: t('User Actions') }}
         buttonClassName="slds-button_icon-x-small"
         buttonVariant="icon"
         iconCategory="utility"
         iconName="down"
         iconSize="small"
         iconVariant="border-filled"
+        triggerClassName="metecho-card-more"
         width="xx-small"
         options={options}
         onSelect={handleSelect}
@@ -68,11 +69,11 @@ const UserActions = ({
 
   /* istanbul ignore else */
   if (userHasPermissions) {
-    return <Button label={i18n.t('Assign')} onClick={openAssignUserModal} />;
+    return <Button label={t('Assign')} onClick={openAssignUserModal} />;
   } else if (type === ORG_TYPES.QA && currentUserId) {
     return (
       <Button
-        label={i18n.t('Self-Assign')}
+        label={t('Self-Assign')}
         onClick={() => setUser(currentUserId, false)}
       />
     );

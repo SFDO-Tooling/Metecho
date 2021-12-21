@@ -24,13 +24,14 @@ from ..jobs import (
     get_social_image,
     get_unsaved_changes,
     refresh_commits,
+    refresh_github_issues,
     refresh_github_repositories_for_user,
     refresh_github_users,
     refresh_scratch_org,
     submit_review,
     user_reassign,
 )
-from ..models import SCRATCH_ORG_TYPES
+from ..models import ScratchOrgType
 
 Author = namedtuple("Author", ("avatar_url", "login"))
 Commit = namedtuple(
@@ -253,6 +254,70 @@ class TestCreateBranchesOnGitHub:
 
 
 @pytest.mark.django_db
+class TestRefreshGitHubIssues:
+    def test_filter_pull_requests(
+        self, mocker, settings, project_factory, short_issue_factory
+    ):
+        settings.GITHUB_ISSUE_LIMIT = 5
+        get_repo_info = mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
+        # Repo with 2 issues and 1 PR
+        get_repo_info.return_value.issues.return_value.__next__.side_effect = (
+            short_issue_factory(title="Issue 1", pull_request_urls=None),
+            short_issue_factory(title="Issue 2", pull_request_urls=None),
+            short_issue_factory(title="Pull Request 3"),
+        )
+        project = project_factory(currently_fetching_issues=True)
+
+        refresh_github_issues(project, originating_user_id=None)
+
+        project.refresh_from_db()
+        assert project.issues.count() == 2
+        assert not project.has_truncated_issues
+        assert not project.currently_fetching_issues
+
+    def test_limit(self, mocker, settings, project_factory, short_issue_factory):
+        settings.GITHUB_ISSUE_LIMIT = 5
+        get_repo_info = mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
+        # Repo with 10 issues
+        get_repo_info.return_value.issues.return_value.__next__.side_effect = (
+            short_issue_factory(pull_request_urls=None) for i in range(10)
+        )
+        project = project_factory(currently_fetching_issues=True)
+
+        refresh_github_issues(project, originating_user_id=None)
+
+        project.refresh_from_db()
+        assert project.issues.count() == 5
+        assert project.has_truncated_issues
+        assert not project.currently_fetching_issues
+
+    def test_idempotent(self, mocker, project_factory, short_issue_factory):
+        gh_issue = short_issue_factory(pull_request_urls=None)
+        get_repo_info = mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
+        get_repo_info.return_value.issues.return_value.__next__.side_effect = [gh_issue]
+        project = project_factory(currently_fetching_issues=True)
+
+        refresh_github_issues(project, originating_user_id=None)
+        issue = project.issues.get()
+
+        # Run again. Should fetch the same issue, not create a new one
+        refresh_github_issues(project, originating_user_id=None)
+        assert issue == project.issues.get()
+
+    def test_error(self, mocker, caplog, project_factory):
+        mocker.patch(f"{PATCH_ROOT}.get_repo_info", side_effect=Exception("Oh no!"))
+        project = project_factory(currently_fetching_issues=True)
+
+        with pytest.raises(Exception):
+            refresh_github_issues(project, originating_user_id=None)
+
+        project.refresh_from_db()
+        assert project.issues.count() == 0
+        assert not project.currently_fetching_issues
+        assert "Oh no!" in caplog.text
+
+
+@pytest.mark.django_db
 class TestAlertUserAboutExpiringOrg:
     def test_soft_deleted_model(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
@@ -303,7 +368,7 @@ def test_create_org_and_run_flow():
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
-        scratch_org = MagicMock(org_type=SCRATCH_ORG_TYPES.Dev)
+        scratch_org = MagicMock(org_type=ScratchOrgType.DEV)
         _create_org_and_run_flow(
             scratch_org,
             user=MagicMock(),
@@ -346,7 +411,7 @@ def test_create_org_and_run_flow__fall_back_to_cases():
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
         _create_org_and_run_flow(
-            MagicMock(org_type=SCRATCH_ORG_TYPES.Dev, org_config_name="dev"),
+            MagicMock(org_type=ScratchOrgType.DEV, org_config_name="dev"),
             user=MagicMock(),
             repo_id=123,
             repo_branch=MagicMock(),
@@ -464,7 +529,7 @@ class TestConvertScratchOrg:
     def test_convert_to_dev_org(self, mocker, scratch_org_factory, _task_factory):
         task = _task_factory()
         scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+            org_type=ScratchOrgType.PLAYGROUND, task=None, epic=task.epic
         )
         _create_branches_on_github = mocker.patch(
             f"{PATCH_ROOT}._create_branches_on_github"
@@ -479,14 +544,14 @@ class TestConvertScratchOrg:
         scratch_org.refresh_from_db()
         assert scratch_org.epic is None
         assert scratch_org.task == task
-        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Dev
+        assert scratch_org.org_type == ScratchOrgType.DEV
 
     def test_convert_to_dev_org__error(
         self, mocker, caplog, scratch_org_factory, task_factory
     ):
         task = task_factory(epic__project__repo_id=123)
         scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+            org_type=ScratchOrgType.PLAYGROUND, task=None, epic=task.epic
         )
         mocker.patch(f"{PATCH_ROOT}._create_branches_on_github", side_effect=Exception)
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
@@ -500,7 +565,7 @@ class TestConvertScratchOrg:
         scratch_org.refresh_from_db()
         assert scratch_org.epic == task.epic
         assert scratch_org.task is None
-        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Playground
+        assert scratch_org.org_type == ScratchOrgType.PLAYGROUND
 
 
 @pytest.mark.django_db

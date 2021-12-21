@@ -196,7 +196,7 @@ class TestLocalGitHubCheckout:
 
         with pytest.raises(Exception):
             with local_github_checkout(user, repo_id):
-                pass
+                pass  # pragma: nocover
 
 
 class TestTryCreateBranch:

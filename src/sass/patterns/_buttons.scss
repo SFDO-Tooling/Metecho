@@ -1,0 +1,17 @@
+// Buttons
+// =======
+
+@media (min-width: $mq-medium) {
+  .narrow-buttons {
+    .slds-button_brand,
+    .slds-button_outline-brand {
+      padding-left: #{$spacing-x-small};
+      padding-right: #{$spacing-x-small};
+    }
+  }
+}
+
+// adds spacing when sibling buttons exist, and can wrap
+.metecho-btn-container:not(:last-of-type) {
+  padding-right: #{$spacing-x-small};
+}

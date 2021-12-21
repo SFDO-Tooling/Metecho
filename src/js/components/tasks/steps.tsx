@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
@@ -89,17 +89,17 @@ const TaskStatusSteps = ({
     testOrgIsRefreshing ||
     testOrgIsSubmittingReview;
 
-  let retrieveChangesLabel = i18n.t('Retrieve changes from Dev Org');
+  let retrieveChangesLabel = t('Retrieve changes from Dev Org');
   if (devOrgFetching) {
-    retrieveChangesLabel = i18n.t('Checking for Unretrieved Changes…');
+    retrieveChangesLabel = t('Checking for Unretrieved Changes…');
   }
   if (devOrgCommitting) {
-    retrieveChangesLabel = i18n.t('Retrieving changes from Dev Org…');
+    retrieveChangesLabel = t('Retrieving changes from Dev Org…');
   }
 
   const steps: Step[] = [
     {
-      label: i18n.t('Assign a Developer'),
+      label: t('Assign a Developer'),
       active: !hasDev,
       // Even if no dev is currently assigned,
       // consider this complete if there are commits and no rejected review
@@ -109,8 +109,8 @@ const TaskStatusSteps = ({
     },
     {
       label: devOrgIsCreating
-        ? i18n.t('Creating a Dev Org…')
-        : i18n.t('Create a Dev Org'),
+        ? t('Creating a Dev Org…')
+        : t('Create a Dev Org'),
       active: hasDev && !hasDevOrg,
       // Even if no dev is currently assigned and there's no Dev Org,
       // consider this complete if there are commits and no rejected review
@@ -120,7 +120,7 @@ const TaskStatusSteps = ({
         userIsAssignedDev && !devOrgLoading ? 'create-dev-org' : undefined,
     },
     {
-      label: i18n.t('Make changes in Dev Org'),
+      label: t('Make changes in Dev Org'),
       // Active if we have an assigned Dev, a Dev Org, and the Dev Org has no
       // unsaved changes
       active: hasDev && hasDevOrg && !devOrg?.has_unsaved_changes,
@@ -140,12 +140,15 @@ const TaskStatusSteps = ({
       // Complete if we have commits (without rejected review)
       complete: hasValidCommits,
       assignee: devUser,
-      action: devOrgLoading || !hasPermissions ? undefined : 'retrieve-changes',
+      action:
+        devOrgLoading || !hasPermissions || !userIsDevOrgOwner
+          ? undefined
+          : 'retrieve-changes',
     },
     {
       label: taskIsSubmitting
-        ? i18n.t('Submitting changes for testing…')
-        : i18n.t('Submit changes for testing'),
+        ? t('Submitting changes for testing…')
+        : t('Submit changes for testing'),
       active: task.has_unmerged_commits && !task.pr_is_open,
       complete: task.pr_is_open,
       assignee: null,
@@ -153,7 +156,7 @@ const TaskStatusSteps = ({
         taskIsSubmitting || !hasPermissions ? undefined : 'submit-changes',
     },
     {
-      label: i18n.t('Assign a Tester'),
+      label: t('Assign a Tester'),
       active: readyForReview && !hasTester,
       complete: hasTester || task.review_valid,
       assignee: null,
@@ -161,8 +164,8 @@ const TaskStatusSteps = ({
     },
     {
       label: testOrgIsCreating
-        ? i18n.t('Creating a Test Org…')
-        : i18n.t('Create a Test Org'),
+        ? t('Creating a Test Org…')
+        : t('Create a Test Org'),
       active: readyForReview && hasTester && !hasTestOrg,
       complete: (hasTester && hasTestOrg) || task.review_valid,
       hidden: testOrgOutOfDate,
@@ -172,8 +175,8 @@ const TaskStatusSteps = ({
     },
     {
       label: testOrgIsRefreshing
-        ? i18n.t('Refreshing Test Org…')
-        : i18n.t('Refresh Test Org'),
+        ? t('Refreshing Test Org…')
+        : t('Refresh Test Org'),
       active: testOrgOutOfDate,
       complete: false,
       hidden: !testOrgOutOfDate,
@@ -182,7 +185,7 @@ const TaskStatusSteps = ({
         userIsTestOrgOwner && !testOrgLoading ? 'refresh-test-org' : undefined,
     },
     {
-      label: i18n.t('Test changes in Test Org'),
+      label: t('Test changes in Test Org'),
       active: readyForReview && hasTestOrg && !testOrg?.has_been_visited,
       complete:
         Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
@@ -194,8 +197,8 @@ const TaskStatusSteps = ({
     },
     {
       label: testOrgIsSubmittingReview
-        ? i18n.t('Submitting a review…')
-        : i18n.t('Submit a review'),
+        ? t('Submitting a review…')
+        : t('Submit a review'),
       // Active if Task PR is still open, a up-to-date Test Org exists,
       // and there isn't already a valid review.
       active:
@@ -211,7 +214,7 @@ const TaskStatusSteps = ({
           : undefined,
     },
     {
-      label: i18n.t('Merge pull request on GitHub'),
+      label: t('Merge pull request on GitHub'),
       active: readyForReview && hasReviewApproved,
       complete: false,
       assignee: null,
@@ -222,7 +225,7 @@ const TaskStatusSteps = ({
   return (
     <Steps
       steps={steps}
-      title={i18n.t('Next Steps for this Task')}
+      title={t('Next Steps for this Task')}
       handleAction={handleAction}
     />
   );

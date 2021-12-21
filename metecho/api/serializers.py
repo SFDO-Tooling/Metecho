@@ -13,16 +13,17 @@ from rest_framework.fields import JSONField
 from .email_utils import get_user_facing_url
 from .fields import MarkdownField
 from .models import (
-    SCRATCH_ORG_TYPES,
-    TASK_REVIEW_STATUS,
     Epic,
+    GitHubIssue,
     Project,
     ScratchOrg,
+    ScratchOrgType,
     SiteProfile,
     Task,
+    TaskReviewStatus,
 )
 from .sf_run_flow import is_org_good
-from .validators import CaseInsensitiveUniqueTogetherValidator
+from .validators import CaseInsensitiveUniqueTogetherValidator, UnattachedIssueValidator
 
 User = get_user_model()
 
@@ -86,6 +87,80 @@ class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
             queryset = queryset[:cutoff]
 
         return OrderedDict(((item.pk, self.display_value(item)) for item in queryset))
+
+
+class GitHubIssueSerializer(HashIdModelSerializer):
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(), pk_field=serializers.CharField()
+    )
+    epic = serializers.SerializerMethodField()
+    task = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GitHubIssue
+        read_only_fields = (
+            "id",
+            "number",
+            "title",
+            "created_at",
+            "html_url",
+            "project",
+            "epic",
+            "task",
+        )
+        fields = read_only_fields
+
+    @extend_schema_field(
+        {
+            "properties": {
+                "id": {"type": "string", "format": "HashID"},
+                "name": {"type": "string"},
+                "status": {"type": "string"},
+                "slug": {"type": "string"},
+            },
+            "nullable": True,
+        }
+    )
+    def get_epic(self, issue):
+        try:
+            return {
+                "id": str(issue.epic.id),
+                "name": issue.epic.name,
+                "status": issue.epic.status,
+                "slug": issue.epic.slug,
+            }
+        except Epic.DoesNotExist:
+            return None
+
+    @extend_schema_field(
+        {
+            "properties": {
+                "id": {"type": "string", "format": "HashID"},
+                "name": {"type": "string"},
+                "status": {"type": "string"},
+                "review_status": {"type": "string"},
+                "review_valid": {"type": "boolean"},
+                "pr_is_open": {"type": "boolean"},
+                "slug": {"type": "string"},
+                "epic_slug": {"type": "string", "nullable": True},
+            },
+            "nullable": True,
+        }
+    )
+    def get_task(self, issue):
+        try:
+            return {
+                "id": str(issue.task.id),
+                "name": issue.task.name,
+                "status": issue.task.status,
+                "review_status": issue.task.review_status,
+                "review_valid": issue.task.review_valid,
+                "pr_is_open": issue.task.pr_is_open,
+                "slug": issue.task.slug,
+                "epic_slug": issue.task.epic.slug if issue.task.epic else None,
+            }
+        except Task.DoesNotExist:
+            return None
 
 
 class RepoPermissionSerializer(serializers.Serializer):
@@ -175,6 +250,7 @@ class ProjectSerializer(HashIdModelSerializer):
             "repo_url",
             "repo_owner",
             "repo_name",
+            "has_truncated_issues",
             "has_push_permission",
             "description",
             "description_rendered",
@@ -188,11 +264,14 @@ class ProjectSerializer(HashIdModelSerializer):
             "currently_fetching_org_config_names",
             "currently_fetching_github_users",
             "latest_sha",
+            "currently_fetching_issues",
         )
         extra_kwargs = {
+            "has_truncated_issues": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
             "currently_fetching_github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
+            "currently_fetching_issues": {"read_only": True},
         }
 
     @extend_schema_field(OpenApiTypes.URI)
@@ -229,6 +308,12 @@ class EpicSerializer(HashIdModelSerializer):
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
+    issue = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubIssue.objects.all(),
+        pk_field=serializers.CharField(),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = Epic
@@ -253,6 +338,7 @@ class EpicSerializer(HashIdModelSerializer):
             "status",
             "github_users",
             "latest_sha",
+            "issue",
         )
         extra_kwargs = {
             "task_count": {"read_only": True},
@@ -275,6 +361,7 @@ class EpicSerializer(HashIdModelSerializer):
                     "name", _("An Epic with this name already exists.")
                 ),
             ),
+            UnattachedIssueValidator(),
         )
 
     def create(self, validated_data):
@@ -431,6 +518,12 @@ class TaskSerializer(HashIdModelSerializer):
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
+    issue = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubIssue.objects.all(),
+        pk_field=serializers.CharField(),
+        required=False,
+        allow_null=True,
+    )
 
     dev_org = serializers.PrimaryKeyRelatedField(
         queryset=ScratchOrg.objects.active(),
@@ -460,6 +553,7 @@ class TaskSerializer(HashIdModelSerializer):
             "origin_sha",
             "branch_diff_url",
             "pr_url",
+            "issue",
             "review_submitted_at",
             "review_valid",
             "review_status",
@@ -491,6 +585,7 @@ class TaskSerializer(HashIdModelSerializer):
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
         }
+        validators = (UnattachedIssueValidator(),)
 
     def get_root_project(self, obj) -> str:
         return str(obj.root_project.pk)
@@ -629,7 +724,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
         existing_assignee = getattr(instance, f"assigned_{type_}")
         assigned_user_has_changed = new_assignee != existing_assignee
         has_assigned_user = bool(new_assignee)
-        org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
+        org_type = {"dev": ScratchOrgType.DEV, "qa": ScratchOrgType.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
             if epic and new_assignee not in epic.github_users:
@@ -717,7 +812,7 @@ class CreatePrSerializer(serializers.Serializer):
 
 class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
-    status = serializers.ChoiceField(choices=TASK_REVIEW_STATUS)
+    status = serializers.ChoiceField(choices=TaskReviewStatus.choices)
     delete_org = serializers.BooleanField()
     org = serializers.PrimaryKeyRelatedField(
         queryset=ScratchOrg.objects.all(),
@@ -857,7 +952,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     def validate(self, data):
         if not self.instance:
             orgs = ScratchOrg.objects.active().filter(org_type=data["org_type"])
-            if data["org_type"] == SCRATCH_ORG_TYPES.Playground:
+            if data["org_type"] == ScratchOrgType.PLAYGROUND:
                 orgs = orgs.filter(
                     owner=data.get("owner", self.context["request"].user)
                 )

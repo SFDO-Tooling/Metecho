@@ -3,7 +3,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -56,10 +56,10 @@ const ContributeWorkModal = ({
     closeModal();
   }, [closeModal, hasDevOrg]);
 
-  const handleSubmit = useCallback(
-    () => doContribute(orgData, { useExistingTask, createEpicLessTask }),
-    [doContribute, orgData, useExistingTask, createEpicLessTask],
-  );
+  const handleSubmit = useCallback(() => {
+    doContribute(orgData, { useExistingTask, createEpicLessTask });
+    doClose();
+  }, [doContribute, orgData, useExistingTask, createEpicLessTask, doClose]);
 
   let contents = null;
   if (!hasPermissions) {
@@ -113,8 +113,8 @@ const ContributeWorkModal = ({
         )}
         <RadioGroup
           assistiveText={{
-            label: i18n.t('Select Task Type'),
-            required: i18n.t('Required'),
+            label: t('Select Task Type'),
+            required: t('Required'),
           }}
           className="slds-p-left_none"
           name="task-contribute-work"
@@ -125,7 +125,7 @@ const ContributeWorkModal = ({
           <Radio
             id="org-current-task"
             labels={{
-              label: i18n.t('Convert Scratch Org into Dev Org for this Task'),
+              label: t('Convert Scratch Org into Dev Org for this Task'),
             }}
             checked={useExistingTask}
             name="task-contribute-work"
@@ -134,7 +134,7 @@ const ContributeWorkModal = ({
           <Radio
             id="org-new-task"
             labels={{
-              label: i18n.t('Convert Scratch Org into Dev Org on a new Task'),
+              label: t('Convert Scratch Org into Dev Org on a new Task'),
             }}
             checked={!useExistingTask}
             name="task-contribute-work"
@@ -179,8 +179,8 @@ const ContributeWorkModal = ({
         </Trans>
         <RadioGroup
           assistiveText={{
-            label: i18n.t('Select Task Type'),
-            required: i18n.t('Required'),
+            label: t('Select Task Type'),
+            required: t('Required'),
           }}
           className="slds-p-left_none"
           name="project-contribute-work"
@@ -190,7 +190,7 @@ const ContributeWorkModal = ({
           <Radio
             id="org-epic-and-task"
             labels={{
-              label: i18n.t('Create a new Epic and Task'),
+              label: t('Create a new Epic and Task'),
             }}
             checked={!createEpicLessTask}
             name="project-contribute-work"
@@ -199,7 +199,7 @@ const ContributeWorkModal = ({
           <Radio
             id="org-epic-less-task"
             labels={{
-              label: i18n.t('Create a new Task with no Epic'),
+              label: t('Create a new Task with no Epic'),
             }}
             checked={createEpicLessTask}
             name="project-contribute-work"
@@ -214,13 +214,13 @@ const ContributeWorkModal = ({
     <Modal
       isOpen={isOpen}
       size="small"
-      heading={i18n.t('Contribute Work from Scratch Org')}
+      heading={t('Contribute Work from Scratch Org')}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
+        <Button key="cancel" label={t('Cancel')} onClick={doClose} />,
         hasPermissions ? (
           <Button
             key="submit"
-            label={i18n.t('Contribute')}
+            label={t('Contribute')}
             variant="brand"
             onClick={handleSubmit}
           />
@@ -228,6 +228,7 @@ const ContributeWorkModal = ({
       ]}
       prompt={hasPermissions ? undefined : 'warning'}
       onRequestClose={doClose}
+      assistiveText={{ closeButton: t('Cancel') }}
     >
       <div className="slds-grid slds-wrap slds-p-around_medium">
         <div

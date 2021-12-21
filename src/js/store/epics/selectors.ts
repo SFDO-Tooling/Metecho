@@ -1,24 +1,13 @@
-import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/js/store';
-import {
-  Epic,
-  EpicsByProjectState,
-  EpicsState,
-} from '@/js/store/epics/reducer';
-import { Project } from '@/js/store/projects/reducer';
+import { AppState, RouteProps } from '@/js/store';
 import { selectProject } from '@/js/store/projects/selectors';
 
-export const selectEpicState = (appState: AppState): EpicsState =>
-  appState.epics;
+export const selectEpicState = (appState: AppState) => appState.epics;
 
 export const selectEpicsByProject = createSelector(
   [selectEpicState, selectProject],
-  (
-    epics: EpicsState,
-    project?: Project | null,
-  ): EpicsByProjectState | undefined => {
+  (epics, project) => {
     /* istanbul ignore else */
     if (project) {
       return epics[project.id];
@@ -29,20 +18,17 @@ export const selectEpicsByProject = createSelector(
 
 export const selectEpicSlug = (
   appState: AppState,
-  { match: { params } }: RouteComponentProps<{ epicSlug?: string }>,
+  { match: { params } }: RouteProps,
 ) => params.epicSlug;
 
 export const selectEpicNotFound = createSelector(
   [selectEpicsByProject, selectEpicSlug],
-  (
-    epics: EpicsByProjectState | undefined,
-    epicSlug: string | undefined,
-  ): boolean => Boolean(epicSlug && epics?.notFound.includes(epicSlug)),
+  (epics, epicSlug) => Boolean(epicSlug && epics?.notFound?.includes(epicSlug)),
 );
 
 export const selectEpic = createSelector(
   [selectEpicsByProject, selectEpicSlug, selectEpicNotFound],
-  (epics, epicSlug, notFound): Epic | null | undefined => {
+  (epics, epicSlug, notFound) => {
     if (!epicSlug || !epics) {
       return undefined;
     }
@@ -56,10 +42,7 @@ export const selectEpic = createSelector(
   },
 );
 
-export const selectEpicById = (
-  appState: AppState,
-  id?: string | null,
-): Epic | undefined => {
+export const selectEpicById = (appState: AppState, id?: string | null) => {
   if (!id) {
     return undefined;
   }

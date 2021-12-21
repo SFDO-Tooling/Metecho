@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { ThunkResult } from '@/js/store';
 import { Epic } from '@/js/store/epics/reducer';
@@ -43,11 +43,11 @@ export const createEpicPR =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Successfully submitted Epic for review on GitHub: “{{epic_name}}.”',
             { epic_name: model.name },
           ),
-          linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
+          linkText: model.pr_url ? t('View pull request.') : undefined,
           linkUrl: model.pr_url ? model.pr_url : undefined,
           openLinkInNewWindow: true,
         }),
@@ -75,7 +75,7 @@ export const createEpicPRFailed =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Uh oh. There was an error submitting Epic for review on GitHub: “{{epic_name}}.”',
             { epic_name: model.name },
           ),

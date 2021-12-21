@@ -8,11 +8,11 @@ from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
 from ..models import (
-    EPIC_STATUSES,
-    SCRATCH_ORG_TYPES,
-    TASK_STATUSES,
     Epic,
+    EpicStatus,
+    ScratchOrgType,
     Task,
+    TaskStatus,
     user_logged_in_handler,
 )
 
@@ -161,12 +161,12 @@ class TestEpic:
         assert not epic.should_update_status()
 
     def test_should_update_status__already_merged(self, epic_factory):
-        epic = epic_factory(status=EPIC_STATUSES.Merged, pr_is_merged=True)
+        epic = epic_factory(status=EpicStatus.MERGED, pr_is_merged=True)
         assert not epic.should_update_status()
 
     def test_should_update_status__already_review(self, epic_factory, task_factory):
-        epic = epic_factory(status=EPIC_STATUSES.Review)
-        task_factory(epic=epic, status=TASK_STATUSES.Completed)
+        epic = epic_factory(status=EpicStatus.REVIEW)
+        task_factory(epic=epic, status=TaskStatus.COMPLETED)
         assert not epic.should_update_status()
 
     def test_queue_create_pr(self, epic_factory, user_factory):
@@ -253,7 +253,7 @@ class TestTask:
             task.refresh_from_db()
             assert async_to_sync.called
             assert task.pr_number == 123
-            assert task.status == TASK_STATUSES.Completed
+            assert task.status == TaskStatus.COMPLETED
 
     def test_finalize_task_update(self, task_factory):
         with ExitStack() as stack:
@@ -336,7 +336,7 @@ class TestTask:
             )
 
             task = task_factory(commits=[{"id": "123"}])
-            scratch_org = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+            scratch_org = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
             scratch_org.queue_delete = MagicMock()
             task.finalize_submit_review(
                 now,
@@ -937,11 +937,16 @@ class TestScratchOrg:
         assert scratch_org.config == {"anything else": "good"}
 
 
-@pytest.mark.django_db
 class TestGitHubRepository:
     def test_str(self, git_hub_repository_factory):
-        gh_repo = git_hub_repository_factory()
+        gh_repo = git_hub_repository_factory.build()
         assert str(gh_repo) == "https://github.com/test/repo.git"
+
+
+class TestGitHubIssue:
+    def test_str(self, git_hub_issue_factory):
+        gh_issue = git_hub_issue_factory.build(title="Hello world")
+        assert str(gh_issue) == "Hello world"
 
 
 @pytest.mark.django_db

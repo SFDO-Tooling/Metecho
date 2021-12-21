@@ -1,5 +1,5 @@
 import Card from '@salesforce/design-system-react/components/card';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -54,18 +54,18 @@ const PlaygroundOrgCard = ({
   let orgOutOfDate = false;
 
   if (task) {
-    heading = i18n.t('Task Scratch Org');
+    heading = t('Task Scratch Org');
     const taskCommits = getTaskCommits(task);
     missingCommits = taskCommits.indexOf(org.latest_commit);
     // We consider an org out-of-date if it is not based on the first commit.
     orgOutOfDate = missingCommits !== 0;
     baseCommit = taskCommits[0];
   } else if (epic) {
-    heading = i18n.t('Epic Scratch Org');
+    heading = t('Epic Scratch Org');
     baseCommit = epic.latest_sha;
     orgOutOfDate = Boolean(baseCommit && org.latest_commit !== baseCommit);
   } else {
-    heading = i18n.t('Project Scratch Org');
+    heading = t('Project Scratch Org');
     baseCommit = (project as Project).latest_sha;
     orgOutOfDate = Boolean(baseCommit && org.latest_commit !== baseCommit);
   }
@@ -142,6 +142,7 @@ const PlaygroundOrgCard = ({
     <>
       <Card
         bodyClassName="slds-card__body_inner"
+        className="wrap-inner-truncate narrow-buttons playground-org-card"
         heading={heading}
         icon={
           org &&

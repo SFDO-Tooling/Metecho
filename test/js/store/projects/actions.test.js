@@ -66,7 +66,7 @@ describe('refreshProjects', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
       }
@@ -111,12 +111,12 @@ describe('projectsRefreshError', () => {
     } finally {
       const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].type).toBe('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
         'Uh oh. There was an error re-syncing Projects.',
       );
-      expect(allActions[0].payload.details).toEqual('error msg');
-      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[0].payload.details).toBe('error msg');
+      expect(allActions[0].payload.variant).toBe('error');
       expect(allActions[1]).toEqual(event);
     }
   });
@@ -176,7 +176,7 @@ describe('refreshGitHubUsers', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
       }
@@ -212,12 +212,12 @@ describe('projectError', () => {
     );
     const allActions = store.getActions();
 
-    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “My Project.”',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
-    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);
   });
 
@@ -298,8 +298,70 @@ describe('refreshOrgConfigs', () => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
+        expect(allActions[2]).toEqual(failed);
+      }
+    });
+  });
+});
+
+describe('refreshIssues', () => {
+  let url;
+  const projectId = 'project-id';
+
+  beforeAll(() => {
+    url = window.api_urls.project_refresh_github_issues(projectId);
+  });
+
+  test('dispatches RefreshGithubIssues action', () => {
+    const store = storeWithThunk({});
+    fetchMock.postOnce(url, {
+      status: 202,
+    });
+    const RefreshGithubIssuesRequested = {
+      type: 'REFRESH_GH_ISSUES_REQUESTED',
+      payload: projectId,
+    };
+    const RefreshGithubIssuesAccepted = {
+      type: 'REFRESH_GH_ISSUES_ACCEPTED',
+      payload: projectId,
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.refreshGitHubIssues(projectId)).then(() => {
+      expect(store.getActions()).toEqual([
+        RefreshGithubIssuesRequested,
+        RefreshGithubIssuesAccepted,
+      ]);
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches REFRESH_GH_ISSUES_REJECTED action', async () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, {
+        status: 500,
+      });
+      const started = {
+        type: 'REFRESH_GH_ISSUES_REQUESTED',
+        payload: projectId,
+      };
+      const failed = {
+        type: 'REFRESH_GH_ISSUES_REJECTED',
+        payload: projectId,
+      };
+
+      expect.assertions(3);
+      try {
+        await store.dispatch(actions.refreshGitHubIssues(projectId));
+      } catch (error) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toBe('ERROR_ADDED');
         expect(allActions[2]).toEqual(failed);
       }
     });

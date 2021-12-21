@@ -286,6 +286,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/Epic'
           description: ''
+  /api/issues/:
+    get:
+      operationId: issues_list
+      description: GitHub Issues
+      parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+      - in: query
+        name: is_attached
+        schema:
+          type: boolean
+        description: Filter/exclude issues attached to Epics or Tasks
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: project
+        schema:
+          type: string
+          format: HashID
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search in issue titles and numbers
+      tags:
+      - issues
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGitHubIssueList'
+          description: ''
+  /api/issues/{id}/:
+    get:
+      operationId: issues_retrieve
+      description: GitHub Issues
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this GitHub issue.
+        required: true
+      tags:
+      - issues
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitHubIssue'
+          description: ''
   /api/projects/:
     get:
       operationId: projects_list
@@ -363,6 +429,26 @@ paths:
                 items:
                   type: string
           description: ''
+  /api/projects/{id}/refresh_github_issues/:
+    post:
+      operationId: projects_refresh_github_issues_create
+      description: Queue a job to refresh the list of GitHub Issues for a Project
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this project.
+        required: true
+      tags:
+      - projects
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
   /api/projects/{id}/refresh_github_users/:
     post:
       operationId: projects_refresh_github_users_create
@@ -1281,6 +1367,10 @@ components:
         latest_sha:
           type: string
           readOnly: true
+        issue:
+          type: string
+          format: HashID
+          nullable: true
       required:
       - branch_diff_url
       - branch_url
@@ -1397,6 +1487,73 @@ components:
       - username
       - uses_global_devhub
       - valid_token_for
+    GitHubIssue:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        number:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        html_url:
+          type: string
+          format: uri
+          readOnly: true
+        project:
+          type: string
+          format: HashID
+        epic:
+          properties:
+            id:
+              type: string
+              format: HashID
+            name:
+              type: string
+            status:
+              type: string
+            slug:
+              type: string
+          nullable: true
+          readOnly: true
+        task:
+          properties:
+            id:
+              type: string
+              format: HashID
+            name:
+              type: string
+            status:
+              type: string
+            review_status:
+              type: string
+            review_valid:
+              type: boolean
+            pr_is_open:
+              type: boolean
+            slug:
+              type: string
+            epic_slug:
+              type: string
+              nullable: true
+          nullable: true
+          readOnly: true
+      required:
+      - created_at
+      - epic
+      - html_url
+      - id
+      - number
+      - project
+      - task
+      - title
     GitHubUser:
       type: object
       properties:
@@ -1480,6 +1637,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Epic'
+    PaginatedGitHubIssueList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GitHubIssue'
     PaginatedMinimalUserList:
       type: object
       properties:
@@ -1590,6 +1767,10 @@ components:
         latest_sha:
           type: string
           readOnly: true
+        issue:
+          type: string
+          format: HashID
+          nullable: true
     PatchedScratchOrg:
       type: object
       properties:
@@ -1623,10 +1804,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         expires_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         latest_commit:
           type: string
           readOnly: true
@@ -1638,10 +1821,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         last_checked_unsaved_changes_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         url:
           type: string
           format: uri
@@ -1689,12 +1874,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         owner_gh_username:
           type: string
           readOnly: true
         owner_gh_id:
           type: string
           readOnly: true
+          nullable: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -1768,10 +1955,15 @@ components:
           type: string
           format: uri
           readOnly: true
+        issue:
+          type: string
+          format: HashID
+          nullable: true
         review_submitted_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         review_valid:
           type: boolean
           readOnly: true
@@ -1796,6 +1988,7 @@ components:
         assigned_qa:
           type: string
           readOnly: true
+          nullable: true
         dev_org:
           type: string
           format: HashID
@@ -1821,6 +2014,9 @@ components:
           type: string
         repo_name:
           type: string
+        has_truncated_issues:
+          type: boolean
+          readOnly: true
         has_push_permission:
           type: boolean
           readOnly: true
@@ -1862,11 +2058,16 @@ components:
         latest_sha:
           type: string
           readOnly: true
+        currently_fetching_issues:
+          type: boolean
+          readOnly: true
       required:
       - currently_fetching_github_users
+      - currently_fetching_issues
       - currently_fetching_org_config_names
       - description_rendered
       - has_push_permission
+      - has_truncated_issues
       - id
       - latest_sha
       - name
@@ -1947,10 +2148,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         expires_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         latest_commit:
           type: string
           readOnly: true
@@ -1962,10 +2165,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         last_checked_unsaved_changes_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         url:
           type: string
           format: uri
@@ -2013,12 +2218,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         owner_gh_username:
           type: string
           readOnly: true
         owner_gh_id:
           type: string
           readOnly: true
+          nullable: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -2121,10 +2328,15 @@ components:
           type: string
           format: uri
           readOnly: true
+        issue:
+          type: string
+          format: HashID
+          nullable: true
         review_submitted_at:
           type: string
           format: date-time
           readOnly: true
+          nullable: true
         review_valid:
           type: boolean
           readOnly: true
@@ -2149,6 +2361,7 @@ components:
         assigned_qa:
           type: string
           readOnly: true
+          nullable: true
         dev_org:
           type: string
           format: HashID

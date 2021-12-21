@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { ThunkResult } from '@/js/store';
 import { fetchObjects, FetchObjectsSucceeded } from '@/js/store/actions';
@@ -46,6 +46,18 @@ interface RefreshGitHubUsersRejected {
   type: 'REFRESH_GH_USERS_REJECTED';
   payload: string;
 }
+interface RefreshGitHubIssuesRequested {
+  type: 'REFRESH_GH_ISSUES_REQUESTED';
+  payload: string;
+}
+interface RefreshGitHubIssuesAccepted {
+  type: 'REFRESH_GH_ISSUES_ACCEPTED';
+  payload: string;
+}
+interface RefreshGitHubIssuesRejected {
+  type: 'REFRESH_GH_ISSUES_REJECTED';
+  payload: string;
+}
 interface RefreshOrgConfigsAction {
   type:
     | 'REFRESH_ORG_CONFIGS_REQUESTED'
@@ -66,6 +78,9 @@ export type ProjectsAction =
   | RefreshGitHubUsersRequested
   | RefreshGitHubUsersAccepted
   | RefreshGitHubUsersRejected
+  | RefreshGitHubIssuesRequested
+  | RefreshGitHubIssuesAccepted
+  | RefreshGitHubIssuesRejected
   | RefreshOrgConfigsAction;
 
 export const refreshProjects =
@@ -108,7 +123,7 @@ export const projectsRefreshError =
   (dispatch) => {
     dispatch(
       addToast({
-        heading: i18n.t('Uh oh. There was an error re-syncing Projects.'),
+        heading: t('Uh oh. There was an error re-syncing Projects.'),
         details: message,
         variant: 'error',
       }),
@@ -157,7 +172,7 @@ export const projectError =
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
-          heading: i18n.t(
+          heading: t(
             'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “{{project_name}}.”',
             { project_name: model.name },
           ),
@@ -188,6 +203,28 @@ export const refreshOrgConfigs =
       });
     } catch (err) {
       dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
+      throw err;
+    }
+  };
+
+export const refreshGitHubIssues =
+  (projectId: string): ThunkResult<Promise<RefreshGitHubIssuesAccepted>> =>
+  async (dispatch) => {
+    dispatch({ type: 'REFRESH_GH_ISSUES_REQUESTED', payload: projectId });
+    try {
+      await apiFetch({
+        url: window.api_urls.project_refresh_github_issues(projectId),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESH_GH_ISSUES_ACCEPTED' as const,
+        payload: projectId,
+      });
+    } catch (err) {
+      dispatch({ type: 'REFRESH_GH_ISSUES_REJECTED', payload: projectId });
       throw err;
     }
   };

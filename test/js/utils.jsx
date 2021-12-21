@@ -1,6 +1,6 @@
 import { render as renderReact } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import i18n from 'i18next';
+import i18n, { use } from 'i18next';
 import React from 'react';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { Provider } from 'react-redux';
@@ -10,7 +10,8 @@ import thunk from 'redux-thunk';
 const mockStore = configureStore([]);
 
 export const initI18n = () => {
-  i18n.use(initReactI18next).init({
+  use(initReactI18next).init({
+    compatibilityJSON: 'v3',
     fallbackLng: 'en',
     keySeparator: false,
     nsSeparator: false,

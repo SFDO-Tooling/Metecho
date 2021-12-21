@@ -12,7 +12,7 @@ from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
 
-from ..models import SCRATCH_ORG_TYPES
+from ..models import ScratchOrgType
 
 Branch = namedtuple("Branch", ["name"])
 
@@ -87,6 +87,101 @@ class TestCurrentUserViewSet:
 
 
 @pytest.mark.django_db
+class TestGitHubIssueViewset:
+    @pytest.mark.parametrize(
+        "method, check",
+        (
+            ("get", status.is_success),
+            ("post", status.is_client_error),
+            ("put", status.is_client_error),
+            ("patch", status.is_client_error),
+            ("delete", status.is_client_error),
+        ),
+    )
+    def test_list_access(self, client, method, check):
+        response = getattr(client, method)(reverse("issue-list"))
+        assert check(response.status_code)
+
+    @pytest.mark.parametrize(
+        "method, check",
+        (
+            ("get", status.is_success),
+            ("post", status.is_client_error),
+            ("put", status.is_client_error),
+            ("patch", status.is_client_error),
+            ("delete", status.is_client_error),
+        ),
+    )
+    def test_detail_access(self, client, git_hub_issue_factory, method, check):
+        issue = git_hub_issue_factory()
+        response = getattr(client, method)(
+            reverse("issue-detail", args=[str(issue.id)])
+        )
+        assert check(response.status_code)
+
+    def test_response(self, client, git_hub_issue_factory):
+        issue = git_hub_issue_factory()
+        response = client.get(reverse("issue-detail", args=[str(issue.id)]))
+        assert tuple(response.json().keys()) == (
+            "id",
+            "number",
+            "title",
+            "created_at",
+            "html_url",
+            "project",
+            "epic",
+            "task",
+        )
+
+    def test_filters__project(self, client, git_hub_issue_factory):
+        project1 = str(git_hub_issue_factory().project_id)
+        project2 = str(git_hub_issue_factory().project_id)
+
+        response = client.get(reverse("issue-list"), data={"project": project1})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["project"] == project1, results
+
+        response = client.get(reverse("issue-list"), data={"project": project2})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["project"] == project2, results
+
+    def test_filters__search(self, client, git_hub_issue_factory):
+        python = str(git_hub_issue_factory(title="Python", number=1).id)
+        js = str(git_hub_issue_factory(title="JavaScript", number=42).id)
+
+        response = client.get(reverse("issue-list"), data={"search": "py"})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == python, results
+
+        response = client.get(reverse("issue-list"), data={"search": "42"})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == js, results
+
+    def test_filters__is_attached(
+        self, client, git_hub_issue_factory, task_factory, epic_factory
+    ):
+        task = task_factory()
+        with_task = str(task.issue_id)
+        with_epic = str(task.epic.issue_id)
+        unattached = str(git_hub_issue_factory().id)
+
+        response = client.get(reverse("issue-list"), data={"is_attached": "true"})
+        results = response.json()["results"]
+        assert len(results) == 2
+        assert results[0]["id"] == with_task, results
+        assert results[1]["id"] == with_epic, results
+
+        response = client.get(reverse("issue-list"), data={"is_attached": "false"})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == unattached, results
+
+
+@pytest.mark.django_db
 class TestProjectViewset:
     def test_refresh_org_config_names(
         self, client, project_factory, git_hub_repository_factory
@@ -123,6 +218,23 @@ class TestProjectViewset:
         assert response.status_code == 202
         assert project.currently_fetching_github_users
         assert refresh_github_users_job.delay.called
+
+    def test_refresh_github_issues(
+        self, mocker, client, project_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(user=client.user, repo_id=123)
+        project = project_factory(repo_id=123)
+        populate_github_issues_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_issues_job"
+        )
+        response = client.post(
+            reverse("project-refresh-github-issues", args=[str(project.pk)])
+        )
+
+        project.refresh_from_db()
+        assert response.status_code == 202
+        assert populate_github_issues_job.delay.called
+        assert project.currently_fetching_issues
 
     def test_feature_branches(
         self, client, project_factory, git_hub_repository_factory
@@ -166,6 +278,7 @@ class TestProjectViewset:
                     "id": str(project.id),
                     "name": str(project.name),
                     "description": "",
+                    "has_truncated_issues": False,
                     "description_rendered": "",
                     "is_managed": False,
                     "slug": str(project.slug),
@@ -183,6 +296,7 @@ class TestProjectViewset:
                     "currently_fetching_org_config_names": False,
                     "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
+                    "currently_fetching_issues": False,
                 }
             ],
         }, response.json()
@@ -211,6 +325,7 @@ class TestProjectViewset:
                     "name": str(project.name),
                     "description": "",
                     "description_rendered": "",
+                    "has_truncated_issues": False,
                     "is_managed": False,
                     "slug": str(project.slug),
                     "old_slugs": [],
@@ -227,6 +342,7 @@ class TestProjectViewset:
                     "currently_fetching_org_config_names": False,
                     "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
+                    "currently_fetching_issues": False,
                 }
             ],
         }, response.json()
@@ -247,14 +363,28 @@ class TestProjectViewset:
 
 @pytest.mark.django_db
 class TestHookView:
+    @pytest.mark.parametrize(
+        "_task_factory, task_data",
+        (
+            pytest.param(
+                fixture("task_with_project_factory"),
+                {"project__repo_id": 123},
+                id="With Project",
+            ),
+            pytest.param(
+                fixture("task_factory"),
+                {"epic__project__repo_id": 123},
+                id="With Epic",
+            ),
+        ),
+    )
     def test_202__push_task_commits(
         self,
         settings,
         client,
-        project_factory,
         git_hub_repository_factory,
-        epic_factory,
-        task_factory,
+        _task_factory,
+        task_data,
     ):
         settings.GITHUB_HOOK_SECRET = b""
         with ExitStack() as stack:
@@ -274,10 +404,8 @@ class TestHookView:
             )
             gh.normalize_commit.return_value = "1234abcd"
 
-            project = project_factory(repo_id=123)
             git_hub_repository_factory(repo_id=123)
-            epic = epic_factory(project=project, branch_name="test-epic")
-            task = task_factory(epic=epic, branch_name="test-task")
+            task = _task_factory(**task_data, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
                 patch("metecho.api.jobs.refresh_commits_job")
@@ -619,7 +747,7 @@ class TestScratchOrgViewSet:
     ):
         other_user = user_factory()
         scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground,
+            org_type=ScratchOrgType.PLAYGROUND,
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
@@ -639,7 +767,7 @@ class TestScratchOrgViewSet:
     ):
         other_user = user_factory()
         scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Playground,
+            org_type=ScratchOrgType.PLAYGROUND,
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
@@ -656,7 +784,7 @@ class TestScratchOrgViewSet:
     def test_list_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
             scratch_org_factory(
-                org_type=SCRATCH_ORG_TYPES.Dev,
+                org_type=ScratchOrgType.DEV,
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
@@ -677,7 +805,7 @@ class TestScratchOrgViewSet:
     def test_retrieve_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
             scratch_org = scratch_org_factory(
-                org_type=SCRATCH_ORG_TYPES.Dev,
+                org_type=ScratchOrgType.DEV,
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
@@ -1042,7 +1170,7 @@ class TestTaskViewSet:
         Write operations on the task detail endpoint should depend on repo push
         permissions
         """
-        task = _task_factory()
+        task = _task_factory(issue=None)
         git_hub_repository_factory(
             repo_id=task.root_project.repo_id, user=client.user, permissions=repo_perms
         )
@@ -1107,7 +1235,7 @@ class TestEpicViewSet:
         check,
         method,
     ):
-        epic = epic_factory()
+        epic = epic_factory(issue=None)
         git_hub_repository_factory(
             repo_id=epic.project.repo_id, user=client.user, permissions=repo_perms
         )
@@ -1119,7 +1247,7 @@ class TestEpicViewSet:
 
         response = getattr(client, method)(url, data=data, format="json")
 
-        assert check(response.status_code)
+        assert check(response.status_code), response.content
 
     def test_collaborators(self, client, git_hub_repository_factory, epic_factory):
         repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)

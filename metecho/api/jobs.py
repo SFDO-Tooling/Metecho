@@ -10,6 +10,7 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.db import transaction
+from django.db.models.query_utils import Q
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
@@ -30,7 +31,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import TASK_REVIEW_STATUS
+from .models import TaskReviewStatus
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -666,7 +667,10 @@ def refresh_commits(*, project, branch_name, originating_user_id):
         epic.latest_sha = commits[0].sha if commits else ""
         epic.finalize_epic_update(originating_user_id=originating_user_id)
 
-    tasks = Task.objects.filter(epic__project=project, branch_name=branch_name)
+    tasks = Task.objects.filter(
+        Q(project=project, branch_name=branch_name)
+        | Q(epic__project=project, branch_name=branch_name)
+    )
     for task in tasks:
         origin_sha_index = [commit.sha for commit in commits].index(task.origin_sha)
         task.commits = [
@@ -728,6 +732,54 @@ def refresh_github_users(project, *, originating_user_id):
 refresh_github_users_job = job(refresh_github_users)
 
 
+def refresh_github_issues(project, *, originating_user_id):
+    try:
+        project.refresh_from_db()
+        repo = get_repo_info(
+            None, repo_owner=project.repo_owner, repo_name=project.repo_name
+        )
+
+        # Unfortunately the GitHub API includes pull requests when querying for issues,
+        # and we can't filter them out in the request. Instead we manually filter out
+        # pull requests until we have enough issues.
+        project.has_truncated_issues = True
+        issues = repo.issues()
+        count = 0
+        while count < settings.GITHUB_ISSUE_LIMIT:
+            try:
+                issue = next(issues)
+            except StopIteration:
+                project.has_truncated_issues = False
+                break
+            if issue.pull_request_urls is not None:
+                continue  # Issue is actually a pull request, skip
+            project.issues.update_or_create(
+                github_id=issue.id,
+                defaults={
+                    "title": issue.title,
+                    "number": issue.number,
+                    "state": issue.state,
+                    "html_url": issue.html_url,
+                    "created_at": issue.created_at,
+                    "updated_at": issue.updated_at,
+                },
+            )
+            count += 1
+
+    except Exception as e:
+        project.finalize_refresh_github_issues(
+            error=e, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_refresh_github_issues(originating_user_id=originating_user_id)
+
+
+refresh_github_issues_job = job(refresh_github_issues)
+
+
 def submit_review(*, user, task, data, originating_user_id):
     try:
         review_sha = ""
@@ -762,8 +814,8 @@ def submit_review(*, user, task, data, originating_user_id):
         state_for_status = {
             # "": "pending",
             # "": "error",
-            TASK_REVIEW_STATUS.Approved: "success",
-            TASK_REVIEW_STATUS["Changes requested"]: "failure",
+            TaskReviewStatus.APPROVED: "success",
+            TaskReviewStatus.CHANGES_REQUESTED: "failure",
         }.get(status)
 
         target_url = get_user_facing_url(path=task.get_absolute_url())

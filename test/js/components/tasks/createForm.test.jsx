@@ -156,7 +156,7 @@ describe('<TaskForm/>', () => {
             shouldSubscribeToObject: true,
           }),
         );
-        expect(context.action).toEqual('PUSH');
+        expect(context.action).toBe('PUSH');
         expect(context.url).toEqual(url);
       });
     });
@@ -273,7 +273,7 @@ describe('<TaskForm/>', () => {
             shouldSubscribeToObject: true,
           }),
         );
-        expect(context.action).toEqual('PUSH');
+        expect(context.action).toBe('PUSH');
         expect(context.url).toEqual(url);
       });
     });

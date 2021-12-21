@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
@@ -52,7 +52,7 @@ const OrgActions = ({
   if (isCreating) {
     return (
       <Button
-        label={<LabelWithSpinner label={i18n.t('Creating Org…')} />}
+        label={<LabelWithSpinner label={t('Creating Org…')} />}
         disabled
       />
     );
@@ -61,7 +61,7 @@ const OrgActions = ({
   if (isRefreshingOrg) {
     return (
       <Button
-        label={<LabelWithSpinner label={i18n.t('Refreshing Org…')} />}
+        label={<LabelWithSpinner label={t('Refreshing Org…')} />}
         disabled
       />
     );
@@ -70,7 +70,7 @@ const OrgActions = ({
   if (isSubmittingReview) {
     return (
       <Button
-        label={<LabelWithSpinner label={i18n.t('Submitting Review…')} />}
+        label={<LabelWithSpinner label={t('Submitting Review…')} />}
         disabled
       />
     );
@@ -86,18 +86,18 @@ const OrgActions = ({
     if (task?.review_valid) {
       submitReviewBtn = (
         <Button
-          label={i18n.t('Update Review')}
+          label={t('Update Review')}
           variant="outline-brand"
-          className="slds-m-right_x-small"
+          className="slds-m-right_x-small slds-m-left_none"
           onClick={openSubmitReviewModal}
         />
       );
     } else if (org?.has_been_visited) {
       submitReviewBtn = (
         <Button
-          label={i18n.t('Submit Review')}
+          label={t('Submit Review')}
           variant="outline-brand"
-          className="slds-m-right_x-small"
+          className="slds-m-right_x-small slds-m-left_none"
           onClick={openSubmitReviewModal}
         />
       );
@@ -116,9 +116,11 @@ const OrgActions = ({
   ) {
     contributeBtn = (
       <Button
-        label={i18n.t('Contribute Work')}
+        label={t('Contribute Work')}
         variant="outline-brand"
-        className="slds-m-right_x-small tour-scratch-org-contribute"
+        className="slds-m-right_x-small
+          slds-m-left_none
+          tour-scratch-org-contribute"
         onClick={openContributeModal}
       />
     );
@@ -129,9 +131,9 @@ const OrgActions = ({
       <>
         {orgOutOfDate && doRefreshOrg ? (
           <Button
-            label={i18n.t('Refresh Org')}
+            label={t('Refresh Org')}
             variant="brand"
-            className="slds-m-horizontal_x-small"
+            className="slds-m-right_x-small slds-m-left_none"
             onClick={doRefreshOrg}
           />
         ) : null}
@@ -139,15 +141,16 @@ const OrgActions = ({
         {contributeBtn}
         <Dropdown
           align="right"
-          assistiveText={{ icon: i18n.t('Org Actions') }}
+          assistiveText={{ icon: t('Org Actions') }}
           buttonClassName="slds-button_icon-x-small"
           buttonVariant="icon"
           iconCategory="utility"
           iconName="down"
           iconSize="small"
           iconVariant="border-filled"
+          triggerClassName="metecho-card-more"
           width="xx-small"
-          options={[{ id: 0, label: i18n.t('Delete Org') }]}
+          options={[{ id: 0, label: t('Delete Org') }]}
           onSelect={doDeleteOrg}
         />
       </>
@@ -172,7 +175,7 @@ const OrgActions = ({
           <TourPopover
             id="tour-task-create-dev-org"
             align="top"
-            heading={i18n.t('Create a Dev Org')}
+            heading={t('Create a Dev Org')}
             body={
               <Trans i18nKey="tourTaskCreateDevOrg">
                 A Dev Org is a temporary Salesforce Org where you can make
@@ -192,7 +195,7 @@ const OrgActions = ({
           <TourPopover
             id="tour-task-create-test-org"
             align="top"
-            heading={i18n.t('Create a Test Org')}
+            heading={t('Create a Test Org')}
             body={
               <Trans i18nKey="tourTaskCreateTestOrg">
                 A Test Org is a temporary Salesforce Org where you can view the
@@ -215,7 +218,7 @@ const OrgActions = ({
             <TourPopover
               id="tour-task-submit-review"
               align="top"
-              heading={i18n.t('Submit a review')}
+              heading={t('Submit a review')}
               body={
                 <Trans i18nKey="tourTaskSubmitReview">
                   When you’re finished viewing and testing all the changes, come
@@ -230,7 +233,7 @@ const OrgActions = ({
         {!(preventNewTestOrg || disableCreation) && (
           <span className="slds-is-relative inline-container">
             <Button
-              label={i18n.t('Create Org')}
+              label={t('Create Org')}
               variant={isActive ? 'brand' : 'neutral'}
               onClick={doCreateOrg}
             />

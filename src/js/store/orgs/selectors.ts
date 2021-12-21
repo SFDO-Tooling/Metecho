@@ -2,16 +2,15 @@ import { createSelector } from 'reselect';
 
 import { AppState } from '@/js/store';
 import { selectEpic } from '@/js/store/epics/selectors';
-import { Org, OrgState } from '@/js/store/orgs/reducer';
 import { selectProject } from '@/js/store/projects/selectors';
 import { selectTask } from '@/js/store/tasks/selectors';
 import { ORG_TYPES } from '@/js/utils/constants';
 
-export const selectOrgState = (appState: AppState): OrgState => appState.orgs;
+export const selectOrgState = (appState: AppState) => appState.orgs;
 
 export const selectOrgsByTask = createSelector(
   [selectOrgState, selectTask],
-  (orgs, task): Org[] | undefined => {
+  (orgs, task) => {
     /* istanbul ignore else */
     if (task && orgs.fetched.tasks.includes(task.id)) {
       return Object.values(orgs.orgs).filter((org) => org?.task === task.id);
@@ -22,7 +21,7 @@ export const selectOrgsByTask = createSelector(
 
 export const selectPlaygroundOrgsByEpic = createSelector(
   [selectOrgState, selectEpic],
-  (orgs, epic): Org[] | undefined => {
+  (orgs, epic) => {
     /* istanbul ignore else */
     if (epic && orgs.fetched.epics.includes(epic.id)) {
       return Object.values(orgs.orgs).filter(
@@ -36,7 +35,7 @@ export const selectPlaygroundOrgsByEpic = createSelector(
 
 export const selectPlaygroundOrgsByProject = createSelector(
   [selectOrgState, selectProject],
-  (orgs, project): Org[] | undefined => {
+  (orgs, project) => {
     /* istanbul ignore else */
     if (project && orgs.fetched.projects.includes(project.id)) {
       return Object.values(orgs.orgs).filter(

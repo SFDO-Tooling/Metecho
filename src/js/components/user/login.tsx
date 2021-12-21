@@ -1,7 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { Location } from 'history';
-import i18n from 'i18next';
+import { t } from 'i18next';
+import cookies from 'js-cookie';
 import React, { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -11,7 +12,6 @@ import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 import welcomeMatBG from '@/img/welcome-mat-bg.png';
 import welcomeMatFG from '@/img/welcome-mat-fg.png';
 import { selectUserState } from '@/js/store/user/selectors';
-import { addUrlParams } from '@/js/utils/api';
 import routes from '@/js/utils/routes';
 
 interface Props
@@ -27,29 +27,32 @@ interface Props
 
 export const LoginButton = withRouter(
   ({ id = 'login', label, from = {}, location }: Props) => {
-    const handleClick = () => {
-      /* istanbul ignore else */
-      if (window.api_urls.github_login) {
-        let { pathname } = location.state?.from || from;
-        if (!pathname) {
-          pathname = window.location.pathname;
-        }
-        window.location.assign(
-          addUrlParams(window.api_urls.github_login(), {
-            next: pathname,
-          }),
-        );
-      }
-    };
+    const action = window.api_urls.github_login?.();
+    let { pathname } = location.state?.from || from;
+    pathname = pathname || window.location.pathname;
 
     return (
-      <Button
-        id={id}
-        label={label === undefined ? i18n.t('Log In With GitHub') : label}
-        variant="brand"
-        disabled={!window.api_urls.github_login}
-        onClick={handleClick}
-      />
+      /* POSTing instead of redirecting to the login endpoint is more secure */
+      <form action={action} method="POST">
+        <input
+          type="hidden"
+          name="csrfmiddlewaretoken"
+          value={cookies.get('csrftoken')}
+        />
+        <input
+          type="hidden"
+          name="next"
+          value={pathname}
+          data-testid="gh-login-next"
+        />
+        <Button
+          id={id}
+          type="submit"
+          label={label === undefined ? t('Log In With GitHub') : label}
+          variant="brand"
+          disabled={!action}
+        />
+      </form>
     );
   },
 );
@@ -74,7 +77,7 @@ const Login = () => {
         >
           <div className="slds-welcome-mat__info-content">
             <h1 className="slds-welcome-mat__info-title">
-              {i18n.t('Welcome to Metecho!')}
+              {t('Welcome to Metecho!')}
             </h1>
             <div
               className="slds-welcome-mat__info-description
@@ -104,15 +107,15 @@ const Login = () => {
             slds-grid_align-center"
         >
           <h2 className="slds-text-heading_large slds-p-bottom_medium">
-            {i18n.t('What is Metecho?')}
+            {t('What is Metecho?')}
           </h2>
           <p className="slds-p-bottom_xx-large">
-            {i18n.t(
+            {t(
               'Metecho is a tool to help collaborate on sharable Salesforce Projects.',
             )}
           </p>
           <h3 className="slds-text-heading_small slds-p-bottom_small">
-            {i18n.t('What can I do with Metecho?')}
+            {t('What can I do with Metecho?')}
           </h3>
           <ul className="slds-m-bottom_x-large">
             <li className="slds-p-bottom_small slds-grid">
@@ -122,7 +125,7 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t('Assign Epics and Tasks to members of your team.')}
+              {t('Assign Epics and Tasks to members of your team.')}
             </li>
             <li className="slds-p-bottom_small slds-grid">
               <Icon
@@ -131,7 +134,7 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t('Easily create a Dev Org for an existing Epic.')}
+              {t('Easily create a Dev Org for an existing Epic.')}
             </li>
             <li className="slds-p-bottom_small slds-grid">
               <Icon
@@ -140,14 +143,12 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t(
-                'Make changes and retrieve them into a repository on GitHub.',
-              )}
+              {t('Make changes and retrieve them into a repository on GitHub.')}
             </li>
           </ul>
           <img
             src={welcomeMatFG}
-            alt={i18n.t('screenshots of Metecho app interface')}
+            alt={t('screenshots of Metecho app interface')}
           />
         </div>
       </div>

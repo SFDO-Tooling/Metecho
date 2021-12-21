@@ -1,6 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -92,13 +92,13 @@ const TaskOrgCard = ({
   switch (type) {
     case ORG_TYPES.QA:
       assignedUserId = task.assigned_qa;
-      heading = i18n.t('Tester');
-      orgHeading = i18n.t('Test Org');
+      heading = t('Tester');
+      orgHeading = t('Test Org');
       popover = (
         <TourPopover
           id="tour-task-test-org"
           align="top left"
-          heading={i18n.t('Tester & Test Org')}
+          heading={t('Tester & Test Org')}
           body={
             <Trans i18nKey="tourTaskTestOrg">
               Assign yourself or someone else as Tester on this Task. Testers
@@ -115,14 +115,14 @@ const TaskOrgCard = ({
       assignedUserId = task.assigned_dev;
       heading =
         !userHasPermissions && !assignedUserId
-          ? i18n.t('No Developer')
-          : i18n.t('Developer');
-      orgHeading = i18n.t('Dev Org');
+          ? t('No Developer')
+          : t('Developer');
+      orgHeading = t('Dev Org');
       popover = (
         <TourPopover
           id="tour-task-dev-org"
           align="top left"
-          heading={i18n.t('Developer & Dev Org')}
+          heading={t('Developer & Dev Org')}
           body={
             <Trans i18nKey="tourTaskDevOrg">
               A Developer is the person assigned to do the work of a Task.
@@ -217,7 +217,10 @@ const TaskOrgCard = ({
     >
       {popover}
       <Card
-        className={classNames({ 'has-nested-card': assignedUser })}
+        className={classNames({
+          'has-nested-card': assignedUser,
+          'has-org': org,
+        })}
         bodyClassName="slds-card__body_inner"
         heading={heading}
         headerActions={
@@ -258,7 +261,10 @@ const TaskOrgCard = ({
           <>
             <hr className="slds-m-vertical_none" />
             <Card
-              className="nested-card wrap-inner-truncate"
+              className="nested-card
+                wrap-inner-truncate
+                narrow-buttons
+                task-org-card"
               heading={orgHeading}
               icon={
                 org &&

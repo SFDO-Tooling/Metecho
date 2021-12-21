@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
     steps:
       - checkout
       - restore_cache:
@@ -22,6 +22,7 @@ jobs:
             yarn install --frozen-lockfile
             python3 -m venv venv
             . venv/bin/activate
+            pip install --upgrade pip pip-tools
             pip install -r requirements/prod.txt
             pip install -r requirements/dev.txt
       - run:
@@ -47,7 +48,7 @@ jobs:
   lint:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:
@@ -61,7 +62,7 @@ jobs:
   test-client:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:
@@ -82,7 +83,7 @@ jobs:
   test-python:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
         environment:
           DATABASE_URL: postgres://ubuntu:circle_test@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
@@ -95,8 +96,8 @@ jobs:
           SFDX_CLIENT_ID: circle_test
           SFDX_CLIENT_SECRET: circle_test
           SFDX_HUB_KEY: circle_test
-      - image: circleci/redis:6.0
-      - image: circleci/postgres:12.5
+      - image: cimg/redis:6.2
+      - image: cimg/postgres:12.9
         environment:
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
@@ -128,7 +129,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -154,7 +155,7 @@ jobs:
   build-docs:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:
@@ -169,7 +170,7 @@ jobs:
   deploy-storybook:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.4.0
+      - image: oddbirds/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:

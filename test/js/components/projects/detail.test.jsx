@@ -1,9 +1,15 @@
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import {
+  fireEvent,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/js/components/projects/detail';
 import { createObject, fetchObject, fetchObjects } from '@/js/store/actions';
+import { refreshGitHubIssues } from '@/js/store/projects/actions';
 import { onboarded } from '@/js/store/user/actions';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
@@ -11,23 +17,30 @@ import routes from '@/js/utils/routes';
 import {
   sampleEpic1,
   sampleEpic2,
+  sampleIssue1,
+  sampleIssue2,
+  sampleIssue3,
+  sampleIssue4,
   sampleProject1,
 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/js/store/actions');
 jest.mock('@/js/store/user/actions');
+jest.mock('@/js/store/projects/actions');
 
 onboarded.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshGitHubIssues.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   onboarded.mockClear();
   createObject.mockClear();
+  refreshGitHubIssues.mockClear();
 });
 
 const defaultOrg = {
@@ -322,7 +335,7 @@ describe('<ProjectDetail />', () => {
     test('redirects to project_detail with new slug', () => {
       const { context } = setup({ projectSlug: 'old-slug' });
 
-      expect(context.action).toEqual('REPLACE');
+      expect(context.action).toBe('REPLACE');
       expect(context.url).toEqual(routes.project_detail('project-1'));
     });
   });
@@ -540,6 +553,159 @@ describe('<ProjectDetail />', () => {
     });
   });
 
+  describe('<SelectIssueModal />', () => {
+    test('opens/closes modal', () => {
+      fetchMock.get(`begin:${window.api_urls.issue_list()}`, {
+        results: [],
+      });
+      const { queryByText, getByText, getByTitle } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      fireEvent.click(getByTitle('Cancel'));
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+    });
+
+    test('creates a task from issue', async () => {
+      fetchMock.getOnce('end:is_attached=false', {
+        results: [sampleIssue1],
+      });
+      fetchMock.getOnce('end:is_attached=true', {
+        results: [sampleIssue2],
+      });
+      const {
+        queryByText,
+        getByText,
+        findByLabelText,
+        getAllByText,
+        findByText,
+      } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              fetched: true,
+              notFound: [],
+              tasks: [],
+            },
+          },
+        },
+      });
+      expect.assertions(3);
+      fireEvent.click(getAllByText('Tasks')[0]);
+
+      const btn = await findByText('Create Task from GitHub Issue');
+      fireEvent.click(btn);
+
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const radio = await findByLabelText('#87: this is an issue');
+      fireEvent.click(radio);
+      fireEvent.click(getAllByText('Create a Task')[1]);
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+
+      await findByText('Attached Issue:');
+
+      expect(getByText('#87: this is an issue')).toBeVisible();
+    });
+
+    test('creates an epic from issue', async () => {
+      fetchMock.get('end:is_attached=false', {
+        results: [sampleIssue1],
+      });
+      fetchMock.get('end:is_attached=true', {
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
+      });
+      const {
+        queryByText,
+        getByText,
+        findByLabelText,
+        getAllByText,
+        findByText,
+      } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect.assertions(3);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const radio = await findByLabelText('#87: this is an issue');
+      fireEvent.click(radio);
+      fireEvent.click(getAllByText('Create an Epic')[1]);
+
+      expect(queryByText('Select GitHub Issue to Develop')).toBeNull();
+
+      await findByText('Attached Issue:');
+
+      expect(getByText('#87: this is an issue')).toBeVisible();
+    });
+
+    test('refreshes issues', async () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [sampleIssue1],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
+      });
+      fetchMock.postOnce(
+        window.api_urls.project_refresh_github_issues(sampleIssue1.project),
+        202,
+      );
+      const { getByText } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect.assertions(2);
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+
+      const btn = await getByText('Re-Sync Issues');
+      fireEvent.click(btn);
+
+      expect(refreshGitHubIssues).toHaveBeenCalledTimes(1);
+    });
+
+    test('displays loading btn while refreshing', () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [sampleIssue1],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [sampleIssue2, sampleIssue3, sampleIssue4],
+      });
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            ...defaultState.projects,
+            projects: [
+              {
+                ...defaultState.projects.projects[0],
+                currently_fetching_issues: true,
+              },
+            ],
+          },
+        },
+      });
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect(getByText('Syncing GitHub Issues…')).toBeVisible();
+    });
+
+    test('refreshes issues by retrieving them from github when none locally', async () => {
+      fetchMock.get('end:is_attached=true', {
+        results: [],
+      });
+      fetchMock.get('end:is_attached=false', {
+        results: [],
+      });
+      const { getByText } = setup();
+      fireEvent.click(getByText('Create Epic from GitHub Issue'));
+
+      expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
+      await waitFor(() => expect(refreshGitHubIssues).toHaveBeenCalledTimes(1));
+    });
+  });
+
   describe('<CreateEpicModal />', () => {
     test('opens/closes form', () => {
       const { queryByText, getByText, getByTitle } = setup();
@@ -722,13 +888,13 @@ describe('<ProjectDetail />', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
+        const { getByText, queryByText, getByTitle } = result;
 
         expect(
           getByText('You are creating a Scratch Org', { exact: false }),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(
           queryByText('You are creating a Scratch Org', { exact: false }),
@@ -752,10 +918,8 @@ describe('<ProjectDetail />', () => {
 
         expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
-        expect(createObject.mock.calls[0][0].data.project).toEqual('p1');
-        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
-          'qa',
-        );
+        expect(createObject.mock.calls[0][0].data.project).toBe('p1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toBe('qa');
       });
     });
   });
@@ -763,14 +927,14 @@ describe('<ProjectDetail />', () => {
   describe('<ContributeWorkModal />', () => {
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText, getByLabelText } = setup();
+        const { getByText, queryByText, getByLabelText, getByTitle } = setup();
         fireEvent.click(getByText('Contribute Work'));
 
         expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
 
         fireEvent.click(getByLabelText('Create a new Task with no Epic'));
         fireEvent.click(getByLabelText('Create a new Epic and Task'));
-        fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
       });

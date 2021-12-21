@@ -2,11 +2,12 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
+import { GitHubIssueLink } from '@/js/components/githubIssues/selectIssueModal';
 import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
@@ -17,6 +18,7 @@ import {
   useTransientMessage,
 } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
@@ -31,6 +33,7 @@ interface Props {
   isOpen: boolean;
   playgroundOrgData?: OrgData | null;
   closeCreateModal: () => void;
+  issue?: GitHubIssue | null;
 }
 
 const CreateTaskModal = ({
@@ -39,6 +42,7 @@ const CreateTaskModal = ({
   isOpen,
   playgroundOrgData,
   closeCreateModal,
+  issue,
 }: Props) => {
   const history = useHistory();
   const isMounted = useIsMounted();
@@ -68,6 +72,7 @@ const CreateTaskModal = ({
   const additionalData: { [key: string]: any } = {
     epic: epic?.id,
     project: epic ? undefined : project.id,
+    issue: issue ? issue.id : undefined,
   };
 
   if (isContributingFromOrg) {
@@ -158,13 +163,13 @@ const CreateTaskModal = ({
 
   let heading;
   if (isContributingFromOrg) {
-    heading = i18n.t('Create a Task to Contribute Work from Scratch Org');
+    heading = t('Create a Task to Contribute Work from Scratch Org');
   } else if (epic) {
-    heading = i18n.t('Create a Task for {{epic_name}}', {
+    heading = t('Create a Task for {{epic_name}}', {
       epic_name: epic.name,
     });
   } else {
-    heading = i18n.t('Create a Task for {{project_name}}', {
+    heading = t('Create a Task for {{project_name}}', {
       project_name: project.name,
     });
   }
@@ -175,7 +180,7 @@ const CreateTaskModal = ({
       size="small"
       disableClose={isSaving || isSavingBatch}
       heading={heading}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       onRequestClose={closeModal}
       footer={[
         isShowingTransientMessage && (
@@ -187,12 +192,12 @@ const CreateTaskModal = ({
               slds-p-top_xx-small
               metecho-transition-out"
           >
-            {i18n.t('A Task was successfully created.')}
+            {t('A Task was successfully created.')}
           </span>
         ),
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={closeModal}
           disabled={isSaving || isSavingBatch}
         />,
@@ -201,9 +206,9 @@ const CreateTaskModal = ({
             key="create-new"
             label={
               isSavingBatch ? (
-                <LabelWithSpinner label={i18n.t('Creating…')} />
+                <LabelWithSpinner label={t('Creating…')} />
               ) : (
-                i18n.t('Create & New')
+                t('Create & New')
               )
             }
             onClick={batchSubmitClicked}
@@ -215,9 +220,9 @@ const CreateTaskModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
+              <LabelWithSpinner label={t('Creating…')} variant="inverse" />
             ) : (
-              i18n.t('Create')
+              t('Create')
             )
           }
           variant="brand"
@@ -226,52 +231,62 @@ const CreateTaskModal = ({
         />,
       ]}
     >
-      <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
+      <div className="slds-p-around_large">
         {!epic && !isContributingFromOrg && (
-          <p className="slds-align_absolute-center slds-m-bottom_small">
-            {i18n.t(
+          <p className="slds-m-bottom_small">
+            {t(
               'You are creating a Task for this Project. To group multiple Tasks together, create an Epic.',
             )}
           </p>
         )}
-        <Input
-          id="task-name"
-          label={i18n.t('Task Name')}
-          className="slds-form-element_stacked slds-p-left_none"
-          name="name"
-          value={inputs.name}
-          required
-          aria-required
-          errorText={errors.name}
-          onChange={handleInputChange}
-        />
-        <Textarea
-          id="task-description"
-          label={i18n.t('Description')}
-          classNameContainer="slds-form-element_stacked slds-p-left_none"
-          className="metecho-textarea"
-          name="description"
-          value={inputs.description}
-          errorText={errors.description}
-          onChange={handleInputChange}
-        />
-        <SelectFlowType
-          orgConfigs={project.org_config_names || []}
-          projectId={project.id}
-          value={inputs.org_config_name}
-          errors={errors.org_config_name}
-          isLoading={project.currently_fetching_org_config_names}
-          className={useExistingOrgConfig ? 'slds-hide' : ''}
-          handleSelect={handleInputChange}
-        />
-        {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={isSaving || isSavingBatch}
-        />
-      </form>
+        {issue && (
+          <p className="slds-m-bottom_small">
+            <strong>{t('Attached Issue:')}</strong> #{issue.number}:{' '}
+            {issue.title}
+            <br />
+            <GitHubIssueLink url={issue.html_url} />
+          </p>
+        )}
+        <form onSubmit={doSubmit} className="slds-form">
+          <Input
+            id="task-name"
+            label={t('Task Name')}
+            className="slds-form-element_stacked slds-p-left_none"
+            name="name"
+            value={inputs.name}
+            required
+            aria-required
+            errorText={errors.name}
+            onChange={handleInputChange}
+          />
+          <Textarea
+            id="task-description"
+            label={t('Description')}
+            classNameContainer="slds-form-element_stacked slds-p-left_none"
+            className="metecho-textarea"
+            name="description"
+            value={inputs.description}
+            errorText={errors.description}
+            onChange={handleInputChange}
+          />
+          <SelectFlowType
+            orgConfigs={project.org_config_names || []}
+            projectId={project.id}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isLoading={project.currently_fetching_org_config_names}
+            className={useExistingOrgConfig ? 'slds-hide' : ''}
+            handleSelect={handleInputChange}
+          />
+          {/* Clicking hidden button allows for native browser form validation */}
+          <button
+            ref={submitButton}
+            type="submit"
+            style={{ display: 'none' }}
+            disabled={isSaving || isSavingBatch}
+          />
+        </form>
+      </div>
     </Modal>
   );
 };

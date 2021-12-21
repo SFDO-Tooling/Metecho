@@ -35,11 +35,11 @@ services:
     # Wait for Postgres DB to be ready before running server
     command:
       bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;
-      /start-server.sh'
+      /app/start-server.sh'
 
   # Runs the database process:
   postgres:
-    image: postgres:12.5
+    image: postgres:12.9
     restart: always
     environment:
       POSTGRES_USER: metecho
@@ -49,4 +49,4 @@ services:
 
   # Runs the queue process:
   redis:
-    image: redis:6.0
+    image: redis:6.2

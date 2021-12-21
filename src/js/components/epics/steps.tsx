@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React from 'react';
 
 import Steps from '@/js/components/steps';
@@ -30,30 +30,30 @@ const EpicStatusSteps = ({
 
   const steps: Step[] = [
     {
-      label: i18n.t('Create a Task'),
+      label: t('Create a Task'),
       active: !hasTasks,
       complete: hasTasks || isMerged,
     },
     {
-      label: i18n.t('Assign a Developer to a Task'),
+      label: t('Assign a Developer to a Task'),
       active: hasTasks && !hasDev,
       complete: epic.has_unmerged_commits || (hasTasks && hasDev) || isMerged,
     },
     {
-      label: i18n.t('Complete a Task'),
+      label: t('Complete a Task'),
       active: hasTasks && hasDev,
       complete: epic.has_unmerged_commits || isMerged,
     },
     {
       label: currentlySubmitting
-        ? i18n.t('Submitting Epic for review on GitHub…')
-        : i18n.t('Submit this Epic for review on GitHub'),
+        ? t('Submitting Epic for review on GitHub…')
+        : t('Submit this Epic for review on GitHub'),
       active: readyToSubmit,
       complete: epic.pr_is_open || isMerged,
       action: canSubmit && !currentlySubmitting ? 'submit' : undefined,
     },
     {
-      label: i18n.t('Merge pull request on GitHub'),
+      label: t('Merge pull request on GitHub'),
       active: epic.pr_is_open,
       complete: isMerged,
       link: epic.pr_url,
@@ -63,7 +63,7 @@ const EpicStatusSteps = ({
   return (
     <Steps
       steps={steps}
-      title={i18n.t('Next Steps for this Epic')}
+      title={t('Next Steps for this Epic')}
       handleAction={handleAction}
     />
   );

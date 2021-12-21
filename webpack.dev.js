@@ -85,12 +85,6 @@ module.exports = merge(common, {
               const options = {
                 filename: file.path,
                 presets: ['@babel/preset-typescript'],
-                plugins: [
-                  '@babel/plugin-syntax-jsx',
-                  '@babel/plugin-proposal-class-properties',
-                  '@babel/plugin-proposal-object-rest-spread',
-                  '@babel/plugin-proposal-optional-chaining',
-                ],
                 configFile: false,
               };
 

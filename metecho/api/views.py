@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from github3.exceptions import ConnectionError, ResponseError
-from rest_framework import mixins, status
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -17,13 +17,27 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
-from .filters import EpicFilter, ProjectFilter, ScratchOrgFilter, TaskFilter
+from .filters import (
+    EpicFilter,
+    GitHubIssueFilter,
+    ProjectFilter,
+    ScratchOrgFilter,
+    TaskFilter,
+)
 from .hook_serializers import (
     PrHookSerializer,
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Project, ScratchOrg, Task
+from .models import (
+    Epic,
+    EpicStatus,
+    GitHubIssue,
+    Project,
+    ScratchOrg,
+    ScratchOrgType,
+    Task,
+)
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -32,6 +46,7 @@ from .serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubIssueSerializer,
     GuidedTourSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
@@ -183,6 +198,17 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     queryset = User.objects.all()
 
 
+class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
+    """GitHub Issues"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GitHubIssueSerializer
+    pagination_class = CustomPaginator
+    queryset = GitHubIssue.objects.select_related("epic", "task", "task__epic")
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = GitHubIssueFilter
+
+
 class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """Read-only information about Metecho Projects."""
 
@@ -212,6 +238,14 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         """Queue a job to refresh the list of GitHub users for a Project."""
         project = self.get_object()
         project.queue_refresh_github_users(originating_user_id=str(request.user.id))
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=None, responses={202: None})
+    @action(detail=True, methods=["POST"])
+    def refresh_github_issues(self, request, pk=None):
+        """Queue a job to refresh the list of GitHub Issues for a Project"""
+        instance = self.get_object()
+        instance.queue_refresh_github_issues(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @extend_schema(request=None, responses={202: None})
@@ -268,10 +302,10 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         whens = [
-            When(status=EPIC_STATUSES.Review, then=0),
-            When(status=EPIC_STATUSES["In progress"], then=1),
-            When(status=EPIC_STATUSES.Planned, then=2),
-            When(status=EPIC_STATUSES.Merged, then=3),
+            When(status=EpicStatus.REVIEW, then=0),
+            When(status=EpicStatus.IN_PROGRESS, then=1),
+            When(status=EpicStatus.PLANNED, then=2),
+            When(status=EpicStatus.MERGED, then=3),
         ]
         return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
             "ordering", "-created_at", "name"
@@ -338,8 +372,8 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         task = self.get_object()
         role = serializer.validated_data["role"]
         role_org_type = {
-            "assigned_qa": SCRATCH_ORG_TYPES.QA,
-            "assigned_dev": SCRATCH_ORG_TYPES.Dev,
+            "assigned_qa": ScratchOrgType.QA,
+            "assigned_dev": ScratchOrgType.DEV,
         }.get(role, None)
         gh_uid = serializer.validated_data["gh_uid"]
         org = task.orgs.active().filter(org_type=role_org_type).first()
@@ -423,7 +457,7 @@ class ScratchOrgViewSet(
         # insert the get_unsaved_changes line in the middle.
         queryset = self.filter_queryset(
             self.get_queryset().exclude(
-                ~Q(owner=request.user), org_type=SCRATCH_ORG_TYPES.Playground
+                ~Q(owner=request.user), org_type=ScratchOrgType.PLAYGROUND
             )
         )
 
@@ -431,7 +465,7 @@ class ScratchOrgViewSet(
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
-            "org_type__in": [SCRATCH_ORG_TYPES.Dev, SCRATCH_ORG_TYPES.Playground],
+            "org_type__in": [ScratchOrgType.DEV, ScratchOrgType.PLAYGROUND],
             "delete_queued_at__isnull": True,
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
@@ -456,7 +490,7 @@ class ScratchOrgViewSet(
         # the middle.
         instance = self.get_object()
         if (
-            instance.org_type == SCRATCH_ORG_TYPES.Playground
+            instance.org_type == ScratchOrgType.PLAYGROUND
             and not request.user == instance.owner
         ):
             return Response(
@@ -465,7 +499,7 @@ class ScratchOrgViewSet(
             )
         force_get = request.query_params.get("get_unsaved_changes", False)
         conditions = [
-            instance.org_type in [SCRATCH_ORG_TYPES.Dev, SCRATCH_ORG_TYPES.Playground],
+            instance.org_type in [ScratchOrgType.DEV, ScratchOrgType.PLAYGROUND],
             instance.is_created,
             instance.delete_queued_at is None,
             not instance.currently_capturing_changes,

@@ -4,9 +4,9 @@ describe('addToast', () => {
   test('returns AddToastAction', () => {
     const actual = actions.addToast({ heading: 'message' });
 
-    expect(actual.type).toEqual('TOAST_ADDED');
-    expect(typeof actual.payload.id).toEqual('string');
-    expect(actual.payload.heading).toEqual('message');
+    expect(actual.type).toBe('TOAST_ADDED');
+    expect(typeof actual.payload.id).toBe('string');
+    expect(actual.payload.heading).toBe('message');
   });
 });
 

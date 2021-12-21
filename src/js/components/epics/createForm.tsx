@@ -6,13 +6,14 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
+import { GitHubIssueLink } from '@/js/components/githubIssues/selectIssueModal';
 import {
   LabelWithSpinner,
   OrgData,
@@ -20,6 +21,7 @@ import {
   useIsMounted,
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
+import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Project } from '@/js/store/projects/reducer';
 import { User } from '@/js/store/user/reducer';
 import apiFetch from '@/js/utils/api';
@@ -36,6 +38,7 @@ interface Props {
   project: Project;
   isOpen: boolean;
   playgroundOrgData?: OrgData | null;
+  issue?: GitHubIssue | null;
   closeCreateModal: () => void;
 }
 
@@ -45,6 +48,7 @@ const CreateEpicModal = ({
   isOpen,
   playgroundOrgData,
   closeCreateModal,
+  issue,
 }: Props) => {
   const history = useHistory();
   const isMounted = useIsMounted();
@@ -80,6 +84,7 @@ const CreateEpicModal = ({
     additionalData: {
       project: project.id,
       github_users: user.github_id ? [user.github_id] : [],
+      issue: issue ? issue.id : undefined,
     },
     onError,
   });
@@ -206,13 +211,13 @@ const CreateEpicModal = ({
   const selection = branchOptions.find((branch) => branch.label === inputVal);
   let noOptionsFoundText = null;
   if (fetchingBranches) {
-    noOptionsFoundText = i18n.t('Loading existing branches…');
+    noOptionsFoundText = t('Loading existing branches…');
   } else {
     noOptionsFoundText = (
       <>
         {noFeatureBranches
-          ? i18n.t("There aren't any available branches at this time.")
-          : i18n.t('No matching branches found.')}{' '}
+          ? t("There aren't any available branches at this time.")
+          : t('No matching branches found.')}{' '}
         <Trans i18nKey="refreshProjectBranches">
           <Button variant="link" onClick={doGetBranches}>
             Check again
@@ -228,9 +233,9 @@ const CreateEpicModal = ({
 
   let heading;
   if (isContributingFromOrg) {
-    heading = i18n.t('Create an Epic to Contribute Work from Scratch Org');
+    heading = t('Create an Epic to Contribute Work from Scratch Org');
   } else {
-    heading = i18n.t('Create an Epic for {{project_name}}', {
+    heading = t('Create an Epic for {{project_name}}', {
       project_name: project.name,
     });
   }
@@ -242,11 +247,11 @@ const CreateEpicModal = ({
       disableClose={isSaving}
       heading={heading}
       onRequestClose={closeForm}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       footer={[
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={closeForm}
           disabled={isSaving}
         />,
@@ -255,9 +260,9 @@ const CreateEpicModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
+              <LabelWithSpinner label={t('Creating…')} variant="inverse" />
             ) : (
-              i18n.t('Create')
+              t('Create')
             )
           }
           variant="brand"
@@ -266,94 +271,104 @@ const CreateEpicModal = ({
         />,
       ]}
     >
-      <form
-        onSubmit={doSubmit}
-        className="slds-form slds-p-around_large"
-        data-form="create-epic-branch"
-      >
-        <RadioGroup
-          assistiveText={{
-            label: i18n.t('Epic Branch'),
-            required: i18n.t('Required'),
-          }}
-          className="slds-form-element_stacked slds-p-left_none"
-          name="epic-branch"
-          required
-          onChange={handleBranchCheckboxChange}
-        >
-          <Radio
-            id="epic-branch-new"
-            labels={{ label: i18n.t('Create new branch on GitHub') }}
-            checked={!fromBranchChecked}
-            name="epic-branch"
-            value="new"
-          />
-          <Radio
-            id="epic-branch-existing"
-            labels={{ label: i18n.t('Use existing GitHub branch') }}
-            checked={fromBranchChecked}
-            name="epic-branch"
-            value="existing"
-          />
-        </RadioGroup>
-        {fromBranchChecked && (
-          <Combobox
-            id="combobox-inline-single"
-            events={{
-              onSelect: handleBranchSelection,
-              onChange: handleBranchChange,
-              onRequestRemoveSelectedOption: handleBranchRemoveSelection,
-              onBlur: handleBranchBlur,
-            }}
-            labels={{
-              label: i18n.t('Select a branch to use for this Epic'),
-              noOptionsFound: noOptionsFoundText,
-            }}
-            menuItemVisibleLength={5}
-            predefinedOptionsOnly
-            options={comboboxFilter({
-              inputValue: filterVal,
-              options: branchOptions,
-              selection: selection ? [selection] : [],
-            })}
-            selection={selection ? [selection] : []}
-            value={selection ? selection.label : filterVal}
-            errorText={errors.branch_name}
-            hasInputSpinner={fetchingBranches}
-            required
-            variant="inline-listbox"
-            classNameContainer="slds-form-element_stacked slds-p-left_none"
-          />
+      <div className="slds-p-around_large">
+        {issue && (
+          <p className="slds-m-bottom_small">
+            <strong>{t('Attached Issue:')}</strong> #{issue.number}:{' '}
+            {issue.title}
+            <br />
+            <GitHubIssueLink url={issue.html_url} />
+          </p>
         )}
-        <Input
-          id="epic-name"
-          label={i18n.t('Epic Name')}
-          className="slds-form-element_stacked slds-p-left_none"
-          name="name"
-          value={inputs.name}
-          required
-          aria-required
-          errorText={errors.name}
-          onChange={handleInputChange}
-        />
-        <Textarea
-          id="epic-description"
-          label={i18n.t('Description')}
-          classNameContainer="slds-form-element_stacked slds-p-left_none"
-          className="metecho-textarea"
-          name="description"
-          value={inputs.description}
-          errorText={errors.description}
-          onChange={handleInputChange}
-        />
-        {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={isSaving}
-        />
-      </form>
+        <form
+          onSubmit={doSubmit}
+          className="slds-form"
+          data-form="create-epic-branch"
+        >
+          <RadioGroup
+            assistiveText={{
+              label: t('Epic Branch'),
+              required: t('Required'),
+            }}
+            className="slds-form-element_stacked slds-p-left_none"
+            name="epic-branch"
+            required
+            onChange={handleBranchCheckboxChange}
+          >
+            <Radio
+              id="epic-branch-new"
+              labels={{ label: t('Create new branch on GitHub') }}
+              checked={!fromBranchChecked}
+              name="epic-branch"
+              value="new"
+            />
+            <Radio
+              id="epic-branch-existing"
+              labels={{ label: t('Use existing GitHub branch') }}
+              checked={fromBranchChecked}
+              name="epic-branch"
+              value="existing"
+            />
+          </RadioGroup>
+          {fromBranchChecked && (
+            <Combobox
+              id="combobox-inline-single"
+              events={{
+                onSelect: handleBranchSelection,
+                onChange: handleBranchChange,
+                onRequestRemoveSelectedOption: handleBranchRemoveSelection,
+                onBlur: handleBranchBlur,
+              }}
+              labels={{
+                label: t('Select a branch to use for this Epic'),
+                noOptionsFound: noOptionsFoundText,
+              }}
+              menuItemVisibleLength={5}
+              predefinedOptionsOnly
+              options={comboboxFilter({
+                inputValue: filterVal,
+                options: branchOptions,
+                selection: selection ? [selection] : [],
+              })}
+              selection={selection ? [selection] : []}
+              value={selection ? selection.label : filterVal}
+              errorText={errors.branch_name}
+              hasInputSpinner={fetchingBranches}
+              required
+              variant="inline-listbox"
+              classNameContainer="slds-form-element_stacked slds-p-left_none"
+            />
+          )}
+          <Input
+            id="epic-name"
+            label={t('Epic Name')}
+            className="slds-form-element_stacked slds-p-left_none"
+            name="name"
+            value={inputs.name}
+            required
+            aria-required
+            errorText={errors.name}
+            onChange={handleInputChange}
+          />
+          <Textarea
+            id="epic-description"
+            label={t('Description')}
+            classNameContainer="slds-form-element_stacked slds-p-left_none"
+            className="metecho-textarea"
+            name="description"
+            value={inputs.description}
+            errorText={errors.description}
+            onChange={handleInputChange}
+          />
+          {/* Clicking hidden button allows for native browser form validation */}
+          <button
+            ref={submitButton}
+            type="submit"
+            style={{ display: 'none' }}
+            disabled={isSaving}
+          />
+        </form>
+      </div>
     </Modal>
   );
 };

@@ -1,9 +1,11 @@
 import { History } from 'history';
+import { RouteComponentProps } from 'react-router-dom';
 import { AnyAction, combineReducers } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 import epicsReducer, { EpicsState } from '@/js/store/epics/reducer';
 import errorsReducer, { ErrorType } from '@/js/store/errors/reducer';
+import issuesReducer, { IssuesState } from '@/js/store/githubIssues/reducer';
 import orgReducer, { OrgState } from '@/js/store/orgs/reducer';
 import projectsReducer, { ProjectsState } from '@/js/store/projects/reducer';
 import socketReducer, { Socket } from '@/js/store/socket/reducer';
@@ -19,6 +21,7 @@ export interface AppState {
   projects: ProjectsState;
   socket: Socket;
   tasks: TaskState;
+  issues: IssuesState;
   user: User | null;
 }
 
@@ -29,6 +32,11 @@ export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
   AnyAction
 >;
 export type ThunkDispatch = ReduxThunkDispatch<AppState, History, AnyAction>;
+export type RouteProps = RouteComponentProps<{
+  projectSlug?: string;
+  epicSlug?: string;
+  taskSlug?: string;
+}>;
 
 const reducer = combineReducers({
   toasts: toastsReducer,
@@ -38,6 +46,7 @@ const reducer = combineReducers({
   projects: projectsReducer,
   socket: socketReducer,
   tasks: taskReducer,
+  issues: issuesReducer,
   user: userReducer,
 });
 

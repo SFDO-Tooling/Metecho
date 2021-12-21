@@ -4,11 +4,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.utils import timezone
 
-from ..models import SCRATCH_ORG_TYPES, Task
+from ..models import ScratchOrgType, Task
 from ..serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubIssueSerializer,
     ScratchOrgSerializer,
     TaskAssigneeSerializer,
     TaskSerializer,
@@ -24,6 +25,33 @@ class TestFullUserSerializer:
         user = user_factory()
         serializer = FullUserSerializer(user)
         assert serializer.data["sf_username"] is None
+
+
+@pytest.mark.django_db
+class TestGitHubIssueSerializer:
+    def test_epic(self, epic_factory):
+        epic = epic_factory()
+        serializer = GitHubIssueSerializer(epic.issue)
+        assert tuple(serializer.data["epic"]) == (
+            "id",
+            "name",
+            "status",
+            "slug",
+        )
+
+    def test_task(self, task_factory):
+        task = task_factory()
+        serializer = GitHubIssueSerializer(task.issue)
+        assert tuple(serializer.data["task"]) == (
+            "id",
+            "name",
+            "status",
+            "review_status",
+            "review_valid",
+            "pr_is_open",
+            "slug",
+            "epic_slug",
+        )
 
 
 @pytest.mark.django_db
@@ -249,6 +277,37 @@ class TestEpicSerializer:
         serializer = EpicSerializer(epic)
         assert serializer.data["pr_url"] is None
 
+    @pytest.mark.parametrize(
+        "issue_type, success",
+        (
+            ("with_task", False),
+            ("with_epic", False),
+            ("unattached", True),
+            ("same", True),
+            ("none", True),
+        ),
+    )
+    def test_validate_issue(
+        self, task_factory, epic_factory, git_hub_issue_factory, issue_type, success
+    ):
+        epic = epic_factory()
+        issues = {
+            "with_task": str(task_factory().issue_id),
+            "with_epic": str(epic_factory().issue_id),
+            "unattached": str(git_hub_issue_factory().id),
+            "same": str(epic.issue_id),
+            "none": None,
+        }
+        issue = issues[issue_type]
+
+        serializer = EpicSerializer(epic, data={"issue": issue}, partial=True)
+
+        if success:
+            assert serializer.is_valid()
+        else:
+            assert not serializer.is_valid()
+            assert "issue" in serializer.errors, serializer.errors
+
 
 @pytest.mark.django_db
 class TestEpicCollaboratorsSerializer:
@@ -457,6 +516,37 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["pr_url"] is None
 
+    @pytest.mark.parametrize(
+        "issue_type, success",
+        (
+            ("with_task", False),
+            ("with_epic", False),
+            ("unattached", True),
+            ("same", True),
+            ("none", True),
+        ),
+    )
+    def test_validate_issue(
+        self, task_factory, epic_factory, git_hub_issue_factory, issue_type, success
+    ):
+        task = task_factory()
+        issues = {
+            "with_task": str(task_factory().issue_id),
+            "with_epic": str(epic_factory().issue_id),
+            "unattached": str(git_hub_issue_factory().id),
+            "same": str(task.issue_id),
+            "none": None,
+        }
+        issue = issues[issue_type]
+
+        serializer = TaskSerializer(task, data={"issue": issue}, partial=True)
+
+        if success:
+            assert serializer.is_valid()
+        else:
+            assert not serializer.is_valid()
+            assert "issue" in serializer.errors, serializer.errors
+
 
 @pytest.mark.django_db
 class TestTaskAssigneeSerializer:
@@ -486,8 +576,8 @@ class TestTaskAssigneeSerializer:
         repo = git_hub_repository_factory(
             repo_id=project.repo_id, permissions={"push": True}
         )
-        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
+        so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
 
         data = {"assigned_dev": "123456", "assigned_qa": "456789"}
         r = rf.get("/")
@@ -514,8 +604,8 @@ class TestTaskAssigneeSerializer:
             assigned_dev="123",
             assigned_qa="123",
         )
-        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
+        so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
         data = {
             "assigned_dev": None,
             "assigned_qa": None,
@@ -746,14 +836,14 @@ class TestTaskAssigneeSerializer:
         scratch_org_factory(
             owner_sf_username="test",
             task=task,
-            org_type=SCRATCH_ORG_TYPES.Dev,
+            org_type=ScratchOrgType.DEV,
             latest_commit="abc123",
             deleted_at=timezone.now(),
         )
         scratch_org_factory(
             owner_sf_username="test",
             task=task,
-            org_type=SCRATCH_ORG_TYPES.QA,
+            org_type=ScratchOrgType.QA,
             latest_commit="abc123",
             deleted_at=timezone.now(),
         )

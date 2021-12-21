@@ -10,23 +10,54 @@
 
 .nested-card {
   .slds-card__header {
-    padding-left: 0;
-    padding-right: 0;
-  }
+    --card-header-toggle-space: 0;
+    --dropdown-right: 0;
 
-  .slds-media {
-    margin-bottom: $spacing-medium;
+    padding-left: 0;
+
+    .has-org & {
+      margin-right: $spacing-medium;
+    }
   }
 }
 
 // override min-width and force header to wrap on nested card headers
 .wrap-inner-truncate {
   .slds-card__header {
+    align-items: baseline;
     flex-wrap: wrap;
+
+    // hold space for absolutely positioned dropdown toggle
+    padding-right: var(--card-header-toggle-space, #{$spacing-x-large});
+
+    // Specifically target OrgActions in card header
+    .slds-no-flex {
+      align-items: baseline;
+      display: flex;
+      flex: 0 1 auto;
+      flex-wrap: wrap; // allow button group to wrap when space is limited
+      row-gap: $spacing-x-small;
+    }
   }
 
   .slds-has-flexi-truncate {
-    min-width: auto;
     margin-right: $spacing-x-small;
+
+    // allow org title to display in truncated state before org actions wrap
+    min-width: 35%; // arbitrary width
   }
+
+  .slds-media {
+    margin-bottom: $spacing-x-small;
+  }
+
+  .metecho-card-more {
+    position: absolute;
+    right: var(--dropdown-right, $spacing-small);
+    top: $spacing-small;
+  }
+}
+
+.playground-org-card {
+  --dropdown-right: #{$spacing-medium};
 }

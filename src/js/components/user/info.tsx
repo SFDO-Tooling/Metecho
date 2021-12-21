@@ -5,7 +5,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,13 +34,13 @@ const ConnectToSalesforce = ({
   return (
     <>
       <Button
-        label={i18n.t('Connect to Salesforce')}
+        label={t('Connect to Salesforce')}
         className="slds-text-body_regular slds-p-right_xx-small"
         variant="link"
         onClick={openConnectModal}
       />
       <Tooltip
-        content={i18n.t(
+        content={t(
           'Connection to a Salesforce Org with Dev Hub enabled is required to create a Dev, Test, or Scratch Org.',
         )}
         position="overflowBoundaryElement"
@@ -102,17 +102,15 @@ const UserInfo = ({
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
-          <strong>{i18n.t('Dev Hub:')}</strong>{' '}
+          <strong>{t('Dev Hub:')}</strong>{' '}
           {user.is_devhub_enabled ? (
-            <span className="slds-text-color_success">{i18n.t('Enabled')}</span>
+            <span className="slds-text-color_success">{t('Enabled')}</span>
           ) : (
             <>
-              <span className="slds-text-color_error">
-                {i18n.t('Not Enabled')}
-              </span>
+              <span className="slds-text-color_error">{t('Not Enabled')}</span>
               {' | '}
               <Button
-                label={i18n.t('Check Again')}
+                label={t('Check Again')}
                 variant="link"
                 onClick={doRefreshDevHubStatus}
               />
@@ -121,23 +119,23 @@ const UserInfo = ({
         </li>
         {user.sf_username && (
           <li>
-            <strong>{i18n.t('User:')}</strong> {user.sf_username}
+            <strong>{t('User:')}</strong> {user.sf_username}
           </li>
         )}
         {user.org_name && (
           <li>
-            <strong>{i18n.t('Org:')}</strong> {user.org_name}
+            <strong>{t('Org:')}</strong> {user.org_name}
           </li>
         )}
         {user.org_type && (
           <li>
-            <strong>{i18n.t('Type:')}</strong> {user.org_type}
+            <strong>{t('Type:')}</strong> {user.org_type}
           </li>
         )}
       </ul>
       {!user.devhub_username && (
         <Button
-          label={i18n.t('Disconnect from Salesforce')}
+          label={t('Disconnect from Salesforce')}
           variant="link"
           className="slds-m-top_small"
           onClick={doDisconnect}
@@ -156,13 +154,11 @@ const ConnectionInfo = ({ user }: { user: User }) => (
       size="small"
     />
     <div className="slds-p-left_x-large slds-m-bottom_small">
-      <p className="slds-text-heading_small">
-        {i18n.t('Connected to Salesforce')}
-      </p>
+      <p className="slds-text-heading_small">{t('Connected to Salesforce')}</p>
       {!user.is_devhub_enabled && (
         <p className="slds-text-color_weak slds-m-top_xx-small">
           <Icon
-            assistiveText={{ label: i18n.t('Error') }}
+            assistiveText={{ label: t('Error') }}
             category="utility"
             name="error"
             colorVariant="error"
@@ -201,16 +197,14 @@ export const ConnectionInfoModal = ({
   return (
     <Modal
       isOpen={isConnected && isOpen}
-      assistiveText={{ closeButton: i18n.t('Close') }}
+      assistiveText={{ closeButton: t('Close') }}
       heading={
-        user.is_devhub_enabled
-          ? i18n.t('Dev Hub Enabled')
-          : i18n.t('Enable Dev Hub')
+        user.is_devhub_enabled ? t('Dev Hub Enabled') : t('Enable Dev Hub')
       }
       tagline={
         user.is_devhub_enabled ? (
           successText ||
-          i18n.t('Please close this message and try your action again.')
+          t('Please close this message and try your action again.')
         ) : (
           <ConnectionInfoWarning />
         )
@@ -218,11 +212,7 @@ export const ConnectionInfoModal = ({
       prompt={user.is_devhub_enabled ? 'success' : 'warning'}
       footer={
         user.is_devhub_enabled && [
-          <Button
-            key="close"
-            label={i18n.t('Continue')}
-            onClick={handleClose}
-          />,
+          <Button key="close" label={t('Continue')} onClick={handleClose} />,
         ]
       }
       onRequestClose={handleClose}
@@ -261,7 +251,7 @@ const UserDropdown = () => {
                     <Avatar
                       variant="user"
                       imgSrc={user.avatar_url}
-                      imgAlt={i18n.t('avatar for user {{username}}', {
+                      imgAlt={t('avatar for user {{username}}', {
                         username: user.username,
                       })}
                       title={user.username}
@@ -308,7 +298,7 @@ const UserDropdown = () => {
             <Avatar
               variant="user"
               imgSrc={user.avatar_url || undefined}
-              imgAlt={i18n.t('avatar for user {{username}}', {
+              imgAlt={t('avatar for user {{username}}', {
                 username: user.username,
               })}
               title={user.username}

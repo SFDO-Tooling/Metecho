@@ -4,7 +4,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import i18n from 'i18next';
+import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
 
 import {
@@ -109,15 +109,15 @@ const SubmitReviewModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      heading={i18n.t('Submit Task Review')}
+      heading={t('Submit Task Review')}
       size="small"
       disableClose={submittingReview}
-      assistiveText={{ closeButton: i18n.t('Cancel') }}
+      assistiveText={{ closeButton: t('Cancel') }}
       onRequestClose={doClose}
       footer={[
         <Button
           key="cancel"
-          label={i18n.t('Cancel')}
+          label={t('Cancel')}
           onClick={doClose}
           disabled={submittingReview}
         />,
@@ -127,11 +127,11 @@ const SubmitReviewModal = ({
           label={
             submittingReview ? (
               <LabelWithSpinner
-                label={i18n.t('Submitting Review…')}
+                label={t('Submitting Review…')}
                 variant="inverse"
               />
             ) : (
-              i18n.t('Submit Review')
+              t('Submit Review')
             )
           }
           variant="brand"
@@ -143,8 +143,8 @@ const SubmitReviewModal = ({
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
         <RadioGroup
           assistiveText={{
-            label: i18n.t('Task review status'),
-            required: i18n.t('Required'),
+            label: t('Task review status'),
+            required: t('Required'),
           }}
           labels={{ error: errors.status }}
           className="slds-p-bottom_x-small"
@@ -154,14 +154,14 @@ const SubmitReviewModal = ({
         >
           <Radio
             id="approve"
-            labels={{ label: i18n.t('Approve') }}
+            labels={{ label: t('Approve') }}
             checked={inputs.status === REVIEW_STATUSES.APPROVED}
             value={REVIEW_STATUSES.APPROVED}
             name="status"
           />
           <Radio
             id="request-changes"
-            labels={{ label: i18n.t('Request changes') }}
+            labels={{ label: t('Request changes') }}
             checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
             value={REVIEW_STATUSES.CHANGES_REQUESTED}
             name="status"
@@ -169,7 +169,7 @@ const SubmitReviewModal = ({
         </RadioGroup>
         <Textarea
           id="notes"
-          label={i18n.t('Review Description')}
+          label={t('Review Description')}
           className="metecho-textarea"
           name="notes"
           value={inputs.notes}
