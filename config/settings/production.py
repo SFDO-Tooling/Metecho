@@ -1,7 +1,14 @@
 import ssl
 
 from .base import *  # NOQA
-from .base import CHANNEL_LAYERS, PROJECT_ROOT, REDIS_LOCATION, RQ_QUEUES, TEMPLATES
+from .base import (
+    CACHES,
+    CHANNEL_LAYERS,
+    PROJECT_ROOT,
+    REDIS_LOCATION,
+    RQ_QUEUES,
+    TEMPLATES,
+)
 
 STATICFILES_DIRS = [
     str(PROJECT_ROOT / "static"),
@@ -22,6 +29,8 @@ if REDIS_LOCATION.startswith("rediss://"):
     #   - https://github.com/django/channels_redis/issues/235
     #   - https://github.com/jazzband/django-redis/issues/353
     #   - https://paltman.com/how-to-turn-off-ssl-verify-django-rq-heroku-redis/
+
+    CACHES["default"]["OPTIONS"]["pool_class"] = "metecho.redis.SSLConnectionPool"
 
     RQ_QUEUES["default"].update(
         {
