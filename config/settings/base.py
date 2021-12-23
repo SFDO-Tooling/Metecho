@@ -410,11 +410,14 @@ JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
 
 # Redis configuration:
 
-REDIS_LOCATION = "{0}/{1}".format(env("REDIS_URL", default="redis://localhost:6379"), 0)
+REDIS_LOCATION = "{}/0".format(
+    env("REDIS_TLS_URL", default=env("REDIS_URL", default="redis://localhost:6379"))
+)
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": REDIS_LOCATION,
+        "OPTIONS": {},
     }
 }
 RQ_QUEUES = {
