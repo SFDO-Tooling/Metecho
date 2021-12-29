@@ -10,7 +10,7 @@ django-allauth==0.47.0
 django-anymail[mailgun]==8.4
 django-hashid-field==3.3.3
 https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
-django-log-request-id==1.7.0
+django-log-request-id==2.0.0
 django-model-utils==4.2.0
 django-parler==2.3
 django-rq==2.5.1
