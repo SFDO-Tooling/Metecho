@@ -11,11 +11,13 @@ export default ({
   isAttached,
   isOpen,
   currentlyResyncing,
+  search,
 }: {
   projectId: string;
   isAttached: boolean;
   isOpen: boolean;
   currentlyResyncing: boolean;
+  search: string;
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [issues, setIssues] = useState<GitHubIssue[]>();
@@ -29,6 +31,7 @@ export default ({
         url: addUrlParams(baseUrl, {
           project: projectId,
           is_attached: isAttached,
+          search,
         }),
         dispatch,
       });
@@ -38,7 +41,7 @@ export default ({
     if (projectId && isOpen && !currentlyResyncing) {
       fetchIssues();
     }
-  }, [dispatch, projectId, isOpen, isAttached, currentlyResyncing]);
+  }, [dispatch, projectId, isOpen, isAttached, currentlyResyncing, search]);
 
   return { issues, currentlyFetching };
 };

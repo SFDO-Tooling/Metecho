@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import ResyncIssuesButton from '@/js/components/githubIssues/resyncIssuesButton';
+import Search from '@/js/components/githubIssues/search';
 import {
   ExternalLink,
   getEpicStatus,
@@ -102,11 +103,13 @@ const SelectIssueModal = ({
   currentlyResyncing,
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
+  const [search, setSearch] = useState<string>('');
   const { issues, currentlyFetching } = useFetchIssues({
     projectId,
     isAttached: false,
     isOpen: Boolean(isOpen),
     currentlyResyncing,
+    search,
   });
   const {
     issues: attachedIssues,
@@ -116,6 +119,7 @@ const SelectIssueModal = ({
     isAttached: true,
     isOpen: Boolean(isOpen),
     currentlyResyncing,
+    search,
   });
 
   const [selectedIssue, setSelectedIssue] = useState<string>('');
@@ -123,7 +127,10 @@ const SelectIssueModal = ({
   const closeForm = () => {
     closeIssueModal();
     setSelectedIssue('');
+    setSearch('');
   };
+
+  const searchIssues = (searchterm: string) => setSearch(searchterm);
 
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedIssue(event.target.value || /* istanbul ignore next */ '');
@@ -246,6 +253,7 @@ const SelectIssueModal = ({
             />
           </div>
         </div>
+        <Search searchIssues={searchIssues} />
         <form className="slds-form">
           <div className="slds-grid slds-gutters slds-wrap">
             <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
