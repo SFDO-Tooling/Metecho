@@ -1,4 +1,4 @@
-Django==4.0.0
+Django==4.0.1
 autobahn==21.11.1
 beautifulsoup4==4.10.0
 bleach==4.1.0
@@ -10,7 +10,7 @@ django-allauth==0.47.0
 django-anymail[mailgun]==8.4
 django-hashid-field==3.3.3
 https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
-django-log-request-id==1.7.0
+django-log-request-id==2.0.0
 django-model-utils==4.2.0
 django-parler==2.3
 django-rq==2.5.1
@@ -27,7 +27,7 @@ markdown==3.3.6
 # 1. Salesforce code only links to unmodified (binary, if applicable) copies of the 3rd-party code
 # 2. Salesforce code only dynamically (not statically) links to the 3rd-party code
 # 3. Salesforce code does not derive from, is not based on, and remains separate (aside from linking) from the requested code
-psycopg2-binary==2.9.2
+psycopg2-binary==2.9.3
 
 rq-scheduler==0.11.0
 sentry-sdk==1.5.1
