@@ -106,7 +106,7 @@ deprecated==1.2.13
     #   redis
 dj-database-url==0.5.0
     # via -r requirements/prod.in
-django==4.0
+django==4.0.1
     # via
     #   -r requirements/prod.in
     #   channels
