@@ -243,7 +243,7 @@ packaging==21.3
     # via bleach
 psutil==5.8.0
     # via cumulusci
-psycopg2-binary==2.9.2
+psycopg2-binary==2.9.3
     # via -r requirements/prod.in
 pyasn1==0.4.8
     # via
