@@ -83,7 +83,7 @@ inflection==0.5.1
     #   pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
-ipython==7.30.1
+ipython==7.31.0
     # via -r requirements/dev.in
 isort==5.10.1
     # via -r requirements/dev.in
