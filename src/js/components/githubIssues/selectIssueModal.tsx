@@ -104,7 +104,7 @@ const SelectIssueModal = ({
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [search, setSearch] = useState<string>('');
-  const { issues, currentlyFetching } = useFetchIssues({
+  const { issues, currentlyFetching, count } = useFetchIssues({
     projectId,
     isAttached: false,
     isOpen: Boolean(isOpen),
@@ -254,6 +254,14 @@ const SelectIssueModal = ({
           </div>
         </div>
         <Search searchIssues={searchIssues} />
+        {search.length > 0 ? (
+          <p>
+            {count} results of {count + attachedIssues?.length + issues?.length}{' '}
+            most recent issues
+          </p>
+        ) : (
+          ''
+        )}
         <form className="slds-form">
           <div className="slds-grid slds-gutters slds-wrap">
             <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">

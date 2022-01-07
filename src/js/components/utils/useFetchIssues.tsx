@@ -22,7 +22,7 @@ export default ({
   const dispatch = useDispatch<ThunkDispatch>();
   const [issues, setIssues] = useState<GitHubIssue[]>();
   const [currentlyFetching, setCurrentlyFetching] = useState(false);
-
+  const [count, setCount] = useState(0);
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();
     const fetchIssues = async () => {
@@ -37,11 +37,12 @@ export default ({
       });
       setIssues(payload?.results || /* istanbul ignore next */ []);
       setCurrentlyFetching(false);
+      setCount(payload?.count);
     };
     if (projectId && isOpen && !currentlyResyncing) {
       fetchIssues();
     }
   }, [dispatch, projectId, isOpen, isAttached, currentlyResyncing, search]);
 
-  return { issues, currentlyFetching };
+  return { issues, currentlyFetching, count };
 };
