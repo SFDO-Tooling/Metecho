@@ -10,7 +10,7 @@ asgiref==3.4.1
     # via
     #   -c requirements/prod.txt
     #   django
-attrs==21.2.0
+attrs==21.4.0
     # via
     #   -c requirements/prod.txt
     #   flake8-bugbear
@@ -41,7 +41,7 @@ coveralls==3.3.1
     # via -r requirements/dev.in
 decorator==5.1.0
     # via ipython
-django==4.0
+django==4.0.1
     # via
     #   -c requirements/prod.txt
     #   django-extensions
@@ -119,7 +119,7 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-platformdirs==2.4.0
+platformdirs==2.4.1
     # via black
 pluggy==1.0.0
     # via pytest
