@@ -122,6 +122,10 @@ const SelectIssueModal = ({
     search,
   });
 
+  const issueLength = attachedIssues?.length
+    ? attachedIssues?.length + issues?.length
+    : 0;
+
   const [selectedIssue, setSelectedIssue] = useState<string>('');
 
   const closeForm = () => {
@@ -256,8 +260,7 @@ const SelectIssueModal = ({
         <Search searchIssues={searchIssues} />
         {search.length > 0 ? (
           <p>
-            {count} results of {count + attachedIssues?.length + issues?.length}{' '}
-            most recent issues
+            {count} results of {count + issueLength} most recent issues
           </p>
         ) : (
           ''

@@ -1112,10 +1112,10 @@ describe('<EpicDetail/>', () => {
     });
 
     test('attaches issue to epic', async () => {
-      fetchMock.getOnce('end:is_attached=false', {
+      fetchMock.getOnce('end:is_attached=false&search=', {
         results: [sampleIssue1],
       });
-      fetchMock.getOnce('end:is_attached=true', {
+      fetchMock.getOnce('end:is_attached=true&search=', {
         results: [sampleIssue2],
       });
       const { queryByText, getByText, getAllByText, findByLabelText } = setup();

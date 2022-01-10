@@ -569,10 +569,10 @@ describe('<ProjectDetail />', () => {
     });
 
     test('creates a task from issue', async () => {
-      fetchMock.getOnce('end:is_attached=false', {
+      fetchMock.getOnce('end:is_attached=false&search=', {
         results: [sampleIssue1],
       });
-      fetchMock.getOnce('end:is_attached=true', {
+      fetchMock.getOnce('end:is_attached=true&search=', {
         results: [sampleIssue2],
       });
       const {
@@ -613,10 +613,10 @@ describe('<ProjectDetail />', () => {
     });
 
     test('creates an epic from issue', async () => {
-      fetchMock.get('end:is_attached=false', {
+      fetchMock.get('end:is_attached=false&search=', {
         results: [sampleIssue1],
       });
-      fetchMock.get('end:is_attached=true', {
+      fetchMock.get('end:is_attached=true&search=', {
         results: [sampleIssue2, sampleIssue3, sampleIssue4],
       });
       const {
@@ -692,10 +692,10 @@ describe('<ProjectDetail />', () => {
     });
 
     test('refreshes issues by retrieving them from github when none locally', async () => {
-      fetchMock.get('end:is_attached=true', {
+      fetchMock.getOnce('end:is_attached=true&search=', {
         results: [],
       });
-      fetchMock.get('end:is_attached=false', {
+      fetchMock.getOnce('end:is_attached=false&search=', {
         results: [],
       });
       const { getByText } = setup();
