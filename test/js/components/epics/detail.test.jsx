@@ -1112,12 +1112,24 @@ describe('<EpicDetail/>', () => {
     });
 
     test('attaches issue to epic', async () => {
-      fetchMock.getOnce('end:is_attached=false&search=', {
-        results: [sampleIssue1],
-      });
-      fetchMock.getOnce('end:is_attached=true&search=', {
-        results: [sampleIssue2],
-      });
+      fetchMock.getOnce(
+        {
+          url: `begin:${window.api_urls.issue_list}`,
+          query: { is_attached: false, search: '' },
+        },
+        {
+          results: [sampleIssue1],
+        },
+      );
+      fetchMock.getOnce(
+        {
+          url: `begin:${window.api_urls.issue_list}`,
+          query: { is_attached: true, search: '' },
+        },
+        {
+          results: [sampleIssue2],
+        },
+      );
       const { queryByText, getByText, getAllByText, findByLabelText } = setup();
       fireEvent.click(getByText('Attach Issue to Epic'));
 
