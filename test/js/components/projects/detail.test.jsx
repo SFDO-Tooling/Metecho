@@ -572,7 +572,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false, search: null },
         },
         {
           results: [sampleIssue1],
@@ -581,12 +581,12 @@ describe('<ProjectDetail />', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true, search: null },
         },
         {
           results: [sampleIssue2],
         },
-        { overwriteRoutes: false },
+        { overwriteRoutes: true },
       );
       const {
         queryByText,
@@ -643,7 +643,7 @@ describe('<ProjectDetail />', () => {
         {
           results: [sampleIssue2, sampleIssue3, sampleIssue4],
         },
-        { overwriteRoutes: false },
+        { overwriteRoutes: true },
       );
       const {
         queryByText,
@@ -686,7 +686,7 @@ describe('<ProjectDetail />', () => {
         {
           results: [sampleIssue2, sampleIssue3, sampleIssue4],
         },
-        { overwriteRoutes: false },
+        { overwriteRoutes: true },
       );
       fetchMock.postOnce(
         window.api_urls.project_refresh_github_issues(sampleIssue1.project),
@@ -722,7 +722,7 @@ describe('<ProjectDetail />', () => {
         {
           results: [sampleIssue2, sampleIssue3, sampleIssue4],
         },
-        { overwriteRoutes: false },
+        { overwriteRoutes: true },
       );
       const { getByText } = setup({
         initialState: {
@@ -744,16 +744,16 @@ describe('<ProjectDetail />', () => {
     });
 
     test('refreshes issues by retrieving them from github when none locally', async () => {
-      fetchMock.getOnce(
+      fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true, search: null },
         },
         {
           results: [],
         },
       );
-      fetchMock.getOnce(
+      fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list}`,
           query: { is_attached: false, search: '' },
@@ -761,7 +761,7 @@ describe('<ProjectDetail />', () => {
         {
           results: [],
         },
-        { overwriteRoutes: false },
+        { overwriteRoutes: true },
       );
       const { getByText } = setup();
       fireEvent.click(getByText('Create Epic from GitHub Issue'));

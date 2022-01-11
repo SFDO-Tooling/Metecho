@@ -9,8 +9,12 @@ const SearchIssues = ({
   searchIssues: (searcht: string) => void;
 }) => {
   const [searchterm, setSearchterm] = useState('');
-  const handleSearchterm = (e) => {
-    setSearchterm(e.target.value);
+  const handleSearchterm = ({
+    event,
+  }: {
+    event: React.ChangeEvent<HTMLInputElement>;
+  }) => {
+    setSearchterm(event.target?.value);
   };
   return (
     <>

@@ -122,9 +122,10 @@ const SelectIssueModal = ({
     search,
   });
 
-  const issueLength = attachedIssues?.length
-    ? attachedIssues?.length + issues?.length
-    : 0;
+  const issueLength =
+    attachedIssues?.length && issues?.length
+      ? attachedIssues?.length + issues?.length
+      : 0;
 
   const [selectedIssue, setSelectedIssue] = useState<string>('');
 
