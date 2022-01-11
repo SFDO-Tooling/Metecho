@@ -1454,7 +1454,7 @@ describe('<TaskDetail/>', () => {
     test('attaches issue to task', async () => {
       fetchMock.getOnce(
         {
-          url: `begin:${window.api_urls.issue_list}`,
+          url: `begin:${window.api_urls.issue_list()}`,
           query: { is_attached: false, search: '' },
         },
         {
@@ -1463,13 +1463,13 @@ describe('<TaskDetail/>', () => {
       );
       fetchMock.getOnce(
         {
-          url: `begin:${window.api_urls.issue_list}`,
+          url: `begin:${window.api_urls.issue_list()}`,
           query: { is_attached: true, search: '' },
+          overwriteRoutes: false,
         },
         {
           results: [sampleIssue2],
         },
-        { overwriteRoutes: false },
       );
       const { queryByText, getByText, getAllByText, findByLabelText } = setup();
       fireEvent.click(getByText('Attach Issue to Task'));

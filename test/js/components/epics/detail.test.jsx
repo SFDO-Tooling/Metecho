@@ -1114,7 +1114,7 @@ describe('<EpicDetail/>', () => {
     test('attaches issue to epic', async () => {
       fetchMock.getOnce(
         {
-          url: `begin:${window.api_urls.issue_list}`,
+          url: `begin:${window.api_urls.issue_list()}`,
           query: { is_attached: false, search: '' },
         },
         {
@@ -1123,8 +1123,9 @@ describe('<EpicDetail/>', () => {
       );
       fetchMock.getOnce(
         {
-          url: `begin:${window.api_urls.issue_list}`,
+          url: `begin:${window.api_urls.issue_list()}`,
           query: { is_attached: true, search: '' },
+          overwriteRoutes: false,
         },
         {
           results: [sampleIssue2],
