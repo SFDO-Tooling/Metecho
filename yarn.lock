@@ -1598,10 +1598,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.0.tgz#6734f8ebc106a0860dff7f92bf90df193f0935d7"
   integrity sha512-zrsUxjLOKAzdewIDRWy9nsV1GQsKBCWaGwsZQlCgr6/q+vjyZhFgqedLfFBuI9anTPEUT4APq9Mu0SZBTzIcGQ==
 
-"@salesforce-ux/design-system@2.16.2":
-  version "2.16.2"
-  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.16.2.tgz#778aa4b4eff99367c1886bb74a60b3d099bfeb43"
-  integrity sha512-8qG5wdR3+5s4zcszMZs9Z4HocPV6uWhisHSeUyxl6Idb5m99yER3HwyKtyIUViPB/8ukDwptLBvJWH+qwA6EOg==
+"@salesforce-ux/design-system@2.17.1":
+  version "2.17.1"
+  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.17.1.tgz#16c35dc9e3a594bf5920a62fd5495ed8e2e493c5"
+  integrity sha512-1mBwWJnQIwTr+9cxoM3Jq89nW3zoRNj2nSHLgKhQciHln3IBfWk7N3odUxW7jrpqDE/bNzR+FJrNgjzQsKM3Ng==
 
 "@salesforce/babel-preset-design-system-react@^3.0.0":
   version "3.0.0"
