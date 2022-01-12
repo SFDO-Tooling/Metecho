@@ -132,7 +132,7 @@
     "fetch-mock": "^9.11.0",
     "html-webpack-plugin": "^5.5.0",
     "i18next-scanner-webpack": "0.8.2",
-    "jest": "^27.4.5",
+    "jest": "^27.4.7",
     "jest-junit": "^13.0.0",
     "mini-css-extract-plugin": "^2.4.5",
     "node-fetch": "^2.6.6",
