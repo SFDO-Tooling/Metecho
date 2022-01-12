@@ -38,6 +38,7 @@ export type issueSelectedCallback = (
 interface Props {
   projectId: string;
   projectSlug: string;
+  issueCount: number;
   isOpen: boolean | 'epic' | 'task';
   closeIssueModal: () => void;
   issueSelected?: issueSelectedCallback;
@@ -95,6 +96,7 @@ const EpicStatus = ({ epic }: { epic: IssueEpic }) => {
 const SelectIssueModal = ({
   projectId,
   projectSlug,
+  issueCount,
   isOpen,
   closeIssueModal,
   issueSelected,
@@ -121,11 +123,6 @@ const SelectIssueModal = ({
     currentlyResyncing,
     search,
   });
-
-  const issueLength =
-    attachedIssues?.length && issues?.length
-      ? attachedIssues?.length + issues?.length
-      : 0;
 
   const [selectedIssue, setSelectedIssue] = useState<string>('');
 
@@ -261,7 +258,7 @@ const SelectIssueModal = ({
         <Search searchIssues={searchIssues} />
         {search.length > 0 ? (
           <p>
-            {count} results of {count + issueLength} most recent issues
+            {count} results of {issueCount} most recent issues
           </p>
         ) : (
           ''
