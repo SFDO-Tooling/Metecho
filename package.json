@@ -110,7 +110,7 @@
     "@types/uuid": "^8.3.3",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
-    "autoprefixer": "^10.4.0",
+    "autoprefixer": "^10.4.2",
     "babel-jest": "^27.4.5",
     "babel-loader": "^8.2.3",
     "core-js": "^3.20.0",
