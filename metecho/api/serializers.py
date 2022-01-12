@@ -241,6 +241,7 @@ class ProjectSerializer(HashIdModelSerializer):
     has_push_permission = serializers.SerializerMethodField()
     github_users = GitHubUserSerializer(many=True, allow_empty=True, required=False)
     org_config_names = OrgConfigNameSerializer(many=True, read_only=True)
+    github_issue_count = serializers.IntegerField(source="issues.count", read_only=True)
 
     class Meta:
         model = Project
@@ -259,6 +260,7 @@ class ProjectSerializer(HashIdModelSerializer):
             "old_slugs",
             "branch_prefix",
             "github_users",
+            "github_issue_count",
             "repo_image_url",
             "org_config_names",
             "currently_fetching_org_config_names",
