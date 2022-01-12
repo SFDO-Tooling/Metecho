@@ -769,6 +769,60 @@ describe('<ProjectDetail />', () => {
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
       await waitFor(() => expect(refreshGitHubIssues).toHaveBeenCalledTimes(1));
     });
+
+    describe('<SearchIssues/>', () => {
+      test('searches and returns an issue', () => {
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '' },
+          },
+          {
+            results: [sampleIssue2, sampleIssue3, sampleIssue4],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '' },
+          },
+          {
+            results: [sampleIssue1],
+          },
+          { overwriteRoutes: false },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '87' },
+          },
+          {
+            results: [sampleIssue1],
+          },
+          { overwriteRoutes: false },
+        );
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '87' },
+          },
+          {
+            results: [],
+          },
+          { overwriteRoutes: false },
+        );
+        const { getByText, getByPlaceholderText } = setup();
+        fireEvent.click(getByText('Create Epic from GitHub Issue'));
+        const input = getByPlaceholderText('Search issues by title or number');
+        const submit = getByText('Search', { selector: 'button' });
+        fireEvent.change(input, { target: { value: '87' } });
+        fireEvent.click(submit);
+
+        expect(getByText('#87: this is an issue')).toBeVisible();
+      });
+    });
   });
 
   describe('<CreateEpicModal />', () => {
