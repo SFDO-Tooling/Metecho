@@ -771,7 +771,7 @@ describe('<ProjectDetail />', () => {
     });
 
     describe('<SearchIssues/>', () => {
-      test('searches and returns an issue on presssing the search', async () => {
+      test('searches and returns an issue on pressing the search', async () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
@@ -826,7 +826,7 @@ describe('<ProjectDetail />', () => {
         expect(issue).toBeVisible();
       });
 
-      test('searches and returns an issue on presssing enter', async () => {
+      test('searches and returns an issue on pressing enter', async () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
@@ -873,7 +873,7 @@ describe('<ProjectDetail />', () => {
         const input = getByPlaceholderText('Search issues by title or number');
         fireEvent.change(input, { target: { value: '87' } });
         fireEvent.keyDown(input, {
-          charCode: 13,
+          keyCode: 13,
         });
 
         expect.assertions(1);
