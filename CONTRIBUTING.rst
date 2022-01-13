@@ -87,7 +87,7 @@ The App will need the following permissions:
     - Pull requests: Read & write
     - Commit statuses: Read & write
 - Organization permissions:
-    - None
+    - Members: Read-only
 - User permissions:
     - Email addresses: Read-only
 - Subscribe to events:
