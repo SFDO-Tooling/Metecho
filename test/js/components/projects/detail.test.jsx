@@ -771,7 +771,7 @@ describe('<ProjectDetail />', () => {
     });
 
     describe('<SearchIssues/>', () => {
-      test('searches and returns an issue', async () => {
+      test('searches and returns an issue on presssing the search', async () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
@@ -819,6 +819,117 @@ describe('<ProjectDetail />', () => {
         const submit = getByText('Search', { selector: 'button' });
         fireEvent.change(input, { target: { value: '87' } });
         fireEvent.click(submit);
+
+        expect.assertions(1);
+        const issue = await findByText('#87: this is an issue');
+
+        expect(issue).toBeVisible();
+      });
+
+      test('searches and returns an issue on presssing enter', async () => {
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '' },
+          },
+          {
+            results: [sampleIssue2, sampleIssue3, sampleIssue4],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '87' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '87' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        const { getByText, getByPlaceholderText, findByText } = setup();
+        fireEvent.click(getByText('Create Epic from GitHub Issue'));
+        const input = getByPlaceholderText('Search issues by title or number');
+        fireEvent.change(input, { target: { value: '87' } });
+        fireEvent.keyDown(input, {
+          charCode: 13,
+        });
+
+        expect.assertions(1);
+        const issue = await findByText('#87: this is an issue');
+
+        expect(issue).toBeVisible();
+      });
+
+      test('the clear button clears input and returns issues for no search term', async () => {
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '' },
+          },
+          {
+            results: [sampleIssue2, sampleIssue3, sampleIssue4],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: 'mongoose' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: 'mongoose' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        const { getByText, getByPlaceholderText, findByText } = setup();
+        fireEvent.click(getByText('Create Epic from GitHub Issue'));
+        const input = getByPlaceholderText('Search issues by title or number');
+        const clear = getByText('Clear');
+        fireEvent.change(input, { target: { value: 'moogoose' } });
+        fireEvent.click(clear);
 
         expect.assertions(1);
         const issue = await findByText('#87: this is an issue');
