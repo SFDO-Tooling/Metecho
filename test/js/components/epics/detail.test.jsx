@@ -1115,7 +1115,7 @@ describe('<EpicDetail/>', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false },
         },
         {
           results: [sampleIssue1],
@@ -1124,7 +1124,7 @@ describe('<EpicDetail/>', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true },
           overwriteRoutes: false,
         },
         {
