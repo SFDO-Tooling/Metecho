@@ -32,18 +32,20 @@ export default ({
         url: addUrlParams(baseUrl, {
           project: projectId,
           is_attached: isAttached,
-          search,
+          search: search || undefined,
         }),
         dispatch,
       });
       setIssues(payload?.results || /* istanbul ignore next */ []);
       setCurrentlyFetching(false);
-      setCount(payload?.count);
+      setCount(payload?.count || /* istanbul ignore next */ 0);
     };
     if (projectId && isOpen && !currentlyResyncing) {
       fetchIssues();
     }
   }, [dispatch, projectId, isOpen, isAttached, currentlyResyncing, search]);
 
-  return { issues, currentlyFetching, count };
+  const clearIssues = () => setIssues(undefined);
+
+  return { issues, currentlyFetching, count, clearIssues };
 };
