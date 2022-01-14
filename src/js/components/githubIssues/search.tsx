@@ -3,10 +3,18 @@ import Search from '@salesforce/design-system-react/components/input/search';
 import { t } from 'i18next';
 import React, { useState } from 'react';
 
+import { pluralize } from '@/js/utils/helpers';
+
 const SearchIssues = ({
   searchIssues,
+  count,
+  total,
+  hasSearch,
 }: {
   searchIssues: (searcht: string) => void;
+  count: number;
+  total: number;
+  hasSearch: boolean;
 }) => {
   const [searchterm, setSearchterm] = useState('');
   const handleSearchterm = (
@@ -25,12 +33,24 @@ const SearchIssues = ({
     searchIssues(searchterm);
   };
 
+  const countMsg = t(
+    'issueResultsCount',
+    `${count} ${pluralize(count, 'result')} of`,
+    { count },
+  );
+  const totalMsg = t(
+    'issueCount',
+    `${total} total ${pluralize(total, 'issue')}`,
+    { count: total },
+  );
+
   return (
     <>
       <Search
         placeholder={t('Search issues by title or number')}
-        name="search"
+        inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
         onChange={handleSearchterm}
+        name="search"
         value={searchterm}
         clearable
         onClear={() => {
