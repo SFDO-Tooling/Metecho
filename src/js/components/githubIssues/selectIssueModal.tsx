@@ -132,7 +132,10 @@ const SelectIssueModal = ({
     setSearch('');
   };
 
-  const searchIssues = (searchterm: string) => setSearch(searchterm);
+  const searchIssues = (searchterm: string) => {
+    const trimmed = searchterm.trim();
+    setSearch(trimmed);
+  };
 
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedIssue(event.target.value || /* istanbul ignore next */ '');

@@ -15,6 +15,16 @@ const SearchIssues = ({
   ) => {
     setSearchterm(value);
   };
+
+  const clearSearch = () => {
+    searchIssues('');
+    setSearchterm('');
+  };
+
+  const getSearchResults = () => {
+    searchIssues(searchterm);
+  };
+
   return (
     <>
       <Search
@@ -22,14 +32,13 @@ const SearchIssues = ({
         name="search"
         onChange={handleSearchterm}
         value={searchterm}
-        clearable={true}
+        clearable
         onClear={() => {
-          searchIssues('');
-          setSearchterm('');
+          clearSearch();
         }}
-        onSearch={() => searchIssues(searchterm)}
+        onSearch={() => getSearchResults()}
       ></Search>
-      <Button onClick={() => searchIssues(searchterm)}>{t('Search')}</Button>
+      <Button onClick={() => getSearchResults()} label={t('Search')}></Button>
     </>
   );
 };

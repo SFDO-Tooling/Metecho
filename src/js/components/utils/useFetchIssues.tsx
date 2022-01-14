@@ -23,6 +23,7 @@ export default ({
   const [issues, setIssues] = useState<GitHubIssue[]>();
   const [currentlyFetching, setCurrentlyFetching] = useState(false);
   const [count, setCount] = useState(0);
+
   useEffect(() => {
     const baseUrl = window.api_urls.issue_list();
     const fetchIssues = async () => {
