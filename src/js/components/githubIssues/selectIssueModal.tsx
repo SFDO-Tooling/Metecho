@@ -116,6 +116,7 @@ const SelectIssueModal = ({
   const {
     issues: attachedIssues,
     currentlyFetching: currentlyFetchingAttached,
+    count: countAttached,
   } = useFetchIssues({
     projectId,
     isAttached: true,
@@ -242,7 +243,7 @@ const SelectIssueModal = ({
             <div className="slds-m-top_small">
               <Search
                 searchIssues={searchIssues}
-                count={count}
+                count={count + countAttached}
                 total={issueCount}
                 hasSearch={Boolean(search)}
               />
