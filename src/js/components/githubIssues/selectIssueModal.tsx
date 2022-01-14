@@ -236,6 +236,14 @@ const SelectIssueModal = ({
                 re-syncing the list of Issues.
               </Trans>
             </p>
+            <div className="slds-m-top_small">
+              <Search
+                searchIssues={searchIssues}
+                count={count}
+                total={issueCount}
+                hasSearch={Boolean(search)}
+              />
+            </div>
           </div>
           <div
             className="slds-grid
@@ -246,23 +254,11 @@ const SelectIssueModal = ({
             <ResyncIssuesButton
               projectId={projectId}
               isRefreshing={currentlyResyncing}
-              forceResync={Boolean(
-                issues &&
-                  attachedIssues &&
-                  !issues.length &&
-                  !attachedIssues.length,
-              )}
+              hasFetched={Boolean(issues && attachedIssues)}
+              noIssues={Boolean(!issues?.length && !attachedIssues?.length)}
             />
           </div>
         </div>
-        <Search searchIssues={searchIssues} />
-        {search.length > 0 ? (
-          <p>
-            {count} results of {issueCount} most recent issues
-          </p>
-        ) : (
-          ''
-        )}
         <form className="slds-form">
           <div className="slds-grid slds-gutters slds-wrap">
             <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
