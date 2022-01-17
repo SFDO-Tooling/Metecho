@@ -317,7 +317,7 @@ const SelectIssueModal = ({
                     {/* eslint-disable-next-line no-nested-ternary */}
                     {issue.task ? (
                       <>
-                        <p>
+                        <div>
                           {t('Task:')}{' '}
                           <Link
                             to={
@@ -336,11 +336,11 @@ const SelectIssueModal = ({
                             {issue.task.name}
                           </Link>
                           <TaskStatus task={issue.task} />
-                        </p>
+                        </div>
                       </>
                     ) : issue.epic ? (
                       <>
-                        <p>
+                        <div>
                           {t('Epic:')}{' '}
                           <Link
                             to={routes.epic_detail(
@@ -351,7 +351,7 @@ const SelectIssueModal = ({
                             {issue.epic.name}
                           </Link>
                           <EpicStatus epic={issue.epic} />
-                        </p>
+                        </div>
                       </>
                     ) : /* istanbul ignore next */ null}
                   </div>
