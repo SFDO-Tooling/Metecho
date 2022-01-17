@@ -572,7 +572,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false },
         },
         {
           results: [sampleIssue1],
@@ -581,7 +581,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true },
           overwriteRoutes: false,
         },
         {
@@ -629,7 +629,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false },
         },
         {
           results: [sampleIssue1],
@@ -638,7 +638,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true },
           overwriteRoutes: false,
         },
         {
@@ -672,7 +672,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true },
         },
         {
           results: [sampleIssue1],
@@ -681,7 +681,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false },
           overwriteRoutes: false,
         },
         {
@@ -708,7 +708,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true },
         },
         {
           results: [sampleIssue1],
@@ -717,7 +717,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.get(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false },
           overwriteRoutes: false,
         },
         {
@@ -747,7 +747,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: true, search: '' },
+          query: { is_attached: true },
         },
         {
           results: [],
@@ -756,7 +756,7 @@ describe('<ProjectDetail />', () => {
       fetchMock.getOnce(
         {
           url: `begin:${window.api_urls.issue_list()}`,
-          query: { is_attached: false, search: '' },
+          query: { is_attached: false },
           overwriteRoutes: false,
         },
         {
@@ -775,7 +775,7 @@ describe('<ProjectDetail />', () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
-            query: { is_attached: true, search: '' },
+            query: { is_attached: true },
           },
           {
             results: [sampleIssue2, sampleIssue3, sampleIssue4],
@@ -785,7 +785,7 @@ describe('<ProjectDetail />', () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
-            query: { is_attached: false, search: '' },
+            query: { is_attached: false },
             overwriteRoutes: false,
           },
           {
@@ -830,7 +830,7 @@ describe('<ProjectDetail />', () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
-            query: { is_attached: true, search: '' },
+            query: { is_attached: true },
           },
           {
             results: [sampleIssue2, sampleIssue3, sampleIssue4],
@@ -840,7 +840,7 @@ describe('<ProjectDetail />', () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
-            query: { is_attached: false, search: '' },
+            query: { is_attached: false },
             overwriteRoutes: false,
           },
           {
@@ -886,7 +886,7 @@ describe('<ProjectDetail />', () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
-            query: { is_attached: true, search: '' },
+            query: { is_attached: true },
           },
           {
             results: [sampleIssue2, sampleIssue3, sampleIssue4],
@@ -896,7 +896,7 @@ describe('<ProjectDetail />', () => {
         fetchMock.getOnce(
           {
             url: `begin:${window.api_urls.issue_list()}`,
-            query: { is_attached: false, search: '' },
+            query: { is_attached: false },
             overwriteRoutes: false,
           },
           {

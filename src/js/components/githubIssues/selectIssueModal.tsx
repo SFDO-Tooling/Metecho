@@ -106,7 +106,9 @@ const SelectIssueModal = ({
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [search, setSearch] = useState<string>('');
-  const { issues, currentlyFetching, count } = useFetchIssues({
+  const [selectedIssue, setSelectedIssue] = useState<string>('');
+
+  const { issues, currentlyFetching, count, clearIssues } = useFetchIssues({
     projectId,
     isAttached: false,
     isOpen: Boolean(isOpen),
@@ -117,6 +119,7 @@ const SelectIssueModal = ({
     issues: attachedIssues,
     currentlyFetching: currentlyFetchingAttached,
     count: countAttached,
+    clearIssues: clearAttachedIssues,
   } = useFetchIssues({
     projectId,
     isAttached: true,
@@ -125,12 +128,12 @@ const SelectIssueModal = ({
     search,
   });
 
-  const [selectedIssue, setSelectedIssue] = useState<string>('');
-
   const closeForm = () => {
     closeIssueModal();
     setSelectedIssue('');
     setSearch('');
+    clearIssues();
+    clearAttachedIssues();
   };
 
   const searchIssues = (searchterm: string) => {

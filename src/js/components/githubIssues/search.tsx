@@ -49,16 +49,14 @@ const SearchIssues = ({
       <Search
         placeholder={t('Search issues by title or number')}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
-        onChange={handleSearchterm}
         name="search"
         value={searchterm}
         clearable
-        onClear={() => {
-          clearSearch();
-        }}
-        onSearch={() => getSearchResults()}
-      ></Search>
-      <Button onClick={() => getSearchResults()} label={t('Search')}></Button>
+        onChange={handleSearchterm}
+        onClear={clearSearch}
+        onSearch={getSearchResults}
+      />
+      <Button label={t('Search')} onClick={getSearchResults} />
     </>
   );
 };
