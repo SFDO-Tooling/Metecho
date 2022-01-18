@@ -44,11 +44,13 @@ const SearchIssues = ({
     { count: total },
   );
 
+  const label = t('Search issues by title or number');
+
   return (
     <div className="form-grid" data-form="search-issues">
       <Search
-        assistiveText={t('Search issues by title or number')}
-        placeholder={t('Search issues by title or number')}
+        assistiveText={{ label }}
+        placeholder={label}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
         name="search"
         value={searchterm}
