@@ -47,6 +47,7 @@ const SearchIssues = ({
   return (
     <>
       <Search
+        assistiveText={t('Search issues by title or number')}
         placeholder={t('Search issues by title or number')}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
         name="search"
