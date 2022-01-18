@@ -57,9 +57,9 @@ const SearchIssues = ({
         onSearch={getSearchResults}
       />
       <Button
+        className="issues-search-button"
         label={t('Search')}
         onClick={getSearchResults}
-        className={'issues-search-button'}
       />
     </div>
   );
