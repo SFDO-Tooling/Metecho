@@ -45,7 +45,7 @@ const SearchIssues = ({
   );
 
   return (
-    <>
+    <div className="form-grid" data-form="search-issues">
       <Search
         assistiveText={t('Search issues by title or number')}
         placeholder={t('Search issues by title or number')}
@@ -57,8 +57,12 @@ const SearchIssues = ({
         onClear={clearSearch}
         onSearch={getSearchResults}
       />
-      <Button label={t('Search')} onClick={getSearchResults} />
-    </>
+      <Button
+        className="issues-search-button"
+        label={t('Search')}
+        onClick={getSearchResults}
+      />
+    </div>
   );
 };
 
