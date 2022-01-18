@@ -45,7 +45,7 @@ const SearchIssues = ({
   );
 
   return (
-    <>
+    <div className="form-grid" data-form="search-issues">
       <Search
         placeholder={t('Search issues by title or number')}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
@@ -56,8 +56,12 @@ const SearchIssues = ({
         onClear={clearSearch}
         onSearch={getSearchResults}
       />
-      <Button label={t('Search')} onClick={getSearchResults} />
-    </>
+      <Button
+        label={t('Search')}
+        onClick={getSearchResults}
+        className={'issues-search-button'}
+      />
+    </div>
   );
 };
 

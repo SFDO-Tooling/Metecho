@@ -243,7 +243,7 @@ const SelectIssueModal = ({
                 re-syncing the list of Issues.
               </Trans>
             </p>
-            <div className="slds-m-top_small">
+            <div className="slds-m-top_small container-fill-width">
               <Search
                 searchIssues={searchIssues}
                 count={count + countAttached}
