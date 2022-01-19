@@ -271,7 +271,7 @@ pyopenssl==21.0.0
     # via twisted
 pyparsing==3.0.6
     # via packaging
-pyrsistent==0.18.0
+pyrsistent==0.18.1
     # via jsonschema
 python-baseconv==1.2.2
     # via
