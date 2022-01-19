@@ -49,12 +49,12 @@ const SearchIssues = ({
   return (
     <div className="slds-grid slds-wrap">
       <Search
+        className="slds-p-right_small slds-grow"
         assistiveText={{ label }}
         placeholder={label}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
         name="search"
         value={searchterm}
-        className="slds-p-right_small slds-grow"
         clearable
         onChange={handleSearchterm}
         onClear={clearSearch}

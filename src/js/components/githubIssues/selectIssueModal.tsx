@@ -241,7 +241,7 @@ const SelectIssueModal = ({
               slds-p-right_medium
               slds-p-bottom_small
               slds-size_1-of-1
-              slds-medium-size_8-of-12"
+              slds-medium-size_5-of-7"
           >
             <p>
               <Trans i18nKey="githubIssuesHelp">
@@ -255,7 +255,7 @@ const SelectIssueModal = ({
           <div
             className="slds-grid
               slds-size_1-of-1
-              slds-medium-size_4-of-12
+              slds-medium-size_2-of-7
               slds-m-bottom_small"
           >
             <ResyncIssuesButton
@@ -269,7 +269,7 @@ const SelectIssueModal = ({
         <div
           className="search-container
             slds-size_1-of-1
-            slds-medium-size_8-of-12
+            slds-medium-size_5-of-7
             slds-p-right_medium
             slds-p-bottom_large"
         >
