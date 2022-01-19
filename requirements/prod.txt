@@ -240,7 +240,9 @@ oauthlib==3.1.1
 orderedmultidict==1.0.1
     # via furl
 packaging==21.3
-    # via bleach
+    # via
+    #   bleach
+    #   redis
 psutil==5.8.0
     # via cumulusci
 psycopg2-binary==2.9.2
@@ -298,7 +300,7 @@ pyyaml==6.0
     #   cumulusci
     #   drf-spectacular
     #   snowfakery
-redis==4.0.2
+redis==4.1.1
     # via
     #   django-rq
     #   rq
