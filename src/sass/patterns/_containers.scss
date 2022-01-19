@@ -48,3 +48,10 @@
     height: 100%;
   }
 }
+
+// Remove extra space padding by overriding slds-p-right_medium on narrow screens
+@media (max-width: $mq-medium) {
+  .search-container {
+    padding-right: 0;
+  }
+}

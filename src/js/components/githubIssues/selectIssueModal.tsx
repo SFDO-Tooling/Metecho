@@ -232,9 +232,17 @@ const SelectIssueModal = ({
         <div
           className="slds-grid
             slds-grid_vertical-align-start
-            slds-p-bottom_large"
+            slds-wrap"
         >
-          <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+          <div
+            className="slds-grid
+              slds-wrap
+              slds-shrink
+              slds-p-right_medium
+              slds-p-bottom_small
+              slds-size_1-of-1
+              slds-medium-size_8-of-12"
+          >
             <p>
               <Trans i18nKey="githubIssuesHelp">
                 Issues are items in GitHub’s bug and enhancement tracking
@@ -243,21 +251,8 @@ const SelectIssueModal = ({
                 re-syncing the list of Issues.
               </Trans>
             </p>
-            <div className="slds-m-top_small slds-size_1-of-1">
-              <Search
-                searchIssues={searchIssues}
-                count={count + countAttached}
-                total={issueCount}
-                hasSearch={Boolean(search)}
-              />
-            </div>
           </div>
-          <div
-            className="slds-grid
-              slds-grow
-              slds-shrink-none
-              slds-grid_align-end"
-          >
+          <div className="slds-grid slds-size_1-of-1 slds-medium-size_4-of-12">
             <ResyncIssuesButton
               projectId={projectId}
               isRefreshing={currentlyResyncing}
@@ -265,6 +260,21 @@ const SelectIssueModal = ({
               noIssues={Boolean(!issues?.length && !attachedIssues?.length)}
             />
           </div>
+        </div>
+        <div
+          className="slds-m-top_small
+            search-container
+            slds-size_1-of-1
+            slds-medium-size_8-of-12
+            slds-p-right_medium
+            slds-p-bottom_large"
+        >
+          <Search
+            searchIssues={searchIssues}
+            count={count + countAttached}
+            total={issueCount}
+            hasSearch={Boolean(search)}
+          />
         </div>
         <form className="slds-form">
           <div className="slds-grid slds-gutters slds-wrap">
