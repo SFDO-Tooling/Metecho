@@ -252,7 +252,12 @@ const SelectIssueModal = ({
               </Trans>
             </p>
           </div>
-          <div className="slds-grid slds-size_1-of-1 slds-medium-size_4-of-12">
+          <div
+            className="slds-grid
+              slds-size_1-of-1
+              slds-medium-size_4-of-12
+              slds-m-bottom_small"
+          >
             <ResyncIssuesButton
               projectId={projectId}
               isRefreshing={currentlyResyncing}
@@ -262,8 +267,7 @@ const SelectIssueModal = ({
           </div>
         </div>
         <div
-          className="slds-m-top_small
-            search-container
+          className="search-container
             slds-size_1-of-1
             slds-medium-size_8-of-12
             slds-p-right_medium
