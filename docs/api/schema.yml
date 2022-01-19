@@ -2040,6 +2040,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GitHubUser'
+        github_issue_count:
+          type: integer
+          readOnly: true
         repo_image_url:
           type: string
           format: uri
@@ -2066,6 +2069,7 @@ components:
       - currently_fetching_issues
       - currently_fetching_org_config_names
       - description_rendered
+      - github_issue_count
       - has_push_permission
       - has_truncated_issues
       - id

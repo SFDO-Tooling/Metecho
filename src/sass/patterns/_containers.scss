@@ -48,3 +48,11 @@
     height: 100%;
   }
 }
+
+// Remove extra space by overriding slds-p-right_medium when search component
+// spans full-width on narrow screens
+@media (max-width: $mq-medium) {
+  .search-container {
+    padding-right: 0;
+  }
+}

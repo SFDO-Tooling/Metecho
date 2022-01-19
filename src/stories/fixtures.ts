@@ -515,6 +515,7 @@ export const sampleProject1 = {
   org_config_names: [],
   latest_sha: 'abc123',
   has_push_permission: true,
+  github_issue_count: 5,
 };
 
 export const sampleEpicSteps = [

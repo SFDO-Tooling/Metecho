@@ -1,11 +1,12 @@
 import cookies from 'js-cookie';
+import { isUndefined } from 'lodash';
 import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/js/store/errors/actions';
 import { logError } from '@/js/utils/logging';
 
-export interface UrlParams {
-  [key: string]: string | number | boolean;
+interface UrlParams {
+  [key: string]: string | number | boolean | undefined;
 }
 
 export class ApiError extends Error {
@@ -101,10 +102,13 @@ const apiFetch = async ({
 export const addUrlParams = (baseUrl: string, params: UrlParams = {}) => {
   const url = new URL(baseUrl, window.location.origin);
   Object.keys(params).forEach((key) => {
-    const value = params[key].toString();
-    // Disallow duplicate params with the same key:value
-    if (url.searchParams.get(key) !== value) {
-      url.searchParams.append(key, value);
+    const param = params[key];
+    if (!isUndefined(param)) {
+      const value = param.toString();
+      // Disallow duplicate params with the same key:value
+      if (url.searchParams.get(key) !== value) {
+        url.searchParams.append(key, value);
+      }
     }
   });
   return url.pathname + url.search + url.hash;

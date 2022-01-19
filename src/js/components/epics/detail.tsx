@@ -852,6 +852,7 @@ const EpicDetail = (
         <SelectIssueModal
           projectId={project.id}
           projectSlug={project.slug}
+          issueCount={project.github_issue_count}
           isOpen={selectIssueModalOpen}
           closeIssueModal={closeSelectIssueModal}
           attachingToEpic={epic}
