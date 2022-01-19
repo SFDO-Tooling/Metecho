@@ -70,17 +70,3 @@
     }
   }
 }
-
-[data-form='search-issues'] {
-  gap: $spacing-x-small;
-  grid-template-rows: min-content auto;
-
-  .slds-form-element {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-  }
-
-  .issues-search-button {
-    grid-column: 2;
-  }
-}

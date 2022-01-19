@@ -47,6 +47,7 @@ const ResyncIssuesButton = ({
       ) : (
         <Button
           label={t('Re-Sync Issues')}
+          className="slds-grow"
           variant="outline-brand"
           iconCategory="utility"
           iconName="refresh"

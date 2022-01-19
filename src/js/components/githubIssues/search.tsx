@@ -47,23 +47,20 @@ const SearchIssues = ({
   const label = t('Search issues by title or number');
 
   return (
-    <div className="form-grid" data-form="search-issues">
+    <div className="slds-grid slds-wrap">
       <Search
         assistiveText={{ label }}
         placeholder={label}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
         name="search"
         value={searchterm}
+        className="slds-p-right_small slds-grow"
         clearable
         onChange={handleSearchterm}
         onClear={clearSearch}
         onSearch={getSearchResults}
       />
-      <Button
-        className="issues-search-button"
-        label={t('Search')}
-        onClick={getSearchResults}
-      />
+      <Button label={t('Search')} onClick={getSearchResults} />
     </div>
   );
 };
