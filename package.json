@@ -85,7 +85,7 @@
     "@babel/preset-env": "^7.16.5",
     "@babel/preset-react": "^7.16.5",
     "@babel/preset-typescript": "^7.16.5",
-    "@storybook/addon-actions": "^6.4.9",
+    "@storybook/addon-actions": "^6.4.14",
     "@storybook/addon-essentials": "^6.4.9",
     "@storybook/addon-links": "^6.4.9",
     "@storybook/addon-postcss": "^2.0.0",
