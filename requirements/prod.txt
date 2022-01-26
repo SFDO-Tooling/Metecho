@@ -56,7 +56,7 @@ channels==3.0.4
     #   channels-redis
 channels-redis==3.3.1
     # via -r requirements/prod.in
-charset-normalizer==2.0.9
+charset-normalizer==2.0.10
     # via
     #   cumulusci
     #   requests
@@ -76,13 +76,9 @@ commonmark==0.9.1
     #   rich
 constantly==15.1.0
     # via twisted
-contextvars==2.4
-    # via
-    #   cumulusci
-    #   snowfakery
 croniter==1.1.0
     # via rq-scheduler
-cryptography==36.0.0
+cryptography==36.0.1
     # via
     #   authlib
     #   autobahn
@@ -93,7 +89,7 @@ cryptography==36.0.0
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.49.0
+cumulusci==3.51.1
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -149,7 +145,7 @@ docutils==0.16
     # via cumulusci
 drf-spectacular==0.21.1
     # via -r requirements/prod.in
-faker==10.0.0
+faker==11.1.0
     # via
     #   cumulusci
     #   snowfakery
@@ -187,16 +183,10 @@ idna==3.3
     #   requests
     #   snowfakery
     #   twisted
-immutables==0.16
-    # via
-    #   contextvars
-    #   cumulusci
-    #   snowfakery
-importlib-metadata==4.8.2
+importlib-metadata==4.10.1
     # via
     #   cumulusci
     #   keyring
-    #   snowfakery
 incremental==21.3.0
     # via twisted
 inflection==0.5.1
@@ -222,7 +212,7 @@ logfmt==0.4
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-lxml==4.6.4
+lxml==4.7.1
     # via cumulusci
 markdown==3.3.6
     # via
@@ -241,7 +231,7 @@ orderedmultidict==1.0.1
     # via furl
 packaging==21.3
     # via bleach
-psutil==5.8.0
+psutil==5.9.0
     # via cumulusci
 psycopg2-binary==2.9.2
     # via -r requirements/prod.in
@@ -255,11 +245,11 @@ pycparser==2.21
     # via
     #   cffi
     #   cumulusci
-pydantic==1.8.2
+pydantic==1.9.0
     # via
     #   cumulusci
     #   snowfakery
-pygments==2.10.0
+pygments==2.11.2
     # via
     #   cumulusci
     #   rich
@@ -302,7 +292,7 @@ redis==4.0.2
     # via
     #   django-rq
     #   rq
-requests==2.26.0
+requests==2.27.0
     # via
     #   cumulusci
     #   django-allauth
@@ -319,9 +309,9 @@ requests-futures==1.0.0
     # via cumulusci
 requests-oauthlib==1.3.0
     # via django-allauth
-rich==10.15.2
+rich==11.0.0
     # via cumulusci
-robotframework==4.1.2
+robotframework==4.1.3
     # via
     #   cumulusci
     #   robotframework-lint
@@ -355,7 +345,7 @@ rst2ansi==0.1.5
     # via cumulusci
 salesforce-bulk==2.2.0
     # via cumulusci
-sarge==0.1.6
+sarge==0.1.7.post1
     # via cumulusci
 secretstorage==3.3.1
     # via keyring
@@ -388,11 +378,11 @@ six==1.16.0
     #   salesforce-bulk
     #   service-identity
     #   snowfakery
-snowfakery==2.3
+snowfakery==2.4.0
     # via cumulusci
 soupsieve==2.3.1
     # via beautifulsoup4
-sqlalchemy==1.4.27
+sqlalchemy==1.4.29
     # via
     #   cumulusci
     #   snowfakery
@@ -440,11 +430,10 @@ wrapt==1.13.3
     #   deprecated
 xmltodict==0.12.0
     # via cumulusci
-zipp==3.6.0
+zipp==3.7.0
     # via
     #   cumulusci
     #   importlib-metadata
-    #   snowfakery
 zope.interface==5.4.0
     # via twisted
 
