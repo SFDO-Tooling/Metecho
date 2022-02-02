@@ -235,7 +235,7 @@ markupsafe==2.0.1
     #   snowfakery
 msgpack==1.0.3
     # via channels-redis
-oauthlib==3.1.1
+oauthlib==3.2.0
     # via requests-oauthlib
 orderedmultidict==1.0.1
     # via furl
