@@ -267,7 +267,7 @@ pyjwt[crypto]==2.3.0
     # via
     #   cumulusci
     #   django-allauth
-pyopenssl==21.0.0
+pyopenssl==22.0.0
     # via twisted
 pyparsing==3.0.6
     # via packaging
@@ -383,7 +383,6 @@ six==1.16.0
     #   fs
     #   furl
     #   orderedmultidict
-    #   pyopenssl
     #   python-dateutil
     #   salesforce-bulk
     #   service-identity
