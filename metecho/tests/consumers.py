@@ -13,8 +13,6 @@ from ..api.serializers import (
 from ..consumers import PushNotificationConsumer
 from ..routing import websockets
 
-pytestmark = pytest.mark.asyncio
-
 
 @database_sync_to_async
 def serialize_model(serializer_model, instance, user):
