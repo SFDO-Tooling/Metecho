@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import ResyncIssuesButton from '@/js/components/githubIssues/resyncIssuesButton';
+import Search from '@/js/components/githubIssues/search';
 import {
   ExternalLink,
   getEpicStatus,
@@ -37,6 +38,7 @@ export type issueSelectedCallback = (
 interface Props {
   projectId: string;
   projectSlug: string;
+  issueCount: number;
   isOpen: boolean | 'epic' | 'task';
   closeIssueModal: () => void;
   issueSelected?: issueSelectedCallback;
@@ -94,6 +96,7 @@ const EpicStatus = ({ epic }: { epic: IssueEpic }) => {
 const SelectIssueModal = ({
   projectId,
   projectSlug,
+  issueCount,
   isOpen,
   closeIssueModal,
   issueSelected,
@@ -102,27 +105,40 @@ const SelectIssueModal = ({
   currentlyResyncing,
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const { issues, currentlyFetching } = useFetchIssues({
+  const [search, setSearch] = useState<string>('');
+  const [selectedIssue, setSelectedIssue] = useState<string>('');
+
+  const { issues, currentlyFetching, count, clearIssues } = useFetchIssues({
     projectId,
     isAttached: false,
     isOpen: Boolean(isOpen),
     currentlyResyncing,
+    search,
   });
   const {
     issues: attachedIssues,
     currentlyFetching: currentlyFetchingAttached,
+    count: countAttached,
+    clearIssues: clearAttachedIssues,
   } = useFetchIssues({
     projectId,
     isAttached: true,
     isOpen: Boolean(isOpen),
     currentlyResyncing,
+    search,
   });
-
-  const [selectedIssue, setSelectedIssue] = useState<string>('');
 
   const closeForm = () => {
     closeIssueModal();
     setSelectedIssue('');
+    setSearch('');
+    clearIssues();
+    clearAttachedIssues();
+  };
+
+  const searchIssues = (searchterm: string) => {
+    const trimmed = searchterm.trim();
+    setSearch(trimmed);
   };
 
   const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,9 +232,17 @@ const SelectIssueModal = ({
         <div
           className="slds-grid
             slds-grid_vertical-align-start
-            slds-p-bottom_large"
+            slds-wrap"
         >
-          <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+          <div
+            className="slds-grid
+              slds-wrap
+              slds-shrink
+              slds-p-right_medium
+              slds-p-bottom_small
+              slds-size_1-of-1
+              slds-medium-size_5-of-7"
+          >
             <p>
               <Trans i18nKey="githubIssuesHelp">
                 Issues are items in GitHub’s bug and enhancement tracking
@@ -230,21 +254,31 @@ const SelectIssueModal = ({
           </div>
           <div
             className="slds-grid
-              slds-grow
-              slds-shrink-none
-              slds-grid_align-end"
+              slds-size_1-of-1
+              slds-medium-size_2-of-7
+              slds-m-bottom_small"
           >
             <ResyncIssuesButton
               projectId={projectId}
               isRefreshing={currentlyResyncing}
-              forceResync={Boolean(
-                issues &&
-                  attachedIssues &&
-                  !issues.length &&
-                  !attachedIssues.length,
-              )}
+              hasFetched={Boolean(issues && attachedIssues)}
+              noIssues={Boolean(!issues?.length && !attachedIssues?.length)}
             />
           </div>
+        </div>
+        <div
+          className="search-container
+            slds-size_1-of-1
+            slds-medium-size_5-of-7
+            slds-p-right_medium
+            slds-p-bottom_large"
+        >
+          <Search
+            searchIssues={searchIssues}
+            count={count + countAttached}
+            total={issueCount}
+            hasSearch={Boolean(search)}
+          />
         </div>
         <form className="slds-form">
           <div className="slds-grid slds-gutters slds-wrap">
@@ -297,7 +331,7 @@ const SelectIssueModal = ({
                     {/* eslint-disable-next-line no-nested-ternary */}
                     {issue.task ? (
                       <>
-                        <p>
+                        <div>
                           {t('Task:')}{' '}
                           <Link
                             to={
@@ -316,11 +350,11 @@ const SelectIssueModal = ({
                             {issue.task.name}
                           </Link>
                           <TaskStatus task={issue.task} />
-                        </p>
+                        </div>
                       </>
                     ) : issue.epic ? (
                       <>
-                        <p>
+                        <div>
                           {t('Epic:')}{' '}
                           <Link
                             to={routes.epic_detail(
@@ -331,7 +365,7 @@ const SelectIssueModal = ({
                             {issue.epic.name}
                           </Link>
                           <EpicStatus epic={issue.epic} />
-                        </p>
+                        </div>
                       </>
                     ) : /* istanbul ignore next */ null}
                   </div>
