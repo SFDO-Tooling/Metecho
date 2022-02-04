@@ -15,7 +15,6 @@ PATCH_ROOT = "metecho.api.push"
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_report_error(user_factory):
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
@@ -25,7 +24,6 @@ async def test_report_error(user_factory):
         assert push_message.called
 
 
-@pytest.mark.asyncio
 async def test_report_scratch_org_error__attribute_error():
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
@@ -36,7 +34,6 @@ async def test_report_scratch_org_error__attribute_error():
         assert push_message_about_instance.called
 
 
-@pytest.mark.asyncio
 async def test_report_scratch_org_error__list():
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
@@ -50,7 +47,6 @@ async def test_report_scratch_org_error__list():
         assert push_message_about_instance.called
 
 
-@pytest.mark.asyncio
 async def test_report_scratch_org_error__dict():
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()

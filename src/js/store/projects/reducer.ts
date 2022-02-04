@@ -23,6 +23,7 @@ export interface Project {
   is_managed: boolean;
   branch_prefix: string;
   github_users: GitHubUser[];
+  github_issue_count: number;
   repo_image_url: string;
   org_config_names: OrgConfig[];
   currently_fetching_org_config_names: boolean;

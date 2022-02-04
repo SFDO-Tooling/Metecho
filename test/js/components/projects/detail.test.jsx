@@ -569,12 +569,25 @@ describe('<ProjectDetail />', () => {
     });
 
     test('creates a task from issue', async () => {
-      fetchMock.getOnce('end:is_attached=false', {
-        results: [sampleIssue1],
-      });
-      fetchMock.getOnce('end:is_attached=true', {
-        results: [sampleIssue2],
-      });
+      fetchMock.getOnce(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: false },
+        },
+        {
+          results: [sampleIssue1],
+        },
+      );
+      fetchMock.getOnce(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: true },
+          overwriteRoutes: false,
+        },
+        {
+          results: [sampleIssue2],
+        },
+      );
       const {
         queryByText,
         getByText,
@@ -613,12 +626,25 @@ describe('<ProjectDetail />', () => {
     });
 
     test('creates an epic from issue', async () => {
-      fetchMock.get('end:is_attached=false', {
-        results: [sampleIssue1],
-      });
-      fetchMock.get('end:is_attached=true', {
-        results: [sampleIssue2, sampleIssue3, sampleIssue4],
-      });
+      fetchMock.get(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: false },
+        },
+        {
+          results: [sampleIssue1],
+        },
+      );
+      fetchMock.get(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: true },
+          overwriteRoutes: false,
+        },
+        {
+          results: [sampleIssue2, sampleIssue3, sampleIssue4],
+        },
+      );
       const {
         queryByText,
         getByText,
@@ -643,12 +669,25 @@ describe('<ProjectDetail />', () => {
     });
 
     test('refreshes issues', async () => {
-      fetchMock.get('end:is_attached=true', {
-        results: [sampleIssue1],
-      });
-      fetchMock.get('end:is_attached=false', {
-        results: [sampleIssue2, sampleIssue3, sampleIssue4],
-      });
+      fetchMock.get(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: true },
+        },
+        {
+          results: [sampleIssue1],
+        },
+      );
+      fetchMock.get(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: false },
+          overwriteRoutes: false,
+        },
+        {
+          results: [sampleIssue2, sampleIssue3, sampleIssue4],
+        },
+      );
       fetchMock.postOnce(
         window.api_urls.project_refresh_github_issues(sampleIssue1.project),
         202,
@@ -666,12 +705,25 @@ describe('<ProjectDetail />', () => {
     });
 
     test('displays loading btn while refreshing', () => {
-      fetchMock.get('end:is_attached=true', {
-        results: [sampleIssue1],
-      });
-      fetchMock.get('end:is_attached=false', {
-        results: [sampleIssue2, sampleIssue3, sampleIssue4],
-      });
+      fetchMock.get(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: true },
+        },
+        {
+          results: [sampleIssue1],
+        },
+      );
+      fetchMock.get(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: false },
+          overwriteRoutes: false,
+        },
+        {
+          results: [sampleIssue2, sampleIssue3, sampleIssue4],
+        },
+      );
       const { getByText } = setup({
         initialState: {
           ...defaultState,
@@ -692,17 +744,198 @@ describe('<ProjectDetail />', () => {
     });
 
     test('refreshes issues by retrieving them from github when none locally', async () => {
-      fetchMock.get('end:is_attached=true', {
-        results: [],
-      });
-      fetchMock.get('end:is_attached=false', {
-        results: [],
-      });
+      fetchMock.getOnce(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: true },
+        },
+        {
+          results: [],
+        },
+      );
+      fetchMock.getOnce(
+        {
+          url: `begin:${window.api_urls.issue_list()}`,
+          query: { is_attached: false },
+          overwriteRoutes: false,
+        },
+        {
+          results: [],
+        },
+      );
       const { getByText } = setup();
       fireEvent.click(getByText('Create Epic from GitHub Issue'));
 
       expect(getByText('Select GitHub Issue to Develop')).toBeVisible();
       await waitFor(() => expect(refreshGitHubIssues).toHaveBeenCalledTimes(1));
+    });
+
+    describe('<SearchIssues/>', () => {
+      test('searches and returns an issue on pressing the search', async () => {
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true },
+          },
+          {
+            results: [sampleIssue2, sampleIssue3, sampleIssue4],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '87' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '87' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        const { getByText, getByPlaceholderText, findByText } = setup();
+        fireEvent.click(getByText('Create Epic from GitHub Issue'));
+        const input = getByPlaceholderText('Search issues by title or number');
+        const submit = getByText('Search', { selector: 'button' });
+        fireEvent.change(input, { target: { value: '87' } });
+        fireEvent.click(submit);
+
+        expect.assertions(1);
+        const issue = await findByText('#87: this is an issue');
+
+        expect(issue).toBeVisible();
+      });
+
+      test('searches and returns an issue on pressing enter', async () => {
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true },
+          },
+          {
+            results: [sampleIssue2, sampleIssue3, sampleIssue4],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: '87' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: '87' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        const { getByText, getByPlaceholderText, findByText } = setup();
+        fireEvent.click(getByText('Create Epic from GitHub Issue'));
+        const input = getByPlaceholderText('Search issues by title or number');
+        fireEvent.change(input, { target: { value: '87' } });
+        fireEvent.keyDown(input, {
+          keyCode: 13,
+        });
+
+        expect.assertions(1);
+        const issue = await findByText('#87: this is an issue');
+
+        expect(issue).toBeVisible();
+      });
+
+      test('the clear button clears input and returns issues for no search term', async () => {
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true },
+          },
+          {
+            results: [sampleIssue2, sampleIssue3, sampleIssue4],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false },
+            overwriteRoutes: false,
+          },
+          {
+            results: [sampleIssue1],
+          },
+        );
+
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: false, search: 'mongoose' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        fetchMock.getOnce(
+          {
+            url: `begin:${window.api_urls.issue_list()}`,
+            query: { is_attached: true, search: 'mongoose' },
+            overwriteRoutes: false,
+          },
+          {
+            results: [],
+          },
+        );
+        const { getByText, getByPlaceholderText, findByText } = setup();
+        fireEvent.click(getByText('Create Epic from GitHub Issue'));
+        const input = getByPlaceholderText('Search issues by title or number');
+        const clear = getByText('Clear');
+        fireEvent.change(input, { target: { value: 'moogoose' } });
+        fireEvent.click(clear);
+
+        expect.assertions(1);
+        const issue = await findByText('#87: this is an issue');
+
+        expect(issue).toBeVisible();
+      });
     });
   });
 
