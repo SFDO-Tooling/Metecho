@@ -159,6 +159,7 @@
   "resolutions": {
     "@storybook/**/ansi-regex": "^5.0.1",
     "@storybook/**/glob-parent": "^5.1.2",
+    "@storybook/**/ramda": "^0.27.2",
     "i18next-scanner-webpack/**/glob-parent": "^5.1.2",
     "react-joyride/**/nested-property": "^4.0.0",
     "trim": "^0.0.3"
