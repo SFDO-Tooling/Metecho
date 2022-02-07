@@ -89,6 +89,18 @@ class IssueStates(models.TextChoices):
 
 class SiteProfile(TranslatableModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE)
+    template_repo_owner = StringField(
+        blank=True,
+        help_text=_(
+            "Owner of the GitHub repository to be used as a template for new Projects"
+        ),
+    )
+    template_repo_name = StringField(
+        blank=True,
+        help_text=_(
+            "Name of the GitHub repository to be used as a template for new Projects"
+        ),
+    )
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
@@ -401,10 +413,23 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=None)
 
-    def queue_create_repository(self, *, user: User, dependencies: Iterable[str]):
+    def queue_create_repository(
+        self,
+        *,
+        user: User,
+        dependencies: Iterable[str],
+        template_repo_owner: str = None,
+        template_repo_name: str = None,
+    ):
         from .jobs import create_repository_job
 
-        create_repository_job.delay(self, user=user, dependencies=dependencies)
+        create_repository_job.delay(
+            self,
+            user=user,
+            dependencies=dependencies,
+            template_repo_owner=template_repo_owner,
+            template_repo_name=template_repo_name,
+        )
 
     def finalize_create_repository(self, *, error=None, user: User):
         originating_user_id = str(user.id)

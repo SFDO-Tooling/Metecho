@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.urls import reverse
 from github3.exceptions import NotFoundError, ResponseError
@@ -13,7 +14,7 @@ from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
 
-from ..models import Project, ScratchOrgType
+from ..models import Project, ScratchOrgType, SiteProfile
 
 Branch = namedtuple("Branch", ["name"])
 
@@ -461,9 +462,13 @@ class TestProjectViewset:
                 content_type__app_label="api", codename="add_project"
             )
         )
-
-        dep1 = project_dependency_factory()
-        dep2 = project_dependency_factory()
+        dep1 = project_dependency_factory(url="http://foo.com")
+        dep2 = project_dependency_factory(url="http://bar.com")
+        SiteProfile.objects.create(
+            site=Site.objects.get(),
+            template_repo_owner="orgname",
+            template_repo_name="reponame",
+        )
 
         create_repository_job = mocker.patch(
             "metecho.api.jobs.create_repository_job", autospec=True
@@ -483,7 +488,7 @@ class TestProjectViewset:
                 "github_users": [
                     {"id": "123", "login": "abc", "avatar_url": "http://example.com"}
                 ],
-                "dependencies": [str(dep1.id), str(dep2.id)],
+                "dependencies": [dep1.id, dep2.id],
             },
             format="json",
         )
@@ -496,7 +501,13 @@ class TestProjectViewset:
         assert project.github_users == [
             {"id": "123", "login": "abc", "avatar_url": "http://example.com"}
         ]
-        assert create_repository_job.delay.called
+        create_repository_job.delay.assert_called_with(
+            project,
+            user=client.user,
+            dependencies=["http://foo.com", "http://bar.com"],
+            template_repo_owner="orgname",
+            template_repo_name="reponame",
+        )
 
 
 @pytest.mark.django_db

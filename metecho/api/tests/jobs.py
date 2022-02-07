@@ -1332,8 +1332,15 @@ class TestCreateRepository:
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
 
-        create_repository(project, user=user, dependencies=["http://foo.com"])
+        create_repository(
+            project,
+            user=user,
+            dependencies=["http://foo.com"],
+            template_repo_owner="owner",
+            template_repo_name="repo",
+        )
         project.refresh_from_db()
 
         assert project.repo_id == 123456
@@ -1351,6 +1358,7 @@ class TestCreateRepository:
             group_name=None,
         )
         assert sarge.capture_both.called
+        assert zipfile.extractall.called
 
     def test__gh_error(self, mocker, caplog, project, user_factory):
         user = user_factory()

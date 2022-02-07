@@ -13,7 +13,7 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
-from cumulusci.utils import temporary_dir
+from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
 from django.db.models.query_utils import Q
@@ -206,7 +206,14 @@ def check_repo_name(
 check_repo_name_job = job(check_repo_name)
 
 
-def create_repository(project: Project, *, user: User, dependencies: Iterable[str]):
+def create_repository(
+    project: Project,
+    *,
+    user: User,
+    dependencies: Iterable[str],
+    template_repo_owner: str = None,
+    template_repo_name: str = None,
+):
     """
     Given a local Metecho Project create and bootstrap the corresponding GitHub repository.
     """
@@ -235,8 +242,16 @@ def create_repository(project: Project, *, user: User, dependencies: Iterable[st
         team.add_repository(repo.full_name, permission="push")
         project.repo_id = repo.id
 
-        # Bootstrap repository with CumulusCI
         with temporary_dir():
+            # Populate files from the template repository
+            if template_repo_owner and template_repo_name:
+                zipfile = download_extract_github(
+                    gh_user, template_repo_owner, template_repo_name
+                )
+                zipfile.extractall()
+
+            # Bootstrap repository with CumulusCI
+            branch_name = "main"
             runtime = CliRuntime()
             context = {
                 "cci_version": cumulusci.__version__,
@@ -249,7 +264,7 @@ def create_repository(project: Project, *, user: User, dependencies: Iterable[st
                     {"type": "github", "url": url} for url in dependencies
                 ],
                 "git": {
-                    "default_branch": "main",
+                    "default_branch": branch_name,
                     "prefix_feature": "feature/",
                     "prefix_beta": "beta/",
                     "prefix_release": "release/",
@@ -261,11 +276,11 @@ def create_repository(project: Project, *, user: User, dependencies: Iterable[st
             cmd = sarge.capture_both(
                 f"""
                 git init;
-                git checkout -b {context["git"]["default_branch"]};
+                git checkout -b {branch_name};
                 git config user.email {user.email};
                 git add --all;
                 git commit -m 'Bootstrap project (via Metecho)';
-                git push https://{gh_user.session.auth.token}@github.com/{repo.full_name}.git main;
+                git push https://{gh_user.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
                 """,  # noqa: B950
                 shell=True,
             )
