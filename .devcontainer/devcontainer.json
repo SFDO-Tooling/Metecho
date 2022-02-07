@@ -84,7 +84,8 @@
     "[python]": {
       "editor.rulers": [88],
       "editor.tabSize": 4,
-      "editor.defaultFormatter": "ms-python.python"
+      "editor.defaultFormatter": "ms-python.python",
+      "editor.codeActionsOnSave": { "source.organizeImports": true }
     },
     "[scss]": {
       "editor.rulers": [80],
