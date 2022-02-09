@@ -1,4 +1,4 @@
-FROM oddbirds/pyjs:py3.10-node16
+FROM ghcr.io/oddbird/pyjs:py3.10-node16
 
 ARG BUILD_ENV=development
 WORKDIR /app
