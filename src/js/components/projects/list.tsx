@@ -1,5 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -125,6 +126,43 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     }
   }
 
+  const onRenderHeaderActions = () => (
+    <PageHeaderControl>
+      <Button label={t('Create Project')} variant="outline-brand" />
+      {refreshing ? (
+        <Button
+          label={<LabelWithSpinner label={t('Syncing Projects…')} />}
+          variant="outline-brand"
+          disabled
+        />
+      ) : (
+        <span className="slds-is-relative slds-m-left_xx-small">
+          <Button
+            label={t('Re-Sync Projects')}
+            variant="outline-brand"
+            iconCategory="utility"
+            iconName="refresh"
+            iconPosition="left"
+            onClick={doRefreshProjects}
+          />
+          <TourPopover
+            id="tour-projects-resync-list"
+            align="left"
+            heading={t('View an updated Project list')}
+            body={
+              <Trans i18nKey="tourUpdateProject">
+                If you have recently been added to a Project on GitHub, you may
+                not yet see your new Project in this list. First, make sure you
+                are logged in with the correct GitHub account. Next, use the
+                re-sync button to get an updated list of Projects.
+              </Trans>
+            }
+          />
+        </span>
+      )}
+    </PageHeaderControl>
+  );
+
   return (
     <DocumentTitle title={`${t('Projects')} | ${t('Metecho')}`}>
       <>
@@ -148,66 +186,48 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
               slds-p-around_x-large
               project-placeholder"
             title={t('Select a Project')}
+            onRenderControls={onRenderHeaderActions}
           />
         </div>
 
         <div className="slds-p-around_x-large">
-          <div className="slds-grid slds-grid_vertical-align-start">
+          <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
             <div
-              className="slds-grid
-                slds-wrap
-                slds-shrink
+              className="slds-p-horizontal_small
                 slds-m-bottom_medium
-                slds-p-right_x-large
-                restricted-container"
+                slds-size_1-of-1
+                slds-medium-size_1-of-2
+                slds-large-size_1-of-3"
             >
-              <p className="slds-p-bottom_small">
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {t('Can’t Find Your Project?')}
+              </h2>
+              <ul className="slds-list_dotted">
                 <Trans i18nKey="projectListHelper">
-                  Access on GitHub is required to view Projects. If you do not
-                  see the Project you’re looking for below, confirm that you are
-                  logged into the correct account or contact an admin for the
-                  repository on GitHub.
+                  <li>Confirm that you are logged into the correct account.</li>
+                  <li>Re-sync Projects using the button in the upper right.</li>
+                  <li>Contact the Project maintainer on GitHub.</li>
                 </Trans>
-              </p>
+              </ul>
             </div>
             <div
-              className="slds-grid
-                slds-grow
-                slds-shrink-none
-                slds-grid_align-end"
+              className="slds-p-horizontal_small
+                slds-m-bottom_medium
+                slds-size_1-of-1
+                slds-medium-size_1-of-2
+                slds-large-size_1-of-3"
             >
-              {refreshing ? (
-                <Button
-                  label={<LabelWithSpinner label={t('Syncing Projects…')} />}
-                  variant="outline-brand"
-                  disabled
-                />
-              ) : (
-                <div className="slds-is-relative">
-                  <Button
-                    label={t('Re-Sync Projects')}
-                    variant="outline-brand"
-                    iconCategory="utility"
-                    iconName="refresh"
-                    iconPosition="left"
-                    onClick={doRefreshProjects}
-                  />
-                  <TourPopover
-                    id="tour-projects-resync-list"
-                    align="left"
-                    heading={t('View an updated Project list')}
-                    body={
-                      <Trans i18nKey="tourUpdateProject">
-                        If you have recently been added to a Project on GitHub,
-                        you may not yet see your new Project in this list.
-                        First, make sure you are logged in with the correct
-                        GitHub account. Next, use the re-sync button to get an
-                        updated list of Projects.
-                      </Trans>
-                    }
-                  />
-                </div>
-              )}
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {t('Creating a New Project?')}
+              </h2>
+              <ul className="slds-list_dotted">
+                <Trans i18nKey="projectCreateHelper">
+                  <li>
+                    Create a new Project using the button in the upper right.
+                  </li>
+                  <li>If the button is not available... @@@</li>
+                </Trans>
+              </ul>
             </div>
           </div>
           {refreshing ? (
