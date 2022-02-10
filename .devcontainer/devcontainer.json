@@ -36,16 +36,20 @@
       "source.fixAll.eslint": true
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.detectIndentation": false,
     "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
     "editor.tabSize": 2,
     "eslint.options": {
       "extensions": [".js", ".jsx", ".md", ".mdx", ".ts", ".tsx"]
     },
+    "files.eol": "\n",
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
     "javascript.suggestionActions.enabled": false,
     "typescript.preferences.quoteStyle": "single",
+    "npm.packageManager": "yarn",
     "python.formatting.provider": "black",
     "python.formatting.blackPath": "black",
     "python.languageServer": "Pylance",
@@ -84,7 +88,10 @@
     "[python]": {
       "editor.rulers": [88],
       "editor.tabSize": 4,
-      "editor.defaultFormatter": "ms-python.python"
+      "editor.defaultFormatter": "ms-python.python",
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      }
     },
     "[scss]": {
       "editor.rulers": [80],
