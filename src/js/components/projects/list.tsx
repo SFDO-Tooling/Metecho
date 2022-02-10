@@ -136,7 +136,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
           disabled
         />
       ) : (
-        <span className="slds-is-relative slds-m-left_xx-small">
+        <div className="slds-is-relative inline-container slds-m-left_xx-small">
           <Button
             label={t('Re-Sync Projects')}
             variant="outline-brand"
@@ -147,7 +147,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
           />
           <TourPopover
             id="tour-projects-resync-list"
-            align="left"
+            align="bottom right"
             heading={t('View an updated Project list')}
             body={
               <Trans i18nKey="tourUpdateProject">
@@ -158,7 +158,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
               </Trans>
             }
           />
-        </span>
+        </div>
       )}
     </PageHeaderControl>
   );
@@ -183,8 +183,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
           <PageHeader
             className="page-header
               slds-is-relative
-              slds-p-around_x-large
-              project-placeholder"
+              slds-p-around_x-large"
             title={t('Select a Project')}
             onRenderControls={onRenderHeaderActions}
           />
@@ -199,7 +198,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                 slds-medium-size_1-of-2
                 slds-large-size_1-of-3"
             >
-              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+              <h2 className="slds-text-heading_small slds-p-bottom_small">
                 {t('Can’t Find Your Project?')}
               </h2>
               <ul className="slds-list_dotted">
@@ -217,7 +216,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                 slds-medium-size_1-of-2
                 slds-large-size_1-of-3"
             >
-              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+              <h2 className="slds-text-heading_small slds-p-bottom_small">
                 {t('Creating a New Project?')}
               </h2>
               <ul className="slds-list_dotted">
