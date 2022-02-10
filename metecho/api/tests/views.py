@@ -115,7 +115,7 @@ class TestGitHubOrganizationViewset:
         response = client.get(
             reverse("organization-detail", args=[str(git_hub_organization.id)])
         )
-        assert tuple(response.json().keys()) == ("id", "name")
+        assert tuple(response.json().keys()) == ("id", "name", "is_default")
 
     def test_for_user(self, client, mocker):
         get_orgs_for_user_job = mocker.patch(

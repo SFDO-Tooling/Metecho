@@ -248,7 +248,7 @@ class ProjectDependencySerializer(HashIdModelSerializer):
 class GitHubOrganizationSerializer(HashIdModelSerializer):
     class Meta:
         model = GitHubOrganization
-        fields = ("id", "name")
+        fields = ("id", "name", "is_default")
 
 
 class CheckRepoNameSerializer(serializers.Serializer):

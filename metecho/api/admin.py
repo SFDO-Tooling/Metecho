@@ -121,7 +121,8 @@ class ProjectDependencyAdmin(admin.ModelAdmin):
 
 @admin.register(GitHubOrganization)
 class GitHubOrganizationAdmin(admin.ModelAdmin):
-    list_display = ("name", "github_link")
+    list_display = ("name", "is_default", "github_link")
+    list_editable = ("is_default",)
     search_fields = ("name", "login")
 
     def github_link(self, obj):

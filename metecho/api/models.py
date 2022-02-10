@@ -549,6 +549,7 @@ class ProjectDependency(HashIdMixin, TimestampsMixin):
 class GitHubOrganization(HashIdMixin, TimestampsMixin):
     name = StringField()
     login = StringField(unique=True, help_text="Organization's 'username' on GitHub")
+    is_default = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("GitHub organization")
@@ -557,19 +558,25 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        """Ensure only one Organization can be marked as default"""
+        if self.is_default:
+            GitHubOrganization.objects.update(is_default=False)
+        super().save(*args, **kwargs)
+
     @property
     def github_url(self):
         return f"https://github.com/{self.login}"
 
-    @classmethod
-    def queue_get_orgs_for_user(cls, user: User):
+    @staticmethod
+    def queue_get_orgs_for_user(user: User):
         from .jobs import get_orgs_for_user_job
 
         get_orgs_for_user_job.delay(user=user)
 
-    @classmethod
+    @staticmethod
     def finalize_get_orgs_for_user(
-        cls, *, orgs: list = None, error: Exception = None, user: User
+        *, orgs: list = None, error: Exception = None, user: User
     ):
         message = {
             "type": "GET_ORGS_FOR_USER",

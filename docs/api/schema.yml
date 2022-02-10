@@ -1760,6 +1760,8 @@ components:
           readOnly: true
         name:
           type: string
+        is_default:
+          type: boolean
       required:
       - id
       - name
