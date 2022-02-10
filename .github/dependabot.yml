@@ -3,19 +3,16 @@ updates:
   - package-ecosystem: pip
     directory: '/'
     schedule:
-      interval: weekly
-      day: wednesday
+      interval: monthly
       time: '05:00'
       timezone: America/New_York
     open-pull-requests-limit: 99
     allow:
       - dependency-type: direct
-      - dependency-type: indirect
   - package-ecosystem: npm
     directory: '/'
     schedule:
-      interval: weekly
-      day: wednesday
+      interval: monthly
       time: '05:00'
       timezone: America/New_York
     open-pull-requests-limit: 99
