@@ -1,5 +1,6 @@
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
+from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
 from django.http import HttpResponseRedirect
 from django.utils import timezone
@@ -293,8 +294,14 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         )
         serializer.is_valid(raise_exception=True)
         dependencies = [dep.url for dep in serializer.validated_data["dependencies"]]
+        site_profile = getattr(get_current_site(request), "siteprofile", None)
         project = serializer.save()
-        project.queue_create_repository(user=request.user, dependencies=dependencies)
+        project.queue_create_repository(
+            user=request.user,
+            dependencies=dependencies,
+            template_repo_owner=getattr(site_profile, "template_repo_owner", ""),
+            template_repo_name=getattr(site_profile, "template_repo_name", ""),
+        )
         return Response(self.get_serializer(project).data)
 
     @extend_schema(request=None, responses={202: None})
