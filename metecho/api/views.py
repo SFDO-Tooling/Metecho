@@ -191,8 +191,9 @@ class CurrentUserViewSet(GenericViewSet):
     @extend_schema(request=None, responses={202: None})
     @action(methods=["POST"], detail=False)
     def refresh(self, request):
-        """Queue a job to refresh the user's list of GitHub repositories."""
+        """Queue a job to refresh the user's list of GitHub repositories and organizations."""
         request.user.queue_refresh_repositories()
+        GitHubOrganization.queue_get_orgs_for_user(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

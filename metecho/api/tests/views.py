@@ -81,10 +81,16 @@ class TestCurrentUserViewSet:
         refresh_github_repositories_for_user_job = mocker.patch(
             "metecho.api.jobs.refresh_github_repositories_for_user_job", autospec=True
         )
+        get_orgs_for_user_job = mocker.patch(
+            "metecho.api.jobs.get_orgs_for_user_job", autospec=True
+        )
+
         response = client.post(reverse("current-user-refresh"))
+
         client.user.refresh_from_db()
         assert response.status_code == 202
         assert refresh_github_repositories_for_user_job.delay.called
+        assert get_orgs_for_user_job.delay.called
         assert client.user.currently_fetching_repos
 
 
