@@ -1377,7 +1377,8 @@ paths:
   /api/user/refresh/:
     post:
       operationId: user_refresh_create
-      description: Queue a job to refresh the user's list of GitHub repositories.
+      description: Queue a job to refresh the user's list of GitHub repositories and
+        organizations.
       tags:
       - user
       security:
