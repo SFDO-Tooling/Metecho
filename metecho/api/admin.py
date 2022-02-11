@@ -48,6 +48,25 @@ class ProjectForm(forms.ModelForm):
             )
 
 
+class GitHubOrganizationForm(forms.ModelForm):
+    class Meta:
+        model = GitHubOrganization
+        exclude = ()
+
+    def clean_login(self):
+        login = self.cleaned_data["login"]
+        try:
+            gh.get_org_for_repo_creation(orgname=login)
+        except Exception:
+            raise forms.ValidationError(
+                _(
+                    "Could not access this organization on GitHub. "
+                    "Has the full-access Metecho app been installed on this organization?"
+                )
+            )
+        return login
+
+
 class JSONWidget(Textarea):
     def value_from_datadict(self, data, files, name):
         value = data.get(name)
@@ -121,6 +140,7 @@ class ProjectDependencyAdmin(admin.ModelAdmin):
 
 @admin.register(GitHubOrganization)
 class GitHubOrganizationAdmin(admin.ModelAdmin):
+    form = GitHubOrganizationForm
     list_display = ("name", "github_link")
     search_fields = ("name", "login")
 
