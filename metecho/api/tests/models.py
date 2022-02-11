@@ -950,14 +950,6 @@ class TestGitHubOrganization:
         org = git_hub_organization_factory(name="Foo Org")
         assert str(org) == "Foo Org"
 
-    def test_single_default(self, git_hub_organization_factory):
-        org1 = git_hub_organization_factory(is_default=True)
-        org2 = git_hub_organization_factory(is_default=True)
-
-        org1.refresh_from_db()
-        assert not org1.is_default
-        assert org2.is_default
-
 
 @pytest.mark.django_db
 class TestGitHubRepository:
