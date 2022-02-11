@@ -9,6 +9,7 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/js/components/404';
+import CreateProjectModal from '@/js/components/projects/createProjectModal';
 import ProjectListItem from '@/js/components/projects/listItem';
 import TourPopover from '@/js/components/tour/popover';
 import {
@@ -28,11 +29,19 @@ import { OBJECT_TYPES } from '@/js/utils/constants';
 
 const ProjectList = withScroll(({ y }: ScrollProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
+  const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const projects = useSelector(selectProjects);
   const refreshing = useSelector(selectProjectsRefreshing);
   const next = useSelector(selectNextUrl);
+
+  const openCreateProjectModal = () => {
+    setCreateProjectModalOpen(true);
+  };
+  const closeCreateProjectModal = () => {
+    setCreateProjectModalOpen(false);
+  };
 
   const doRefreshProjects = useCallback(() => {
     dispatch(refreshProjects());
@@ -128,7 +137,11 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
 
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button label={t('Create Project')} variant="outline-brand" />
+      <Button
+        label={t('Create Project')}
+        variant="outline-brand"
+        onClick={openCreateProjectModal}
+      />
       {refreshing ? (
         <Button
           label={<LabelWithSpinner label={t('Syncing Projects…')} />}
@@ -247,6 +260,11 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             </div>
           ) : null}
         </div>
+
+        <CreateProjectModal
+          isOpen={createProjectModalOpen}
+          closeModal={closeCreateProjectModal}
+        />
       </>
     </DocumentTitle>
   );
