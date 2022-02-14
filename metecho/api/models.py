@@ -154,6 +154,7 @@ class User(HashIdMixin, AbstractUser):
             self.currently_fetching_repos = True
             self.save()
             refresh_github_repositories_for_user_job.delay(self)
+            GitHubOrganization.queue_get_orgs_for_user(self)
 
     def finalize_refresh_repositories(self, error=None):
         self.refresh_from_db()
