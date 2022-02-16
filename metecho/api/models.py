@@ -117,7 +117,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
         return self.get_or_create(username=settings.GITHUB_USER_NAME)[0]
 
 
-class User(HashIdMixin, AbstractUser):
+class User(PushMixin, HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
     currently_fetching_orgs = models.BooleanField(default=False)
@@ -164,13 +164,9 @@ class User(HashIdMixin, AbstractUser):
         self.currently_fetching_repos = False
         self.save()
         if error is None:
-            message = {"type": "USER_REPOS_REFRESH"}
+            self.notify_changed(type_="USER_REPOS_REFRESH", originating_user_id=None)
         else:
-            message = {
-                "type": "USER_REPOS_ERROR",
-                "payload": {"message": str(error)},
-            }
-        async_to_sync(push.push_message_about_instance)(self, message)
+            self.notify_error(error, type_="USER_REPOS_ERROR", originating_user_id=None)
 
     def queue_refresh_organizations(self):
         from .jobs import refresh_github_organizations_for_user_job
@@ -184,19 +180,33 @@ class User(HashIdMixin, AbstractUser):
         self.refresh_from_db()
         self.currently_fetching_orgs = False
         self.save()
-        message = {"type": "USER_ORGS_REFRESH"}
-        if error is not None:
-            message = {
-                "type": "USER_ORGS_REFRESH_ERROR",
-                "payload": {"message": str(error)},
-            }
-        async_to_sync(push.push_message_about_instance)(self, message)
+        if error is None:
+            self.notify_changed(
+                type_="USER_ORGS_REFRESH", originating_user_id=None, include_user=True
+            )
+        else:
+            self.notify_error(
+                error, type_="USER_ORGS_REFRESH_ERROR", originating_user_id=None
+            )
 
     def invalidate_salesforce_credentials(self):
         self.socialaccount_set.filter(provider="salesforce").delete()
 
     def subscribable_by(self, user):
         return self == user
+
+    # begin PushMixin configuration:
+    push_update_type = "USER_UPDATE"
+    push_error_type = "USER_ERROR"
+
+    def get_serialized_representation(self, user):
+        from .serializers import FullUserSerializer
+
+        return FullUserSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
+
+    # end PushMixin configuration
 
     def _get_org_property(self, key):
         try:

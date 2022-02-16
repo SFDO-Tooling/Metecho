@@ -50,4 +50,5 @@ const CreateProjectForm = ({ inputs, errors, handleInputChange }: Props) => (
     />
   </form>
 );
+
 export default CreateProjectForm;

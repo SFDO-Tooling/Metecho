@@ -1652,6 +1652,8 @@ components:
           readOnly: true
         currently_fetching_repos:
           type: boolean
+        currently_fetching_orgs:
+          type: boolean
         devhub_username:
           type: string
         uses_global_devhub:

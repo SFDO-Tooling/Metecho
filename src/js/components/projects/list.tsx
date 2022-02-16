@@ -237,7 +237,6 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   <li>
                     Create a new Project using the button in the upper right.
                   </li>
-                  <li>If the button is not available... @@@</li>
                 </Trans>
               </ul>
             </div>

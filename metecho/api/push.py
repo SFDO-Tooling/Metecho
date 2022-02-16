@@ -59,7 +59,7 @@ from .constants import CHANNELS_GROUP_NAME, LIST
 
 
 async def push_message_about_instance(
-    instance, message, for_list=False, group_name=None
+    instance, message, for_list=False, group_name=None, include_user=False
 ):
     model_name = instance._meta.model_name
     id_ = str(instance.id)
@@ -71,6 +71,7 @@ async def push_message_about_instance(
     new_message = deepcopy(message)
     new_message["model_name"] = model_name
     new_message["id"] = id_
+    new_message["include_user"] = include_user
     sent_message = {"type": "notify", "content": new_message}
     not_deleted = getattr(instance, "deleted_at", None) is None
     message_about_delete = "DELETE" in message["type"] or "REMOVE" in message["type"]

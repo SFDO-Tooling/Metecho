@@ -16,6 +16,11 @@ export interface GitHubUser {
   };
 }
 
+export interface GitHubOrg {
+  id: string;
+  name: string;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -29,12 +34,14 @@ export interface User {
   is_devhub_enabled: boolean;
   is_staff: boolean;
   currently_fetching_repos: boolean;
+  currently_fetching_orgs: boolean;
   devhub_username: string;
   uses_global_devhub: boolean;
   agreed_to_tos_at: string | null;
   onboarded_at: string | null;
   self_guided_tour_enabled: boolean;
   self_guided_tour_state: string[] | null;
+  organizations: GitHubOrg[];
 }
 
 const reducer = (

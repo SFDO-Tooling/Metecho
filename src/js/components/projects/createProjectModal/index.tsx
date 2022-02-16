@@ -148,6 +148,7 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
     <ProgressIndicator
       steps={steps}
       completedSteps={steps.slice(0, pageIndex)}
+      disabledSteps={canSubmit ? [] : steps.slice(1)}
       selectedStep={steps[pageIndex]}
       variant="modal"
     />
@@ -173,7 +174,9 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
     },
     {
       heading: t('Add Project Collaborators'),
-      contents: null,
+      contents: (
+        <div className="slds-p-around_large">This is a placeholder.</div>
+      ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">
           <BackBtn />
@@ -184,7 +187,9 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
     },
     {
       heading: t('Add Dependencies'),
-      contents: null,
+      contents: (
+        <div className="slds-p-around_large">This is a placeholder.</div>
+      ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">
           <BackBtn />
@@ -195,7 +200,9 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
     },
     {
       heading: t('Create Project'),
-      contents: null,
+      contents: (
+        <div className="slds-p-around_large">This is a placeholder.</div>
+      ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">
           <BackBtn />
@@ -213,7 +220,6 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
             onClick={doSubmit}
             disabled={isSaving}
           />
-          ,
         </div>
       ),
     },

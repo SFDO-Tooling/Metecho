@@ -461,7 +461,7 @@
   "orgStatusMsg": "{{count}} unretrieved change",
   "orgStatusMsg_plural": "{{count}} unretrieved changes",
   "pageCannotBeFound": "That page cannot be found. Try the <2>home page</2>?",
-  "projectCreateHelper": "<0>Create a new Project using the button in the upper right.</0><1>If the button is not available... @@@</1>",
+  "projectCreateHelper": "<0>Create a new Project using the button in the upper right.</0>",
   "projectListHelper": "<0>Confirm that you are logged into the correct account.</0><1>Re-sync Projects using the button in the upper right.</1><2>Contact the Project maintainer on GitHub.</2>",
   "projectNotFound": "We can’t find the Project you’re looking for. Try the <2>list of all Projects</2>?",
   "projectTaskNotFound": "We can’t find the Task you’re looking for. Try <2>another Task</2> from that Project?",

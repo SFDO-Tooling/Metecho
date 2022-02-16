@@ -223,6 +223,7 @@ class FullUserSerializer(HashIdModelSerializer):
             "sf_username",
             "can_create_projects",
             "currently_fetching_repos",
+            "currently_fetching_orgs",
             "devhub_username",
             "uses_global_devhub",
             "agreed_to_tos_at",
