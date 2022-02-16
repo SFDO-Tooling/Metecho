@@ -393,6 +393,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_ADAPTER = "metecho.oauth2.adapter.CustomSocialAccountAdapter"
+SOCIALACCOUNT_STORE_TOKENS = True  # Required to store GitHub account tokens
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
