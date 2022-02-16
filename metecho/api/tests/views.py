@@ -81,17 +81,25 @@ class TestCurrentUserViewSet:
         refresh_github_repositories_for_user_job = mocker.patch(
             "metecho.api.jobs.refresh_github_repositories_for_user_job", autospec=True
         )
-        get_orgs_for_user_job = mocker.patch(
-            "metecho.api.jobs.get_orgs_for_user_job", autospec=True
-        )
 
         response = client.post(reverse("current-user-refresh"))
 
         client.user.refresh_from_db()
         assert response.status_code == 202
         assert refresh_github_repositories_for_user_job.delay.called
-        assert get_orgs_for_user_job.delay.called
         assert client.user.currently_fetching_repos
+
+    def test_refresh_orgs(self, client, mocker):
+        get_orgs_for_user_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_organizations_for_user_job", autospec=True
+        )
+
+        response = client.post(reverse("current-user-refresh-orgs"))
+
+        client.user.refresh_from_db()
+        assert response.status_code == 202
+        assert get_orgs_for_user_job.delay.called
+        assert client.user.currently_fetching_orgs
 
 
 @pytest.mark.django_db
@@ -122,14 +130,6 @@ class TestGitHubOrganizationViewset:
             reverse("organization-detail", args=[str(git_hub_organization.id)])
         )
         assert tuple(response.json().keys()) == ("id", "name")
-
-    def test_for_user(self, client, mocker):
-        get_orgs_for_user_job = mocker.patch(
-            "metecho.api.jobs.get_orgs_for_user_job", autospec=True
-        )
-        response = client.post(reverse("organization-for-user"))
-        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
-        assert get_orgs_for_user_job.delay.called
 
     def test_members(self, client, mocker, git_hub_organization):
         get_org_members_job = mocker.patch(

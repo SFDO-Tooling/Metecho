@@ -179,6 +179,12 @@ class GitHubUserSerializer(serializers.Serializer):
     permissions = RepoPermissionSerializer(required=False)
 
 
+class GitHubOrganizationSerializer(HashIdModelSerializer):
+    class Meta:
+        model = GitHubOrganization
+        fields = ("id", "name")
+
+
 class OrgConfigNameSerializer(serializers.Serializer):
     key = serializers.CharField()
     label = serializers.CharField(required=False)
@@ -199,6 +205,7 @@ class GuidedTourSerializer(serializers.ModelSerializer):
 class FullUserSerializer(HashIdModelSerializer):
     sf_username = serializers.SerializerMethodField()
     can_create_projects = serializers.SerializerMethodField()
+    organizations = GitHubOrganizationSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -222,6 +229,7 @@ class FullUserSerializer(HashIdModelSerializer):
             "onboarded_at",
             "self_guided_tour_enabled",
             "self_guided_tour_state",
+            "organizations",
         )
 
     def get_sf_username(self, obj) -> Optional[str]:
@@ -243,12 +251,6 @@ class ProjectDependencySerializer(HashIdModelSerializer):
     class Meta:
         model = ProjectDependency
         fields = ("id", "name", "recommended")
-
-
-class GitHubOrganizationSerializer(HashIdModelSerializer):
-    class Meta:
-        model = GitHubOrganization
-        fields = ("id", "name")
 
 
 class CheckRepoNameSerializer(serializers.Serializer):

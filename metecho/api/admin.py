@@ -106,7 +106,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
     list_filter = ("is_active", "is_staff", "is_superuser")
     search_fields = ("username", "email")
-    filter_horizontal = ("groups", "user_permissions")
+    filter_horizontal = ("groups", "user_permissions", "organizations")
 
 
 @admin.register(Project)

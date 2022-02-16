@@ -968,5 +968,7 @@ class TestGitHubIssue:
 def test_login_handler(user_factory):
     user = user_factory()
     user.queue_refresh_repositories = MagicMock()
+    user.queue_refresh_organizations = MagicMock()
     user_logged_in_handler(None, user=user)
     user.queue_refresh_repositories.assert_called_once()
+    user.queue_refresh_organizations.assert_called_once()

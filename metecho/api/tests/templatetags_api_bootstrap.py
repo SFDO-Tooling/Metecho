@@ -34,6 +34,7 @@ def test_serialize(user_factory):
                 "onboarded_at": None,
                 "self_guided_tour_enabled": True,
                 "self_guided_tour_state": None,
+                "organizations": [],
             }
         )
     )

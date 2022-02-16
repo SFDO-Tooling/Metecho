@@ -191,8 +191,15 @@ class CurrentUserViewSet(GenericViewSet):
     @extend_schema(request=None, responses={202: None})
     @action(methods=["POST"], detail=False)
     def refresh(self, request):
-        """Queue a job to refresh the user's list of GitHub repositories and organizations."""
+        """Queue a job to refresh the user's list of GitHub repositories."""
         request.user.queue_refresh_repositories()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=None, responses={202: None})
+    @action(methods=["POST"], detail=False)
+    def refresh_orgs(self, request):
+        """Queue a job to refresh the user's list of GitHub organizations."""
+        request.user.queue_refresh_organizations()
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -228,13 +235,6 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
         """Queue a job to fetch the members of the Organization"""
         org: GitHubOrganization = self.get_object()
         org.queue_get_members(user=request.user)
-        return Response(status=status.HTTP_202_ACCEPTED)
-
-    @extend_schema(request=None, responses={202: None})
-    @action(detail=False, methods=["POST"])
-    def for_user(self, request):
-        """Queue a job to get GitHubOrganizations where the current user is a member"""
-        GitHubOrganization.queue_get_orgs_for_user(request.user)
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @extend_schema(request=CheckRepoNameSerializer, responses={202: None})

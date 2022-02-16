@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
-from unittest.mock import ANY, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
@@ -24,11 +24,11 @@ from ..jobs import (
     create_repository,
     delete_scratch_org,
     get_org_members,
-    get_orgs_for_user,
     get_social_image,
     get_unsaved_changes,
     refresh_commits,
     refresh_github_issues,
+    refresh_github_organizations_for_user,
     refresh_github_repositories_for_user,
     refresh_github_users,
     refresh_scratch_org,
@@ -639,6 +639,41 @@ class TestRefreshGitHubRepositoriesForUser:
 
         assert not user.currently_fetching_repos
         assert user.repositories.count() == 1
+        assert async_to_sync.called
+        assert "Oh no!" in caplog.text
+
+
+@pytest.mark.django_db
+class TestRefreshGitHubOrganizationsForUser:
+    def test_success(self, mocker, user_factory, git_hub_organization_factory):
+        member_org = git_hub_organization_factory(login="member-org")
+        git_hub_organization_factory()  # Another unrelated org
+        user = user_factory(currently_fetching_orgs=True)
+        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
+        gh_given_user.return_value.organizations.return_value = (
+            mocker.MagicMock(login="member-org"),
+        )
+
+        refresh_github_organizations_for_user(user)
+        user.refresh_from_db()
+
+        assert not user.currently_fetching_orgs
+        assert tuple(user.organizations.all()) == (member_org,)
+        assert async_to_sync.called
+
+    def test_error(self, mocker, caplog, user_factory):
+        user = user_factory(currently_fetching_orgs=True)
+        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
+        gh_given_user.return_value.organizations.side_effect = Exception("Oh no!")
+
+        with pytest.raises(Exception):
+            refresh_github_organizations_for_user(user)
+        user.refresh_from_db()
+
+        assert not user.currently_fetching_orgs
+        assert not user.organizations.exists()
         assert async_to_sync.called
         assert "Oh no!" in caplog.text
 
@@ -1483,57 +1518,6 @@ class TestGetOrgMembers:
             git_hub_organization,
             {
                 "type": "GITHUB_ORGANIZATION_MEMBERS_ERROR",
-                "payload": {
-                    "originating_user_id": str(user.pk),
-                    "message": "Oh no!",
-                },
-            },
-        )
-
-
-@pytest.mark.django_db
-class TestCheckUserMembership:
-    @pytest.mark.parametrize(
-        "org_name, message",
-        (
-            ("existing-org", [{"id": ANY, "name": "Foo Org"}]),
-            ("missing-org", []),
-        ),
-    )
-    def test_ok(
-        self, mocker, git_hub_organization_factory, user_factory, org_name, message
-    ):
-        user = user_factory()
-        git_hub_organization_factory(login=org_name, name="Foo Org")
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
-        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
-        gh_given_user.return_value.organizations.return_value = (
-            mocker.MagicMock(login="existing-org"),
-        )
-
-        get_orgs_for_user(user=user)
-
-        async_to_sync.return_value.assert_called_with(
-            user,
-            {
-                "type": "GET_ORGS_FOR_USER",
-                "payload": {"originating_user_id": str(user.pk), "message": message},
-            },
-        )
-
-    def test_error(self, mocker, caplog, user_factory):
-        user = user_factory()
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
-        mocker.patch(f"{PATCH_ROOT}.gh_given_user", side_effect=Exception("Oh no!"))
-
-        with pytest.raises(Exception):
-            get_orgs_for_user(user=user)
-
-        assert "Oh no!" in caplog.text
-        async_to_sync.return_value.assert_called_with(
-            user,
-            {
-                "type": "GET_ORGS_FOR_USER_ERROR",
                 "payload": {
                     "originating_user_id": str(user.pk),
                     "message": "Oh no!",

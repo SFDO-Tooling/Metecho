@@ -120,6 +120,10 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
+    currently_fetching_orgs = models.BooleanField(default=False)
+    organizations = models.ManyToManyField(
+        "api.GitHubOrganization", related_name="users"
+    )
     devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
@@ -154,7 +158,6 @@ class User(HashIdMixin, AbstractUser):
             self.currently_fetching_repos = True
             self.save()
             refresh_github_repositories_for_user_job.delay(self)
-            GitHubOrganization.queue_get_orgs_for_user(self)
 
     def finalize_refresh_repositories(self, error=None):
         self.refresh_from_db()
@@ -165,6 +168,26 @@ class User(HashIdMixin, AbstractUser):
         else:
             message = {
                 "type": "USER_REPOS_ERROR",
+                "payload": {"message": str(error)},
+            }
+        async_to_sync(push.push_message_about_instance)(self, message)
+
+    def queue_refresh_organizations(self):
+        from .jobs import refresh_github_organizations_for_user_job
+
+        if not self.currently_fetching_orgs:
+            self.currently_fetching_orgs = True
+            self.save()
+            refresh_github_organizations_for_user_job.delay(user=self)
+
+    def finalize_refresh_organizations(self, *, error: Exception = None):
+        self.refresh_from_db()
+        self.currently_fetching_orgs = False
+        self.save()
+        message = {"type": "USER_ORGS_REFRESH"}
+        if error is not None:
+            message = {
+                "type": "USER_ORGS_REFRESH_ERROR",
                 "payload": {"message": str(error)},
             }
         async_to_sync(push.push_message_about_instance)(self, message)
@@ -561,28 +584,6 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
     @property
     def github_url(self):
         return f"https://github.com/{self.login}"
-
-    @classmethod
-    def queue_get_orgs_for_user(cls, user: User):
-        from .jobs import get_orgs_for_user_job
-
-        get_orgs_for_user_job.delay(user=user)
-
-    @classmethod
-    def finalize_get_orgs_for_user(
-        cls, *, orgs: list = None, error: Exception = None, user: User
-    ):
-        message = {
-            "type": "GET_ORGS_FOR_USER",
-            "payload": {
-                "originating_user_id": str(user.id),
-                "message": orgs,
-            },
-        }
-        if error is not None:
-            message["type"] = "GET_ORGS_FOR_USER_ERROR"
-            message["payload"]["message"] = str(error)
-        async_to_sync(push.push_message_about_instance)(user, message)
 
     def queue_get_members(self, *, user: User):
         from .jobs import get_org_members_job
@@ -1579,6 +1580,7 @@ class ScratchOrg(
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
     user.queue_refresh_repositories()
+    user.queue_refresh_organizations()
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):

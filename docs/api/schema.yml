@@ -499,19 +499,6 @@ paths:
       responses:
         '202':
           description: No response body
-  /api/organizations/for_user/:
-    post:
-      operationId: organizations_for_user_create
-      description: Queue a job to get GitHubOrganizations where the current user is
-        a member
-      tags:
-      - organizations
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '202':
-          description: No response body
   /api/projects/:
     get:
       operationId: projects_list
@@ -1377,8 +1364,19 @@ paths:
   /api/user/refresh/:
     post:
       operationId: user_refresh_create
-      description: Queue a job to refresh the user's list of GitHub repositories and
-        organizations.
+      description: Queue a job to refresh the user's list of GitHub repositories.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
+  /api/user/refresh_orgs/:
+    post:
+      operationId: user_refresh_orgs_create
+      description: Queue a job to refresh the user's list of GitHub organizations.
       tags:
       - user
       security:
@@ -1674,6 +1672,11 @@ components:
           type: object
           additionalProperties: {}
           nullable: true
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GitHubOrganization'
+          readOnly: true
       required:
       - avatar_url
       - can_create_projects
@@ -1682,6 +1685,7 @@ components:
       - is_devhub_enabled
       - org_name
       - org_type
+      - organizations
       - sf_username
       - username
       - uses_global_devhub

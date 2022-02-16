@@ -154,29 +154,6 @@ def _create_branches_on_github(
     return task_branch_name
 
 
-def get_orgs_for_user(user: User):
-    """
-    Filter the local GitHubOrganizations down to those that the user is a member of.
-    """
-
-    try:
-        gh_user = gh_given_user(user)
-        qs = GitHubOrganization.objects.filter(
-            login__in=(org.login for org in gh_user.organizations())
-        )
-        serialized = [{"id": str(org.id), "name": org.name} for org in qs]
-    except Exception as error:
-        GitHubOrganization.finalize_get_orgs_for_user(error=error, user=user)
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
-    else:
-        GitHubOrganization.finalize_get_orgs_for_user(orgs=serialized, user=user)
-
-
-get_orgs_for_user_job = job(get_orgs_for_user)
-
-
 def check_repo_name(
     organization: GitHubOrganization, *, name: str, originating_user_id: str
 ):
@@ -774,6 +751,30 @@ def refresh_github_repositories_for_user(user):
 
 
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
+
+
+def refresh_github_organizations_for_user(user: User):
+    """
+    Update the local set of GitHubOrganizations for a user to match the organizations
+    they have access to on GitHub.
+    """
+
+    try:
+        gh_user = gh_given_user(user)
+        orgs = GitHubOrganization.objects.filter(
+            login__in=(org.login for org in gh_user.organizations())
+        )
+        user.organizations.set(orgs)
+    except Exception as error:
+        user.finalize_refresh_organizations(error=error)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        user.finalize_refresh_organizations()
+
+
+refresh_github_organizations_for_user_job = job(refresh_github_organizations_for_user)
 
 
 def get_social_image(*, project):
