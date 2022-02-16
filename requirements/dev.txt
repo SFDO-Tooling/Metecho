@@ -222,7 +222,7 @@ sqlparse==0.4.2
     # via
     #   -c requirements/prod.txt
     #   django
-stack-data==0.1.4
+stack-data==0.2.0
     # via ipython
 stevedore==3.5.0
     # via doc8
