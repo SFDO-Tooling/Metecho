@@ -5,7 +5,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.contrib.auth.models import Permission
 from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.urls import reverse
@@ -444,30 +443,9 @@ class TestProjectViewset:
         data = response.json()
         assert data["count"] == 3, data
 
-    def test_create__missing_permission(self, client, git_hub_organization):
-        """
-        User lacks the required Django permission to create Projects
-        """
-        response = client.post(
-            reverse("project-list"),
-            data={
-                "organization": str(git_hub_organization.pk),
-                "name": "Foo",
-                "repo_name": "foo",
-                "github_users": [],
-            },
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
-
     def test_create(
         self, client, mocker, git_hub_organization, project_dependency_factory
     ):
-        # User is not a superuser but has the required permission
-        client.user.user_permissions.add(
-            Permission.objects.get(
-                content_type__app_label="api", codename="add_project"
-            )
-        )
         dep1 = project_dependency_factory(url="http://foo.com")
         dep2 = project_dependency_factory(url="http://bar.com")
         SiteProfile.objects.create(
