@@ -609,7 +609,9 @@ def test_delete_scratch_org__exception(scratch_org_factory):
 class TestRefreshGitHubRepositoriesForUser:
     def test_success(self, mocker, user_factory):
         user = user_factory(currently_fetching_repos=True)
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        notify_changed = mocker.patch.object(
+            user, "notify_changed", wraps=user.notify_changed
+        )
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos",
             return_value=[
@@ -623,7 +625,7 @@ class TestRefreshGitHubRepositoriesForUser:
 
         assert not user.currently_fetching_repos
         assert user.repositories.count() == 2
-        assert async_to_sync.called
+        assert notify_changed.called
 
     def test_error(self, mocker, caplog, user_factory, git_hub_repository_factory):
         user = user_factory(currently_fetching_repos=True)
@@ -631,7 +633,9 @@ class TestRefreshGitHubRepositoriesForUser:
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos", side_effect=Exception("Oh no!")
         )
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        notify_error = mocker.patch.object(
+            user, "notify_error", wraps=user.notify_error
+        )
 
         with pytest.raises(Exception):
             refresh_github_repositories_for_user(user)
@@ -639,7 +643,7 @@ class TestRefreshGitHubRepositoriesForUser:
 
         assert not user.currently_fetching_repos
         assert user.repositories.count() == 1
-        assert async_to_sync.called
+        assert notify_error.called
         assert "Oh no!" in caplog.text
 
 
@@ -649,7 +653,9 @@ class TestRefreshGitHubOrganizationsForUser:
         member_org = git_hub_organization_factory(login="member-org")
         git_hub_organization_factory()  # Another unrelated org
         user = user_factory(currently_fetching_orgs=True)
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        notify_changed = mocker.patch.object(
+            user, "notify_changed", wraps=user.notify_changed
+        )
         gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
         gh_given_user.return_value.organizations.return_value = (
             mocker.MagicMock(login="member-org"),
@@ -660,11 +666,13 @@ class TestRefreshGitHubOrganizationsForUser:
 
         assert not user.currently_fetching_orgs
         assert tuple(user.organizations.all()) == (member_org,)
-        assert async_to_sync.called
+        assert notify_changed.called
 
     def test_error(self, mocker, caplog, user_factory):
         user = user_factory(currently_fetching_orgs=True)
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        notify_error = mocker.patch.object(
+            user, "notify_error", wraps=user.notify_error
+        )
         gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
         gh_given_user.return_value.organizations.side_effect = Exception("Oh no!")
 
@@ -674,7 +682,7 @@ class TestRefreshGitHubOrganizationsForUser:
 
         assert not user.currently_fetching_orgs
         assert not user.organizations.exists()
-        assert async_to_sync.called
+        assert notify_error.called
         assert "Oh no!" in caplog.text
 
 
@@ -1391,6 +1399,7 @@ class TestCreateRepository:
             },
             for_list=False,
             group_name=None,
+            include_user=False,
         )
         assert sarge.capture_both.called
         assert zipfile.extractall.called
@@ -1419,6 +1428,7 @@ class TestCreateRepository:
             },
             for_list=False,
             group_name=None,
+            include_user=False,
         )
 
     def test__push_error(self, mocker, caplog, github_mocks, user_factory):
@@ -1451,6 +1461,7 @@ class TestCreateRepository:
             },
             for_list=False,
             group_name=None,
+            include_user=False,
         )
 
     def test_not_a_member(self, mocker, caplog, project, user_factory):
@@ -1475,6 +1486,7 @@ class TestCreateRepository:
             },
             for_list=False,
             group_name=None,
+            include_user=False,
         )
 
 

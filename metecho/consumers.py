@@ -56,7 +56,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         content = deepcopy(content)
         model_name = content.pop("model_name")
         id_ = content.pop("id")
-        include_user = content.pop("include_user")
+        include_user = content.pop("include_user", False)
         # We usually don't want to include the user model, as that
         # would cause every generic-message to include the serialized user who's
         # getting the message. It'd just be noise on the wire.
