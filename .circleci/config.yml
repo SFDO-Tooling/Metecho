@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
     steps:
       - checkout
       - restore_cache:
@@ -48,7 +48,7 @@ jobs:
   lint:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:
@@ -62,7 +62,7 @@ jobs:
   test-client:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:
@@ -83,7 +83,7 @@ jobs:
   test-python:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
         environment:
           DATABASE_URL: postgres://ubuntu:circle_test@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
@@ -129,7 +129,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -155,7 +155,7 @@ jobs:
   build-docs:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:
@@ -170,7 +170,7 @@ jobs:
   deploy-storybook:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:py3.10-node16
+      - image: ghcr.io/oddbird/pyjs:py3.10-node16
     steps:
       - checkout
       - attach_workspace:

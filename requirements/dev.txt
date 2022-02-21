@@ -21,7 +21,7 @@ babel==2.9.1
     # via sphinx
 backcall==0.2.0
     # via ipython
-black==21.12b0
+black==22.1.0
     # via
     #   -r requirements/dev.in
     #   ipython
@@ -119,17 +119,17 @@ parso==0.8.3
     # via jedi
 pathspec==0.9.0
     # via black
-pbr==5.8.0
+pbr==5.8.1
     # via stevedore
 pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-platformdirs==2.4.1
+platformdirs==2.5.0
     # via black
 pluggy==1.0.0
     # via pytest
-prompt-toolkit==3.0.26
+prompt-toolkit==3.0.27
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -161,7 +161,7 @@ pytest==7.0.0
     #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
-pytest-asyncio==0.17.2
+pytest-asyncio==0.18.0
     # via -r requirements/dev.in
 pytest-cov==3.0.0
     # via -r requirements/dev.in
@@ -228,7 +228,7 @@ stevedore==3.5.0
     # via doc8
 termcolor==1.1.0
     # via pytest-sugar
-tomli==1.2.3
+tomli==2.0.1
     # via
     #   black
     #   coverage
@@ -237,10 +237,6 @@ traitlets==5.1.1
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.0.1
-    # via
-    #   -c requirements/prod.txt
-    #   black
 urllib3==1.26.8
     # via
     #   -c requirements/prod.txt
