@@ -1512,10 +1512,10 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
-"@salesforce-ux/design-system@2.17.4":
-  version "2.17.4"
-  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.17.4.tgz#e5f332969b7a47c646102b40592af0694258a96e"
-  integrity sha512-LbYTj2SluY/TcbJ6G2ratRmDI3c1YJzxPJayX4LYMjaKW2z+GF6Zzsk6ygP8hqIglGKvxConb0UA1oq8v1wX4w==
+"@salesforce-ux/design-system@2.17.5":
+  version "2.17.5"
+  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.17.5.tgz#f4d25d85e8f85970698941a076b344cb16cd57fd"
+  integrity sha512-vj1MgAeUHRbg3EeGQUR79QrgIoJI6U84IRCkRVnvgdBJs1iy3zb/chtz71/x4EVTfowY6+3gjR3hG11mJo1h3A==
 
 "@salesforce/babel-preset-design-system-react@^3.0.0":
   version "3.0.0"
