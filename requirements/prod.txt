@@ -28,7 +28,7 @@ authlib==0.15.5
     # via
     #   cumulusci
     #   simple-salesforce
-autobahn==22.1.1
+autobahn==22.2.2
     # via
     #   -r requirements/prod.in
     #   daphne
