@@ -6,7 +6,7 @@ channels-redis==3.3.1
 channels==3.0.4
 cumulusci==3.52.0
 dj-database-url==0.5.0
-django-allauth==0.48.0
+django-allauth==0.49.0
 django-anymail[mailgun]==8.5
 django-hashid-field==3.3.3
 https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
