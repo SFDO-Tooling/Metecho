@@ -1,6 +1,7 @@
 FROM ghcr.io/oddbird/pyjs:py3.10-node16
 
 ARG BUILD_ENV=development
+ARG PROD_ASSETS
 WORKDIR /app
 
 # Env setup:
@@ -26,7 +27,7 @@ RUN yarn install --check-files
 COPY . /app
 
 # Avoid building prod assets in development
-RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
+RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 
 RUN DATABASE_URL="" \
   # Sample keys, not to be used for realsies:

@@ -165,6 +165,19 @@
     "trim": "^0.0.3",
     "unset-value": "^2.0.1"
   },
+  "yarn-upgrade-all": {
+    "ignore": [
+      "@storybook/addon-actions",
+      "@storybook/addon-essentials",
+      "@storybook/addon-links",
+      "@storybook/builder-webpack5",
+      "@storybook/manager-webpack5",
+      "@storybook/react",
+      "i18next-scanner-webpack",
+      "node-fetch",
+      "react-router-dom"
+    ]
+  },
   "storybook-deployer": {
     "gitUsername": "Storybook Deployer Bot",
     "gitEmail": "dev-ops@oddbird.net",
