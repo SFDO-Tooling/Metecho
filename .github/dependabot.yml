@@ -1,19 +1,8 @@
 version: 2
 updates:
-  - package-ecosystem: pip
+  - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: monthly
+      interval: weekly
       time: '05:00'
       timezone: America/New_York
-    open-pull-requests-limit: 99
-    allow:
-      - dependency-type: direct
-  - package-ecosystem: npm
-    directory: '/'
-    schedule:
-      interval: monthly
-      time: '05:00'
-      timezone: America/New_York
-    open-pull-requests-limit: 99
-    versioning-strategy: increase
