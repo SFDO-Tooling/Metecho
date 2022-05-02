@@ -1,8 +1,8 @@
 Metecho
 =======
 
-.. image:: https://circleci.com/gh/SFDO-Tooling/Metecho.svg?style=shield
-     :target: https://circleci.com/gh/SFDO-Tooling/Metecho
+.. image:: https://github.com/SFDO-Tooling/Metecho/actions/workflows/test.yml/badge.svg
+     :target: https://github.com/SFDO-Tooling/Metecho/actions/workflows/test.yml
      :alt: Build Status
 
 .. image:: https://coveralls.io/repos/github/SFDO-Tooling/Metecho/badge.svg

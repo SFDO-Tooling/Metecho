@@ -1,0 +1,85 @@
+name: Test
+on:
+  push:
+  pull_request:
+    types: [reopened]
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/setup-docker-compose
+        with:
+          # Only this step sets the cache for future runs
+          cache-to: type=gha,mode=max
+      - name: Lint
+        run: docker-compose run --no-deps web yarn lint:nofix
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/setup-docker-compose
+      - name: Test frontend
+        run: docker-compose run --no-deps web yarn test:js:ci
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: frontend-coverage
+          path: |
+            coverage
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: setup
+        uses: ./.github/setup-docker-compose
+      - name:
+          Copy dist folder (contains the index.html file for Django templates)
+        run:
+          docker cp $(docker create ${{ steps.setup.outputs.tag }}):/app/dist .
+      - name: Test backend
+        run: >
+          docker-compose run
+          -e DJANGO_DEBUG=false
+          -e SECURE_SSL_REDIRECT=false
+          -e SFDX_CLIENT_SECRET="sample secret"
+          -e SFDX_CLIENT_CALLBACK_URL="sample callback"
+          -e SFDX_CLIENT_ID="sample id" 
+          -e SFDX_HUB_KEY="sample key"
+          -e DB_ENCRYPTION_KEY=MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
+          web yarn test:py
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: backend-coverage
+          path: |
+            .coverage
+            coverage.xml
+
+  coverage:
+    name: Upload coverage reports
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download frontend coverage results
+        uses: actions/download-artifact@v2
+        with:
+          name: frontend-coverage
+      - name: Download backend coverage results
+        uses: actions/download-artifact@v2
+        with:
+          name: backend-coverage
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

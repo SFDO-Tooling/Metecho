@@ -18,11 +18,19 @@ from typing import List
 import dj_database_url
 import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 from sentry_sdk.integrations.rq import RqIntegration
 
 BOOLS = ("True", "true", "T", "t", "1", 1)
+
+
+def safe_key() -> str:
+    """
+    Generate a secret key, stripping "$" to prevent env var interpolation in the key.
+    """
+    return get_random_secret_key().lstrip("$")
 
 
 def boolish(val: str) -> bool:
@@ -85,8 +93,10 @@ PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("DJANGO_SECRET_KEY")
-HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT")
+# Strip "$" to prevent env var interpolation in the random key
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=safe_key())
+
+HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT", default=safe_key())
 HASHID_FIELD_ALLOW_INT_LOOKUP = True
 HASHID_FIELD_ENABLE_HASHID_OBJECT = False  # Use plain strings
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
