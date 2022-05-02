@@ -37,7 +37,6 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -73,7 +72,6 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -109,7 +107,6 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -145,7 +142,6 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -204,7 +200,6 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -240,7 +235,6 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -276,7 +270,6 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -307,7 +300,6 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -361,7 +353,6 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -397,7 +388,6 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -433,7 +423,6 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -464,7 +453,6 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -518,7 +506,6 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -554,7 +541,6 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -590,7 +576,6 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -626,7 +611,6 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -685,7 +669,6 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -721,7 +704,6 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -752,7 +734,6 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -783,7 +764,6 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -837,7 +817,6 @@ exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -873,7 +852,6 @@ exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -909,7 +887,6 @@ exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -945,7 +922,6 @@ exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
