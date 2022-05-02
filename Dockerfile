@@ -29,7 +29,7 @@ COPY . /app
 # Avoid building prod assets in development
 RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 
-RUN DATABASE_URL="" \
+RUN DATABASE_URL="postgres://" \
   # Sample keys, not to be used for realsies:
   DB_ENCRYPTION_KEY="IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE=" \
   DJANGO_HASHID_SALT="sample hashid salt" \

@@ -11,75 +11,23 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 from ipaddress import IPv4Network
-from os import environ
+from os import environ as os_environ
 from pathlib import Path
-from typing import List
 
-import dj_database_url
+import environ
 import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 from sentry_sdk.integrations.rq import RqIntegration
 
-BOOLS = ("True", "true", "T", "t", "1", 1)
-
-
-def boolish(val: str) -> bool:
-    return val in BOOLS
-
-
-def ipv4_networks(val: str) -> List[IPv4Network]:
-    return [IPv4Network(s.strip()) for s in val.split(",")]
-
-
-class NoDefaultValue:
-    pass
-
-
-def env(name, default=NoDefaultValue, type_=str):
-    """
-    Get a configuration value from the environment.
-
-    Arguments
-    ---------
-    name : str
-        The name of the environment variable to pull from for this
-        setting.
-    default : any
-        A default value of the return type in case the intended
-        environment variable is not set. If this argument is not passed,
-        the environment variable is considered to be required, and
-        ``ImproperlyConfigured`` may be raised.
-    type_ : callable
-        A callable that takes a string and returns a value of the return
-        type.
-
-    Returns
-    -------
-    any
-        A value of the type returned by ``type_``.
-
-    Raises
-    ------
-    ImproperlyConfigured
-        If there is no ``default``, and the environment variable is not
-        set.
-    """
-    try:
-        val = environ[name]
-    except KeyError:
-        if default == NoDefaultValue:
-            raise ImproperlyConfigured(f"Missing environment variable: {name}.")
-        val = default
-    if val is not None:
-        val = type_(val)
-    return val
-
-
-# Build paths inside the project like this: BASE_DIR.joinpath(...)
+# Build paths inside the project like this: str(PROJECT_ROOT / 'some_path')
 PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 
+env = environ.Env()
+env_file = PROJECT_ROOT / ".env"
+if env_file.exists():
+    environ.Env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -92,31 +40,43 @@ HASHID_FIELD_ENABLE_HASHID_OBJECT = False  # Use plain strings
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DJANGO_DEBUG", default=False, type_=boolish)
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 
 if MODE == "dev":
-    environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+    os_environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-API_DOCS_ENABLED = env("API_DOCS_ENABLED", default=DEBUG, type_=boolish)
+API_DOCS_ENABLED = env.bool("API_DOCS_ENABLED", default=DEBUG)
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "127.0.0.1:8000",
-    "127.0.0.1:8080",
-    "0.0.0.0",
-    "0.0.0.0:8000",
-    "0.0.0.0:8080",
-    "localhost",
-    "localhost:8000",
-    "localhost:8080",
-] + [
-    el.strip()
-    for el in env("DJANGO_ALLOWED_HOSTS", default="", type_=lambda x: x.split(","))
-    if el.strip()
-]
+# Use HTTPS:
+SECURE_PROXY_SSL_HEADER = env.tuple(
+    "SECURE_PROXY_SSL_HEADER",
+    default=("HTTP_X_FORWARDED_PROTO", "https"),
+)
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT)
 
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+if MODE == "dev":
+    ALLOWED_HOSTS += [
+        "127.0.0.1",
+        "127.0.0.1:8000",
+        "127.0.0.1:8080",
+        "0.0.0.0",
+        "0.0.0.0:8000",
+        "0.0.0.0:8080",
+        "localhost",
+        "localhost:8000",
+        "localhost:8080",
+    ]
+CSRF_TRUSTED_ORIGINS = env.list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    default=[
+        f"{'https' if SECURE_SSL_REDIRECT else 'http'}://{host}"
+        for host in ALLOWED_HOSTS
+    ],
+)
 
 # Application definition
 
@@ -204,7 +164,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {"default": dj_database_url.config(default="postgres:///metecho")}
+DATABASES = {"default": env.db_url("DATABASE_URL", default="postgres:///metecho")}
 
 # Custom User model:
 AUTH_USER_MODEL = "api.User"
@@ -214,24 +174,22 @@ AUTH_USER_MODEL = "api.User"
 ROOT_URLCONF = "metecho.urls"
 
 ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin")
-RESTRICTED_PREFIXES = env(
-    "RESTRICTED_PREFIXES", default=(), type_=lambda x: x.split(",") if x else ()
-)
+RESTRICTED_PREFIXES = env.list("RESTRICTED_PREFIXES", default=[])
 UNRESTRICTED_PREFIXES = ["api/hook"]
 
-ADMIN_API_ALLOWED_SUBNETS = env(
-    "ADMIN_API_ALLOWED_SUBNETS",
-    default="127.0.0.1/32,172.16.0.0/12",
-    type_=ipv4_networks,
-)
+
+ADMIN_API_ALLOWED_SUBNETS = [
+    IPv4Network(s.strip())
+    for s in env.list(
+        "ADMIN_API_ALLOWED_SUBNETS", default=["127.0.0.1/32", "172.16.0.0/12"]
+    )
+]
 
 # GitHub settings:
-GITHUB_HOOK_SECRET = env(
-    "GITHUB_HOOK_SECRET", default="", type_=lambda x: bytes(x, encoding="utf-8")
-)
+GITHUB_HOOK_SECRET = bytes(env("GITHUB_HOOK_SECRET", default=""), "utf-8")
 # The username of the user that GitHub webhook actions should authenticate as:
 GITHUB_USER_NAME = env("GITHUB_USER_NAME", default="GitHub user")
-GITHUB_APP_ID = env("GITHUB_APP_ID", default=0, type_=int)
+GITHUB_APP_ID = env.int("GITHUB_APP_ID", default=0)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
 DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
 GITHUB_APP_KEY = bytes(env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY), "utf-8")
@@ -257,29 +215,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_REDIRECT_URL = "/"
 
-# Use HTTPS:
-SECURE_PROXY_SSL_HEADER = env(
-    "SECURE_PROXY_SSL_HEADER",
-    default="HTTP_X_FORWARDED_PROTO:https",
-    type_=(lambda v: tuple(v.split(":", 1)) if (v is not None and ":" in v) else None),
-)
-SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, type_=boolish)
-SESSION_COOKIE_SECURE = env(
-    "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
-)
 # "Lax" is required for GitHub login redirects to work properly
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-CSRF_COOKIE_SECURE = env(
-    "CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT)
+SECURE_HSTS_SECONDS = env.int(
+    "SECURE_HSTS_SECONDS", default=3600 if SECURE_SSL_REDIRECT else 0
 )
-SECURE_HSTS_SECONDS = env(
-    "SECURE_HSTS_SECONDS", default=3600 if SECURE_SSL_REDIRECT else 0, type_=int
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True
 )
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env(
-    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True, type_=boolish
-)
-SECURE_HSTS_PRELOAD = env("SECURE_HSTS_PRELOAD", default=False, type_=boolish)
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
 
 
 # Internationalization
@@ -306,10 +252,8 @@ else:
         "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN", default=None),
     }
 
-DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env(
-    "DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3, type_=int
-)
-ORG_RECHECK_MINUTES = env("ORG_RECHECK_MINUTES", default=5, type_=int)
+DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env.int("DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3)
+ORG_RECHECK_MINUTES = env.int("ORG_RECHECK_MINUTES", default=5)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -341,9 +285,7 @@ GITHUB_CLIENT_SECRET = env("GITHUB_CLIENT_SECRET", default=None)
 
 # If GITHUB_OAUTH_PRIVATE_REPO env var is True, oauth scope should include
 # private repositories. Otherwise, the scope will only be for public repos.
-GITHUB_OAUTH_PRIVATE_REPO = env(
-    "GITHUB_OAUTH_PRIVATE_REPO", default=False, type_=boolish
-)
+GITHUB_OAUTH_PRIVATE_REPO = env.bool("GITHUB_OAUTH_PRIVATE_REPO", default=False)
 GITHUB_OAUTH_SCOPES = ["read:user", "user:email"]
 GITHUB_OAUTH_SCOPES.append("repo" if GITHUB_OAUTH_PRIVATE_REPO else "public_repo")
 
@@ -376,8 +318,8 @@ if not SFDX_HUB_KEY:
     raise ImproperlyConfigured("Missing environment variable: SFDX_HUB_KEY.")
 
 # CCI expects these env vars to be set to refresh org oauth tokens
-environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
-environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
+os_environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
+os_environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
 
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
@@ -415,7 +357,7 @@ CACHES = {
 RQ_QUEUES = {
     "default": {
         "URL": REDIS_LOCATION,
-        "DEFAULT_TIMEOUT": env("REDIS_JOB_TIMEOUT", type_=int, default=3600),
+        "DEFAULT_TIMEOUT": env.int("REDIS_JOB_TIMEOUT", default=3600),
         "DEFAULT_RESULT_TTL": 720,
     }
 }
@@ -523,14 +465,14 @@ LOGGING = {
     },
 }
 
-API_PAGE_SIZE = env("API_PAGE_SIZE", type_=int, default=50)
+API_PAGE_SIZE = env.int("API_PAGE_SIZE", default=50)
 
-GITHUB_ISSUE_LIMIT = env("GITHUB_ISSUE_LIMIT", type_=int, default=1000)
+GITHUB_ISSUE_LIMIT = env.int("GITHUB_ISSUE_LIMIT", default=1000)
 
 # New feature branch prefix:
 BRANCH_PREFIX = env("BRANCH_PREFIX", default=None)
 
-ENABLE_WALKTHROUGHS = env("ENABLE_WALKTHROUGHS", default=True, type_=boolish)
+ENABLE_WALKTHROUGHS = env.bool("ENABLE_WALKTHROUGHS", default=True)
 
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN", default="")

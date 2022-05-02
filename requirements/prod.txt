@@ -116,6 +116,8 @@ django-allauth==0.50.0
     # via -r requirements/prod.in
 django-anymail[mailgun]==8.5
     # via -r requirements/prod.in
+django-environ==0.8.1
+    # via -r requirements/prod.in
 django-filter==21.1
     # via sfdo-template-helpers
 django-hashid-field==3.3.4
