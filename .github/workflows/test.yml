@@ -30,7 +30,7 @@ jobs:
       - name: Test frontend
         run: docker-compose run --no-deps web yarn test:js:ci
       - name: Upload coverage results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: frontend-coverage
           path: |
@@ -59,7 +59,7 @@ jobs:
           -e DB_ENCRYPTION_KEY=MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
           web yarn test:py
       - name: Upload coverage results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: backend-coverage
           path: |
@@ -73,13 +73,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download frontend coverage results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: frontend-coverage
       - name: Download backend coverage results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: backend-coverage
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
