@@ -94,7 +94,6 @@
     "@storybook/storybook-deployer": "^2.8.11",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
-    "@testing-library/react-hooks": "^8.0.0",
     "@types/classnames": "^2.3.1",
     "@types/core-js": "^2.5.5",
     "@types/js-cookie": "^3.0.2",

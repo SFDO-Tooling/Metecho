@@ -1,5 +1,4 @@
-import { render as renderReact } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render as renderReact, renderHook } from '@testing-library/react';
 import i18n, { use } from 'i18next';
 import React from 'react';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
