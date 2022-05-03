@@ -1007,13 +1007,13 @@ describe('<ProjectDetail />', () => {
           exact: false,
         });
         fireEvent.click(getByText('Start Play Walkthrough'));
-        const dialog = await findByText('View & play with a Project');
+        const dialog = await findByText('What’s in a name?');
 
         expect(dialog).toBeVisible();
 
         fireEvent.click(getByTitle('Close'));
 
-        expect(queryByText('View & play with a Project')).toBeNull();
+        expect(queryByText('What’s in a name?')).toBeNull();
       });
     });
 
