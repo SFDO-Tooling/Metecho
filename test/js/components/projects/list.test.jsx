@@ -19,7 +19,7 @@ jest.mock('@/js/store/projects/actions');
 
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-useScrollPosition.mockReturnValue(() => 0);
+useScrollPosition.mockReturnValue(0);
 
 afterEach(() => {
   fetchObjects.mockClear();
@@ -106,7 +106,7 @@ describe('<ProjectList />', () => {
     test('fetches next page of projects', async () => {
       fetchObjects.mockReturnValueOnce(() => new Promise(() => {}));
       const { findByText, rerender, store } = setup({ initialState });
-      useScrollPosition.mockReturnValueOnce(() => 1000);
+      useScrollPosition.mockReturnValueOnce(1000);
       setup({ rerender, store });
 
       expect.assertions(1);
@@ -127,7 +127,7 @@ describe('<ProjectList />', () => {
         },
       };
       const { rerender, queryByText, store } = setup({ initialState: state });
-      useScrollPosition.mockReturnValueOnce(() => 1000);
+      useScrollPosition.mockReturnValueOnce(1000);
       setup({ rerender, store });
 
       expect(queryByText('Loading…')).toBeNull();

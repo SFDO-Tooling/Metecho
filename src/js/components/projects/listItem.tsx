@@ -12,19 +12,19 @@ const ProjectListItem = ({ project }: { project: Project }) => {
   return (
     <div
       className="metecho-project-item
-      slds-p-around_small
-      slds-size_1-of-1
-      slds-medium-size_1-of-2
-      slds-large-size_1-of-3"
+        slds-p-around_small
+        slds-size_1-of-1
+        slds-medium-size_1-of-2
+        slds-large-size_1-of-3"
     >
       <Link
         to={routes.project_detail(project.slug)}
         className="slds-box
-        slds-box_link
-        slds-box_x-small
-        slds-theme_default
-        slds-media
-        container-fill-space"
+          slds-box_link
+          slds-box_x-small
+          slds-theme_default
+          slds-media
+          container-fill-space"
       >
         <div className="slds-media__figure slds-m-left_xx-small">
           {project.repo_image_url ? (
@@ -47,11 +47,11 @@ const ProjectListItem = ({ project }: { project: Project }) => {
         </div>
         <div
           className="slds-media__body
-          slds-border_left
-          slds-p-around_small
-          slds-grid
-          slds-grid_vertical
-          content-fill-height"
+            slds-border_left
+            slds-p-around_small
+            slds-grid
+            slds-grid_vertical
+            content-fill-height"
         >
           <h2
             className="slds-truncate slds-text-heading_small"

@@ -256,6 +256,7 @@ describe('<CaptureModal/>', () => {
 
         expect(getByText(text)).toBeVisible();
         if (showsErr) {
+          await findByText('Do not do that');
           // eslint-disable-next-line jest/no-conditional-expect
           expect(getByText('Do not do that')).toBeVisible();
         }
