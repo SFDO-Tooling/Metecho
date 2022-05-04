@@ -1,8 +1,7 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { t } from 'i18next';
 import React, { ReactNode } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import TourPopover from '@/js/components/tour/popover';
@@ -41,6 +40,8 @@ const DetailPageLayout = ({
   children?: ReactNode;
   image?: string;
 }) => {
+  const { t } = useTranslation();
+
   const showHeaderImage = Boolean(image && !description);
   let popover = null;
   const popoverHeading = t('Navigation breadcrumb');

@@ -1,6 +1,5 @@
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { TFunction, Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -13,9 +12,11 @@ import { EPIC_STATUSES } from '@/js/utils/constants';
 export const getDemoEpic = ({
   project,
   github_id,
+  t,
 }: {
   project: string;
   github_id: string | null;
+  t: TFunction;
 }): Epic => {
   const description = t(
     'This is a sample description to show where the description of the Epic would appear.',
@@ -47,6 +48,8 @@ export const getDemoEpic = ({
 };
 
 const PlanTour = (props: TourProps) => {
+  const { t } = useTranslation();
+
   /*
     Note: Any step which targets an element that may be hidden (or not in the
     DOM) will be skipped unless the element is made visible when the *prior*
@@ -120,7 +123,7 @@ const PlanTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
-    getFinalStep(),
+    getFinalStep(t),
   ];
 
   return <GuidedTour steps={steps} {...props} />;

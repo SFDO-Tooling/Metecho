@@ -1,10 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { Location } from 'history';
-import { t } from 'i18next';
 import cookies from 'js-cookie';
 import React, { ReactElement } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { StaticContext } from 'react-router';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -27,6 +26,8 @@ interface Props
 
 export const LoginButton = withRouter(
   ({ id = 'login', label, from = {}, location }: Props) => {
+    const { t } = useTranslation();
+
     const action = window.api_urls.github_login?.();
     let { pathname } = location.state?.from || from;
     pathname = pathname || window.location.pathname;
@@ -58,6 +59,7 @@ export const LoginButton = withRouter(
 );
 
 const Login = () => {
+  const { t } = useTranslation();
   const user = useSelector(selectUserState);
 
   return user ? (

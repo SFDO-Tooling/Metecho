@@ -3,8 +3,8 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import Icon from '@salesforce/design-system-react/components/icon';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   BooleanObject,
@@ -20,6 +20,7 @@ interface Props {
 }
 
 const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
+  const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
 
   const handlePanelToggle = (groupName: string) => {

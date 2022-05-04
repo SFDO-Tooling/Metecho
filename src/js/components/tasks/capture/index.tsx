@@ -2,8 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import ChangesForm from '@/js/components/tasks/capture/changes';
@@ -69,6 +69,7 @@ export const ModalCard = ({
 );
 
 const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
+  const { t } = useTranslation();
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);

@@ -6,10 +6,10 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
-import { t } from 'i18next';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { createRoot } from 'react-dom/client';
+import { useTranslation } from 'react-i18next';
 import { Provider } from 'react-redux';
 // Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import {
@@ -68,6 +68,8 @@ const App = withRouter(
     dispatch,
     location: { pathname },
   }: { dispatch: Dispatch } & RouteComponentProps) => {
+    const { t } = useTranslation();
+
     useEffect(
       () => () => {
         dispatch(clearErrors());

@@ -1,7 +1,6 @@
-import { t } from 'i18next';
 import { pick } from 'lodash';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { TFunction, Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -15,11 +14,13 @@ import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
 export const getDemoTask = ({
   project,
   github_id,
+  t,
 }: {
   project: string;
   github_id: string | null;
+  t: TFunction;
 }): Task => {
-  const epic = getDemoEpic({ project, github_id });
+  const epic = getDemoEpic({ project, github_id, t });
 
   return {
     id: 'demo-task',
@@ -55,6 +56,7 @@ export const getDemoTask = ({
 };
 
 const HelpTour = (props: TourProps) => {
+  const { t } = useTranslation();
   /*
     Note: Any step which targets an element that may be hidden (or not in the
     DOM) will be skipped unless the element is made visible when the *prior*
@@ -122,7 +124,7 @@ const HelpTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
-    getFinalStep(),
+    getFinalStep(t),
   ];
 
   return <GuidedTour steps={steps} {...props} />;

@@ -1,7 +1,6 @@
 import ProgressBar from '@salesforce/design-system-react/components/progress-bar';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import TourPopover from '@/js/components/tour/popover';
 import { getPercentage } from '@/js/utils/helpers';
@@ -11,8 +10,11 @@ interface Props {
 }
 
 const EpicProgress = ({ range }: Props) => {
+  const { t } = useTranslation();
+
   const [complete, total] = range;
   const value = getPercentage(complete, total);
+
   return (
     <div className="epic-progress">
       <div className="slds-clearfix slds-m-bottom_xx-small">

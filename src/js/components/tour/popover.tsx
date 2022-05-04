@@ -1,8 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ThunkDispatch } from '@/js/store';
@@ -22,6 +22,7 @@ const TourPopover = ({
 }) => {
   const user = useSelector(selectUserState);
   const dispatch = useDispatch<ThunkDispatch>();
+  const { t } = useTranslation();
 
   const isViewed = user?.self_guided_tour_state?.includes(id);
 

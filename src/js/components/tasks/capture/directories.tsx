@@ -1,9 +1,8 @@
 import Radio from '@salesforce/design-system-react/components/radio';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { CommitData, ModalCard } from '@/js/components/tasks/capture';
 import { UseFormProps } from '@/js/components/utils';
@@ -22,6 +21,7 @@ const TargetDirectoriesForm = ({
   errors,
   handleInputChange,
 }: Props) => {
+  const { t } = useTranslation();
   const keys = [
     'source' as const,
     'pre' as const,

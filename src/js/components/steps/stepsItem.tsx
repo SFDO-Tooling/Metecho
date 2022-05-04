@@ -1,8 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import { ExternalLink } from '@/js/components/utils';
@@ -27,6 +27,7 @@ const StepsItem = ({
   someAssignees: boolean;
   handleAction?: (s: Step) => void;
 }) => {
+  const { t } = useTranslation();
   const isActive = step.active && !step.complete;
   const hasAssignee = Boolean(step.assignee && !step.complete);
 

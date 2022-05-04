@@ -1,8 +1,8 @@
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import { UseFormProps } from '@/js/components/utils';
@@ -22,6 +22,7 @@ const CreateOrgForm = ({
   errors,
   handleInputChange,
 }: Props) => {
+  const { t } = useTranslation();
   const [isExpanded, setExpanded] = useState(false);
 
   const handlePanelToggle = useCallback(() => {

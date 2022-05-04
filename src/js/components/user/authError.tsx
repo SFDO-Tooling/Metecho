@@ -1,7 +1,6 @@
-import { t } from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -12,6 +11,7 @@ import { selectUserState } from '@/js/store/user/selectors';
 import routes from '@/js/utils/routes';
 
 const AuthError = () => {
+  const { t } = useTranslation();
   const user = useSelector(selectUserState);
 
   return (

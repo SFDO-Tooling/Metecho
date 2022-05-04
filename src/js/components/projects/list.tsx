@@ -1,10 +1,9 @@
 import useScrollPosition from '@react-hook/window-scroll';
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/js/components/404';
@@ -26,6 +25,7 @@ import {
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 const ProjectList = () => {
+  const { t } = useTranslation();
   const scrollY = useScrollPosition();
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const isMounted = useIsMounted();

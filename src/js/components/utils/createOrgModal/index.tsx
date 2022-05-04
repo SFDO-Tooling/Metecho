@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   LabelWithSpinner,
@@ -34,6 +34,7 @@ export interface OrgData {
 }
 
 const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
+  const { t } = useTranslation();
   const [pageIndex, setPageIndex] = useState(0);
   const isMounted = useIsMounted();
   const [isSaving, setIsSaving] = useState(false);

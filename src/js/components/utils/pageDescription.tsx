@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PageDescription = ({
   title,
@@ -10,6 +10,8 @@ const PageDescription = ({
   description: string;
   image?: string;
 }) => {
+  const { t } = useTranslation();
+
   const descriptionHasTitle =
     description?.startsWith('<h1>') || description?.startsWith('<h2>');
 

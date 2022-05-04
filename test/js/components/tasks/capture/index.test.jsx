@@ -185,7 +185,6 @@ describe('<CaptureModal/>', () => {
         const selectAll = getByLabelText('All Ignored Changes');
         fireEvent.click(selectAll);
         fireEvent.click(getByText('Un-ignore Selected Changes'));
-
         await findByText('Saving Ignored Changes…');
 
         expect(updateObject).toHaveBeenCalledWith({

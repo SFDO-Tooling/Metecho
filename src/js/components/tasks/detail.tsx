@@ -4,11 +4,10 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
-import { t } from 'i18next';
 import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -91,6 +90,7 @@ const ResubmitButton = ({
 const TaskDetail = (
   props: RouteComponentProps<any, any, { [RETRIEVE_CHANGES]?: boolean }>,
 ) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);

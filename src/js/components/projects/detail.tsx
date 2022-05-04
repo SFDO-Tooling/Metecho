@@ -1,11 +1,10 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
-import { t } from 'i18next';
 import { pick } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -58,6 +57,7 @@ const ProjectDetail = (
     { [SHOW_WALKTHROUGH]?: WalkthroughType }
   >,
 ) => {
+  const { t } = useTranslation();
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [selectIssueModalOpen, setSelectIssueModalOpen] = useState<
@@ -274,6 +274,7 @@ const ProjectDetail = (
     owner_gh_username: user.username,
     owner_gh_id: user.github_id,
     latest_commit: project?.latest_sha || '',
+    t,
   });
   /* istanbul ignore next */
   const handlePlayTourStep = useCallback(
@@ -506,6 +507,7 @@ const ProjectDetail = (
                       getDemoEpic({
                         project: project.id,
                         github_id: user.github_id,
+                        t,
                       }),
                     ]
                   : epics?.epics || []
@@ -609,6 +611,7 @@ const ProjectDetail = (
                       getDemoTask({
                         project: project.id,
                         github_id: user.github_id,
+                        t,
                       }),
                     ]
                   : tasks || []
