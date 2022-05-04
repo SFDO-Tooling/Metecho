@@ -25,7 +25,6 @@
 **/Dockerfile
 .Python
 .cache
-.circleci/
 .coverage
 .coverage.*
 .devcontainer/
