@@ -19,6 +19,9 @@ export const initI18n = () => {
     interpolation: {
       escapeValue: false,
     },
+    react: {
+      useSuspense: false,
+    },
   });
 };
 
