@@ -1,6 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import Footer from '@/js/components/orgs/cards/footer';
@@ -41,6 +41,7 @@ const PlaygroundOrgCard = ({
   repoUrl,
   openContributeModal,
 }: PlaygroundCardProps) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
   const [isDeletingOrg, setIsDeletingOrg] = useState(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] =

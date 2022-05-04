@@ -5,9 +5,8 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/js/components/user/connect';
@@ -27,6 +26,8 @@ const ConnectToSalesforce = ({
 }: {
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const { t } = useTranslation();
+
   const openConnectModal = () => {
     toggleModal(true);
   };
@@ -68,6 +69,7 @@ const UserInfo = ({
   user: User;
   onDisconnect?: () => void;
 }) => {
+  const { t } = useTranslation();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isMounted = useIsMounted();
@@ -145,34 +147,40 @@ const UserInfo = ({
   );
 };
 
-const ConnectionInfo = ({ user }: { user: User }) => (
-  <>
-    <Icon
-      className="slds-is-absolute"
-      category="utility"
-      name="connected_apps"
-      size="small"
-    />
-    <div className="slds-p-left_x-large slds-m-bottom_small">
-      <p className="slds-text-heading_small">{t('Connected to Salesforce')}</p>
-      {!user.is_devhub_enabled && (
-        <p className="slds-text-color_weak slds-m-top_xx-small">
-          <Icon
-            assistiveText={{ label: t('Error') }}
-            category="utility"
-            name="error"
-            colorVariant="error"
-            size="x-small"
-            className="slds-m-bottom_xxx-small"
-            containerClassName="slds-m-right_xx-small"
-          />
-          <ConnectionInfoWarning />
+const ConnectionInfo = ({ user }: { user: User }) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Icon
+        className="slds-is-absolute"
+        category="utility"
+        name="connected_apps"
+        size="small"
+      />
+      <div className="slds-p-left_x-large slds-m-bottom_small">
+        <p className="slds-text-heading_small">
+          {t('Connected to Salesforce')}
         </p>
-      )}
-    </div>
-    <UserInfo user={user} />
-  </>
-);
+        {!user.is_devhub_enabled && (
+          <p className="slds-text-color_weak slds-m-top_xx-small">
+            <Icon
+              assistiveText={{ label: t('Error') }}
+              category="utility"
+              name="error"
+              colorVariant="error"
+              size="x-small"
+              className="slds-m-bottom_xxx-small"
+              containerClassName="slds-m-right_xx-small"
+            />
+            <ConnectionInfoWarning />
+          </p>
+        )}
+      </div>
+      <UserInfo user={user} />
+    </>
+  );
+};
 
 export const ConnectionInfoModal = ({
   user,
@@ -187,6 +195,8 @@ export const ConnectionInfoModal = ({
   onDisconnect?: () => void;
   successText?: string;
 }) => {
+  const { t } = useTranslation();
+
   const handleClose = () => {
     toggleModal(false);
   };
@@ -225,6 +235,7 @@ export const ConnectionInfoModal = ({
 };
 
 const UserDropdown = () => {
+  const { t } = useTranslation();
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
 

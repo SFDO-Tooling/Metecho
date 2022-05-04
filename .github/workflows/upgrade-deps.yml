@@ -28,8 +28,6 @@ jobs:
           docker-compose run --no-deps web /bin/sh -c 'pip-compile --upgrade -o
           requirements/prod.txt requirements/prod.in && pip-compile --upgrade -o
           requirements/dev.txt requirements/dev.in'
-      - name: Lint
-        run: docker-compose run --no-deps web yarn lint
       - name: Detect changes
         id: changes
         run:

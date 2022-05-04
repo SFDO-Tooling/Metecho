@@ -3,10 +3,9 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -152,6 +151,7 @@ const AssigneeTableCell = ({
   assignUserAction: AssignUserAction;
   children?: string | null;
 }) => {
+  const { t } = useTranslation();
   const assignedUser = useSelector((state: AppState) =>
     selectProjectCollaborator(state, projectId, children),
   );
@@ -271,6 +271,7 @@ const TaskTable = ({
   assignUserAction,
   viewEpicsColumn,
 }: Props) => {
+  const { t } = useTranslation();
   const currentUser = useSelector(selectUserState) as User;
   const statusOrder = {
     [TASK_STATUSES.IN_PROGRESS]: 1,

@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { Org } from '@/js/store/orgs/reducer';
@@ -28,6 +28,8 @@ const Footer = ({
   readyForReview?: boolean;
   openRefreshOrgModal?: () => void;
 }) => {
+  const { t } = useTranslation();
+
   const loadingMsg: JSX.Element = t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );

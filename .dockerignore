@@ -33,6 +33,7 @@
 .eggs/
 .env
 .git
+.github/
 .hypothesis/
 .idea/
 .installed.cfg

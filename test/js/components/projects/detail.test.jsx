@@ -976,16 +976,16 @@ describe('<ProjectDetail />', () => {
       });
 
       expect.assertions(3);
-      const heading = await findByText('What can Metecho help you do today?', {
-        exact: false,
-      });
+      const heading = await findByText(
+        'Hello! What can Metecho help you do today?',
+      );
 
       expect(heading).toBeVisible();
 
       fireEvent.click(getByTitle('Close'));
 
       expect(
-        queryByText('What can Metecho help you do today?', { exact: false }),
+        queryByText('Hello! What can Metecho help you do today?'),
       ).toBeNull();
       expect(onboarded).toHaveBeenCalledTimes(1);
     });
@@ -1002,18 +1002,19 @@ describe('<ProjectDetail />', () => {
           },
         });
 
-        expect.assertions(2);
-        await findByText('What can Metecho help you do today?', {
-          exact: false,
-        });
+        await findByText('Hello! What can Metecho help you do today?');
         fireEvent.click(getByText('Start Play Walkthrough'));
         const dialog = await findByText('View & play with a Project');
 
-        expect(dialog).toBeVisible();
+        await waitFor(() => {
+          expect(dialog).toBeVisible();
+        });
 
         fireEvent.click(getByTitle('Close'));
 
-        expect(queryByText('View & play with a Project')).toBeNull();
+        await waitFor(() => {
+          expect(queryByText('View & play with a Project')).toBeNull();
+        });
       });
     });
 
@@ -1029,18 +1030,19 @@ describe('<ProjectDetail />', () => {
           },
         });
 
-        expect.assertions(2);
-        await findByText('What can Metecho help you do today?', {
-          exact: false,
-        });
+        await findByText('Hello! What can Metecho help you do today?');
         fireEvent.click(getByText('Start Plan Walkthrough'));
         const dialog = await findByText('List of Tasks');
 
-        expect(dialog).toBeVisible();
+        await waitFor(() => {
+          expect(dialog).toBeVisible();
+        });
 
         fireEvent.click(getByTitle('Close'));
 
-        expect(queryByText('List of Tasks')).toBeNull();
+        await waitFor(() => {
+          expect(queryByText('List of Tasks')).toBeNull();
+        });
       });
     });
 
@@ -1056,14 +1058,13 @@ describe('<ProjectDetail />', () => {
           },
         });
 
-        expect.assertions(3);
-        await findByText('What can Metecho help you do today?', {
-          exact: false,
-        });
+        await findByText('Hello! What can Metecho help you do today?');
         fireEvent.click(getByText('Start Help Walkthrough'));
         const dialog = await findByText('List of Tasks');
 
-        expect(dialog).toBeVisible();
+        await waitFor(() => {
+          expect(dialog).toBeVisible();
+        });
 
         const btn = await findByText('Create a Task');
 
@@ -1071,7 +1072,9 @@ describe('<ProjectDetail />', () => {
 
         fireEvent.click(getByTitle('Close'));
 
-        expect(queryByText('List of Tasks')).toBeNull();
+        await waitFor(() => {
+          expect(queryByText('List of Tasks')).toBeNull();
+        });
       });
     });
 
@@ -1081,10 +1084,11 @@ describe('<ProjectDetail />', () => {
           location: { state: { [SHOW_WALKTHROUGH]: WALKTHROUGH_TYPES.PLAN } },
         });
 
-        expect.assertions(2);
         const dialog = await findByText('List of Tasks');
 
-        expect(dialog).toBeVisible();
+        await waitFor(() => {
+          expect(dialog).toBeVisible();
+        });
         expect(history.replace).toHaveBeenCalledWith({ state: {} });
       });
     });

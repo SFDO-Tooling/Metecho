@@ -12,6 +12,7 @@ cumulusci
 dj-database-url
 django-allauth
 django-anymail[mailgun]
+django-environ
 django-hashid-field
 django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
 django-log-request-id

@@ -4,8 +4,8 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   BooleanObject,
@@ -128,6 +128,7 @@ const ChangesForm = ({
   setInputs,
   ignoredSuccess,
 }: Props) => {
+  const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
 
   // remove ignored changes from full list

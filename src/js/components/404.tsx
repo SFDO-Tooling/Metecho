@@ -1,7 +1,6 @@
-import { t } from 'i18next';
 import React, { ReactNode } from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import desertSvg from '@/img/desert.svg?raw';
@@ -26,19 +25,23 @@ export const EmptyIllustration = ({
   </div>
 );
 
-const FourOhFour = ({ message }: { message?: ReactNode }) => (
-  <DocumentTitle title={`${t('404')} | ${t('Metecho')}`}>
-    <EmptyIllustration
-      message={
-        message || (
-          <Trans i18nKey="pageCannotBeFound">
-            That page cannot be found. Try the{' '}
-            <Link to={routes.home()}>home page</Link>?
-          </Trans>
-        )
-      }
-    />
-  </DocumentTitle>
-);
+const FourOhFour = ({ message }: { message?: ReactNode }) => {
+  const { t } = useTranslation();
+
+  return (
+    <DocumentTitle title={`${t('404')} | ${t('Metecho')}`}>
+      <EmptyIllustration
+        message={
+          message || (
+            <Trans i18nKey="pageCannotBeFound">
+              That page cannot be found. Try the{' '}
+              <Link to={routes.home()}>home page</Link>?
+            </Trans>
+          )
+        }
+      />
+    </DocumentTitle>
+  );
+};
 
 export default FourOhFour;

@@ -1,3 +1,4 @@
+import useScrollPosition from '@react-hook/window-scroll';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -12,17 +13,13 @@ import {
   storeWithThunk,
 } from './../../utils';
 
-jest.mock('react-fns', () => ({
-  withScroll(Component) {
-    // eslint-disable-next-line react/display-name
-    return (props) => <Component x={0} y={0} {...props} />;
-  },
-}));
+jest.mock('@react-hook/window-scroll');
 jest.mock('@/js/store/actions');
 jest.mock('@/js/store/projects/actions');
 
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+useScrollPosition.mockReturnValue(0);
 
 afterEach(() => {
   fetchObjects.mockClear();
@@ -109,7 +106,8 @@ describe('<ProjectList />', () => {
     test('fetches next page of projects', async () => {
       fetchObjects.mockReturnValueOnce(() => new Promise(() => {}));
       const { findByText, rerender, store } = setup({ initialState });
-      setup({ props: { y: 1000 }, rerender, store });
+      useScrollPosition.mockReturnValueOnce(1000);
+      setup({ rerender, store });
 
       expect.assertions(1);
       await findByText('Loading…');
@@ -129,8 +127,8 @@ describe('<ProjectList />', () => {
         },
       };
       const { rerender, queryByText, store } = setup({ initialState: state });
-
-      setup({ props: { y: 1000 }, rerender, store });
+      useScrollPosition.mockReturnValueOnce(1000);
+      setup({ rerender, store });
 
       expect(queryByText('Loading…')).toBeNull();
       expect(fetchObjects).not.toHaveBeenCalled();

@@ -1,8 +1,7 @@
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -17,6 +16,7 @@ import { selectUserState } from '@/js/store/user/selectors';
 import routes from '@/js/utils/routes';
 
 const Header = () => {
+  const { t } = useTranslation();
   const user = useSelector(selectUserState);
 
   const controls = () => (

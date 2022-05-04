@@ -2,9 +2,9 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
 import { omit } from 'lodash';
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
@@ -46,6 +46,7 @@ const EditModal = ({
   isOpen,
   handleClose,
 }: EditModalProps) => {
+  const { t } = useTranslation();
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
   const [isSaving, setIsSaving] = useState(false);

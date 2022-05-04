@@ -1,9 +1,8 @@
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import TourDropdown from '@/js/components/tour/dropdown';
@@ -15,6 +14,7 @@ const reloadPage = () => {
 };
 
 const OfflineAlert = () => {
+  const { t } = useTranslation();
   const socket = useSelector(selectSocketState);
 
   return socket ? null : (

@@ -1,8 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { getOrgBehindLatestMsg } from '@/js/utils/helpers';
@@ -20,6 +19,8 @@ const RefreshOrgModal = ({
   closeRefreshOrgModal: () => void;
   doRefreshOrg: () => void;
 }) => {
+  const { t } = useTranslation();
+
   const handleSubmit = () => {
     doRefreshOrg();
     closeRefreshOrgModal();

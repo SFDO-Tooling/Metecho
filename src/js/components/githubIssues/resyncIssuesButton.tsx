@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { LabelWithSpinner } from '@/js/components/utils';
@@ -21,6 +21,7 @@ const ResyncIssuesButton = ({
   noIssues,
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
+  const { t } = useTranslation();
   const [didAutoResync, setDidAutoResync] = useState(false);
   const refreshIssues = useCallback(() => {
     dispatch(refreshGitHubIssues(projectId));

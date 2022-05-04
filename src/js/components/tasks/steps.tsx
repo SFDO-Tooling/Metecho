@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { OrgTypeTracker } from '@/js/components/orgs/taskOrgCards';
@@ -32,6 +32,7 @@ const TaskStatusSteps = ({
   isCreatingOrg,
   handleAction,
 }: TaskStatusStepsProps) => {
+  const { t } = useTranslation();
   const devUser = useSelector((state: AppState) =>
     selectProjectCollaborator(state, projectId, task.assigned_dev),
   );

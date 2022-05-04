@@ -1,12 +1,13 @@
 import Button from '@salesforce/design-system-react/components/button';
-import { t } from 'i18next';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { TermsModal } from '@/js/components/terms';
 import { selectUserState } from '@/js/store/user/selectors';
 
 const Footer = ({ logoSrc }: { logoSrc: string }) => {
+  const { t } = useTranslation();
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const user = useSelector(selectUserState);
   if (!user) {

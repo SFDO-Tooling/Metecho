@@ -1,7 +1,7 @@
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PathItemProps {
   steps: string[];
@@ -18,6 +18,8 @@ const PathItem = ({
   isCompleted,
   isLost,
 }: PathItemProps) => {
+  const { t } = useTranslation();
+
   const title = steps[idx];
   let isActive = false;
   let isComplete = false;

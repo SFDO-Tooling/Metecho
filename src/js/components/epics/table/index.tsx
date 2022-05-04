@@ -1,10 +1,9 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
 import { orderBy } from 'lodash';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
 import CollaboratorTableCell from '@/js/components/epics/table/collaboratorCell';
@@ -32,6 +31,8 @@ const EpicTable = ({
   userHasPermissions: boolean;
   projectSlug: string;
 }) => {
+  const { t } = useTranslation();
+
   const items = isFetched
     ? orderBy(
         epics.map((epic) => ({

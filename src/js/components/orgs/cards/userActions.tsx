@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
@@ -20,6 +20,8 @@ const UserActions = ({
   openAssignUserModal: (orgType: OrgTypes) => void;
   setUser: (user: string | null, shouldAlertAssignee: boolean) => void;
 }) => {
+  const { t } = useTranslation();
+
   if (assignedUserId) {
     const handleSelect = (option: { id: string; label: string }) => {
       switch (option.id) {
