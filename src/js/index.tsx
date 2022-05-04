@@ -6,11 +6,12 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import { createBrowserHistory } from 'history';
-import { t } from 'i18next';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { useTranslation } from 'react-i18next';
 import { Provider } from 'react-redux';
+// Consider upgrading to v6: https://github.com/remix-run/react-router/discussions/8753
 import {
   Redirect,
   Route,
@@ -19,7 +20,12 @@ import {
   Switch,
   withRouter,
 } from 'react-router-dom';
-import { applyMiddleware, createStore, Dispatch } from 'redux';
+import {
+  applyMiddleware,
+  Dispatch,
+  // Consider upgrading to Redux Toolkit: https://github.com/reduxjs/redux/releases/tag/v4.2.0
+  legacy_createStore as createStore,
+} from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
@@ -62,6 +68,8 @@ const App = withRouter(
     dispatch,
     location: { pathname },
   }: { dispatch: Dispatch } & RouteComponentProps) => {
+    const { t } = useTranslation();
+
     useEffect(
       () => () => {
         dispatch(clearErrors());
@@ -201,7 +209,8 @@ initializeI18n((i18nError?: string) => {
     settings.setAppElement(el);
 
     const renderApp = () => {
-      render(
+      const root = createRoot(el);
+      root.render(
         <Provider store={appStore}>
           <Router history={history}>
             <IconSettings
@@ -215,7 +224,6 @@ initializeI18n((i18nError?: string) => {
             </IconSettings>
           </Router>
         </Provider>,
-        el,
       );
     };
 

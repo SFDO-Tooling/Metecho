@@ -1,10 +1,9 @@
+import useScrollPosition from '@react-hook/window-scroll';
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { ScrollProps, withScroll } from 'react-fns';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/js/components/404';
@@ -25,7 +24,9 @@ import {
 } from '@/js/store/projects/selectors';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
-const ProjectList = withScroll(({ y }: ScrollProps) => {
+const ProjectList = () => {
+  const { t } = useTranslation();
+  const scrollY = useScrollPosition();
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -72,13 +73,14 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     const clientHeight =
       document.documentElement?.clientHeight || window.innerHeight;
     // Fetch more projects if within 100px of bottom of page...
-    const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
+    const scrolledToBottom =
+      scrollHeight - Math.ceil(scrollY + clientHeight) <= 100;
 
     /* istanbul ignore else */
     if (scrolledToBottom) {
       maybeFetchMoreProjects();
     }
-  }, [y, next, fetchingProjects, isMounted, dispatch]);
+  }, [scrollY, next, fetchingProjects, isMounted, dispatch]);
 
   let contents;
   switch (projects.length) {
@@ -231,6 +233,6 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
       </>
     </DocumentTitle>
   );
-});
+};
 
 export default ProjectList;

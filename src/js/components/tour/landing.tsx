@@ -1,9 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import backpackSvg from '@/img/backpack-lg.svg?raw';
 import mapSvg from '@/img/map-lg.svg?raw';
@@ -29,6 +28,8 @@ const LandingModal = ({
   runTour: (type: WalkthroughType) => void;
   onRequestClose: () => void;
 }) => {
+  const { t } = useTranslation();
+
   const tours: Tour[] = [
     {
       header: t('I want to Play'),

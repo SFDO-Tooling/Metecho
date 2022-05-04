@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 
@@ -20,6 +20,7 @@ const OrgIcon = ({
   testOrgOutOfDate?: boolean;
   openRefreshOrgModal?: () => void;
 }) => {
+  const { t } = useTranslation();
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
 
   if (orgUrl && ownedByCurrentUser && !isDeleting && !isRefreshingOrg) {

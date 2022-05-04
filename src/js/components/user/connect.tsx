@@ -1,10 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import cookies from 'js-cookie';
 import React, { useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
@@ -18,6 +17,7 @@ const ConnectModal = ({
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const [url, setUrl] = useState('');
   const [isCustomDomain, setIsCustomDomain] = useState(false);
   const customDomainSubmitButton = useRef<HTMLButtonElement | null>(null);

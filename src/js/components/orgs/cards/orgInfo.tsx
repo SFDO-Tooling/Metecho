@@ -1,9 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, formatDistanceToNow } from 'date-fns';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { Org } from '@/js/store/orgs/reducer';
@@ -44,6 +43,8 @@ const OrgInfo = ({
   doCheckForOrgChanges?: () => void;
   openCaptureModal?: () => void;
 }) => {
+  const { t } = useTranslation();
+
   if (ownedByWrongUser) {
     return (
       <ul>

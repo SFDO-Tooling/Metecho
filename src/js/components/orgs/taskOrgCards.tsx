@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import TaskOrgCard from '@/js/components/orgs/taskOrgCard';
@@ -77,6 +77,7 @@ const TaskOrgCards = ({
   doCreateOrg: (type: OrgTypes) => void;
   doRefreshOrg: (org: Org) => void;
 }) => {
+  const { t } = useTranslation();
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);

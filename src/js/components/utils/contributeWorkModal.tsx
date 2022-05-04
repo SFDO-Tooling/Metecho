@@ -3,9 +3,8 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
-import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import mapSvg from '@/img/map-lg.svg?raw';
 import { Illustration } from '@/js/components/utils';
@@ -47,6 +46,7 @@ const ContributeWorkModal = ({
   closeModal,
   doContribute,
 }: Props) => {
+  const { t } = useTranslation();
   const [useExistingTask, setUseExistingTask] = useState(!hasDevOrg);
   const [createEpicLessTask, setCreateEpicLessTask] = useState(false);
 

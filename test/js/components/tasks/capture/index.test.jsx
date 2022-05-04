@@ -185,8 +185,6 @@ describe('<CaptureModal/>', () => {
         const selectAll = getByLabelText('All Ignored Changes');
         fireEvent.click(selectAll);
         fireEvent.click(getByText('Un-ignore Selected Changes'));
-
-        expect.assertions(3);
         await findByText('Saving Ignored Changes…');
 
         expect(updateObject).toHaveBeenCalledWith({
@@ -258,6 +256,7 @@ describe('<CaptureModal/>', () => {
 
         expect(getByText(text)).toBeVisible();
         if (showsErr) {
+          await findByText('Do not do that');
           // eslint-disable-next-line jest/no-conditional-expect
           expect(getByText('Do not do that')).toBeVisible();
         }

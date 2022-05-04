@@ -2,8 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { SpinnerWrapper, UseFormProps } from '@/js/components/utils';
@@ -33,6 +33,7 @@ const SelectFlowType = ({
   className?: string;
   handleSelect: UseFormProps['handleInputChange'];
 }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
 
   const doRefreshOrgConfigs = useCallback(() => {

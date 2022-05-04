@@ -4,8 +4,8 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   LabelWithSpinner,
@@ -30,6 +30,7 @@ const SubmitReviewModal = ({
   isOpen,
   handleClose,
 }: Props) => {
+  const { t } = useTranslation();
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);

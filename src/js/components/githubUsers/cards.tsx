@@ -1,8 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import ReadonlyBadge from '@/js/components/githubUsers/readonlyBadge';
@@ -19,6 +19,8 @@ export const UserCard = ({
   className?: string;
   showPermissions?: boolean;
 }) => {
+  const { t } = useTranslation();
+
   let name: string | JSX.Element = user.name
     ? `${user.name} (${user.login})`
     : user.login;

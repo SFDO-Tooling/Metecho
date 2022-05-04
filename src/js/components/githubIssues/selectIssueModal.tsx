@@ -3,9 +3,8 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import { t } from 'i18next';
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -47,20 +46,24 @@ interface Props {
   currentlyResyncing: boolean;
 }
 
-export const GitHubIssueLink = ({ url }: { url: string }) => (
-  <ExternalLink url={url}>
-    {t('View on GitHub')}
-    <Icon
-      category="utility"
-      name="new_window"
-      size="xx-small"
-      className="slds-button__icon
-        slds-button__icon_right
-        slds-m-bottom_xx-small"
-      containerClassName="slds-icon_container slds-current-color"
-    />
-  </ExternalLink>
-);
+export const GitHubIssueLink = ({ url }: { url: string }) => {
+  const { t } = useTranslation();
+
+  return (
+    <ExternalLink url={url}>
+      {t('View on GitHub')}
+      <Icon
+        category="utility"
+        name="new_window"
+        size="xx-small"
+        className="slds-button__icon
+          slds-button__icon_right
+          slds-m-bottom_xx-small"
+        containerClassName="slds-icon_container slds-current-color"
+      />
+    </ExternalLink>
+  );
+};
 
 const TaskStatus = ({ task }: { task: IssueTask }) => {
   const { status, icon } = getTaskStatus({
@@ -105,6 +108,7 @@ const SelectIssueModal = ({
   currentlyResyncing,
 }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
+  const { t } = useTranslation();
   const [search, setSearch] = useState<string>('');
   const [selectedIssue, setSelectedIssue] = useState<string>('');
 
