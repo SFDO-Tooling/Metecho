@@ -3,10 +3,9 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import GitHubUserButton from '@/js/components/githubUsers/button';
@@ -37,6 +36,7 @@ const AssignTaskRoleModal = ({
   onRequestClose: () => void;
   setUser: (user: string | null, shouldAlertAssignee: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const currentUser = useSelector(selectUserState) as User;
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);

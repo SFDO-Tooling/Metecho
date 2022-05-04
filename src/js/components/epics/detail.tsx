@@ -1,10 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import { t } from 'i18next';
 import { pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -60,6 +59,7 @@ const EpicDetail = (
   props: RouteComponentProps<any, any, { [CREATE_TASK_FROM_ORG]?: OrgData }>,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
+  const { t } = useTranslation();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
     { project },

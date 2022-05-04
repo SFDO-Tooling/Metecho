@@ -1,6 +1,7 @@
 FROM ghcr.io/oddbird/pyjs:py3.10-node16
 
 ARG BUILD_ENV=development
+ARG PROD_ASSETS
 WORKDIR /app
 
 # Env setup:
@@ -26,13 +27,11 @@ RUN yarn install --check-files
 COPY . /app
 
 # Avoid building prod assets in development
-RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
+RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 
-RUN DATABASE_URL="" \
+RUN \
   # Sample keys, not to be used for realsies:
   DB_ENCRYPTION_KEY="IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE=" \
-  DJANGO_HASHID_SALT="sample hashid salt" \
-  DJANGO_SECRET_KEY="sample secret key" \
   SFDX_CLIENT_SECRET="sample secret" \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \
   SFDX_CLIENT_ID="sample id" \

@@ -1,7 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import seesawSvg from '@/img/seesaw-lg.svg?raw';
 import { Illustration } from '@/js/components/utils';
@@ -18,6 +17,8 @@ const Overview = ({
   epic?: Epic;
   task?: Task;
 }) => {
+  const { t } = useTranslation();
+
   let type, name;
   let isProject = false;
 
@@ -33,15 +34,19 @@ const Overview = ({
     isProject = true;
   }
 
+  // Translation assignment objects are cast to strings because of:
+  // https://github.com/i18next/react-i18next/issues/1483
   const help = (
     <Trans i18nKey="createScratchOrgHelp">
       <h3 className="slds-text-title_bold">
-        You are creating a Scratch Org for {{ type }} “{{ name }}.”
+        You are creating a Scratch Org for {{ type } as unknown as string} “
+        {{ name } as unknown as string}.”
       </h3>
       <p>
         Your new Org will expire in 30 days.
         <br />
-        You will be able to access your Org from this {{ type }} page.
+        You will be able to access your Org from this{' '}
+        {{ type } as unknown as string} page.
       </p>
     </Trans>
   );

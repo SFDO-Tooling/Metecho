@@ -2,8 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
@@ -44,6 +44,7 @@ const CreateTaskModal = ({
   closeCreateModal,
   issue,
 }: Props) => {
+  const { t } = useTranslation();
   const history = useHistory();
   const isMounted = useIsMounted();
   const { showTransientMessage, isShowingTransientMessage } =

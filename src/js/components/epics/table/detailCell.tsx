@@ -1,8 +1,8 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { TableCellProps } from '@/js/components/epics/table';
@@ -17,6 +17,8 @@ const DetailTableCell = ({
 }: TableCellProps & {
   projectSlug: string;
 }) => {
+  const { t } = useTranslation();
+
   /* istanbul ignore if */
   if (!item) {
     return null;

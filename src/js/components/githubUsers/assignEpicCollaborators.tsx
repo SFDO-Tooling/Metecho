@@ -3,9 +3,8 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
 import GitHubUserButton from '@/js/components/githubUsers/button';
@@ -55,6 +54,7 @@ const AssignEpicCollaboratorsModal = ({
   isRefreshing: boolean;
   projectId: string;
 }) => {
+  const { t } = useTranslation();
   const [selection, setSelection] = useState(selectedUsers);
   const reset = useCallback(() => setSelection(selectedUsers), [selectedUsers]);
 

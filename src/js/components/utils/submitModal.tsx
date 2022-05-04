@@ -3,9 +3,8 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import {
@@ -39,6 +38,7 @@ const SubmitModal = ({
   assignee,
   originatingUser,
 }: Props) => {
+  const { t } = useTranslation();
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
@@ -138,13 +138,15 @@ const SubmitModal = ({
   const alertLabelText = assignee
     ? t('Notify {{username}} by email', { username: assignee.login })
     : '';
+  // Translation assignment objects are cast to strings because of:
+  // https://github.com/i18next/react-i18next/issues/1483
   const alertLabel = assignee ? (
     <div className="metecho-avatar-container" onClick={toggleAlertAssignee}>
       <Trans i18nKey="notifyUser">
         <span className="slds-m-right_xx-small">Notify</span>
         <GitHubUserAvatar user={assignee} />{' '}
         <span className="slds-m-left_xx-small">
-          <b>{{ username: assignee.login }}</b> by email
+          <b>{{ username: assignee.login } as unknown as string}</b> by email
         </span>
       </Trans>
     </div>

@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
-import { t } from 'i18next';
 import { some } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { LabelWithSpinner } from '@/js/components/utils';
@@ -20,6 +20,7 @@ const RefreshGitHubUsersButton = ({
   projectId,
   githubUsers,
 }: Props) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
   const refreshUsers = useCallback(() => {
     dispatch(refreshGitHubUsers(projectId));

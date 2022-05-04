@@ -381,7 +381,6 @@ exports[`<EpicStatusSteps /> renders steps: epic with pr 1`] = `
               >
                 <use />
               </svg>
-              
             </span>
           </a>
         </div>

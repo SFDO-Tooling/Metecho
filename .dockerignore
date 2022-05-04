@@ -25,7 +25,6 @@
 **/Dockerfile
 .Python
 .cache
-.circleci/
 .coverage
 .coverage.*
 .devcontainer/
@@ -33,6 +32,7 @@
 .eggs/
 .env
 .git
+.github/
 .hypothesis/
 .idea/
 .installed.cfg

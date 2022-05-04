@@ -930,6 +930,7 @@ paths:
         name: project
         schema:
           type: string
+          format: HashID
       - in: query
         name: slug
         schema:

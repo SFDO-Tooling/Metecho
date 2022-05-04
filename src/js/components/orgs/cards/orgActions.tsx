@@ -1,8 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import TourPopover from '@/js/components/tour/popover';
 import { LabelWithSpinner } from '@/js/components/utils';
@@ -49,6 +48,8 @@ const OrgActions = ({
   doRefreshOrg?: () => void;
   openContributeModal?: () => void;
 }) => {
+  const { t } = useTranslation();
+
   if (isCreating) {
     return (
       <Button

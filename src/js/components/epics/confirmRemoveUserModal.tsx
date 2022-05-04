@@ -1,8 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { UserCard } from '@/js/components/githubUsers/cards';
 import { GitHubUser } from '@/js/store/user/reducer';
@@ -18,6 +17,7 @@ const ConfirmRemoveUserModal = ({
   handleClose: () => void;
   handleUpdateUsers: (users: GitHubUser[]) => void;
 }) => {
+  const { t } = useTranslation();
   const isOpen = Boolean(confirmRemoveUsers?.length && waitingToUpdateUsers);
 
   if (!isOpen) {

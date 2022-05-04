@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { SpinnerWrapper } from '@/js/components/utils';
 
@@ -12,13 +12,17 @@ const LabelWithSpinner = ({
   label?: string;
   variant?: 'base' | 'brand' | 'inverse';
   size?: 'small' | 'xx-small' | 'x-small' | 'medium' | 'large';
-}) => (
-  <>
-    <span className="slds-is-relative slds-m-right_large">
-      <SpinnerWrapper variant={variant} size={size} />
-    </span>
-    {label || t('Loading…')}
-  </>
-);
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <span className="slds-is-relative slds-m-right_large">
+        <SpinnerWrapper variant={variant} size={size} />
+      </span>
+      {label || t('Loading…')}
+    </>
+  );
+};
 
 export default LabelWithSpinner;

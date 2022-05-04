@@ -1,7 +1,7 @@
 import Card from '@salesforce/design-system-react/components/card';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import { t } from 'i18next';
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { GitHubIssueLink } from '@/js/components/githubIssues/selectIssueModal';
@@ -18,6 +18,7 @@ interface Props {
 
 const IssueCard = ({ issueId, epicId, taskId }: Props) => {
   const dispatch = useDispatch<ThunkDispatch>();
+  const { t } = useTranslation();
   const { issue } = useFetchIssueIfMissing({ id: issueId });
 
   const unlink = useCallback(() => {

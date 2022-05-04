@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Steps from '@/js/components/steps';
 import { Step } from '@/js/components/steps/stepsItem';
@@ -24,6 +24,8 @@ const EpicStatusSteps = ({
   canSubmit,
   handleAction,
 }: EpicStatusStepsProps) => {
+  const { t } = useTranslation();
+
   const hasTasks = Boolean(tasks.length);
   const hasDev = tasks.some((task) => task.assigned_dev);
   const isMerged = epic.status === EPIC_STATUSES.MERGED;
