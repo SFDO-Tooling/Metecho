@@ -42,7 +42,6 @@ if env_file.exists():
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Strip "$" to prevent env var interpolation in the random key
 SECRET_KEY = env("DJANGO_SECRET_KEY", default=safe_key())
 
 HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT", default=safe_key())
