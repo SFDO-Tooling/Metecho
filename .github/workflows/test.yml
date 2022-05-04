@@ -43,10 +43,6 @@ jobs:
       - uses: actions/checkout@v3
       - id: setup
         uses: ./.github/setup-docker-compose
-      - name:
-          Copy dist folder (contains the index.html file for Django templates)
-        run:
-          docker cp $(docker create ${{ steps.setup.outputs.tag }}):/app/dist/prod .
       - name: Test backend
         run: >
           docker-compose run
