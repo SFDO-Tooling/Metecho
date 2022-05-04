@@ -1,6 +1,7 @@
 import { addDays, subHours } from 'date-fns';
+import * as i18n from 'i18next';
 import React from 'react';
-import { TFunction, Trans, useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -10,23 +11,17 @@ import GuidedTour, {
 import { Org } from '@/js/store/orgs/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, ORG_TYPES } from '@/js/utils/constants';
 
-interface DemoOrgOpts
-  extends Pick<
-    Org,
-    'project' | 'owner' | 'owner_gh_username' | 'owner_gh_id' | 'latest_commit'
-  > {
-  t: TFunction;
-}
-
 export const getDemoOrg = ({
   project,
   owner,
   owner_gh_username,
   owner_gh_id,
   latest_commit,
-  t,
-}: DemoOrgOpts): Org => {
-  const description = t(
+}: Pick<
+  Org,
+  'project' | 'owner' | 'owner_gh_username' | 'owner_gh_id' | 'latest_commit'
+>): Org => {
+  const description = i18n.t(
     'This is a sample description to show where the description of the Org would appear.',
   );
   const expires_at = addDays(subHours(new Date(), 12), 30).toISOString();
@@ -161,7 +156,7 @@ const PlayTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
-    getFinalStep(t),
+    getFinalStep(),
   ];
 
   return <GuidedTour steps={steps} {...props} />;

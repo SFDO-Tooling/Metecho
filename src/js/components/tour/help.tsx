@@ -1,6 +1,7 @@
+import * as i18n from 'i18next';
 import { pick } from 'lodash';
 import React from 'react';
-import { TFunction, Trans, useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -14,17 +15,15 @@ import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
 export const getDemoTask = ({
   project,
   github_id,
-  t,
 }: {
   project: string;
   github_id: string | null;
-  t: TFunction;
 }): Task => {
-  const epic = getDemoEpic({ project, github_id, t });
+  const epic = getDemoEpic({ project, github_id });
 
   return {
     id: 'demo-task',
-    name: t('This is a Sample Task'),
+    name: i18n.t('This is a Sample Task'),
     description: '',
     description_rendered: '',
     epic: pick(epic, ['id', 'name', 'slug', 'github_users']),
@@ -124,7 +123,7 @@ const HelpTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
-    getFinalStep(t),
+    getFinalStep(),
   ];
 
   return <GuidedTour steps={steps} {...props} />;

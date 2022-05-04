@@ -1,5 +1,6 @@
+import * as i18n from 'i18next';
 import React from 'react';
-import { TFunction, Trans, useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -12,19 +13,17 @@ import { EPIC_STATUSES } from '@/js/utils/constants';
 export const getDemoEpic = ({
   project,
   github_id,
-  t,
 }: {
   project: string;
   github_id: string | null;
-  t: TFunction;
 }): Epic => {
-  const description = t(
+  const description = i18n.t(
     'This is a sample description to show where the description of the Epic would appear.',
   );
 
   return {
     id: 'demo-epic',
-    name: t('This is a Sample Epic'),
+    name: i18n.t('This is a Sample Epic'),
     description,
     description_rendered: `<p>${description}</p>`,
     slug: 'this-is-a-sample-epic',
@@ -123,7 +122,7 @@ const PlanTour = (props: TourProps) => {
       placement: 'right',
       disableBeacon: true,
     },
-    getFinalStep(t),
+    getFinalStep(),
   ];
 
   return <GuidedTour steps={steps} {...props} />;

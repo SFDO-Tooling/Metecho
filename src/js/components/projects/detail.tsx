@@ -274,7 +274,6 @@ const ProjectDetail = (
     owner_gh_username: user.username,
     owner_gh_id: user.github_id,
     latest_commit: project?.latest_sha || '',
-    t,
   });
   /* istanbul ignore next */
   const handlePlayTourStep = useCallback(
@@ -507,7 +506,6 @@ const ProjectDetail = (
                       getDemoEpic({
                         project: project.id,
                         github_id: user.github_id,
-                        t,
                       }),
                     ]
                   : epics?.epics || []
@@ -611,7 +609,6 @@ const ProjectDetail = (
                       getDemoTask({
                         project: project.id,
                         github_id: user.github_id,
-                        t,
                       }),
                     ]
                   : tasks || []
