@@ -4,7 +4,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,3 +22,5 @@ jobs:
           cache: yarn
       - run: yarn install --frozen--lockfile
       - run: yarn deploy-storybook --ci
+        env:
+          GH_TOKEN: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}

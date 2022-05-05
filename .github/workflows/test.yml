@@ -5,7 +5,7 @@ on:
     types: [reopened]
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,15 +45,12 @@ jobs:
         uses: ./.github/setup-docker-compose
       - name: Test backend
         run: >
-          docker-compose run
-          -e DJANGO_DEBUG=false
-          -e SECURE_SSL_REDIRECT=false
-          -e SFDX_CLIENT_SECRET="sample secret"
-          -e SFDX_CLIENT_CALLBACK_URL="sample callback"
-          -e SFDX_CLIENT_ID="sample id" 
-          -e SFDX_HUB_KEY="sample key"
-          -e DB_ENCRYPTION_KEY=MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
-          web yarn test:py
+          docker-compose run -e DJANGO_DEBUG=false -e SECURE_SSL_REDIRECT=false
+          -e SFDX_CLIENT_SECRET="sample secret" -e
+          SFDX_CLIENT_CALLBACK_URL="sample callback" -e SFDX_CLIENT_ID="sample
+          id" -e SFDX_HUB_KEY="sample key" -e
+          DB_ENCRYPTION_KEY=MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc= web
+          yarn test:py
       - name: Upload coverage results
         uses: actions/upload-artifact@v3
         with:
