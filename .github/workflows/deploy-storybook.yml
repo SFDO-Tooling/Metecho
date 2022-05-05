@@ -1,7 +1,8 @@
 name: Deploy Storybook
 on:
   push:
-    branches: [main]
+    # TODO: limit to `main` before merging
+    # branches: [main]
 
 concurrency:
   group: ${{ github.ref }}
@@ -22,3 +23,5 @@ jobs:
           cache: yarn
       - run: yarn install --frozen--lockfile
       - run: yarn deploy-storybook --ci
+        env:
+          GH_TOKEN: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
