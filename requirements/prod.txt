@@ -195,7 +195,7 @@ jinja2==2.11.3
     # via
     #   cumulusci
     #   snowfakery
-jsonschema==4.4.0
+jsonschema==4.5.0
     # via drf-spectacular
 keyring==23.0.1
     # via cumulusci
@@ -205,7 +205,7 @@ logfmt==0.4
     #   sfdo-template-helpers
 lxml==4.8.0
     # via cumulusci
-markdown==3.3.6
+markdown==3.3.7
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
