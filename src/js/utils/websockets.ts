@@ -44,6 +44,7 @@ import {
   updateTask,
 } from '@/js/store/tasks/actions';
 import { Task } from '@/js/store/tasks/reducer';
+import { orgsRefreshError, refreshUser } from '@/js/store/user/actions';
 import {
   ObjectTypes,
   WEBSOCKET_ACTIONS,
@@ -76,6 +77,15 @@ interface ReposRefreshedEvent {
 }
 interface ReposRefreshErrorEvent {
   type: 'USER_REPOS_ERROR';
+  payload: {
+    message?: string;
+  };
+}
+interface OrgsRefreshedEvent {
+  type: 'USER_ORGS_REFRESH';
+}
+interface OrgsRefreshErrorEvent {
+  type: 'USER_ORGS_REFRESH_ERROR';
   payload: {
     message?: string;
   };
@@ -330,7 +340,9 @@ type EventType =
   | ModelEvent
   | ErrorEvent
   | ReposRefreshedEvent
-  | ReposRefreshErrorEvent;
+  | ReposRefreshErrorEvent
+  | OrgsRefreshedEvent
+  | OrgsRefreshErrorEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -346,6 +358,10 @@ export const getAction = (event: EventType) => {
       return projectsRefreshed();
     case 'USER_REPOS_ERROR':
       return projectsRefreshError(event.payload.message);
+    case 'USER_ORGS_REFRESH':
+      return refreshUser();
+    case 'USER_ORGS_REFRESH_ERROR':
+      return orgsRefreshError(event.payload.message);
     case 'PROJECT_UPDATE':
       return hasModel(event) && updateProject(event.payload.model);
     case 'PROJECT_UPDATE_ERROR':

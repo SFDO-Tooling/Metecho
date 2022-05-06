@@ -61,6 +61,12 @@ const reducer = (
     case 'PROJECTS_REFRESHED':
     case 'REFRESH_PROJECTS_ERROR':
       return user ? { ...user, currently_fetching_repos: false } : user;
+    case 'REFRESH_ORGS_REQUESTED':
+    case 'REFRESHING_ORGS':
+      return user ? { ...user, currently_fetching_orgs: true } : user;
+    case 'REFRESH_ORGS_REJECTED':
+    case 'REFRESH_ORGS_ERROR':
+      return user ? { ...user, currently_fetching_orgs: false } : user;
   }
   return user;
 };

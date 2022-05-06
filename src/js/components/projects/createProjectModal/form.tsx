@@ -3,17 +3,32 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import { t } from 'i18next';
 import React from 'react';
 
+import RefreshGitHubOrgsButton from '@/js/components/githubOrgs/refreshOrgsButton';
 import { CreateProjectData } from '@/js/components/projects/createProjectModal';
 import { UseFormProps } from '@/js/components/utils';
 
 interface Props {
+  isRefreshingOrgs: boolean;
   inputs: CreateProjectData;
   errors: UseFormProps['errors'];
   handleInputChange: UseFormProps['handleInputChange'];
 }
 
-const CreateProjectForm = ({ inputs, errors, handleInputChange }: Props) => (
+const CreateProjectForm = ({
+  isRefreshingOrgs,
+  inputs,
+  errors,
+  handleInputChange,
+}: Props) => (
   <form className="slds-form slds-p-around_large">
+    <div
+      className="slds-grid
+        slds-grow
+        slds-shrink-none
+        slds-grid_align-end"
+    >
+      <RefreshGitHubOrgsButton isRefreshing={isRefreshingOrgs} />
+    </div>
     <Input
       id="create-project-name"
       label={t('Project Name')}

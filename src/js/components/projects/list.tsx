@@ -24,11 +24,14 @@ import {
   selectProjects,
   selectProjectsRefreshing,
 } from '@/js/store/projects/selectors';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 const ProjectList = () => {
   const { t } = useTranslation();
   const scrollY = useScrollPosition();
+  const user = useSelector(selectUserState) as User;
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
   const isMounted = useIsMounted();
@@ -263,6 +266,8 @@ const ProjectList = () => {
         </div>
 
         <CreateProjectModal
+          orgs={user.organizations}
+          isRefreshingOrgs={user.currently_fetching_orgs}
           isOpen={createProjectModalOpen}
           closeModal={closeCreateProjectModal}
         />

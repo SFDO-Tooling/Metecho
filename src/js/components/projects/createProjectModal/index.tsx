@@ -3,6 +3,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import ProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
 import { t } from 'i18next';
 import React, { useState } from 'react';
+import { GitHubOrg } from 'src/js/store/user/reducer';
 
 import CreateProjectForm from '@/js/components/projects/createProjectModal/form';
 import {
@@ -15,6 +16,8 @@ import { Project } from '@/js/store/projects/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 interface Props {
+  orgs: GitHubOrg[];
+  isRefreshingOrgs: boolean;
   isOpen: boolean;
   closeModal: () => void;
 }
@@ -25,12 +28,15 @@ export interface CreateProjectData
   dependencies: string[];
 }
 
-const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
+const CreateProjectModal = ({
+  orgs,
+  isRefreshingOrgs,
+  isOpen,
+  closeModal,
+}: Props) => {
   const [pageIndex, setPageIndex] = useState(0);
   const isMounted = useIsMounted();
   const [isSaving, setIsSaving] = useState(false);
-
-  const orgs: string[] = [];
 
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
@@ -56,7 +62,7 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
     }
   };
 
-  const defaultOrganization = orgs[0] || '';
+  const defaultOrganization = orgs[0]?.id || '';
 
   const {
     inputs,
@@ -159,6 +165,7 @@ const CreateProjectModal = ({ isOpen, closeModal }: Props) => {
       heading: t('Create Project'),
       contents: (
         <CreateProjectForm
+          isRefreshingOrgs={isRefreshingOrgs}
           inputs={inputs as CreateProjectData}
           errors={errors}
           handleInputChange={handleInputChange}
