@@ -2,7 +2,6 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.contrib.auth.models import Permission
 from django.utils import timezone
 
 from ..models import ScratchOrgType, Task
@@ -26,21 +25,6 @@ class TestFullUserSerializer:
         user = user_factory()
         serializer = FullUserSerializer(user)
         assert serializer.data["sf_username"] is None
-
-    def test_can_create_projects__false(self, user_factory):
-        user = user_factory()
-        serializer = FullUserSerializer(user)
-        assert not serializer.data["can_create_projects"]
-
-    def test_can_create_projects__true(self, user_factory):
-        user = user_factory()
-        user.user_permissions.add(
-            Permission.objects.get(
-                content_type__app_label="api", codename="add_project"
-            )
-        )
-        serializer = FullUserSerializer(user)
-        assert serializer.data["can_create_projects"]
 
 
 @pytest.mark.django_db

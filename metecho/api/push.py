@@ -3,8 +3,12 @@ Websocket notifications you can subscribe to:
 
     user.:id
         BACKEND_ERROR
+        USER_UPDATE
+        USER_ERROR
         USER_REPOS_REFRESH
         USER_REPOS_ERROR
+        USER_ORGS_REFRESH
+        USER_ORGS_REFRESH_ERROR
 
     project.:id
         PROJECT_UPDATE
@@ -48,6 +52,12 @@ Websocket notifications you can subscribe to:
 
     scratchorg.list
         SCRATCH_ORG_RECREATE
+
+    githuborganization.:id
+        GITHUB_ORGANIZATION_MEMBERS_FETCH
+        GITHUB_ORGANIZATION_MEMBERS_ERROR
+        GITHUB_ORGANIZATION_REPO_NAME_CHECK
+        GITHUB_ORGANIZATION_REPO_NAME_CHECK_ERROR
 """
 from copy import deepcopy
 

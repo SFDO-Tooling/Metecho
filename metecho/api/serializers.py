@@ -204,7 +204,6 @@ class GuidedTourSerializer(serializers.ModelSerializer):
 
 class FullUserSerializer(HashIdModelSerializer):
     sf_username = serializers.SerializerMethodField()
-    can_create_projects = serializers.SerializerMethodField()
     organizations = GitHubOrganizationSerializer(many=True, read_only=True)
 
     class Meta:
@@ -221,7 +220,6 @@ class FullUserSerializer(HashIdModelSerializer):
             "org_type",
             "is_devhub_enabled",
             "sf_username",
-            "can_create_projects",
             "currently_fetching_repos",
             "currently_fetching_orgs",
             "devhub_username",
@@ -237,9 +235,6 @@ class FullUserSerializer(HashIdModelSerializer):
         if obj.uses_global_devhub:
             return None
         return obj.sf_username
-
-    def get_can_create_projects(self, obj) -> bool:
-        return obj.has_perm("api.add_project")
 
 
 class MinimalUserSerializer(HashIdModelSerializer):
