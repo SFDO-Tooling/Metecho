@@ -332,6 +332,7 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
 
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
+    pagination_class = CustomPaginator
     queryset = Task.objects.select_related("epic", "epic__project").active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter

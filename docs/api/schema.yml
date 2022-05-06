@@ -752,6 +752,12 @@ paths:
         schema:
           type: string
           format: HashID
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
       - in: query
         name: project
         schema:
@@ -771,9 +777,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Task'
+                $ref: '#/components/schemas/PaginatedTaskList'
           description: ''
     post:
       operationId: tasks_create
@@ -1698,6 +1702,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
+    PaginatedTaskList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
     PatchedEpic:
       type: object
       properties:

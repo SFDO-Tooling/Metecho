@@ -965,10 +965,10 @@ class TestTaskViewSet:
 
         response = client.get(url)
 
-        results = response.json()
+        data = response.json()
         assert response.status_code == 200, response.content
-        assert len(results) == 1, response.json()
-        assert tuple(results[0]["epic"].keys()) == (
+        assert len(data["results"]) == 1, data
+        assert tuple(data["results"][0]["epic"].keys()) == (
             "id",
             "name",
             "slug",
@@ -985,10 +985,10 @@ class TestTaskViewSet:
         task_factory(epic=None, project=project_factory())
 
         response = client.get(url)
-        assert len(response.json()) == 4
+        assert len(response.json()["results"]) == 4
 
         response = client.get(url, data={"project": str(project.pk)})
-        assert len(response.json()) == 2
+        assert len(response.json()["results"]) == 2
 
     def test_create__dev_org(
         self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
