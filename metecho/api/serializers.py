@@ -182,7 +182,7 @@ class GitHubUserSerializer(serializers.Serializer):
 class GitHubOrganizationSerializer(HashIdModelSerializer):
     class Meta:
         model = GitHubOrganization
-        fields = ("id", "name")
+        fields = ("id", "name", "avatar_url")
 
 
 class OrgConfigNameSerializer(serializers.Serializer):

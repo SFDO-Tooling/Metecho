@@ -53,10 +53,10 @@ class GitHubOrganizationForm(forms.ModelForm):
         model = GitHubOrganization
         exclude = ()
 
-    def clean_login(self):
+    def clean(self):
         login = self.cleaned_data["login"]
         try:
-            gh.get_org_for_repo_creation(orgname=login)
+            org = gh.get_org_for_repo_creation(orgname=login)
         except Exception:
             raise forms.ValidationError(
                 _(
@@ -64,7 +64,7 @@ class GitHubOrganizationForm(forms.ModelForm):
                     "Has the full-access Metecho app been installed on this organization?"
                 )
             )
-        return login
+        self.cleaned_data["avatar_url"] = org.avatar_url
 
 
 class JSONWidget(Textarea):

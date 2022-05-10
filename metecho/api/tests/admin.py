@@ -137,10 +137,17 @@ class TestGitHubOrganizationAdmin:
         assert b"Could not access this organization on GitHub" in response.content
 
     def test_org__good(self, admin_client, mocker):
-        mocker.patch("metecho.api.admin.gh", autospec=True)
+        gh = mocker.patch("metecho.api.admin.gh", autospec=True)
+        gh.get_org_for_repo_creation.return_value = mocker.MagicMock(
+            avatar_url="http://example.com"
+        )
+
         url = reverse("admin:api_githuborganization_add")
         admin_client.post(url, data={"name": "Test", "login": "test"})
-        assert GitHubOrganization.objects.filter(name="Test", login="test").exists()
+
+        assert GitHubOrganization.objects.filter(
+            name="Test", login="test", avatar_url="http://example.com"
+        ).exists()
 
 
 def test_json_widget():

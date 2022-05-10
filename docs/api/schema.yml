@@ -1648,9 +1648,6 @@ components:
           type: string
           nullable: true
           readOnly: true
-        can_create_projects:
-          type: boolean
-          readOnly: true
         currently_fetching_repos:
           type: boolean
         currently_fetching_orgs:
@@ -1682,7 +1679,6 @@ components:
           readOnly: true
       required:
       - avatar_url
-      - can_create_projects
       - github_id
       - id
       - is_devhub_enabled
@@ -1768,6 +1764,10 @@ components:
           readOnly: true
         name:
           type: string
+        avatar_url:
+          type: string
+          format: uri
+          maxLength: 200
       required:
       - id
       - name

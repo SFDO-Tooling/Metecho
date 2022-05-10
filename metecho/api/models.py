@@ -583,6 +583,7 @@ class ProjectDependency(HashIdMixin, TimestampsMixin):
 class GitHubOrganization(HashIdMixin, TimestampsMixin):
     name = StringField()
     login = StringField(unique=True, help_text="Organization's 'username' on GitHub")
+    avatar_url = models.URLField(_("Avatar URL"), blank=True)
 
     class Meta:
         verbose_name = _("GitHub organization")
