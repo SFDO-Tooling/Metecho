@@ -62,7 +62,7 @@ const CreateProjectModal = ({
     }
   };
 
-  const defaultOrganization = orgs[0]?.id || '';
+  const defaultOrganization = orgs.length === 1 ? orgs[0].id : '';
 
   const {
     inputs,
@@ -165,10 +165,12 @@ const CreateProjectModal = ({
       heading: t('Create Project'),
       contents: (
         <CreateProjectForm
+          orgs={orgs}
           isRefreshingOrgs={isRefreshingOrgs}
           inputs={inputs as CreateProjectData}
           errors={errors}
           handleInputChange={handleInputChange}
+          setInputs={setInputs}
         />
       ),
       footer: (
