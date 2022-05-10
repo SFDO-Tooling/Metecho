@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiResponse, extend_schema
-from github3.exceptions import ConnectionError, ResponseError
+from github3.exceptions import ConnectionError, NotFoundError, ResponseError
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -52,6 +52,7 @@ from .serializers import (
     FullUserSerializer,
     GitHubIssueSerializer,
     GitHubOrganizationSerializer,
+    GitHubUserMinimalSerializer,
     GuidedTourSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
@@ -229,26 +230,43 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
     pagination_class = CustomPaginator
     queryset = GitHubOrganization.objects.all()
 
-    @extend_schema(request=None, responses={202: None})
-    @action(detail=True, methods=["POST"])
+    @extend_schema(request=None, responses=GitHubUserMinimalSerializer(many=True))
+    @action(detail=True, methods=["GET"])
     def members(self, request, pk):
-        """Queue a job to fetch the members of the Organization"""
+        """Fetch the members of an Organization from GitHub"""
         org: GitHubOrganization = self.get_object()
-        org.queue_get_members(user=request.user)
-        return Response(status=status.HTTP_202_ACCEPTED)
+        gh_api = gh.gh_given_user(request.user)
+        gh_org = gh_api.organization(org.login)
+        members = sorted(
+            (member.as_dict() for member in gh_org.members()),
+            key=lambda member: member["login"].lower(),
+        )
+        members = GitHubUserMinimalSerializer(data=members, many=True)
+        members.is_valid(raise_exception=True)
+        return Response(members.data)
 
-    @extend_schema(request=CheckRepoNameSerializer, responses={202: None})
+    @extend_schema(
+        request=CheckRepoNameSerializer,
+        responses=OpenApiResponse(
+            {"type": "object", "properties": {"available": {"type": "boolean"}}},
+            description="",
+        ),
+    )
     @action(detail=True, methods=["POST"])
     def check_repo_name(self, request, pk):
-        """Queue a job to determine if a repository name is available for the Organization"""
+        """Determine if a repository name is available for the Organization on GitHub"""
         org: GitHubOrganization = self.get_object()
         serializer = CheckRepoNameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        org.queue_check_repo_name(
-            name=serializer.validated_data["name"],
-            originating_user_id=str(request.user.id),
-        )
-        return Response(status=status.HTTP_202_ACCEPTED)
+        try:
+            gh.get_repo_info(
+                None, repo_owner=org.login, repo_name=serializer.validated_data["name"]
+            )
+        except NotFoundError:
+            available = True
+        else:
+            available = False
+        return Response({"available": available})
 
 
 class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):

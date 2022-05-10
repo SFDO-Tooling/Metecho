@@ -9,6 +9,7 @@ from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.urls import reverse
 from github3.exceptions import NotFoundError, ResponseError
+from github3.users import User as gh_user
 from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
@@ -128,43 +129,59 @@ class TestGitHubOrganizationViewset:
         response = client.get(
             reverse("organization-detail", args=[str(git_hub_organization.id)])
         )
-        assert tuple(response.json().keys()) == ("id", "name")
+        assert tuple(response.json().keys()) == ("id", "name", "avatar_url")
 
     def test_members(self, client, mocker, git_hub_organization):
-        get_org_members_job = mocker.patch(
-            "metecho.api.jobs.get_org_members_job", autospec=True
+        member1 = mocker.MagicMock(spec=gh_user)
+        member1.as_dict.return_value = {
+            "id": 123,
+            "login": "user-xyz",
+            "avatar_url": "http://123.com",
+        }
+        member2 = mocker.MagicMock(spec=gh_user)
+        member2.as_dict.return_value = {
+            "id": 456,
+            "login": "user-abc",
+            "avatar_url": "http://456.com",
+        }
+        gh = mocker.patch("metecho.api.views.gh", autospec=True)
+        gh.gh_given_user.return_value.organization.return_value.members.return_value = (
+            member1,
+            member2,
         )
-        response = client.post(
-            reverse("organization-members", args=[str(git_hub_organization.id)]),
-        )
-        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
-        assert get_org_members_job.delay.called
 
-    def test_check_repo_name(self, client, mocker, git_hub_organization):
-        check_repo_name_job = mocker.patch(
-            "metecho.api.jobs.check_repo_name_job", autospec=True
+        response = client.get(
+            reverse("organization-members", args=[git_hub_organization.id])
         )
+
+        assert response.json() == [
+            {"id": "456", "login": "user-abc", "avatar_url": "http://456.com"},
+            {"id": "123", "login": "user-xyz", "avatar_url": "http://123.com"},
+        ]
+
+    @pytest.mark.parametrize(
+        "available",
+        (
+            pytest.param(False, id="Repo name taken"),
+            pytest.param(True, id="Repo name available"),
+        ),
+    )
+    def test_check_repo_name(self, client, mocker, git_hub_organization, available):
+        gh = mocker.patch("metecho.api.views.gh")
+        if available:
+            gh.get_repo_info.side_effect = NotFoundError(mocker.MagicMock())
         response = client.post(
-            reverse(
-                "organization-check-repo-name", args=[str(git_hub_organization.id)]
-            ),
-            data={"name": "abc"},
+            reverse("organization-check-repo-name", args=[git_hub_organization.id]),
+            data={"name": "repo-name"},
         )
-        assert response.status_code == status.HTTP_202_ACCEPTED, response.content
-        assert check_repo_name_job.delay.called
+        assert response.json() == {"available": available}
 
     def test_check_repo_name__missing_name(self, client, mocker, git_hub_organization):
-        check_repo_name_job = mocker.patch(
-            "metecho.api.jobs.check_repo_name_job", autospec=True
-        )
         response = client.post(
-            reverse(
-                "organization-check-repo-name", args=[str(git_hub_organization.id)]
-            ),
+            reverse("organization-check-repo-name", args=[git_hub_organization.id]),
             data={"name": ""},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
-        assert not check_repo_name_job.delay.called
 
 
 @pytest.mark.django_db

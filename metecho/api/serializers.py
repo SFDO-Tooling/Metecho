@@ -171,11 +171,14 @@ class RepoPermissionSerializer(serializers.Serializer):
     admin = serializers.BooleanField(required=False)
 
 
-class GitHubUserSerializer(serializers.Serializer):
+class GitHubUserMinimalSerializer(serializers.Serializer):
     id = serializers.CharField()
     login = serializers.CharField()
-    name = serializers.CharField(required=False)
     avatar_url = serializers.URLField()
+
+
+class GitHubUserSerializer(GitHubUserMinimalSerializer):
+    name = serializers.CharField(required=False)
     permissions = RepoPermissionSerializer(required=False)
 
 

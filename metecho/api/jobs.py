@@ -154,35 +154,6 @@ def _create_branches_on_github(
     return task_branch_name
 
 
-def check_repo_name(
-    organization: GitHubOrganization, *, name: str, originating_user_id: str
-):
-    organization.refresh_from_db()
-
-    try:
-        # result=True if the name DOES NOT exist, meaning it's available for creation
-        try:
-            get_repo_info(None, repo_owner=organization.login, repo_name=name)
-        except NotFoundError:
-            result = True
-        else:
-            result = False
-    except Exception as error:
-        organization.finalize_check_repo_name(
-            error=error, originating_user_id=originating_user_id
-        )
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
-    else:
-        organization.finalize_check_repo_name(
-            result=result, originating_user_id=originating_user_id
-        )
-
-
-check_repo_name_job = job(check_repo_name)
-
-
 def create_repository(
     project: Project,
     *,
@@ -843,41 +814,6 @@ def refresh_commits(*, project, branch_name, originating_user_id):
 
 
 refresh_commits_job = job(refresh_commits)
-
-
-def get_org_members(org: GitHubOrganization, *, user: User):
-    """
-    Get organization's members from the GitHub API, as seen by `user`.
-    """
-    try:
-        org.refresh_from_db()
-        originating_user_id = str(user.id)
-
-        gh = gh_given_user(user)
-        gh_org = gh.organization(org.login)
-        members = sorted(
-            (
-                {
-                    "id": str(member.id),
-                    "login": member.login,
-                    "avatar_url": member.avatar_url,
-                }
-                for member in gh_org.members()
-            ),
-            key=lambda x: x["login"].lower(),
-        )
-    except Exception as error:
-        org.finalize_get_members(error=error, originating_user_id=originating_user_id)
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
-    else:
-        org.finalize_get_members(
-            members=members, originating_user_id=originating_user_id
-        )
-
-
-get_org_members_job = job(get_org_members)
 
 
 def refresh_github_users(project, *, originating_user_id):

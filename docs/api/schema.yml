@@ -449,8 +449,8 @@ paths:
   /api/organizations/{id}/check_repo_name/:
     post:
       operationId: organizations_check_repo_name_create
-      description: Queue a job to determine if a repository name is available for
-        the Organization
+      description: Determine if a repository name is available for the Organization
+        on GitHub
       parameters:
       - in: path
         name: id
@@ -477,12 +477,19 @@ paths:
       - tokenAuth: []
       - cookieAuth: []
       responses:
-        '202':
-          description: No response body
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: boolean
+          description: ''
   /api/organizations/{id}/members/:
-    post:
-      operationId: organizations_members_create
-      description: Queue a job to fetch the members of the Organization
+    get:
+      operationId: organizations_members_list
+      description: Fetch the members of an Organization from GitHub
       parameters:
       - in: path
         name: id
@@ -491,14 +498,24 @@ paths:
           format: HashID
         description: A unique integer value identifying this GitHub organization.
         required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
       tags:
       - organizations
       security:
       - tokenAuth: []
       - cookieAuth: []
       responses:
-        '202':
-          description: No response body
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGitHubUserMinimalList'
+          description: ''
   /api/projects/:
     get:
       operationId: projects_list
@@ -1778,13 +1795,27 @@ components:
           type: string
         login:
           type: string
+        avatar_url:
+          type: string
+          format: uri
         name:
+          type: string
+        permissions:
+          $ref: '#/components/schemas/RepoPermission'
+      required:
+      - avatar_url
+      - id
+      - login
+    GitHubUserMinimal:
+      type: object
+      properties:
+        id:
+          type: string
+        login:
           type: string
         avatar_url:
           type: string
           format: uri
-        permissions:
-          $ref: '#/components/schemas/RepoPermission'
       required:
       - avatar_url
       - id
@@ -1894,6 +1925,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GitHubOrganization'
+    PaginatedGitHubUserMinimalList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GitHubUserMinimal'
     PaginatedMinimalUserList:
       type: object
       properties:

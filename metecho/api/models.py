@@ -6,7 +6,6 @@ from typing import Dict, Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
-from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -33,7 +32,7 @@ from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 from simple_salesforce.exceptions import SalesforceError
 
-from . import gh, push
+from . import gh
 from .constants import CHANNELS_GROUP_NAME, ORGANIZATION_DETAILS
 from .email_utils import get_user_facing_url
 from .model_mixins import (
@@ -595,48 +594,6 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
     @property
     def github_url(self):
         return f"https://github.com/{self.login}"
-
-    def queue_get_members(self, *, user: User):
-        from .jobs import get_org_members_job
-
-        get_org_members_job.delay(self, user=user)
-
-    def finalize_get_members(
-        self, *, members: list = None, error: Exception = None, originating_user_id: str
-    ):
-        message = {
-            "type": "GITHUB_ORGANIZATION_MEMBERS_FETCH",
-            "payload": {
-                "originating_user_id": originating_user_id,
-                "message": members,
-            },
-        }
-        if error is not None:
-            message["type"] = "GITHUB_ORGANIZATION_MEMBERS_ERROR"
-            message["payload"]["message"] = str(error)
-        async_to_sync(push.push_message_about_instance)(self, message)
-
-    def queue_check_repo_name(self, *, name: str, originating_user_id: str):
-        from .jobs import check_repo_name_job
-
-        check_repo_name_job.delay(
-            self, name=name, originating_user_id=originating_user_id
-        )
-
-    def finalize_check_repo_name(
-        self, *, result: bool = None, error: Exception = None, originating_user_id: str
-    ):
-        message = {
-            "type": "GITHUB_ORGANIZATION_REPO_NAME_CHECK",
-            "payload": {
-                "originating_user_id": originating_user_id,
-                "message": result,
-            },
-        }
-        if error is not None:
-            message["type"] = "GITHUB_ORGANIZATION_REPO_NAME_CHECK_ERROR"
-            message["payload"]["message"] = str(error)
-        async_to_sync(push.push_message_about_instance)(self, message)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
