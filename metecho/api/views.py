@@ -52,7 +52,7 @@ from .serializers import (
     FullUserSerializer,
     GitHubIssueSerializer,
     GitHubOrganizationSerializer,
-    GitHubUserMinimalSerializer,
+    ShortGitHubUserSerializer,
     GuidedTourSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
@@ -229,7 +229,7 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
     pagination_class = CustomPaginator
     queryset = GitHubOrganization.objects.all()
 
-    @extend_schema(request=None, responses=GitHubUserMinimalSerializer(many=True))
+    @extend_schema(request=None, responses=ShortGitHubUserSerializer(many=True))
     @action(detail=True, methods=["GET"])
     def members(self, request, pk):
         """Fetch the members of an Organization from GitHub"""
@@ -240,7 +240,7 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
             (member.as_dict() for member in gh_org.members()),
             key=lambda member: member["login"].lower(),
         )
-        members = GitHubUserMinimalSerializer(data=members, many=True)
+        members = ShortGitHubUserSerializer(data=members, many=True)
         members.is_valid(raise_exception=True)
         return Response(members.data)
 

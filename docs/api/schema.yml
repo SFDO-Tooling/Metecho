@@ -509,7 +509,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedGitHubUserMinimalList'
+                $ref: '#/components/schemas/PaginatedShortGitHubUserList'
           description: ''
   /api/projects/:
     get:
@@ -1785,6 +1785,7 @@ components:
       - name
     GitHubUser:
       type: object
+      description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
       properties:
         id:
           type: string
@@ -1797,20 +1798,6 @@ components:
           type: string
         permissions:
           $ref: '#/components/schemas/RepoPermission'
-      required:
-      - avatar_url
-      - id
-      - login
-    GitHubUserMinimal:
-      type: object
-      properties:
-        id:
-          type: string
-        login:
-          type: string
-        avatar_url:
-          type: string
-          format: uri
       required:
       - avatar_url
       - id
@@ -1920,26 +1907,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GitHubOrganization'
-    PaginatedGitHubUserMinimalList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/GitHubUserMinimal'
     PaginatedMinimalUserList:
       type: object
       properties:
@@ -1980,6 +1947,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Project'
+    PaginatedShortGitHubUserList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShortGitHubUser'
     PatchedEpic:
       type: object
       properties:
@@ -2564,6 +2551,21 @@ components:
       - unsaved_changes
       - url
       - valid_target_directories
+    ShortGitHubUser:
+      type: object
+      description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
+      properties:
+        id:
+          type: string
+        login:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+      required:
+      - avatar_url
+      - id
+      - login
     Task:
       type: object
       properties:

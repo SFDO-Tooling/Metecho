@@ -171,13 +171,14 @@ class RepoPermissionSerializer(serializers.Serializer):
     admin = serializers.BooleanField(required=False)
 
 
-class GitHubUserMinimalSerializer(serializers.Serializer):
+class ShortGitHubUserSerializer(serializers.Serializer):
+    """See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser"""
     id = serializers.CharField()
     login = serializers.CharField()
     avatar_url = serializers.URLField()
 
 
-class GitHubUserSerializer(GitHubUserMinimalSerializer):
+class GitHubUserSerializer(ShortGitHubUserSerializer):
     name = serializers.CharField(required=False)
     permissions = RepoPermissionSerializer(required=False)
 
