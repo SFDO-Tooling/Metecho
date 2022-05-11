@@ -218,7 +218,6 @@ class ProjectDependencyViewSet(ReadOnlyModelViewSet):
 
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectDependencySerializer
-    pagination_class = CustomPaginator
     queryset = ProjectDependency.objects.all()
 
 

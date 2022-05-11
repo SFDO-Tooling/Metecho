@@ -88,8 +88,8 @@ const reducer = (
     }
     case 'FETCH_OBJECTS_SUCCEEDED': {
       const { response, objectType, reset } = action.payload;
-      const { results, next } = response as PaginatedObjectResponse;
       if (objectType === OBJECT_TYPES.PROJECT) {
+        const { results, next } = response as PaginatedObjectResponse;
         if (reset) {
           return {
             ...projects,
@@ -113,7 +113,7 @@ const reducer = (
       if (objectType === OBJECT_TYPES.PROJECT_DEPENDENCY) {
         return {
           ...projects,
-          dependencies: results,
+          dependencies: response as Dependency[],
           fetchingDependencies: false,
         };
       }

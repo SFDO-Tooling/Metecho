@@ -8,13 +8,6 @@ paths:
     get:
       operationId: dependencies_list
       description: Dependencies available during Project creation
-      parameters:
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
       tags:
       - dependencies
       security:
@@ -25,7 +18,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedProjectDependencyList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectDependency'
           description: ''
   /api/dependencies/{id}/:
     get:
@@ -1965,26 +1960,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MinimalUser'
-    PaginatedProjectDependencyList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProjectDependency'
     PaginatedProjectList:
       type: object
       properties:

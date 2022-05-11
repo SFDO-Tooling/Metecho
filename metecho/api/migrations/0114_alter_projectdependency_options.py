@@ -6,12 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0113_alter_projectdependency_options'),
+        ("api", "0113_alter_projectdependency_options"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='projectdependency',
-            options={'ordering': ('-recommended', 'name'), 'verbose_name': 'project dependency', 'verbose_name_plural': 'project dependencies'},
+            name="projectdependency",
+            options={
+                "ordering": ("-recommended", "name"),
+                "verbose_name": "project dependency",
+                "verbose_name_plural": "project dependencies",
+            },
         ),
     ]
