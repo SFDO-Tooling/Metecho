@@ -59,3 +59,13 @@ export const selectProjectCollaborator = (
   const project = selectProjectById(appState, projectId);
   return project?.github_users.find((user) => user.id === userId) || null;
 };
+
+export const selectProjectDependencies = createSelector(
+  selectProjectsState,
+  (projects) => projects.dependencies,
+);
+
+export const selectFetchingProjectDependencies = createSelector(
+  selectProjectsState,
+  (projects) => projects.fetchingDependencies,
+);

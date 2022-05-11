@@ -1,14 +1,19 @@
 import Combobox from '@salesforce/design-system-react/components/combobox';
+import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
-import React from 'react';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import { ComboboxOption } from '@/js/components/epics/createForm';
 import RefreshGitHubOrgsButton from '@/js/components/githubOrgs/refreshOrgsButton';
 import { CreateProjectData } from '@/js/components/projects/createProjectModal';
-import { UseFormProps } from '@/js/components/utils';
+import { UseFormProps, useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
 import { GitHubOrg } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
 
 interface Props {
   orgs: GitHubOrg[];
@@ -17,6 +22,7 @@ interface Props {
   errors: UseFormProps['errors'];
   handleInputChange: UseFormProps['handleInputChange'];
   setInputs: UseFormProps['setInputs'];
+  setHasErrors: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const CreateProjectForm = ({
@@ -26,12 +32,70 @@ const CreateProjectForm = ({
   errors,
   handleInputChange,
   setInputs,
+  setHasErrors,
 }: Props) => {
+  const { t } = useTranslation();
+  const dispatch = useDispatch<ThunkDispatch>();
+  const isMounted = useIsMounted();
+  const [isCheckingRepoName, setIsCheckingRepoName] = useState(false);
+  const [nameIsAvailable, setNameIsAvailable] = useState<boolean>();
+
+  const checkRepoName = useCallback(
+    async (org: string, name: string) => {
+      if (org && name) {
+        setIsCheckingRepoName(true);
+        const { available } = await apiFetch({
+          url: window.api_urls.organization_check_repo_name(org),
+          dispatch,
+          opts: {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        });
+        setNameIsAvailable(available);
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsCheckingRepoName(false);
+        }
+      } else {
+        setNameIsAvailable(undefined);
+      }
+    },
+    [dispatch, isMounted],
+  );
+
+  const debouncedCheckRepoName = useMemo(
+    () => debounce(checkRepoName, 500),
+    [checkRepoName],
+  );
+
+  // Check repo name availability when org or name changes
+  useEffect(() => {
+    setNameIsAvailable(undefined);
+    debouncedCheckRepoName(inputs.organization, inputs.repo_name);
+  }, [inputs.organization, inputs.repo_name, debouncedCheckRepoName]);
+
+  useEffect(() => {
+    setHasErrors(!nameIsAvailable);
+  }, [nameIsAvailable, setHasErrors]);
+
   const handleOrgSelection = (
     event: any,
     { selection }: { selection: ComboboxOption[] },
   ) => {
     setInputs({ ...inputs, organization: selection[0]?.id || '' });
+  };
+
+  const handleProjectNameChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    { value }: { value: string },
+  ) => {
+    // When project name changes, also update repo_name
+    const repo_name = value.replace(/[^A-Za-z0-9_.-]/g, '-').substring(0, 100);
+    setInputs({ ...inputs, name: value, repo_name });
   };
 
   const options = orgs.map((org) => ({ id: org.id, label: org.name }));
@@ -41,6 +105,10 @@ const CreateProjectForm = ({
         'You are not a member of any GitHub Organization with permissions to create new Projects on Metecho. Confirm that you are logged into the correct account or contact an admin on GitHub.',
       )
     : '';
+  const nameUnavailableMsg =
+    nameIsAvailable === false && !isCheckingRepoName
+      ? t('This name is unavailable on GitHub.')
+      : '';
 
   return (
     <form className="slds-form slds-p-around_large">
@@ -87,7 +155,7 @@ const CreateProjectForm = ({
         required
         aria-required
         errorText={errors.name}
-        onChange={handleInputChange}
+        onChange={handleProjectNameChange}
       />
       <Input
         id="create-project-repo_name"
@@ -98,7 +166,13 @@ const CreateProjectForm = ({
         required
         aria-required
         maxLength="100"
-        errorText={errors.repo_name}
+        hasSpinner={isCheckingRepoName}
+        iconRight={
+          nameIsAvailable && !isCheckingRepoName ? (
+            <InputIcon name="check" category="utility" />
+          ) : null
+        }
+        errorText={errors.repo_name || nameUnavailableMsg}
         onChange={handleInputChange}
       />
       <Textarea

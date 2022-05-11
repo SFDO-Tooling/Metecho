@@ -32,18 +32,29 @@ export interface Project {
   latest_sha: string;
   has_push_permission: boolean;
 }
+
+export interface Dependency {
+  id: string;
+  name: string;
+  recommended: boolean;
+}
+
 export interface ProjectsState {
   projects: Project[];
   next: string | null;
   notFound: string[];
   refreshing: boolean;
+  dependencies: Dependency[];
+  fetchingDependencies: boolean;
 }
 
-const defaultState = {
+const defaultState: ProjectsState = {
   projects: [],
   next: null,
   notFound: [],
   refreshing: false,
+  dependencies: [],
+  fetchingDependencies: false,
 };
 
 const reducer = (
@@ -64,6 +75,16 @@ const reducer = (
           'REFRESHING_PROJECTS',
         ].includes(action.type),
       };
+    }
+    case 'FETCH_OBJECTS_STARTED': {
+      const { objectType } = action.payload;
+      if (objectType === OBJECT_TYPES.PROJECT_DEPENDENCY) {
+        return {
+          ...projects,
+          fetchingDependencies: true,
+        };
+      }
+      return projects;
     }
     case 'FETCH_OBJECTS_SUCCEEDED': {
       const { response, objectType, reset } = action.payload;
@@ -87,6 +108,13 @@ const reducer = (
           ],
           next,
           refreshing: false,
+        };
+      }
+      if (objectType === OBJECT_TYPES.PROJECT_DEPENDENCY) {
+        return {
+          ...projects,
+          dependencies: results,
+          fetchingDependencies: false,
         };
       }
       return projects;

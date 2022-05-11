@@ -19,6 +19,7 @@ export interface GitHubUser {
 export interface GitHubOrg {
   id: string;
   name: string;
+  avatar_url: string;
 }
 
 export interface User {

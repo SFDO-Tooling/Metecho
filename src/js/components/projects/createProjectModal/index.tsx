@@ -1,10 +1,12 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import ProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import { t } from 'i18next';
-import React, { useState } from 'react';
-import { GitHubOrg } from 'src/js/store/user/reducer';
+import { compact } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 
+import SelectProjectDependenciesForm from '@/js/components/projects/createProjectModal/dependencies';
 import CreateProjectForm from '@/js/components/projects/createProjectModal/form';
 import {
   LabelWithSpinner,
@@ -12,7 +14,14 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
 import { Project } from '@/js/store/projects/reducer';
+import {
+  selectFetchingProjectDependencies,
+  selectProjectDependencies,
+} from '@/js/store/projects/selectors';
+import { GitHubOrg } from '@/js/store/user/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 interface Props {
@@ -34,9 +43,29 @@ const CreateProjectModal = ({
   isOpen,
   closeModal,
 }: Props) => {
+  const { t } = useTranslation();
+  const dispatch = useDispatch<ThunkDispatch>();
+  const dependencies = useSelector(selectProjectDependencies);
+  const fetchingDependencies = useSelector(selectFetchingProjectDependencies);
   const [pageIndex, setPageIndex] = useState(0);
   const isMounted = useIsMounted();
   const [isSaving, setIsSaving] = useState(false);
+  const [hasErrors, setHasErrors] = useState(false);
+  const hasDeps = Boolean(dependencies.length);
+  const [fetchedDependencies, setFetchedDependencies] = useState(hasDeps);
+
+  // When modal opens, fetch dependencies if list is empty
+  useEffect(() => {
+    if (isOpen && !fetchedDependencies) {
+      setFetchedDependencies(true);
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.PROJECT_DEPENDENCY,
+          shouldSubscribeToObject: false,
+        }),
+      );
+    }
+  }, [dispatch, fetchedDependencies, isOpen]);
 
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
@@ -85,13 +114,10 @@ const CreateProjectModal = ({
     onError: handleError,
   });
 
-  const canSubmit = Boolean(
-    inputs.name && inputs.organization && inputs.repo_name,
-  );
-
   const handleClose = () => {
     closeModal();
     setPageIndex(0);
+    setFetchedDependencies(hasDeps);
     resetForm();
   };
 
@@ -103,13 +129,9 @@ const CreateProjectModal = ({
     setInputs,
   });
 
-  // When project name changes, update repo_name
-  useFormDefaults({
-    field: 'repo_name',
-    value: inputs.name.replace(/[^A-Za-z0-9_.-]/g, '-').substring(0, 100),
-    inputs,
-    setInputs,
-  });
+  const canSubmit = Boolean(
+    !hasErrors && inputs.name && inputs.organization && inputs.repo_name,
+  );
 
   const doSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     setIsSaving(true);
@@ -143,12 +165,13 @@ const CreateProjectModal = ({
     />
   );
 
-  const steps = [
+  const showDeps = hasDeps || fetchingDependencies;
+  const steps = compact([
     { id: 0, label: t('Enter Project Details') },
     { id: 1, label: t('Add Project Collaborators') },
-    { id: 2, label: t('Add Dependencies') },
-    { id: 3, label: t('Create Project') },
-  ];
+    showDeps && { id: 2, label: t('Add Dependencies') },
+    { id: showDeps ? 3 : 2, label: t('Create Project') },
+  ]);
 
   const Progress = (
     <ProgressIndicator
@@ -160,7 +183,7 @@ const CreateProjectModal = ({
     />
   );
 
-  const pages = [
+  const pages = compact([
     {
       heading: t('Create Project'),
       contents: (
@@ -171,6 +194,7 @@ const CreateProjectModal = ({
           errors={errors}
           handleInputChange={handleInputChange}
           setInputs={setInputs}
+          setHasErrors={setHasErrors}
         />
       ),
       footer: (
@@ -194,16 +218,20 @@ const CreateProjectModal = ({
         </div>
       ),
     },
-    {
+    showDeps && {
       heading: t('Add Dependencies'),
       contents: (
-        <div className="slds-p-around_large">This is a placeholder.</div>
+        <SelectProjectDependenciesForm
+          inputs={inputs as CreateProjectData}
+          errors={errors}
+          setInputs={setInputs}
+        />
       ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">
           <BackBtn />
           {Progress}
-          <NextBtn />
+          <NextBtn disabled={fetchingDependencies} />
         </div>
       ),
     },
@@ -232,7 +260,7 @@ const CreateProjectModal = ({
         </div>
       ),
     },
-  ];
+  ]);
 
   return (
     <Modal

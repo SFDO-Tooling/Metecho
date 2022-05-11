@@ -52,12 +52,6 @@ Websocket notifications you can subscribe to:
 
     scratchorg.list
         SCRATCH_ORG_RECREATE
-
-    githuborganization.:id
-        GITHUB_ORGANIZATION_MEMBERS_FETCH
-        GITHUB_ORGANIZATION_MEMBERS_ERROR
-        GITHUB_ORGANIZATION_REPO_NAME_CHECK
-        GITHUB_ORGANIZATION_REPO_NAME_CHECK_ERROR
 """
 from copy import deepcopy
 

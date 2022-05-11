@@ -577,7 +577,7 @@ class ProjectDependency(HashIdMixin, TimestampsMixin):
     class Meta:
         verbose_name = _("project dependency")
         verbose_name_plural = _("project dependencies")
-        ordering = ("name",)
+        ordering = ("-recommended", "name")
 
 
 class GitHubOrganization(HashIdMixin, TimestampsMixin):
