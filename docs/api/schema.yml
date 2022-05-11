@@ -547,13 +547,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Project'
+              $ref: '#/components/schemas/ProjectCreate'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Project'
+              $ref: '#/components/schemas/ProjectCreate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Project'
+              $ref: '#/components/schemas/ProjectCreate'
         required: true
       security:
       - tokenAuth: []
@@ -2352,6 +2352,33 @@ components:
       - repo_owner
       - repo_url
       - slug
+    ProjectCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        organization:
+          type: string
+          format: HashID
+        repo_name:
+          type: string
+        github_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShortGitHubUser'
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: HashID
+      required:
+      - dependencies
+      - github_users
+      - name
+      - organization
+      - repo_name
     ProjectDependency:
       type: object
       properties:

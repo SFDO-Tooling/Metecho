@@ -172,7 +172,8 @@ class RepoPermissionSerializer(serializers.Serializer):
 
 
 class ShortGitHubUserSerializer(serializers.Serializer):
-    """See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser"""
+    """See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser"""  # noqa: B950
+
     id = serializers.CharField()
     login = serializers.CharField()
     avatar_url = serializers.URLField()
@@ -266,6 +267,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         pk_field=serializers.CharField(),
         queryset=ProjectDependency.objects.all(),
     )
+    github_users = ShortGitHubUserSerializer(many=True, allow_empty=True, required=True)
 
     class Meta:
         model = Project

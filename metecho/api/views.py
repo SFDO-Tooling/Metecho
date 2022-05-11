@@ -52,7 +52,6 @@ from .serializers import (
     FullUserSerializer,
     GitHubIssueSerializer,
     GitHubOrganizationSerializer,
-    ShortGitHubUserSerializer,
     GuidedTourSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
@@ -60,6 +59,7 @@ from .serializers import (
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
+    ShortGitHubUserSerializer,
     TaskAssigneeSerializer,
     TaskSerializer,
 )
@@ -302,6 +302,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
         return self.queryset.filter(repo_id__in=repo_ids)
 
+    @extend_schema(request=ProjectCreateSerializer)
     def create(self, request):
         serializer = ProjectCreateSerializer(
             data=request.data, context=self.get_serializer_context()
