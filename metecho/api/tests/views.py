@@ -107,8 +107,8 @@ class TestProjectDependencyViewset:
     def test_list(self, client, project_dependency):
         response = client.get(reverse("dependency-list"))
         data = response.json()
-        assert data["count"] == 1
-        assert data["results"][0]["id"] == str(project_dependency.id)
+        assert len(data) == 1
+        assert data[0]["id"] == project_dependency.id
 
     def test_retrieve(self, client, project_dependency):
         response = client.get(
