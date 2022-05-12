@@ -132,32 +132,23 @@ class TestGitHubOrganizationViewset:
         assert tuple(response.json().keys()) == ("id", "name", "avatar_url")
 
     def test_members(self, client, mocker, git_hub_organization):
-        member1 = mocker.MagicMock(spec=gh_user)
-        member1.as_dict.return_value = {
-            "id": 123,
-            "login": "user-xyz",
-            "avatar_url": "http://123.com",
-        }
-        member2 = mocker.MagicMock(spec=gh_user)
-        member2.as_dict.return_value = {
-            "id": 456,
-            "login": "user-abc",
-            "avatar_url": "http://456.com",
-        }
         gh = mocker.patch("metecho.api.views.gh", autospec=True)
-        gh.gh_given_user.return_value.organization.return_value.members.return_value = (
-            member1,
-            member2,
-        )
+        org = gh.gh_given_user.return_value.organization.return_value
+        org._get.return_value.json.return_value = [
+            {"id": 123, "login": "user-xyz", "avatar_url": "http://123.com"},
+            {"id": 456, "login": "user-abc", "avatar_url": "http://456.com"},
+        ]
 
         response = client.get(
-            reverse("organization-members", args=[git_hub_organization.id])
+            reverse("organization-members", args=[git_hub_organization.id]),
+            data={"page": 10},
         )
 
         assert response.json() == [
             {"id": "456", "login": "user-abc", "avatar_url": "http://456.com"},
             {"id": "123", "login": "user-xyz", "avatar_url": "http://123.com"},
         ]
+        org._get.assert_called_with(mocker.ANY, params={"page": "10"})
 
     @pytest.mark.parametrize(
         "available",
@@ -176,7 +167,7 @@ class TestGitHubOrganizationViewset:
         )
         assert response.json() == {"available": available}
 
-    def test_check_repo_name__missing_name(self, client, mocker, git_hub_organization):
+    def test_check_repo_name__missing_name(self, client, git_hub_organization):
         response = client.post(
             reverse("organization-check-repo-name", args=[git_hub_organization.id]),
             data={"name": ""},

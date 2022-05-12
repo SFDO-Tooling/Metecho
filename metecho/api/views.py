@@ -6,7 +6,8 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from github3.exceptions import ConnectionError, NotFoundError, ResponseError
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -229,15 +230,22 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
     pagination_class = CustomPaginator
     queryset = GitHubOrganization.objects.all()
 
-    @extend_schema(request=None, responses=ShortGitHubUserSerializer(many=True))
-    @action(detail=True, methods=["GET"])
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("page", OpenApiTypes.INT, OpenApiParameter.QUERY),
+        ],
+        responses=ShortGitHubUserSerializer(many=True),
+    )
+    @action(detail=True, methods=["GET"], pagination_class=None)
     def members(self, request, pk):
         """Fetch the members of an Organization from GitHub"""
         org: GitHubOrganization = self.get_object()
         gh_api = gh.gh_given_user(request.user)
         gh_org = gh_api.organization(org.login)
+        members_url = gh_org._build_url("members", base_url=gh_org._api)
+        params = {"page": request.GET.get("page", 1)}
         members = sorted(
-            (member.as_dict() for member in gh_org.members()),
+            gh_org._get(members_url, params=params).json(),
             key=lambda member: member["login"].lower(),
         )
         members = ShortGitHubUserSerializer(data=members, many=True)
