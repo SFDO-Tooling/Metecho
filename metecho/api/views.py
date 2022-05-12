@@ -232,7 +232,9 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter("page", OpenApiTypes.INT, OpenApiParameter.QUERY),
+            OpenApiParameter(
+                "page", type=OpenApiTypes.INT, location=OpenApiParameter.QUERY
+            ),
         ],
         responses=ShortGitHubUserSerializer(many=True),
     )
