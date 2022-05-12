@@ -9,7 +9,6 @@ from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.urls import reverse
 from github3.exceptions import NotFoundError, ResponseError
-from github3.users import User as gh_user
 from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
