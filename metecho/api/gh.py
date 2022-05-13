@@ -93,7 +93,7 @@ def copy_branch_protection(src: Branch, dst: Branch):
     # Setting the protection rules on the destination could be achieved by calling
     # `dst.protect()`, but that relies on github3py supporting all GitHub API fields as
     # function arguments. Instead of waiting for that we `_put` the data directly and
-    # can update at our own pace if GitHub changes de protection schema
+    # can update at our own pace if GitHub changes the protection schema
     dst_url = dst._build_url("protection", base_url=dst._api)
     resp = dst._put(dst_url, json=data)
     return dst._json(resp, 200)
