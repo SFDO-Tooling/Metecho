@@ -73,4 +73,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: backend-coverage
-      - uses: codecov/codecov-action@v3
+      - name: (TODO) Upload coverage reports
+        run: |
+          echo "Coverage files: .coverage, coverage, coverage.xml"
