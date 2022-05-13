@@ -75,20 +75,26 @@ Docker-based development
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 .. _this issue: https://github.com/moby/moby/issues/12997
 
-Setting up the GitHub App
--------------------------
+Setting up the GitHub Apps
+--------------------------
 
-To deploy this app, you will need to set up a GitHub App and give it
+To deploy this app, you will need to set up two GitHub Apps and give them
 proper permissions. You can do that at
 ``https://github.com/organizations/<your org>/settings/apps``
 
-The App will need the following permissions:
+Basic Access App
+~~~~~~~~~~~~~~~~
+
+The first GitHub app let's users log into Metecho with their GitHub account,
+connect to repositories, create branches, pull requests, and commit code. The
+app will need the following permissions:
 
 - Repository permissions
     - Contents: Read & write
     - Metadata: Read-only
     - Pull requests: Read & write
     - Commit statuses: Read & write
+    - Workflows: Read & write
 - Organization permissions:
     - Members: Read-only
 - User permissions:
@@ -115,6 +121,23 @@ Use the app's "App ID" as ``GITHUB_APP_ID``, "Client ID" as
 Finally, generate a new private key for the app, replace newlines with ``\n``,
 and set it as the ``DOCKER_GITHUB_APP_KEY`` environment variable (the entire
 key, not a path to one).
+
+Full Access App
+~~~~~~~~~~~~~~~
+
+The second GitHub app is used to create GitHub repositories in your organization
+when Projects are created in Metecho. The app will need the following
+permissions:
+
+- Repository permissions
+    - Administration: Read & write
+- Organization permissions
+    - Members: Read & write
+
+Use the app's "App ID" as ``FULL_ACCESS_GITHUB_APP_ID`` and generate a new
+private key for the app, replace newlines with ``\n``, and set it as the
+``FULL_ACCESS_DOCKER_GITHUB_APP_KEY`` environment variable (the entire key, not
+a path to one).
 
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~
