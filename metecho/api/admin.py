@@ -56,7 +56,8 @@ class GitHubOrganizationForm(forms.ModelForm):
     def clean(self):
         login = self.cleaned_data["login"]
         try:
-            org = gh.get_org_for_repo_creation(orgname=login)
+            session = gh.gh_as_full_access_org(orgname=login)
+            org = session.organization(login)
         except Exception:
             raise forms.ValidationError(
                 _(

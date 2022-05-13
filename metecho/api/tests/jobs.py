@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.utils.timezone import now
 from github3.exceptions import NotFoundError
+from github3.orgs import Organization
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
@@ -1354,11 +1355,15 @@ class TestCreateRepository:
         project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
 
         team = mocker.MagicMock()
-        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user").return_value
+        gh_user = mocker.patch(
+            f"{PATCH_ROOT}.gh_given_user", autospec=True
+        ).return_value
         gh_user.organizations.return_value = [
-            mocker.MagicMock(login=project.repo_owner),
+            mocker.MagicMock(login=project.repo_owner, spec=Organization)
         ]
-        gh_org = mocker.patch(f"{PATCH_ROOT}.get_org_for_repo_creation").return_value
+        gh_org = mocker.patch(
+            f"{PATCH_ROOT}.gh_as_full_access_org", autospec=True
+        ).return_value.organization.return_value
         gh_org.create_team.return_value = team
         gh_org.create_repository.return_value = mocker.MagicMock(
             id=123456, html_url="", permissions=[]

@@ -12,11 +12,11 @@ from ..gh import (
     extract_zip_file,
     get_all_org_repos,
     get_cached_user,
-    get_org_for_repo_creation,
     get_repo_info,
     get_source_format,
     get_zip_file,
     gh_as_app,
+    gh_as_full_access_org,
     is_safe_path,
     local_github_checkout,
     log_unsafe_zipfile_error,
@@ -51,10 +51,10 @@ def test_gh_as_app(mocker):
     assert gh_as_app("TestOrg", "TestRepo") is not None
 
 
-def test_gh_org_for_repo_creation(mocker):
+def test_gh_as_full_access_org(mocker):
     gh = mocker.patch("metecho.api.gh.GitHub", autospec=True).return_value
-    get_org_for_repo_creation("org-name")
-    gh.organization.assert_called_with("org-name")
+    gh_as_full_access_org("org-name")
+    gh.app_installation_for_organization.assert_called_with("org-name")
 
 
 def test_is_safe_path():

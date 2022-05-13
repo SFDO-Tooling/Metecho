@@ -128,7 +128,7 @@ class TestGitHubOrganizationAdmin:
 
     def test_org__bad(self, admin_client, mocker):
         gh = mocker.patch("metecho.api.admin.gh", autospec=True)
-        gh.get_org_for_repo_creation.side_effect = Exception
+        gh.gh_as_full_access_org.side_effect = Exception
         url = reverse("admin:api_githuborganization_add")
 
         response = admin_client.post(url, data={"name": "Test", "login": "test"})
@@ -138,8 +138,8 @@ class TestGitHubOrganizationAdmin:
 
     def test_org__good(self, admin_client, mocker):
         gh = mocker.patch("metecho.api.admin.gh", autospec=True)
-        gh.get_org_for_repo_creation.return_value = mocker.MagicMock(
-            avatar_url="http://example.com"
+        gh.gh_as_full_access_org.return_value.organization.return_value = (
+            mocker.MagicMock(avatar_url="http://example.com")
         )
 
         url = reverse("admin:api_githuborganization_add")

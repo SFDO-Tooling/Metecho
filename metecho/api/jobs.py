@@ -28,12 +28,13 @@ from github3.repos.repo import Repository
 
 from .email_utils import get_user_facing_url
 from .gh import (
+    copy_branch_protection,
     get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
-    get_org_for_repo_creation,
     get_project_config,
     get_repo_info,
+    gh_as_full_access_org,
     gh_given_user,
     local_github_checkout,
     normalize_commit,
@@ -169,8 +170,8 @@ def create_repository(
 
     try:
         # Ensure the user is part of the org that owns the project
-        gh_user = gh_given_user(user)
-        user_orgs = [org.login for org in gh_user.organizations()]
+        gh_as_user = gh_given_user(user)
+        user_orgs = [org.login for org in gh_as_user.organizations()]
         if project.repo_owner not in user_orgs:
             raise ValueError(
                 _(
@@ -180,8 +181,17 @@ def create_repository(
                 % {"name": project.repo_owner}
             )
 
+        # Get a GitHub session with write premissions on the org
+        gh_as_org = gh_as_full_access_org(project.repo_owner)
+        org = gh_as_org.organization(project.repo_owner)
+        if template_repo_owner and template_repo_name:
+            tpl_repo = gh_as_org.repository(template_repo_owner, template_repo_name)
+            branch_name = tpl_repo.default_branch or "main"
+        else:
+            tpl_repo = None
+            branch_name = "main"
+
         # Create team & repository on GitHub
-        org = get_org_for_repo_creation(project.repo_owner)
         team = org.create_team(f"{project} Team")
         team.add_or_update_membership(user.username, role="maintainer")
         for collaborator in project.github_users:
@@ -192,14 +202,13 @@ def create_repository(
 
         with temporary_dir():
             # Populate files from the template repository
-            if template_repo_owner and template_repo_name:
+            if tpl_repo:
                 zipfile = download_extract_github(
-                    gh_user, template_repo_owner, template_repo_name
+                    gh_as_org, tpl_repo.owner, tpl_repo.name
                 )
                 zipfile.extractall()
 
             # Bootstrap repository with CumulusCI
-            branch_name = "main"
             runtime = CliRuntime()
             context = {
                 "cci_version": cumulusci.__version__,
@@ -228,13 +237,19 @@ def create_repository(
                 git config user.email {user.email};
                 git add --all;
                 git commit -m 'Bootstrap project (via Metecho)';
-                git push https://{gh_user.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
+                git push https://{gh_as_user.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
                 """,  # noqa: B950
                 shell=True,
             )
             if cmd.returncode:  # non-zero return code, something's wrong
                 logger.error(cmd.stderr.text)
                 raise Exception("Failed to push files to GitHub repository")
+
+        # Copy branch protection rules from the template repo
+        if tpl_repo:
+            copy_branch_protection(
+                src=tpl_repo.branch(branch_name), dst=repo.branch(branch_name)
+            )
 
         # Create GitHubRepository instance for local permission checks
         user.repositories.create(
