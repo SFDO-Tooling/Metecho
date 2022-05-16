@@ -39,7 +39,7 @@ click==8.0.3
     # via
     #   -c requirements/prod.txt
     #   black
-coverage[toml]==6.3.2
+coverage[toml]==6.3.3
     # via
     #   coveralls
     #   pytest-cov
@@ -152,7 +152,7 @@ pygments==2.12.0
     #   doc8
     #   ipython
     #   sphinx
-pyparsing==3.0.8
+pyparsing==3.0.9
     # via
     #   -c requirements/prod.txt
     #   packaging
@@ -172,7 +172,7 @@ pytest-cov==3.0.0
     # via -r requirements/dev.in
 pytest-django==4.5.2
     # via -r requirements/dev.in
-pytest-factoryboy==2.2.0
+pytest-factoryboy==2.3.0
     # via -r requirements/dev.in
 pytest-lazy-fixture==0.6.3
     # via -r requirements/dev.in
@@ -238,7 +238,7 @@ tomli==2.0.1
     #   black
     #   coverage
     #   pytest
-traitlets==5.1.1
+traitlets==5.2.0
     # via
     #   ipython
     #   matplotlib-inline
