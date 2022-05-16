@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { ComboboxOption } from '@/js/components/epics/createForm';
 import RefreshGitHubOrgsButton from '@/js/components/githubOrgs/refreshOrgsButton';
 import { CreateProjectData } from '@/js/components/projects/createProjectModal';
-import { UseFormProps, useIsMounted } from '@/js/components/utils';
+import { UseFormProps } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { GitHubOrg } from '@/js/store/user/reducer';
 import apiFetch from '@/js/utils/api';
@@ -36,7 +36,6 @@ const CreateProjectForm = ({
 }: Props) => {
   const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
-  const isMounted = useIsMounted();
   const [isCheckingRepoName, setIsCheckingRepoName] = useState(false);
   const [nameIsAvailable, setNameIsAvailable] = useState<boolean>();
 
@@ -56,15 +55,12 @@ const CreateProjectForm = ({
           },
         });
         setNameIsAvailable(available);
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setIsCheckingRepoName(false);
-        }
+        setIsCheckingRepoName(false);
       } else {
         setNameIsAvailable(undefined);
       }
     },
-    [dispatch, isMounted],
+    [dispatch],
   );
 
   const debouncedCheckRepoName = useMemo(
@@ -98,7 +94,10 @@ const CreateProjectForm = ({
     setInputs({ ...inputs, name: value, repo_name });
   };
 
-  const options = orgs.map((org) => ({ id: org.id, label: org.name }));
+  const options = orgs.map((org) => ({
+    id: org.id,
+    label: org.name,
+  }));
   const noOrgs = !orgs.length;
   const orgErrorMsg = noOrgs
     ? t(
@@ -138,10 +137,10 @@ const CreateProjectForm = ({
         </div>
         <div
           className="slds-grid
-          slds-grow
-          slds-shrink-none
-          slds-grid_align-end
-          slds-grid_vertical-align-center"
+            slds-grow
+            slds-shrink-none
+            slds-grid_align-end
+            slds-grid_vertical-align-center"
         >
           <RefreshGitHubOrgsButton isRefreshing={isRefreshingOrgs} />
         </div>

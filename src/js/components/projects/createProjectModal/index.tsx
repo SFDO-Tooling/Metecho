@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
+import SelectProjectCollaboratorsForm from '@/js/components/projects/createProjectModal/collaborators';
 import SelectProjectDependenciesForm from '@/js/components/projects/createProjectModal/dependencies';
 import CreateProjectForm from '@/js/components/projects/createProjectModal/form';
 import {
@@ -167,11 +168,29 @@ const CreateProjectModal = ({
 
   const showDeps = hasDeps || fetchingDependencies;
   const steps = compact([
-    { id: 0, label: t('Enter Project Details') },
-    { id: 1, label: t('Add Project Collaborators') },
-    showDeps && { id: 2, label: t('Add Dependencies') },
-    { id: showDeps ? 3 : 2, label: t('Create Project') },
+    { id: 'details', label: t('Enter Project Details') },
+    { id: 'collaborators', label: t('Add Project Collaborators') },
+    showDeps && { id: 'dependencies', label: t('Add Dependencies') },
+    { id: 'summary', label: t('Create Project') },
   ]);
+
+  const handleStepEvent = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    {
+      step,
+    }: {
+      step: {
+        id: string;
+        label: string;
+      };
+    },
+  ) => {
+    const idx = steps.indexOf(step);
+    if (idx < 0) {
+      return;
+    }
+    setPageIndex(idx);
+  };
 
   const Progress = (
     <ProgressIndicator
@@ -180,6 +199,7 @@ const CreateProjectModal = ({
       disabledSteps={canSubmit ? [] : steps.slice(1)}
       selectedStep={steps[pageIndex]}
       variant="modal"
+      onStepClick={handleStepEvent}
     />
   );
 
@@ -208,7 +228,10 @@ const CreateProjectModal = ({
     {
       heading: t('Add Project Collaborators'),
       contents: (
-        <div className="slds-p-around_large">This is a placeholder.</div>
+        <SelectProjectCollaboratorsForm
+          inputs={inputs as CreateProjectData}
+          setInputs={setInputs}
+        />
       ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">
