@@ -279,6 +279,9 @@ const TaskTable = ({
     [TASK_STATUSES.COMPLETED]: 3,
     [TASK_STATUSES.CANCELED]: 4,
   };
+
+  console.log(tasks);
+
   const taskDefaultSort = sortBy(isFetched ? tasks : [], [
     (item) => statusOrder[item.status],
     (item) => item.name.toLowerCase(),

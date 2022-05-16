@@ -11,9 +11,14 @@ export default (
   {
     projectId,
     tasksTabViewed,
+    next,
   }: {
     projectId?: string;
     tasksTabViewed: boolean;
+    next: {
+      next: string;
+      all: string;
+    };
   },
   routeProps: RouteComponentProps,
 ) => {
@@ -33,7 +38,7 @@ export default (
         }),
       );
     }
-  }, [dispatch, projectId, tasks, tasksTabViewed]);
+  }, [dispatch, projectId, tasks, tasksTabViewed, next]);
 
   return { tasks };
 };

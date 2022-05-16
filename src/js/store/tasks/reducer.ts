@@ -1,6 +1,6 @@
 import { find, reject, unionBy, uniq } from 'lodash';
 
-import { ObjectsAction } from '@/js/store/actions';
+import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
 import { TaskAction } from '@/js/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
 import {
@@ -73,6 +73,10 @@ export interface TaskState {
     // - epic-less tasks are stored as raw slugs
     // - tasks with epics are stored as `epic.id`-`slug`
     notFound: string[];
+
+    // next set of paginated results
+
+    next: string[];
   };
 }
 
@@ -82,6 +86,7 @@ const defaultProjectTasks = {
   tasks: [],
   fetched: [],
   notFound: [],
+  next: null,
 };
 
 const modelIsTask = (model: any): model is Task =>
@@ -102,6 +107,7 @@ const reducer = (
         filters: { epic, project },
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
+        const { next, results } = response as PaginatedObjectResponse;
         const projectTasks = tasks[project] || { ...defaultProjectTasks };
         const fetched = projectTasks.fetched;
         if (epic) {
@@ -109,8 +115,12 @@ const reducer = (
             ...tasks,
             [project]: {
               ...projectTasks,
-              tasks: unionBy(response as Task[], projectTasks.tasks, 'id'),
+              tasks: unionBy(results as Task[], projectTasks.tasks, 'id'),
               fetched: fetched === true || uniq([...fetched, epic]),
+              next: {
+                ...projectTasks.next,
+                [epic]: next,
+              },
             },
           };
         }
@@ -118,8 +128,12 @@ const reducer = (
           ...tasks,
           [project]: {
             ...projectTasks,
-            tasks: response,
+            tasks: results as Task[],
             fetched: true,
+            next: {
+              ...projectTasks.next,
+              all: next,
+            },
           },
         };
       }

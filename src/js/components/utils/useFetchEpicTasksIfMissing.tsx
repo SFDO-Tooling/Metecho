@@ -11,9 +11,14 @@ export default (
   {
     projectId,
     epicId,
+    next,
   }: {
     projectId?: string;
     epicId?: string;
+    next?: {
+      next: string;
+      all: string;
+    };
   },
   routeProps: RouteComponentProps,
 ) => {
@@ -35,7 +40,7 @@ export default (
         }),
       );
     }
-  }, [dispatch, projectId, epicId, tasks]);
+  }, [dispatch, projectId, epicId, tasks, next]);
 
   return { tasks };
 };
