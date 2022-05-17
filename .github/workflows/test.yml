@@ -33,7 +33,9 @@ jobs:
       - name: Test frontend
         run: docker-compose run --no-deps web yarn test:js:coverage
       - name: Upload coverage reports
-        run: docker-compose run --no-deps web yarn test:js:report-coverage
+        run:
+          docker-compose run -e COVERALLS_REPO_TOKEN --no-deps web yarn
+          test:js:report-coverage
       - name: Check coverage
         run: docker-compose run --no-deps web yarn test:js:check-coverage
 
@@ -53,6 +55,8 @@ jobs:
           DB_ENCRYPTION_KEY=MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc= web
           yarn test:py
       - name: Upload coverage reports
-        run: docker-compose run --no-deps web yarn test:py:report-coverage
+        run:
+          docker-compose run -e COVERALLS_REPO_TOKEN --no-deps web yarn
+          test:py:report-coverage
       - name: Check coverage
         run: docker-compose run --no-deps web yarn test:py:check-coverage
