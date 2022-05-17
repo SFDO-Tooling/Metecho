@@ -8,44 +8,51 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
 jobs:
-  lint:
-    name: Lint
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
         with:
-          # Only this step sets the cache for future runs
+          # By writing to the cache here subsequent jobs will get the updated
+          # image when they use setup-docker-compose
           cache-to: type=gha,mode=max
+
+  lint:
+    name: Lint
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/setup-docker-compose
       - name: Lint
         run: docker-compose run --no-deps web yarn lint:nofix
 
   frontend:
     name: Frontend
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/setup-docker-compose
       - name: Test frontend
         run: docker-compose run --no-deps web yarn test:js:coverage
-      - name: Upload coverage reports
-        run:
-          docker-compose run -e COVERALLS_REPO_TOKEN --no-deps web yarn
-          test:js:report-coverage
-      - name: Check coverage
-        run: docker-compose run --no-deps web yarn test:js:check-coverage
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: |
+            coverage
 
   backend:
     name: Backend
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - id: setup
-        uses: ./.github/setup-docker-compose
+      - uses: ./.github/setup-docker-compose
       - name: Test backend
         run: >
           docker-compose run -e DJANGO_DEBUG=false -e SECURE_SSL_REDIRECT=false
@@ -54,9 +61,39 @@ jobs:
           id" -e SFDX_HUB_KEY="sample key" -e
           DB_ENCRYPTION_KEY=MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc= web
           yarn test:py
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage
+          path: |
+            .coverage
+            coverage.xml
+
+  coverage:
+    name: Coverage
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    env:
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      COVERALLS_PARALLEL: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/setup-docker-compose
+      - name: Download frontend coverage artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-coverage
+          path: coverage
+      - name: Download backend coverage artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-coverage
       - name: Upload coverage reports
-        run:
-          docker-compose run -e COVERALLS_REPO_TOKEN --no-deps web yarn
-          test:py:report-coverage
+        run: >
+          docker-compose run -e COVERALLS_REPO_TOKEN -e COVERALLS_PARALLEL
+          --no-deps web bash -c 'yarn test:js:report-coverage && yarn
+          test:py:report-coverage && python -m coveralls --finish'
       - name: Check coverage
-        run: docker-compose run --no-deps web yarn test:py:check-coverage
+        run: |
+          docker-compose run --no-deps web yarn test:js:check-coverage
+          docker-compose run --no-deps web yarn test:py:check-coverage
