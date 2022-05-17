@@ -42,5 +42,5 @@ export default (
     }
   }, [dispatch, projectId, epicId, tasks, next]);
 
-  return { tasks };
+  return { tasks, next };
 };

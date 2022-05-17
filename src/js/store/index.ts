@@ -23,6 +23,7 @@ export interface AppState {
   tasks: TaskState;
   issues: IssuesState;
   user: User | null;
+  next?: string | null;
 }
 
 export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<

@@ -475,7 +475,7 @@ LOGGING = {
     },
 }
 
-API_PAGE_SIZE = env.int("API_PAGE_SIZE", default=50)
+API_PAGE_SIZE = env.int("API_PAGE_SIZE", default=5)
 
 GITHUB_ISSUE_LIMIT = env.int("GITHUB_ISSUE_LIMIT", default=1000)
 

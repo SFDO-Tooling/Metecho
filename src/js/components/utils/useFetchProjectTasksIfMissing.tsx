@@ -11,22 +11,20 @@ export default (
   {
     projectId,
     tasksTabViewed,
-    next,
   }: {
     projectId?: string;
     tasksTabViewed: boolean;
-    next: {
-      next: string;
-      all: string;
-    };
   },
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const selectTasksWithProps = useCallback(selectTasksByProject, []);
-  const tasks = useSelector((state: AppState) =>
+  const results = useSelector((state: AppState) =>
     selectTasksWithProps(state, routeProps),
   );
+
+  const tasks = results?.tasks;
+  const next = results?.next;
 
   useEffect(() => {
     if (projectId && !tasks && tasksTabViewed) {
@@ -38,7 +36,7 @@ export default (
         }),
       );
     }
-  }, [dispatch, projectId, tasks, tasksTabViewed, next]);
+  }, [dispatch, projectId, tasks, tasksTabViewed]);
 
-  return { tasks };
+  return { tasks, next };
 };

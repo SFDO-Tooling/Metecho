@@ -83,7 +83,7 @@ const ProjectDetail = (
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing({ projectId: project?.id }, props);
   const { orgs } = useFetchOrgsIfMissing({ projectId: project?.id }, props);
-  const { tasks } = useFetchProjectTasksIfMissing(
+  const { tasks, next } = useFetchProjectTasksIfMissing(
     {
       projectId: project?.id,
       tasksTabViewed,
@@ -619,6 +619,7 @@ const ProjectDetail = (
               isRefreshingUsers={project.currently_fetching_github_users}
               assignUserAction={assignUser}
               viewEpicsColumn
+              next={next}
             />
           </TabsPanel>
         </Tabs>

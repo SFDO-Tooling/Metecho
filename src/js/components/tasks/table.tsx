@@ -6,20 +6,31 @@ import classNames from 'classnames';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/js/components/404';
 import AssignTaskRoleModal from '@/js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import TourPopover from '@/js/components/tour/popover';
-import { getTaskStatus, SpinnerWrapper } from '@/js/components/utils';
+import {
+  getTaskStatus,
+  LabelWithSpinner,
+  SpinnerWrapper,
+} from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
 import { AppState } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
 import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { Task } from '@/js/store/tasks/reducer';
 import { GitHubUser, User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
-import { ORG_TYPES, OrgTypes, TASK_STATUSES } from '@/js/utils/constants';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  OrgTypes,
+  TASK_STATUSES,
+} from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
 type AssignUserAction = ({
@@ -52,6 +63,7 @@ interface Props {
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
   viewEpicsColumn?: boolean;
+  next: string;
 }
 
 const NameTableCell = ({
@@ -139,6 +151,7 @@ const AssigneeTableCell = ({
   item,
   className,
   children,
+  next,
   ...props
 }: TableCellProps & {
   type: OrgTypes;
@@ -150,6 +163,7 @@ const AssigneeTableCell = ({
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
   children?: string | null;
+  next?: string | null;
 }) => {
   const { t } = useTranslation();
   const assignedUser = useSelector((state: AppState) =>
@@ -263,6 +277,7 @@ const TaskTable = ({
   projectId,
   projectSlug,
   tasks,
+  next,
   isFetched,
   epicUsers,
   githubUsers,
@@ -280,12 +295,52 @@ const TaskTable = ({
     [TASK_STATUSES.CANCELED]: 4,
   };
 
-  console.log(tasks);
-
   const taskDefaultSort = sortBy(isFetched ? tasks : [], [
     (item) => statusOrder[item.status],
     (item) => item.name.toLowerCase(),
   ]);
+
+  const [fetchingTasks, setFetchingTasks] = useState(false);
+  const dispatch = useDispatch<ThunkDispatch>();
+
+  const fetchMoreTasks = useCallback(() => {
+    if (projectId && next) {
+      /* istanbul ignore else */
+      if (isFetched) {
+        setFetchingTasks(true);
+      }
+
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.TASK,
+          filters: { project: projectId },
+          url: next,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isFetched) {
+          setFetchingTasks(false);
+        }
+      });
+    } else {
+      if (isFetched) {
+        setFetchingTasks(true);
+      }
+
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.TASK,
+          filters: { project: projectId },
+          url: next,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isFetched) {
+          setFetchingTasks(false);
+        }
+      });
+    }
+  }, [dispatch, projectId, isFetched, next]);
   return isFetched ? (
     <>
       {tasks.length ? (
@@ -446,6 +501,14 @@ const TaskTable = ({
               assignUserAction={assignUserAction}
             />
           </DataTableColumn>
+          {tasks?.length && next ? (
+            <div className="slds-m-top_large">
+              <Button
+                label={fetchingTasks ? <LabelWithSpinner /> : t('Load More')}
+                onClick={() => fetchMoreTasks()}
+              />
+            </div>
+          ) : /* istanbul ignore next */ null}
         </DataTable>
       ) : (
         <EmptyIllustration

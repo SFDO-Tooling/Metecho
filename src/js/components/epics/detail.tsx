@@ -782,13 +782,14 @@ const EpicDetail = (
                 <TaskTable
                   projectId={project.id}
                   projectSlug={project.slug}
-                  tasks={tasks}
+                  tasks={tasks.tasks}
                   isFetched
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}
                   isRefreshingUsers={project.currently_fetching_github_users}
                   assignUserAction={assignUser}
+                  next={tasks.next}
                 />
               </>
             )}

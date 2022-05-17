@@ -23,7 +23,7 @@ export const selectTasksByProject = createSelector(
   (tasks, project) => {
     /* istanbul ignore else */
     if (project && tasks[project.id]?.fetched === true) {
-      return tasks[project.id].tasks;
+      return { tasks: tasks[project.id].tasks, [project.id]: tasks.next };
     }
     return undefined;
   },
@@ -36,7 +36,10 @@ export const selectTasksByEpic = createSelector(
     if (epic && tasks[epic.project]?.fetched) {
       const fetched = tasks[epic.project].fetched;
       if (fetched === true || fetched.includes(epic.id)) {
-        return filter(tasks[epic.project].tasks, ['epic.id', epic.id]);
+        return {
+          tasks: filter(tasks[epic.project].tasks, ['epic.id', epic.id]),
+          [epic.id]: tasks.next,
+        };
       }
     }
     return undefined;
