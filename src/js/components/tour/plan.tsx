@@ -24,6 +24,7 @@ export const getDemoEpic = ({
   return {
     id: 'demo-epic',
     name: i18n.t('This is a Sample Epic'),
+    created_at: '',
     description,
     description_rendered: `<p>${description}</p>`,
     slug: 'this-is-a-sample-epic',
