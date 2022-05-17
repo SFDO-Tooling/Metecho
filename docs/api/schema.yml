@@ -493,10 +493,6 @@ paths:
           format: HashID
         description: A unique integer value identifying this GitHub organization.
         required: true
-      - in: query
-        name: page
-        schema:
-          type: integer
       tags:
       - organizations
       security:
