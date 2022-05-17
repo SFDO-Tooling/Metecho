@@ -1,7 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import { uniqBy } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import { intersectionBy, uniqBy } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -44,11 +44,25 @@ const SelectProjectCollaboratorsForm = ({ inputs, setInputs }: Props) => {
     }
   }, [dispatch, inputs.organization]);
 
+  // Fetch GitHub Org members when organization changes
   useEffect(() => {
     if (inputs.organization) {
       fetchCollaborators();
     }
   }, [fetchCollaborators, inputs.organization]);
+
+  // When available GitHub Org members change, reset selected collaborators
+  const collaboratorsRef = useRef(collaborators);
+  useEffect(() => {
+    const prevValue = collaboratorsRef.current;
+    if (collaborators !== prevValue) {
+      setInputs({
+        ...inputs,
+        github_users: intersectionBy(inputs.github_users, collaborators, 'id'),
+      });
+      collaboratorsRef.current = collaborators;
+    }
+  }, [collaborators, inputs, setInputs]);
 
   const handleUserClick = useCallback(
     (user: GitHubUser) => {
