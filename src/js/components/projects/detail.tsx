@@ -613,13 +613,13 @@ const ProjectDetail = (
                     ]
                   : tasks || []
               }
+              next={next}
               isFetched={Boolean(tasks)}
               githubUsers={project.github_users}
               canAssign={project.has_push_permission}
               isRefreshingUsers={project.currently_fetching_github_users}
               assignUserAction={assignUser}
               viewEpicsColumn
-              next={next}
             />
           </TabsPanel>
         </Tabs>

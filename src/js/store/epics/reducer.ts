@@ -9,6 +9,7 @@ export interface Epic {
   name: string;
   slug: string;
   old_slugs: string[];
+  created_at: string;
   description: string;
   description_rendered: string;
   task_count: number;

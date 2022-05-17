@@ -65,7 +65,7 @@ const EpicDetail = (
     { project },
     props,
   );
-  const { tasks } = useFetchEpicTasksIfMissing(
+  const { tasks, next } = useFetchEpicTasksIfMissing(
     { projectId: project?.id, epicId: epic?.id },
     props,
   );
@@ -782,14 +782,15 @@ const EpicDetail = (
                 <TaskTable
                   projectId={project.id}
                   projectSlug={project.slug}
-                  tasks={tasks.tasks}
+                  tasks={tasks}
+                  next={next}
                   isFetched
+                  epicId={epic.id}
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}
                   isRefreshingUsers={project.currently_fetching_github_users}
                   assignUserAction={assignUser}
-                  next={tasks.next}
                 />
               </>
             )}

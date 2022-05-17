@@ -11,22 +11,17 @@ export default (
   {
     projectId,
     epicId,
-    next,
   }: {
     projectId?: string;
     epicId?: string;
-    next?: {
-      next: string;
-      all: string;
-    };
   },
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const selectTasksWithProps = useCallback(selectTasksByEpic, []);
-  const tasks = useSelector((state: AppState) =>
-    selectTasksWithProps(state, routeProps),
-  );
+  const { tasks, next } =
+    useSelector((state: AppState) => selectTasksWithProps(state, routeProps)) ||
+    {};
 
   useEffect(() => {
     if (projectId && epicId && !tasks) {
@@ -40,7 +35,7 @@ export default (
         }),
       );
     }
-  }, [dispatch, projectId, epicId, tasks, next]);
+  }, [dispatch, projectId, epicId, tasks]);
 
   return { tasks, next };
 };

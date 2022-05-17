@@ -12,7 +12,7 @@ interface ObjectPayload extends CreateObjectPayload {
   filters: ObjectFilters;
   reset?: boolean;
 }
-interface ObjectFilters {
+export interface ObjectFilters {
   [key: string]: string;
 }
 interface ObjectData {

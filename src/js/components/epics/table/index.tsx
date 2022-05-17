@@ -13,6 +13,7 @@ import TaskCountTableCell from '@/js/components/epics/table/taskCountCell';
 import TourPopover from '@/js/components/tour/popover';
 import { SpinnerWrapper } from '@/js/components/utils';
 import { Epic } from '@/js/store/epics/reducer';
+import { EPIC_STATUSES } from '@/js/utils/constants';
 
 export interface TableCellProps {
   [key: string]: any;
@@ -33,14 +34,25 @@ const EpicTable = ({
 }) => {
   const { t } = useTranslation();
 
+  const statusOrder = {
+    [EPIC_STATUSES.REVIEW]: 1,
+    [EPIC_STATUSES.IN_PROGRESS]: 2,
+    [EPIC_STATUSES.PLANNED]: 3,
+    [EPIC_STATUSES.MERGED]: 4,
+  };
+
   const items = isFetched
     ? orderBy(
         epics.map((epic) => ({
           ...epic,
           numCollaborators: epic.github_users?.length || 0,
         })),
-        ['created_at', 'name'],
-        ['desc', 'asc'],
+        [
+          (item) => statusOrder[item.status],
+          'created_at',
+          (item) => item.name.toLowerCase(),
+        ],
+        ['asc', 'desc', 'asc'],
       )
     : [];
 

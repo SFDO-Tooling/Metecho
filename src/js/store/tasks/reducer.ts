@@ -8,6 +8,7 @@ import {
   OBJECT_TYPES,
   ObjectTypes,
   ReviewStatuses,
+  TASKS_BY_PROJECT_KEY,
   TaskStatuses,
 } from '@/js/utils/constants';
 
@@ -29,6 +30,7 @@ export interface Task {
   name: string;
   slug: string;
   old_slugs: string[];
+  created_at: string;
   epic: {
     id: string;
     name: string;
@@ -61,23 +63,26 @@ export interface Task {
   issue: string | null;
 }
 
+export interface TaskByProjectState {
+  // list of all (fetched) tasks for this project
+  tasks: Task[];
+  // list of `epic.id` where first page of tasks have been fetched, or "all"
+  // if first page of tasks for the entire project have been fetched
+  fetched: string[];
+  // list of any task slugs that have been fetched and do not exist (404)
+  // - epic-less tasks are stored as raw slugs
+  // - tasks with epics are stored as `epic.id`-`slug`
+  notFound: string[];
+  // URLs for next page of paginated results
+  next: {
+    // `key` is an `epic.id` or "all" (for all tasks for the entire project)
+    [key: string]: string | null;
+  };
+}
+
 export interface TaskState {
   // `key` is a `project.id`
-  [key: string]: {
-    // list of all (fetched) tasks for this project
-    tasks: Task[];
-    // - `true` means that all tasks for this entire project have been fetched
-    // - `string[]` is a list of all `epic.id` where tasks have been fetched
-    fetched: string[] | true;
-    // list of any task slugs that have been fetched and do not exist (404)
-    // - epic-less tasks are stored as raw slugs
-    // - tasks with epics are stored as `epic.id`-`slug`
-    notFound: string[];
-
-    // next set of paginated results
-
-    next: string[];
-  };
+  [key: string]: TaskByProjectState;
 }
 
 const defaultState: TaskState = {};
@@ -86,7 +91,7 @@ const defaultProjectTasks = {
   tasks: [],
   fetched: [],
   notFound: [],
-  next: null,
+  next: {},
 };
 
 const modelIsTask = (model: any): model is Task =>
@@ -107,7 +112,7 @@ const reducer = (
         filters: { epic, project },
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
-        const { next, results } = response as PaginatedObjectResponse;
+        const { results, next } = response as PaginatedObjectResponse;
         const projectTasks = tasks[project] || { ...defaultProjectTasks };
         const fetched = projectTasks.fetched;
         if (epic) {
@@ -116,7 +121,7 @@ const reducer = (
             [project]: {
               ...projectTasks,
               tasks: unionBy(results as Task[], projectTasks.tasks, 'id'),
-              fetched: fetched === true || uniq([...fetched, epic]),
+              fetched: uniq([...fetched, epic]),
               next: {
                 ...projectTasks.next,
                 [epic]: next,
@@ -128,8 +133,8 @@ const reducer = (
           ...tasks,
           [project]: {
             ...projectTasks,
-            tasks: results as Task[],
-            fetched: true,
+            tasks: unionBy(results as Task[], projectTasks.tasks, 'id'),
+            fetched: uniq([...fetched, TASKS_BY_PROJECT_KEY]),
             next: {
               ...projectTasks.next,
               all: next,
