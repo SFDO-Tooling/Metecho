@@ -36,14 +36,21 @@ class NoGitHubTokenError(Exception):
     pass
 
 
-def copy_branch_protection(src: Branch, dst: Branch):
+def copy_branch_protection(source: Branch, target: Branch):
     """
-    Copy the branch protection [output](1) of one branch into the [input](2) of another.
+    Copy the branch protection [output][1] of one branch into the [input][2] of another.
+
+    As of May 2022 it appears the following settings are only available to the GUI, not
+    the API:
+
+    - Require signed commits
+    - Require deployments to succeed before merging
+    - Restrict pushes that create matching branches
 
     [1]: https://docs.github.com/en/rest/branches/branch-protection#get-branch-protection
     [2]: https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection
     """
-    protection = src.protection().as_dict()
+    protection = source.protection().as_dict()
     reviews = protection["required_pull_request_reviews"]
 
     required_pull_request_reviews = {
@@ -94,9 +101,9 @@ def copy_branch_protection(src: Branch, dst: Branch):
     # `dst.protect()`, but that relies on github3py supporting all GitHub API fields as
     # function arguments. Instead of waiting for that we `_put` the data directly and
     # can update at our own pace if GitHub changes the protection schema
-    dst_url = dst._build_url("protection", base_url=dst._api)
-    resp = dst._put(dst_url, json=data)
-    return dst._json(resp, 200)
+    target_url = target._build_url("protection", base_url=target._api)
+    resp = target._put(target_url, json=data)
+    return target._json(resp, 200)
 
 
 def gh_given_user(user):

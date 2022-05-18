@@ -248,7 +248,7 @@ def create_repository(
         # Copy branch protection rules from the template repo
         if tpl_repo:
             copy_branch_protection(
-                src=tpl_repo.branch(branch_name), dst=repo.branch(branch_name)
+                source=tpl_repo.branch(branch_name), target=repo.branch(branch_name)
             )
 
         # Create GitHubRepository instance for local permission checks
