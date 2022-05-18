@@ -62,6 +62,8 @@ export const sampleUser1 = {
   onboarded_at: '2019-02-01T19:47:49Z',
   self_guided_tour_enabled: false,
   self_guided_tour_state: null,
+  organizations: [],
+  currently_fetching_orgs: false,
 };
 
 export const sampleGitHubUser1 = {
@@ -516,6 +518,7 @@ export const sampleProject1 = {
   latest_sha: 'abc123',
   has_push_permission: true,
   github_issue_count: 5,
+  has_truncated_issues: false,
 };
 
 export const sampleEpicSteps = [

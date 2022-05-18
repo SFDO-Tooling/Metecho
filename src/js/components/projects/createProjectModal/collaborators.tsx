@@ -30,6 +30,7 @@ const SelectProjectCollaboratorsForm = ({ inputs, setInputs }: Props) => {
   const [collaborators, setCollaborators] = useState<GitHubUser[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // @@@ move this up a level so that we don't refetch on every render?
   const fetchCollaborators = useCallback(async () => {
     if (inputs.organization) {
       setIsRefreshing(true);

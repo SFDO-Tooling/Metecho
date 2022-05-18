@@ -433,8 +433,7 @@ class Project(
                 )
                 self.branch_name = repo.default_branch
                 self.latest_sha = repo.branch(repo.default_branch).latest_sha()
-
-            if not self.latest_sha:
+            elif not self.latest_sha:
                 repo = gh.get_repo_info(
                     None, repo_owner=self.repo_owner, repo_name=self.repo_name
                 )

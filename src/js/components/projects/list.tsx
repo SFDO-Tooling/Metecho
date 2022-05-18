@@ -2,6 +2,7 @@ import useScrollPosition from '@react-hook/window-scroll';
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import { sortBy } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans, useTranslation } from 'react-i18next';
@@ -131,9 +132,11 @@ const ProjectList = () => {
               </Trans>
             }
           />
-          {projects.map((project) => (
-            <ProjectListItem project={project} key={project.id} />
-          ))}
+          {sortBy(projects, [(item) => item.name.toLowerCase()]).map(
+            (project) => (
+              <ProjectListItem project={project} key={project.id} />
+            ),
+          )}
         </div>
       );
       break;
