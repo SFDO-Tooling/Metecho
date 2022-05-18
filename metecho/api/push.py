@@ -14,8 +14,12 @@ Websocket notifications you can subscribe to:
         PROJECT_UPDATE
         PROJECT_UPDATE_ERROR
         SCRATCH_ORG_PROVISIONING
+        PROJECT_CREATE
+        PROJECT_CREATE_ERROR
         TASK_CREATE
         EPIC_CREATE
+        REFRESH_GH_USERS_ERROR
+        REFRESH_GH_ISSUES_ERROR
 
     epic.:id
         EPIC_UPDATE

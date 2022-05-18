@@ -77,6 +77,13 @@ const reducer = (
         ].includes(action.type),
       };
     }
+    case 'PROJECT_DELETED': {
+      const id = action.payload;
+      return {
+        ...projects,
+        projects: projects.projects.filter((p) => p.id !== id),
+      };
+    }
     case 'FETCH_OBJECTS_STARTED': {
       const { objectType } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT_DEPENDENCY) {

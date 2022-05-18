@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
@@ -28,6 +29,8 @@ import {
 } from '@/js/store/orgs/actions';
 import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
 import {
+  projectCreated,
+  projectCreateError,
   projectError,
   projectsRefreshed,
   projectsRefreshError,
@@ -91,14 +94,18 @@ interface OrgsRefreshErrorEvent {
   };
 }
 interface ProjectUpdatedEvent {
-  type: 'PROJECT_UPDATE';
+  type: 'PROJECT_UPDATE' | 'PROJECT_CREATE';
   payload: {
     model: Project;
     originating_user_id: string | null;
   };
 }
 interface ProjectUpdateErrorEvent {
-  type: 'PROJECT_UPDATE_ERROR';
+  type:
+    | 'PROJECT_UPDATE_ERROR'
+    | 'PROJECT_CREATE_ERROR'
+    | 'REFRESH_GH_USERS_ERROR'
+    | 'REFRESH_GH_ISSUES_ERROR';
   payload: {
     message?: string;
     model: Project;
@@ -364,8 +371,32 @@ export const getAction = (event: EventType) => {
       return orgsRefreshError(event.payload.message);
     case 'PROJECT_UPDATE':
       return hasModel(event) && updateProject(event.payload.model);
-    case 'PROJECT_UPDATE_ERROR':
-      return hasModel(event) && projectError(event.payload);
+    case 'PROJECT_CREATE':
+      return hasModel(event) && projectCreated(event.payload);
+    case 'PROJECT_CREATE_ERROR':
+      return hasModel(event) && projectCreateError(event.payload);
+    case 'REFRESH_GH_USERS_ERROR': {
+      if (hasModel(event)) {
+        const { model } = event.payload;
+        const heading = t(
+          'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “{{project_name}}.”',
+          { project_name: model.name },
+        );
+        return projectError({ ...event.payload, heading });
+      }
+      return false;
+    }
+    case 'REFRESH_GH_ISSUES_ERROR': {
+      if (hasModel(event)) {
+        const { model } = event.payload;
+        const heading = t(
+          'Uh oh. There was an error re-syncing GitHub Issues for this Project: “{{project_name}}.”',
+          { project_name: model.name },
+        );
+        return projectError({ ...event.payload, heading });
+      }
+      return false;
+    }
     case 'EPIC_CREATE':
       return hasModel(event) && createEpic(event.payload.model);
     case 'EPIC_UPDATE':

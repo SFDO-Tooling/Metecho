@@ -247,7 +247,7 @@ const reducer = (
         ...epics,
         [epic.project]: {
           ...projectEpics,
-          epics: projectEpics.epics.filter((p) => p.id !== epic.id),
+          epics: projectEpics.epics.filter((e) => e.id !== epic.id),
         },
       };
     }
