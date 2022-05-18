@@ -92,17 +92,19 @@ jobs:
       - name: Upload coverage reports
         # prettier-ignore
         run: >
-          docker-compose run
-          -e COVERALLS_PARALLEL=true
-          -e COVERALLS_REPO_TOKEN="${{ secrets.COVERALLS_REPO_TOKEN }}"
-          -e COVERALLS_SERVICE_NUMBER="${{ github.run_id }}"
-          -e CI_BUILD_NUMBER="${{ github.run_id }}"
-          --no-deps
-          web bash -c '
-          yarn test:js:report-coverage &&
-          yarn test:py:report-coverage &&
-          python -m coveralls --finish
-          '
+          if [ -n "${{ secrets.COVERALLS_REPO_TOKEN }}" ]; then
+            docker-compose run
+            -e COVERALLS_PARALLEL=true
+            -e COVERALLS_REPO_TOKEN="${{ secrets.COVERALLS_REPO_TOKEN }}"
+            -e COVERALLS_SERVICE_NUMBER="${{ github.run_id }}"
+            -e CI_BUILD_NUMBER="${{ github.run_id }}"
+            --no-deps
+            web bash -c '
+            yarn test:js:report-coverage &&
+            yarn test:py:report-coverage &&
+            python -m coveralls --finish
+            ';
+          fi
       - name: Check coverage
         run: |
           docker-compose run --no-deps web yarn test:js:check-coverage
