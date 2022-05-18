@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # Use a separate key so the resulting PR also runs GH Actions
+          # [Optional] Use a separate key to automatically execute checks on the resulting PR
           # https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs
           ssh-key: ${{ secrets.DEPLOY_KEY }}
       - uses: ./.github/setup-docker-compose
