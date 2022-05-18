@@ -436,8 +436,7 @@ class Project(
                 )
                 self.branch_name = repo.default_branch
                 self.latest_sha = repo.branch(repo.default_branch).latest_sha()
-
-            if not self.latest_sha:
+            elif not self.latest_sha:
                 repo = gh.get_repo_info(
                     None, repo_owner=self.repo_owner, repo_name=self.repo_name
                 )
@@ -471,11 +470,17 @@ class Project(
         originating_user_id = str(user.id)
         if error is None:
             self.save()
-            self.notify_changed(originating_user_id=originating_user_id)
+            self.notify_changed(
+                type_="PROJECT_CREATE", originating_user_id=originating_user_id
+            )
             # Get fresh permission information for each collaborator
             self.queue_refresh_github_users(originating_user_id=originating_user_id)
         else:
-            self.notify_error(error, originating_user_id=originating_user_id)
+            self.notify_error(
+                error,
+                type_="PROJECT_CREATE_ERROR",
+                originating_user_id=originating_user_id,
+            )
             self.delete()
 
     def queue_refresh_github_users(self, *, originating_user_id):
@@ -494,7 +499,11 @@ class Project(
         if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
         else:
-            self.notify_error(error, originating_user_id=originating_user_id)
+            self.notify_error(
+                error,
+                type_="REFRESH_GH_USERS_ERROR",
+                originating_user_id=originating_user_id,
+            )
 
     def queue_refresh_github_issues(self, *, originating_user_id):
         from .jobs import refresh_github_issues_job
@@ -513,7 +522,11 @@ class Project(
         if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
         else:
-            self.notify_error(error, originating_user_id=originating_user_id)
+            self.notify_error(
+                error,
+                type_="REFRESH_GH_ISSUES_ERROR",
+                originating_user_id=originating_user_id,
+            )
 
     def queue_refresh_commits(self, *, ref, originating_user_id):
         from .jobs import refresh_commits_job

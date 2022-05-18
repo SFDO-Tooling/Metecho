@@ -5,7 +5,10 @@ import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { AnyAction } from 'redux';
 
+import SelectProjectCollaboratorsForm from '@/js/components/projects/createProjectModal/collaborators';
 import SelectProjectDependenciesForm from '@/js/components/projects/createProjectModal/dependencies';
 import CreateProjectForm from '@/js/components/projects/createProjectModal/form';
 import {
@@ -23,6 +26,7 @@ import {
 } from '@/js/store/projects/selectors';
 import { GitHubOrg } from '@/js/store/user/reducer';
 import { OBJECT_TYPES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface Props {
   orgs: GitHubOrg[];
@@ -44,11 +48,12 @@ const CreateProjectModal = ({
   closeModal,
 }: Props) => {
   const { t } = useTranslation();
+  const history = useHistory();
   const dispatch = useDispatch<ThunkDispatch>();
+  const isMounted = useIsMounted();
   const dependencies = useSelector(selectProjectDependencies);
   const fetchingDependencies = useSelector(selectFetchingProjectDependencies);
   const [pageIndex, setPageIndex] = useState(0);
-  const isMounted = useIsMounted();
   const [isSaving, setIsSaving] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
   const hasDeps = Boolean(dependencies.length);
@@ -75,12 +80,26 @@ const CreateProjectModal = ({
     setPageIndex(pageIndex - 1 || 0);
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = (action: AnyAction) => {
     /* istanbul ignore else */
     if (isMounted.current) {
       setIsSaving(false);
       closeModal();
       setPageIndex(0);
+      setFetchedDependencies(hasDeps);
+      const {
+        type,
+        payload: { object, objectType },
+      } = action;
+      if (
+        type === 'CREATE_OBJECT_SUCCEEDED' &&
+        objectType === OBJECT_TYPES.PROJECT &&
+        object?.slug
+      ) {
+        // Redirect to newly created project
+        const url = routes.project_detail(object.slug);
+        history.push(url);
+      }
     }
   };
 
@@ -167,11 +186,29 @@ const CreateProjectModal = ({
 
   const showDeps = hasDeps || fetchingDependencies;
   const steps = compact([
-    { id: 0, label: t('Enter Project Details') },
-    { id: 1, label: t('Add Project Collaborators') },
-    showDeps && { id: 2, label: t('Add Dependencies') },
-    { id: showDeps ? 3 : 2, label: t('Create Project') },
+    { id: 'details', label: t('Enter Project Details') },
+    { id: 'collaborators', label: t('Add Project Collaborators') },
+    showDeps && { id: 'dependencies', label: t('Add Dependencies') },
+    { id: 'summary', label: t('Create Project') },
   ]);
+
+  const handleStepEvent = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    {
+      step,
+    }: {
+      step: {
+        id: string;
+        label: string;
+      };
+    },
+  ) => {
+    const idx = steps.indexOf(step);
+    if (idx < 0) {
+      return;
+    }
+    setPageIndex(idx);
+  };
 
   const Progress = (
     <ProgressIndicator
@@ -180,6 +217,7 @@ const CreateProjectModal = ({
       disabledSteps={canSubmit ? [] : steps.slice(1)}
       selectedStep={steps[pageIndex]}
       variant="modal"
+      onStepClick={handleStepEvent}
     />
   );
 
@@ -208,7 +246,10 @@ const CreateProjectModal = ({
     {
       heading: t('Add Project Collaborators'),
       contents: (
-        <div className="slds-p-around_large">This is a placeholder.</div>
+        <SelectProjectCollaboratorsForm
+          inputs={inputs as CreateProjectData}
+          setInputs={setInputs}
+        />
       ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">

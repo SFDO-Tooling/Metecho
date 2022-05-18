@@ -16,6 +16,10 @@ interface ProjectUpdateError {
   type: 'PROJECT_UPDATE_ERROR';
   payload: Project;
 }
+interface ProjectDeleted {
+  type: 'PROJECT_DELETED';
+  payload: string;
+}
 interface RefreshProjectsRequested {
   type: 'REFRESH_PROJECTS_REQUESTED';
 }
@@ -67,6 +71,7 @@ interface RefreshOrgConfigsAction {
 }
 
 export type ProjectsAction =
+  | ProjectDeleted
   | ProjectUpdated
   | ProjectUpdateError
   | RefreshProjectsRequested
@@ -158,7 +163,33 @@ export const updateProject = (payload: Project): ProjectUpdated => ({
   payload,
 });
 
-export const projectError =
+export const projectCreated =
+  ({
+    model,
+    originating_user_id,
+  }: {
+    model: Project;
+    originating_user_id: string | null;
+  }): ThunkResult<ProjectUpdated> =>
+  (dispatch, getState) => {
+    if (isCurrentUser(originating_user_id, getState())) {
+      dispatch(
+        addToast({
+          heading: t(
+            'Successfully created GitHub Repository for new Project: “{{project_name}}.”',
+            { project_name: model.name },
+          ),
+          linkText: model.repo_url ? t('View Project on GitHub.') : undefined,
+          linkUrl: model.repo_url ? model.repo_url : undefined,
+          openLinkInNewWindow: true,
+        }),
+      );
+    }
+
+    return dispatch(updateProject(model));
+  };
+
+export const projectCreateError =
   ({
     model,
     message,
@@ -167,15 +198,41 @@ export const projectError =
     model: Project;
     message?: string;
     originating_user_id: string | null;
-  }): ThunkResult<ProjectUpdated> =>
+  }): ThunkResult<ProjectDeleted> =>
   (dispatch, getState) => {
     if (isCurrentUser(originating_user_id, getState())) {
       dispatch(
         addToast({
           heading: t(
-            'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “{{project_name}}.”',
+            'Uh oh. There was an error creating your new Project: “{{project_name}}.”',
             { project_name: model.name },
           ),
+          details: message,
+          variant: 'error',
+        }),
+      );
+    }
+
+    return dispatch({ type: 'PROJECT_DELETED', payload: model.id });
+  };
+
+export const projectError =
+  ({
+    model,
+    heading,
+    message,
+    originating_user_id,
+  }: {
+    model: Project;
+    heading: string;
+    message?: string;
+    originating_user_id: string | null;
+  }): ThunkResult<ProjectUpdated> =>
+  (dispatch, getState) => {
+    if (isCurrentUser(originating_user_id, getState())) {
+      dispatch(
+        addToast({
+          heading,
           details: message,
           variant: 'error',
         }),

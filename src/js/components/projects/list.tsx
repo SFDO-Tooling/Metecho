@@ -2,6 +2,7 @@ import useScrollPosition from '@react-hook/window-scroll';
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import { sortBy } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans, useTranslation } from 'react-i18next';
@@ -131,9 +132,11 @@ const ProjectList = () => {
               </Trans>
             }
           />
-          {projects.map((project) => (
-            <ProjectListItem project={project} key={project.id} />
-          ))}
+          {sortBy(projects, [(item) => item.name.toLowerCase()]).map(
+            (project) => (
+              <ProjectListItem project={project} key={project.id} />
+            ),
+          )}
         </div>
       );
       break;
@@ -146,11 +149,13 @@ const ProjectList = () => {
         label={t('Create Project')}
         variant="outline-brand"
         onClick={openCreateProjectModal}
+        className="slds-align-middle"
       />
       {refreshing ? (
         <Button
           label={<LabelWithSpinner label={t('Syncing Projects…')} />}
           variant="outline-brand"
+          className="slds-align-middle"
           disabled
         />
       ) : (
@@ -162,6 +167,7 @@ const ProjectList = () => {
             iconName="refresh"
             iconPosition="left"
             onClick={doRefreshProjects}
+            className="slds-align-middle"
           />
           <TourPopover
             id="tour-projects-resync-list"
