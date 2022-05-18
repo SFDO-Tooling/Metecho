@@ -149,11 +149,13 @@ const ProjectList = () => {
         label={t('Create Project')}
         variant="outline-brand"
         onClick={openCreateProjectModal}
+        className="slds-align-middle"
       />
       {refreshing ? (
         <Button
           label={<LabelWithSpinner label={t('Syncing Projects…')} />}
           variant="outline-brand"
+          className="slds-align-middle"
           disabled
         />
       ) : (
@@ -165,6 +167,7 @@ const ProjectList = () => {
             iconName="refresh"
             iconPosition="left"
             onClick={doRefreshProjects}
+            className="slds-align-middle"
           />
           <TourPopover
             id="tour-projects-resync-list"

@@ -8,6 +8,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
+import { EmptyIllustration } from '@/js/components/404';
 import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
 import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
@@ -637,17 +638,12 @@ const ProjectDetail = (
             </TabsPanel>
           </Tabs>
         ) : (
-          <div
-            className="slds-is-relative
-              slds-p-bottom_xx-large
-              slds-grid
-              slds-grid_align-center"
-          >
-            <span className="slds-m-bottom_large">
-              {t('Creating GitHub Repository for Project…')}
-            </span>
-            <SpinnerWrapper className="slds-m-top_xx-large" />
-          </div>
+          <EmptyIllustration
+            heading={t('Creating GitHub Repository for Project…')}
+            message={
+              <SpinnerWrapper className="slds-is-relative slds-p-top_x-large" />
+            }
+          />
         )}
         <SelectIssueModal
           projectId={project.id}
