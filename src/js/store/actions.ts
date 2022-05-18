@@ -22,6 +22,7 @@ type ObjectResponse = any[];
 export interface PaginatedObjectResponse {
   next: string | null;
   results: ObjectResponse;
+  count: number;
 }
 
 interface FetchObjectsStarted {

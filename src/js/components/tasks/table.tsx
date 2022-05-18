@@ -58,6 +58,7 @@ interface Props {
   projectSlug: string;
   tasks: Task[];
   next?: string | null;
+  count?: number;
   isFetched: boolean;
   epicId?: string;
   epicUsers?: GitHubUser[];
@@ -278,6 +279,7 @@ const TaskTable = ({
   projectSlug,
   tasks,
   next,
+  count,
   isFetched,
   epicId,
   epicUsers,
@@ -504,7 +506,7 @@ const TaskTable = ({
               />
             </DataTableColumn>
           </DataTable>
-          {tasks?.length && next ? (
+          {tasks?.length && next && tasks?.length !== count ? (
             <div className="slds-m-top_large">
               <Button
                 label={fetchingTasks ? <LabelWithSpinner /> : t('Load More')}

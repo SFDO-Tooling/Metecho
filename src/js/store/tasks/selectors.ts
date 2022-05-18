@@ -29,6 +29,7 @@ export const selectTasksByProject = createSelector(
         return {
           tasks: tasks[project.id].tasks,
           next: tasks[project.id].next[TASKS_BY_PROJECT_KEY],
+          count: tasks[project.id].count[TASKS_BY_PROJECT_KEY],
         };
       }
     }
@@ -46,6 +47,7 @@ export const selectTasksByEpic = createSelector(
         return {
           tasks: filter(tasks[epic.project].tasks, ['epic.id', epic.id]),
           next: tasks[epic.project].next[epic.id],
+          count: tasks[epic.project].count[epic.id],
         };
       }
     }

@@ -65,7 +65,7 @@ const EpicDetail = (
     { project },
     props,
   );
-  const { tasks, next } = useFetchEpicTasksIfMissing(
+  const { tasks, next, count } = useFetchEpicTasksIfMissing(
     { projectId: project?.id, epicId: epic?.id },
     props,
   );
@@ -784,6 +784,7 @@ const EpicDetail = (
                   projectSlug={project.slug}
                   tasks={tasks}
                   next={next}
+                  count={count}
                   isFetched
                   epicId={epic.id}
                   epicUsers={epicCollaborators}

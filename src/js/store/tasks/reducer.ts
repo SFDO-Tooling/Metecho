@@ -78,6 +78,10 @@ export interface TaskByProjectState {
     // `key` is an `epic.id` or "all" (for all tasks for the entire project)
     [key: string]: string | null;
   };
+  count: {
+    // `key` is an `epic.id` or "all" (for all tasks for the entire project)
+    [key: string]: number;
+  };
 }
 
 export interface TaskState {
@@ -92,6 +96,7 @@ const defaultProjectTasks = {
   fetched: [],
   notFound: [],
   next: {},
+  count: {},
 };
 
 const modelIsTask = (model: any): model is Task =>
@@ -112,7 +117,7 @@ const reducer = (
         filters: { epic, project },
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
-        const { results, next } = response as PaginatedObjectResponse;
+        const { results, next, count } = response as PaginatedObjectResponse;
         const projectTasks = tasks[project] || { ...defaultProjectTasks };
         const fetched = projectTasks.fetched;
         if (epic) {
@@ -126,6 +131,10 @@ const reducer = (
                 ...projectTasks.next,
                 [epic]: next,
               },
+              count: {
+                ...projectTasks.count,
+                [epic]: count,
+              },
             },
           };
         }
@@ -138,6 +147,10 @@ const reducer = (
             next: {
               ...projectTasks.next,
               all: next,
+            },
+            count: {
+              ...projectTasks.count,
+              all: count,
             },
           },
         };

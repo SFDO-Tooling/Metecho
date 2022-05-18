@@ -19,7 +19,7 @@ export default (
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const selectTasksWithProps = useCallback(selectTasksByEpic, []);
-  const { tasks, next } =
+  const { tasks, next, count } =
     useSelector((state: AppState) => selectTasksWithProps(state, routeProps)) ||
     {};
 
@@ -37,5 +37,5 @@ export default (
     }
   }, [dispatch, projectId, epicId, tasks]);
 
-  return { tasks, next };
+  return { tasks, next, count };
 };
