@@ -5,9 +5,10 @@ Metecho
      :target: https://github.com/SFDO-Tooling/Metecho/actions/workflows/test.yml
      :alt: Build Status
 
-.. image:: https://codecov.io/gh/SFDO-Tooling/Metecho/branch/main/graph/badge.svg?token=S7GZ8D9QPT
-     :target: https://codecov.io/gh/SFDO-Tooling/Metecho
-     :alt: Test Coverage
+.. image:: https://coveralls.io/repos/github/SFDO-Tooling/Metecho/badge.svg?branch=main
+     :target: https://coveralls.io/github/SFDO-Tooling/Metecho?branch=main
+     :alt: Code Coverage
+
 
 Development
 -----------
