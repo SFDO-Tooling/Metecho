@@ -1397,7 +1397,7 @@ class TestCreateRepository:
         async_to_sync.return_value.assert_called_with(
             project,
             {
-                "type": "PROJECT_UPDATE",
+                "type": "PROJECT_CREATE",
                 "payload": {"originating_user_id": str(user.pk)},
             },
             for_list=False,
@@ -1423,7 +1423,7 @@ class TestCreateRepository:
         async_to_sync.return_value.assert_called_with(
             project,
             {
-                "type": "PROJECT_UPDATE_ERROR",
+                "type": "PROJECT_CREATE_ERROR",
                 "payload": {
                     "originating_user_id": str(user.pk),
                     "message": "Oh no!",
@@ -1456,7 +1456,7 @@ class TestCreateRepository:
         async_to_sync.return_value.assert_called_with(
             project,
             {
-                "type": "PROJECT_UPDATE_ERROR",
+                "type": "PROJECT_CREATE_ERROR",
                 "payload": {
                     "originating_user_id": str(user.pk),
                     "message": "Failed to push files to GitHub repository",
@@ -1480,7 +1480,7 @@ class TestCreateRepository:
         async_to_sync.return_value.assert_called_with(
             project,
             {
-                "type": "PROJECT_UPDATE_ERROR",
+                "type": "PROJECT_CREATE_ERROR",
                 "payload": {
                     "originating_user_id": str(user.pk),
                     "message": f"Either you are not a member of the {project.repo_owner} "
