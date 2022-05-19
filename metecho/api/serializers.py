@@ -386,6 +386,7 @@ class EpicSerializer(HashIdModelSerializer):
             "description_rendered",
             "slug",
             "old_slugs",
+            "created_at",
             "project",
             "task_count",
             "branch_url",
@@ -414,6 +415,7 @@ class EpicSerializer(HashIdModelSerializer):
             "pr_is_merged": {"read_only": True},
             "status": {"read_only": True},
             "latest_sha": {"read_only": True},
+            "created_at": {"read_only": True},
         }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -605,6 +607,7 @@ class TaskSerializer(HashIdModelSerializer):
             "project",
             "slug",
             "old_slugs",
+            "created_at",
             "has_unmerged_commits",
             "currently_creating_branch",
             "currently_creating_pr",
@@ -646,6 +649,7 @@ class TaskSerializer(HashIdModelSerializer):
             "pr_is_open": {"read_only": True},
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
+            "created_at": {"read_only": True},
         }
         validators = (UnattachedIssueValidator(),)
 
