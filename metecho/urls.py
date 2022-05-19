@@ -40,7 +40,7 @@ urlpatterns = [
     # Routes to pass through to the front end JS route-handler
     # Ensure the CSRF token is always present via a cookie to be read by JS
     re_path(
-        r"^($|login\/?$|terms\/?$|projects(\/|$)|accounts(\/|$))",
+        r"^($|login\/?$|manage\/?$|terms\/?$|projects(\/|$)|accounts(\/|$))",
         ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")),
         name="frontend",
     ),

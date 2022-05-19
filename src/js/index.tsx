@@ -42,6 +42,7 @@ import TaskDetail from '@/js/components/tasks/detail';
 import Terms from '@/js/components/terms';
 import AuthError from '@/js/components/user/authError';
 import Login from '@/js/components/user/login';
+import Manage from '@/js/components/user/manage';
 import { PrivateRoute } from '@/js/components/utils';
 import initializeI18n from '@/js/i18n';
 import reducer, { ThunkDispatch } from '@/js/store';
@@ -92,6 +93,7 @@ const App = withRouter(
               <ErrorBoundary>
                 <Switch>
                   <Route exact path={routePatterns.login} component={Login} />
+                  <Route exact path={routePatterns.manage} component={Manage} />
                   <Route exact path={routePatterns.terms} component={Terms} />
                   <Redirect
                     exact

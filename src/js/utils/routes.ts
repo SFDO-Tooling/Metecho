@@ -1,6 +1,7 @@
 const routes = {
   home: () => '/',
   login: () => '/login',
+  manage: () => '/manage',
   terms: () => '/terms',
   project_list: () => '/projects',
   project_detail: (projectSlug: string) => `/projects/${projectSlug}`,
@@ -15,6 +16,7 @@ const routes = {
 export const routePatterns = {
   home: '/',
   login: '/login',
+  manage: '/manage',
   terms: '/terms',
   auth_error: '/accounts/*',
   project_list: '/projects',

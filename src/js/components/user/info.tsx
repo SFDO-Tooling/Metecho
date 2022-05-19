@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/js/components/user/connect';
 import Logout from '@/js/components/user/logout';
+import { ManageAccountButton } from '@/js/components/user/manage';
 import {
   ExternalLink,
   SpinnerWrapper,
@@ -285,6 +286,7 @@ const UserDropdown = () => {
                   >
                     {user.username}
                   </h2>
+                  <ManageAccountButton className="slds-m-top_xx-small"></ManageAccountButton>
                   <Logout className="slds-m-top_xx-small" />
                 </div>
               </div>

@@ -10,10 +10,11 @@ import { ThunkDispatch } from '@/js/store';
 import { deleteObject } from '@/js/store/actions';
 import { Epic } from '@/js/store/epics/reducer';
 import { Task } from '@/js/store/tasks/reducer';
+import { User } from '@/js/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 interface Props extends RouteComponentProps {
-  model: Epic | Task;
+  model: Epic | Task | User;
   modelType: ObjectTypes;
   isOpen: boolean;
   redirect: string;
@@ -70,6 +71,16 @@ const DeleteModal = ({
         <Trans i18nKey="confirmDeleteTask">
           Are you sure you want to delete Task “{{ name: model.name }}”? This
           will also delete any Orgs in this Task.
+        </Trans>
+      );
+      break;
+    case OBJECT_TYPES.USER:
+      heading = t('Confirm Deleting Account');
+      message = (
+        <Trans i18nKey="confirmDeleteUser">
+          Your Dev Orgs will be deleted, and any unretrieved changes will be
+          lost. This action cannot be undone. Are you sure you want to delete
+          your Metecho account?
         </Trans>
       );
       break;
