@@ -24,6 +24,7 @@ export const getDemoTask = ({
   return {
     id: 'demo-task',
     name: i18n.t('This is a Sample Task'),
+    created_at: '',
     description: '',
     description_rendered: '',
     epic: pick(epic, ['id', 'name', 'slug', 'github_users']),
