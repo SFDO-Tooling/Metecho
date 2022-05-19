@@ -167,6 +167,7 @@ def create_repository(
     Given a local Metecho Project create and bootstrap the corresponding GitHub repository.
     """
     project.refresh_from_db()
+    repo = None
 
     try:
         # Ensure the user is part of the org that owns the project
@@ -181,7 +182,7 @@ def create_repository(
                 % {"name": project.repo_owner}
             )
 
-        # Get a GitHub session with write premissions on the org
+        # Get a GitHub session with write permissions on the org
         gh_as_org = gh_as_full_access_org(project.repo_owner)
         org = gh_as_org.organization(project.repo_owner)
         if template_repo_owner and template_repo_name:
@@ -261,6 +262,22 @@ def create_repository(
         project.finalize_create_repository(error=e, user=user)
         tb = traceback.format_exc()
         logger.error(tb)
+
+        if repo:
+            # Remove orphaned GitHub API resources
+            try:
+                for team in repo.teams():
+                    logger.info(
+                        f"Deleting GitHub team {team.name}. Result: {team.delete()}"
+                    )
+                logger.info(
+                    f"Deleting GitHub repository {repo}. Result: {repo.delete()}"
+                )
+            except Exception:
+                logger.exception(
+                    f"Failed to clean up after failed creation of Project {project}"
+                )
+
         raise
     else:
         project.finalize_create_repository(user=user)

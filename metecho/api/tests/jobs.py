@@ -1353,8 +1353,9 @@ class TestCreateRepository:
         and the repository is created successfully
         """
         project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
-
         team = mocker.MagicMock()
+        repo = mocker.MagicMock(id=123456, html_url="", permissions=[])
+
         gh_user = mocker.patch(
             f"{PATCH_ROOT}.gh_given_user", autospec=True
         ).return_value
@@ -1365,15 +1366,13 @@ class TestCreateRepository:
             f"{PATCH_ROOT}.gh_as_full_access_org", autospec=True
         ).return_value.organization.return_value
         gh_org.create_team.return_value = team
-        gh_org.create_repository.return_value = mocker.MagicMock(
-            id=123456, html_url="", permissions=[]
-        )
+        gh_org.create_repository.return_value = repo
 
-        return project, team
+        return project, team, repo
 
     def test_ok(self, mocker, github_mocks, user_factory):
         user = user_factory()
-        project, team = github_mocks
+        project, team, repo = github_mocks
         mocker.patch(f"{PATCH_ROOT}.init_from_context")
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
@@ -1398,7 +1397,7 @@ class TestCreateRepository:
             project,
             {
                 "type": "PROJECT_CREATE",
-                "payload": {"originating_user_id": str(user.pk)},
+                "payload": {"originating_user_id": user.pk},
             },
             for_list=False,
             group_name=None,
@@ -1418,14 +1417,13 @@ class TestCreateRepository:
         with pytest.raises(project.DoesNotExist):
             # Expect project to be deleted from the DB since repo creation failed
             project.refresh_from_db()
-
         assert "Oh no!" in caplog.text
         async_to_sync.return_value.assert_called_with(
             project,
             {
                 "type": "PROJECT_CREATE_ERROR",
                 "payload": {
-                    "originating_user_id": str(user.pk),
+                    "originating_user_id": user.pk,
                     "message": "Oh no!",
                 },
             },
@@ -1434,16 +1432,22 @@ class TestCreateRepository:
             include_user=False,
         )
 
-    def test__push_error(self, mocker, caplog, github_mocks, user_factory):
+    @pytest.mark.parametrize("fail_repo_delete", (True, False))
+    def test__push_error(
+        self, mocker, caplog, github_mocks, user_factory, fail_repo_delete
+    ):
         user = user_factory()
+        project, team, repo = github_mocks
+        repo.teams.return_value = [team]
+        if fail_repo_delete:
+            repo.delete.side_effect = Exception("REPO DELETE FAIL")
         mocker.patch(f"{PATCH_ROOT}.init_from_context")
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
-        project, team = github_mocks
         cmd = mocker.patch(
             f"{PATCH_ROOT}.sarge", autospec=True
         ).capture_both.return_value
         cmd.returncode = 1
-        cmd.stderr.text = "Oh no!"
+        cmd.stderr.text = "REPO PUSH FAIL"
 
         with pytest.raises(Exception, match="Failed to push"):
             create_repository(project, user=user, dependencies=[])
@@ -1451,14 +1455,17 @@ class TestCreateRepository:
         with pytest.raises(project.DoesNotExist):
             # Expect project to be deleted from the DB since repo creation failed
             project.refresh_from_db()
-
-        assert "Oh no!" in caplog.text
+        assert repo.delete.called
+        assert team.delete.called
+        if fail_repo_delete:
+            assert "REPO DELETE FAIL" in caplog.text
+        assert "REPO PUSH FAIL" in caplog.text
         async_to_sync.return_value.assert_called_with(
             project,
             {
                 "type": "PROJECT_CREATE_ERROR",
                 "payload": {
-                    "originating_user_id": str(user.pk),
+                    "originating_user_id": user.pk,
                     "message": "Failed to push files to GitHub repository",
                 },
             },
@@ -1482,7 +1489,7 @@ class TestCreateRepository:
             {
                 "type": "PROJECT_CREATE_ERROR",
                 "payload": {
-                    "originating_user_id": str(user.pk),
+                    "originating_user_id": user.pk,
                     "message": f"Either you are not a member of the {project.repo_owner} "
                     "organization or it hasn't installed the Metecho GitHub app",
                 },
