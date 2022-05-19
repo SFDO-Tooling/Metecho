@@ -28,12 +28,6 @@
     }
   }
 
-  .slds-is-open {
-    > .slds-accordion__summary {
-      margin-bottom: $spacing-x-small;
-    }
-  }
-
   .grow-inner-item {
     .slds-accordion__summary-action > .slds-truncate {
       flex-grow: 1;
@@ -41,15 +35,9 @@
   }
 
   .accordion-no-padding {
-    > .slds-accordion__list-item {
-      > .slds-is-open {
-        padding: 0;
-
-        > .slds-accordion__summary {
-          padding-top: $spacing-x-small;
-          padding-left: $spacing-medium;
-          padding-right: $spacing-medium;
-        }
+    .slds-is-open {
+      .slds-accordion__section {
+        padding-right: 0;
       }
     }
   }
@@ -57,7 +45,8 @@
 
 .metecho-nested-checkboxes {
   // line up with above label; add grid + (faux checkbox + label margin)
-  padding-left: $square-icon-x-small-boundary + $spacing-large;
+  // twice left padding of accordion + icon and icon margin spacing
+  padding-left: 2.875rem;
 }
 
 [data-form='create-epic-branch'] {
