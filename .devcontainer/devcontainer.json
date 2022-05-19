@@ -134,7 +134,8 @@
       "package-lock.json": true,
       "npm-debug.log": true,
       "yarn-debug.log": true,
-      "yarn-error.log": true
+      "yarn-error.log": true,
+      "static/styles": true
     }
   }
 }

@@ -36,7 +36,6 @@ const PageOptions = ({
       align="right"
       iconCategory="utility"
       iconName="settings"
-      iconSize="large"
       iconVariant="more"
       width="xx-small"
       triggerClassName="slds-m-right_xx-small"

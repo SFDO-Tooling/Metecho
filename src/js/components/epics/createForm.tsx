@@ -143,7 +143,7 @@ const CreateEpicModal = ({
     // fetching feature branches here when option selected,
     // in lieu of storing in store...
     const baseBranches = await apiFetch({
-      url: `${window.api_urls.project_feature_branches(project.id)}`,
+      url: window.api_urls.project_feature_branches(project.id),
       dispatch,
     });
     /* istanbul ignore else */
@@ -312,7 +312,6 @@ const CreateEpicModal = ({
           </RadioGroup>
           {fromBranchChecked && (
             <Combobox
-              id="combobox-inline-single"
               events={{
                 onSelect: handleBranchSelection,
                 onChange: handleBranchChange,

@@ -39,7 +39,7 @@ const EpicTable = ({
           ...epic,
           numCollaborators: epic.github_users?.length || 0,
         })),
-        ['created_at', 'name'],
+        ['created_at', (item) => item.name.toLowerCase()],
         ['desc', 'asc'],
       )
     : [];
