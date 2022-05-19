@@ -152,7 +152,6 @@ const TourDropdown = ({
         className={triggerClassName}
         iconCategory="utility"
         iconName="question"
-        iconSize="large"
         iconVariant="more"
       />
     </Popover>

@@ -31,6 +31,7 @@ export interface Project {
   currently_fetching_issues: boolean;
   latest_sha: string;
   has_push_permission: boolean;
+  has_truncated_issues: boolean;
 }
 export interface ProjectsState {
   projects: Project[];

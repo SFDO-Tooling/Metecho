@@ -268,6 +268,7 @@ export const sampleTask1 = {
   name: 'Data Mapping',
   slug: 'data-mapping',
   old_slugs: [],
+  created_at: '2019-10-24T20:03:52.159440Z',
   epic: {
     id: 'e1',
     name: 'My Epic',
@@ -308,6 +309,7 @@ export const sampleTask2 = {
   name: 'Control Toggles for Accessible Actions',
   slug: 'control-toggles',
   old_slugs: [],
+  created_at: '2019-10-24T20:03:52.159440Z',
   epic: {
     id: 'e1',
     name: 'My Epic',
@@ -348,6 +350,7 @@ export const sampleTask3 = {
   name: 'Dark Mode and High Contrast Options',
   slug: 'dark-mode',
   old_slugs: [],
+  created_at: '2019-10-24T20:03:52.159440Z',
   epic: {
     id: 'e1',
     name: 'My Epic',
@@ -389,6 +392,7 @@ export const sampleTask4 = {
   name: 'Universal Language Selectors',
   slug: 'universal-language',
   old_slugs: [],
+  created_at: '2019-10-24T20:03:52.159440Z',
   epic: {
     id: 'e1',
     name: 'My Epic',
@@ -430,6 +434,7 @@ export const sampleTask5 = {
   name: 'Additional User Role Permissions',
   slug: 'user-roles',
   old_slugs: [],
+  created_at: '2019-10-24T20:03:52.159440Z',
   epic: {
     id: 'e1',
     name: 'My Epic',
@@ -470,6 +475,7 @@ export const sampleTask6 = {
   name: 'Add the Widgets',
   slug: 'add-widgets',
   old_slugs: [],
+  created_at: '2019-10-24T20:03:52.159440Z',
   epic: {
     id: 'e1',
     name: 'My Epic',
@@ -527,6 +533,7 @@ export const sampleProject1 = {
   latest_sha: 'abc123',
   has_push_permission: true,
   github_issue_count: 5,
+  has_truncated_issues: false,
 };
 
 export const sampleEpicSteps = [
