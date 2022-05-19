@@ -11,10 +11,17 @@ from ..models import (
     Epic,
     EpicStatus,
     ScratchOrgType,
+    SiteProfile,
     Task,
     TaskStatus,
     user_logged_in_handler,
 )
+
+
+class TestSiteProfile:
+    def test_str(self):
+        profile = SiteProfile(name="Hello world")
+        assert str(profile) == "Hello world"
 
 
 @pytest.mark.django_db

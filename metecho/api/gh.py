@@ -18,6 +18,7 @@ from django.core.cache import cache
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from github3 import GitHub, login, users
 from github3.exceptions import NotFoundError, UnprocessableEntity
+from github3.repos.branch import Branch
 
 from .custom_cci_configs import MetechoUniversalConfig, ProjectConfig
 
@@ -33,6 +34,76 @@ class UnsafeZipfileError(Exception):
 
 class NoGitHubTokenError(Exception):
     pass
+
+
+def copy_branch_protection(source: Branch, target: Branch):
+    """
+    Copy the branch protection [output][1] of one branch into the [input][2] of another.
+
+    As of May 2022 it appears the following settings are only available to the GUI, not
+    the API:
+
+    - Require signed commits
+    - Require deployments to succeed before merging
+    - Restrict pushes that create matching branches
+
+    [1]: https://docs.github.com/en/rest/branches/branch-protection#get-branch-protection
+    [2]: https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection
+    """
+    protection = source.protection().as_dict()
+    reviews = protection["required_pull_request_reviews"]
+
+    required_pull_request_reviews = {
+        key: reviews[key]
+        for key in (
+            "dismiss_stale_reviews",
+            "require_code_owner_reviews",
+            "required_approving_review_count",
+        )
+    } | {
+        "dismissal_restrictions": {
+            "users": [u["login"] for u in reviews["dismissal_restrictions"]["users"]],
+            "teams": [t["slug"] for t in reviews["dismissal_restrictions"]["teams"]],
+        },
+        "bypass_pull_request_allowances": {
+            "users": [
+                u["login"] for u in reviews["bypass_pull_request_allowances"]["users"]
+            ],
+            "teams": [
+                t["slug"] for t in reviews["bypass_pull_request_allowances"]["teams"]
+            ],
+        },
+    }
+
+    data = {
+        key: protection[key]["enabled"]
+        for key in (
+            "enforce_admins",
+            "required_linear_history",
+            "allow_force_pushes",
+            "allow_deletions",
+            "block_creations",
+            "required_conversation_resolution",
+        )
+    } | {
+        "required_pull_request_reviews": required_pull_request_reviews,
+        "required_status_checks": {
+            key: protection["required_status_checks"][key]
+            for key in ("strict", "checks")
+        },
+        "restrictions": {
+            "users": [user["login"] for user in protection["restrictions"]["users"]],
+            "teams": [team["slug"] for team in protection["restrictions"]["teams"]],
+            "apps": [app["slug"] for app in protection["restrictions"]["apps"]],
+        },
+    }
+    # Setting the protection rules on the destination could be achieved by calling
+    # `dst.protect()`, but that relies on github3py supporting all GitHub API fields as
+    # function arguments. Instead of waiting for that we `_put` the data directly and
+    # can update at our own pace if GitHub changes the protection schema
+    target_url = target._build_url("protection", base_url=target._api)
+    resp = target._put(target_url, json=data)
+    return target._json(resp, 200)
 
 
 def gh_given_user(user):
@@ -55,10 +126,10 @@ def gh_as_app(repo_owner, repo_name):
     return gh
 
 
-def get_org_for_repo_creation(orgname: str):
+def gh_as_full_access_org(orgname: str):
     """
-    Authenticate as a GitHub organization.
-    A different app key is used to grant write access.
+    Get a GitHub session with full access to an Organization.
+    The Full-Access Metecho app must be installed in the org.
     """
     app_id = settings.FULL_ACCESS_GITHUB_APP_ID
     app_key = settings.FULL_ACCESS_GITHUB_APP_KEY
@@ -66,7 +137,7 @@ def get_org_for_repo_creation(orgname: str):
     gh.login_as_app(app_key, app_id, expire_in=120)
     installation = gh.app_installation_for_organization(orgname)
     gh.login_as_app_installation(app_key, app_id, installation.id)
-    return gh.organization(orgname)
+    return gh
 
 
 def get_all_org_repos(user):

@@ -106,6 +106,9 @@ class SiteProfile(TranslatableModel):
         clickthrough_agreement=MarkdownField(property_suffix="_markdown", blank=True),
     )
 
+    def __str__(self) -> str:
+        return str(self.name)
+
 
 class UserQuerySet(models.QuerySet):
     pass
