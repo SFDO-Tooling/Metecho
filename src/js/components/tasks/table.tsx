@@ -3,7 +3,7 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import classNames from 'classnames';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -273,21 +273,31 @@ const TaskTable = ({
 }: Props) => {
   const { t } = useTranslation();
   const currentUser = useSelector(selectUserState) as User;
+
   const statusOrder = {
     [TASK_STATUSES.IN_PROGRESS]: 1,
     [TASK_STATUSES.PLANNED]: 2,
     [TASK_STATUSES.COMPLETED]: 3,
     [TASK_STATUSES.CANCELED]: 4,
   };
-  const taskDefaultSort = sortBy(isFetched ? tasks : [], [
-    (item) => statusOrder[item.status],
-    (item) => item.name.toLowerCase(),
-  ]);
+
+  const items = isFetched
+    ? orderBy(
+        tasks,
+        [
+          (item) => statusOrder[item.status],
+          'created_at',
+          (item) => item.name.toLowerCase(),
+        ],
+        ['asc', 'desc', 'asc'],
+      )
+    : [];
+
   return isFetched ? (
     <>
       {tasks.length ? (
         <DataTable
-          items={taskDefaultSort}
+          items={items}
           id="epic-tasks-table"
           className={viewEpicsColumn ? 'outdented_medium' : ''}
           noRowHover

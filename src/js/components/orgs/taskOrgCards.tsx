@@ -102,7 +102,7 @@ const TaskOrgCards = ({
 
   const checkIfTaskCanBeReassigned = async (assignee: string) => {
     const { can_reassign } = await apiFetch({
-      url: `${window.api_urls.task_can_reassign(task.id)}`,
+      url: window.api_urls.task_can_reassign(task.id),
       dispatch,
       opts: {
         method: 'POST',

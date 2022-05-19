@@ -29,6 +29,7 @@ export interface Task {
   name: string;
   slug: string;
   old_slugs: string[];
+  created_at: string;
   epic: {
     id: string;
     name: string;
