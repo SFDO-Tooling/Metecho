@@ -16,7 +16,8 @@ from ..gh import (
     get_source_format,
     get_zip_file,
     gh_as_app,
-    gh_as_full_access_org,
+    gh_as_org,
+    gh_as_repo,
     is_safe_path,
     local_github_checkout,
     log_unsafe_zipfile_error,
@@ -48,12 +49,18 @@ class TestGetAllOrgRepos:
 
 def test_gh_as_app(mocker):
     mocker.patch("metecho.api.gh.GitHub", autospec=True)
-    assert gh_as_app("TestOrg", "TestRepo") is not None
+    assert gh_as_app() is not None
 
 
-def test_gh_as_full_access_org(mocker):
+def test_gh_as_repo(mocker):
     gh = mocker.patch("metecho.api.gh.GitHub", autospec=True).return_value
-    gh_as_full_access_org("org-name")
+    gh_as_repo("owner", "repo")
+    gh.app_installation_for_repository.assert_called_with("owner", "repo")
+
+
+def test_gh_as_org(mocker):
+    gh = mocker.patch("metecho.api.gh.GitHub", autospec=True).return_value
+    gh_as_org("org-name")
     gh.app_installation_for_organization.assert_called_with("org-name")
 
 

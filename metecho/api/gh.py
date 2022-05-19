@@ -25,6 +25,8 @@ from .custom_cci_configs import MetechoUniversalConfig, ProjectConfig
 logger = logging.getLogger(__name__)
 
 
+APP_ID = settings.GITHUB_APP_ID
+APP_KEY = settings.GITHUB_APP_KEY
 ZIP_FILE_NAME = "archive.zip"
 
 
@@ -116,27 +118,23 @@ def gh_as_user(user):
     return login(token=token)
 
 
-def gh_as_app(repo_owner, repo_name):
-    app_id = settings.GITHUB_APP_ID
-    app_key = settings.GITHUB_APP_KEY
+def gh_as_app():
     gh = GitHub()
-    gh.login_as_app(app_key, app_id, expire_in=120)
-    installation = gh.app_installation_for_repository(repo_owner, repo_name)
-    gh.login_as_app_installation(app_key, app_id, installation.id)
+    gh.login_as_app(APP_KEY, APP_ID, expire_in=120)
     return gh
 
 
-def gh_as_full_access_org(orgname: str):
-    """
-    Get a GitHub session with full access to an Organization.
-    The Full-Access Metecho app must be installed in the org.
-    """
-    app_id = settings.FULL_ACCESS_GITHUB_APP_ID
-    app_key = settings.FULL_ACCESS_GITHUB_APP_KEY
-    gh = GitHub()
-    gh.login_as_app(app_key, app_id, expire_in=120)
+def gh_as_repo(repo_owner: str, repo_name: str):
+    gh = gh_as_app()
+    installation = gh.app_installation_for_repository(repo_owner, repo_name)
+    gh.login_as_app_installation(APP_KEY, APP_ID, installation.id)
+    return gh
+
+
+def gh_as_org(orgname: str):
+    gh = gh_as_app()
     installation = gh.app_installation_for_organization(orgname)
-    gh.login_as_app_installation(app_key, app_id, installation.id)
+    gh.login_as_app_installation(APP_KEY, APP_ID, installation.id)
     return gh
 
 
@@ -156,7 +154,7 @@ def zip_file_is_safe(zip_file):
 def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
     if user is None and (repo_owner is None or repo_name is None):
         raise TypeError("If user=None, you must call with repo_owner and repo_name")
-    gh = gh_as_user(user) if user else gh_as_app(repo_owner, repo_name)
+    gh = gh_as_user(user) if user else gh_as_repo(repo_owner, repo_name)
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)
     return gh.repository_with_id(repo_id)

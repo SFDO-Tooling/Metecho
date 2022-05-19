@@ -16,12 +16,12 @@ def test_populate_data():
             patch("metecho.api.models.Project.get_repo_id")
         )
         get_repo_id.return_value = 8080
-        with patch("metecho.api.gh.get_repo_info") as get_repo_info:
+        with patch("metecho.api.gh.gh_as_repo") as gh_as_repo:
             repo_branch = MagicMock()
             repo_branch.latest_sha.return_value = "abcd1234"
             repo_info = MagicMock(default_branch="main-branch")
             repo_info.branch.return_value = repo_branch
-            get_repo_info.return_value = repo_info
+            gh_as_repo.return_value.repository.return_value = repo_info
             call_command("populate_data")
 
     assert Project.objects.count() == 7

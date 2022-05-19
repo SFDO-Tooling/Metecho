@@ -1361,7 +1361,7 @@ class TestCreateRepository:
             mocker.MagicMock(login=project.repo_owner, spec=Organization)
         ]
         gh_org = mocker.patch(
-            f"{PATCH_ROOT}.gh_as_full_access_org", autospec=True
+            f"{PATCH_ROOT}.gh_as_org", autospec=True
         ).return_value.organization.return_value
         gh_org.create_team.return_value = team
         gh_org.create_repository.return_value = repo

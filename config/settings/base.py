@@ -204,16 +204,6 @@ GITHUB_APP_ID = env.int("GITHUB_APP_ID", default=0)
 DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
 GITHUB_APP_KEY = bytes(env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY), "utf-8")
 
-# Same as above, but for the GitHub app with write access
-FULL_ACCESS_GITHUB_APP_ID = env.int("FULL_ACCESS_GITHUB_APP_ID", default=0)
-DOCKER_FULL_ACCESS_GITHUB_APP_KEY = env(
-    "DOCKER_FULL_ACCESS_GITHUB_APP_KEY", default=""
-).replace("\\n", "\n")
-FULL_ACCESS_GITHUB_APP_KEY = bytes(
-    env("FULL_ACCESS_GITHUB_APP_KEY", default=DOCKER_FULL_ACCESS_GITHUB_APP_KEY),
-    "utf-8",
-)
-
 
 # Salesforce Devhub settings:
 DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)

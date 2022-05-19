@@ -34,7 +34,7 @@ from .gh import (
     get_cumulus_prefix,
     get_project_config,
     get_repo_info,
-    gh_as_full_access_org,
+    gh_as_org,
     gh_as_user,
     local_github_checkout,
     normalize_commit,
@@ -183,7 +183,7 @@ def create_repository(
             )
 
         # Get a GitHub session with write permissions on the org
-        org_gh = gh_as_full_access_org(project.repo_owner)
+        org_gh = gh_as_org(project.repo_owner)
         org = org_gh.organization(project.repo_owner)
         if template_repo_owner and template_repo_name:
             tpl_repo = org_gh.repository(template_repo_owner, template_repo_name)

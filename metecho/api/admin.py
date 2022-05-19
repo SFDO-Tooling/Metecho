@@ -56,13 +56,13 @@ class GitHubOrganizationForm(forms.ModelForm):
     def clean(self):
         login = self.cleaned_data["login"]
         try:
-            session = gh.gh_as_full_access_org(orgname=login)
+            session = gh.gh_as_org(orgname=login)
             org = session.organization(login)
         except Exception:
             raise forms.ValidationError(
                 _(
                     "Could not access this organization on GitHub. "
-                    "Has the full-access Metecho app been installed on this organization?"
+                    "Has the Metecho GitHub App been installed on this organization?"
                 )
             )
         self.cleaned_data["avatar_url"] = org.avatar_url

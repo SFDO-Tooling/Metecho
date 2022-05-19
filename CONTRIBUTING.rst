@@ -51,14 +51,11 @@ Docker-based development
     GITHUB_CLIENT_SECRET=...
     GITHUB_APP_ID=...
     DOCKER_GITHUB_APP_KEY=...
-    FULL_ACCESS_GITHUB_APP_ID=...
-    DOCKER_FULL_ACCESS_GITHUB_APP_KEY=...
 
    Note that none of the values should be quoted, and while
-   ``DOCKER_SFDX_HUB_KEY``, ``DOCKER_GITHUB_APP_KEY``, and
-   ``DOCKER_FULL_ACCESS_GITHUB_APP_KEY`` are RSA private keys, they must have
-   newlines replaced with ``\n`` in order to work properly with the Docker
-   ``env_file`` configuration option (see `this issue`_).
+   ``DOCKER_SFDX_HUB_KEY`` and ``DOCKER_GITHUB_APP_KEY`` are RSA private keys,
+   they must have newlines replaced with ``\n`` in order to work properly with
+   the Docker ``env_file`` configuration option (see `this issue`_).
 
 3. Run ``./derrick build`` to build/re-build all the container images.
 
@@ -75,17 +72,14 @@ Docker-based development
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 .. _this issue: https://github.com/moby/moby/issues/12997
 
-Setting up the GitHub Apps
---------------------------
+Setting up the GitHub App
+-------------------------
 
-To deploy this app, you will need to set up two GitHub Apps and give them
-proper permissions. You can do that at
-``https://github.com/organizations/<your org>/settings/apps``
+To deploy this app, you will need to set up a GitHub App and give it proper
+permissions. You can do that at ``https://github.com/organizations/<your
+org>/settings/apps``
 
-Basic Access App
-~~~~~~~~~~~~~~~~
-
-The first GitHub app let's users log into Metecho with their GitHub account,
+The GitHub app let's users log into Metecho with their GitHub account,
 connect to repositories, create branches, pull requests, and commit code. The
 app will need the following permissions:
 
@@ -104,6 +98,15 @@ app will need the following permissions:
     - Pull request review
     - Push
 
+If you want to allow Metecho to create new repositories in your organization you
+must grant access to the app to all repositories, not a subset of them, and
+enable these additional permissions:
+
+- Repository permissions
+    - Administration: Read & write
+- Organization permissions
+    - Members: Read & write
+
 To enable logging in with GitHub, set the "User authorization callback URL" to
 ``https://<your-deployed-url>/accounts/github/login/callback/``, and be sure the
 "Request user authorization (OAuth) during installation" box is checked.
@@ -121,23 +124,6 @@ Use the app's "App ID" as ``GITHUB_APP_ID``, "Client ID" as
 Finally, generate a new private key for the app, replace newlines with ``\n``,
 and set it as the ``DOCKER_GITHUB_APP_KEY`` environment variable (the entire
 key, not a path to one).
-
-Full Access App
-~~~~~~~~~~~~~~~
-
-The second GitHub app is used to create GitHub repositories in your organization
-when Projects are created in Metecho. The app will need the following
-permissions:
-
-- Repository permissions
-    - Administration: Read & write
-- Organization permissions
-    - Members: Read & write
-
-Use the app's "App ID" as ``FULL_ACCESS_GITHUB_APP_ID`` and generate a new
-private key for the app, replace newlines with ``\n``, and set it as the
-``FULL_ACCESS_DOCKER_GITHUB_APP_KEY`` environment variable (the entire key, not
-a path to one).
 
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~
