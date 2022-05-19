@@ -84,19 +84,19 @@ class TestGetRepoInfo:
             get_repo_info(None, repo_id=123)
 
     def test_with_repo_id(self, user_factory):
-        with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
+        with patch(f"{PATCH_ROOT}.gh_as_user") as gh_as_user:
             user = user_factory()
             gh = MagicMock()
-            gh_given_user.return_value = gh
+            gh_as_user.return_value = gh
             get_repo_info(user, repo_id=123)
 
             gh.repository_with_id.assert_called_with(123)
 
     def test_without_repo_id(self, user_factory):
-        with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
+        with patch(f"{PATCH_ROOT}.gh_as_user") as gh_as_user:
             user = user_factory()
             gh = MagicMock()
-            gh_given_user.return_value = gh
+            gh_as_user.return_value = gh
             get_repo_info(user, repo_owner="owner", repo_name="name")
 
             gh.repository.assert_called_with("owner", "name")
@@ -151,14 +151,14 @@ class TestLocalGitHubCheckout:
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
             os = stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+            gh_as_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_as_user"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             repository = MagicMock(default_branch="main")
             repository.file_contents.return_value.decoded.decode.return_value = "Hello"
             gh = MagicMock()
             gh.repository_with_id.return_value = repository
-            gh_given_user.return_value = gh
+            gh_as_user.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
             with local_github_checkout(user, repo) as repo_root:
@@ -171,7 +171,7 @@ class TestLocalGitHubCheckout:
         repo = 123
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
-            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+            gh_as_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_as_user"))
             stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             zip_file_is_safe = stack.enter_context(
@@ -179,7 +179,7 @@ class TestLocalGitHubCheckout:
             )
             zip_file_is_safe.return_value = False
             gh = MagicMock()
-            gh_given_user.return_value = gh
+            gh_as_user.return_value = gh
             glob.return_value = [".."]
 
             with pytest.raises(UnsafeZipfileError):
@@ -191,14 +191,14 @@ class TestLocalGitHubCheckout:
         repo_id = 123
         mocker.patch(f"{PATCH_ROOT}.zipfile")
         mocker.patch(f"{PATCH_ROOT}.os")
-        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
+        gh_as_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user")
         mocker.patch(f"{PATCH_ROOT}.shutil")
         glob = mocker.patch(f"{PATCH_ROOT}.glob")
         repository = MagicMock(default_branch="main")
         repository.file_contents.side_effect = NotFoundError(MagicMock())
         gh = MagicMock()
         gh.repository_with_id.return_value = repository
-        gh_given_user.return_value = gh
+        gh_as_user.return_value = gh
         glob.return_value = ["owner-repo_name-"]
 
         with pytest.raises(Exception):

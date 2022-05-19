@@ -106,7 +106,7 @@ def copy_branch_protection(source: Branch, target: Branch):
     return target._json(resp, 200)
 
 
-def gh_given_user(user):
+def gh_as_user(user):
     try:
         token = (
             user.socialaccount_set.get(provider="github").socialtoken_set.get().token
@@ -141,7 +141,7 @@ def gh_as_full_access_org(orgname: str):
 
 
 def get_all_org_repos(user):
-    gh = gh_given_user(user)
+    gh = gh_as_user(user)
     return set(gh.repositories())
 
 
@@ -156,7 +156,7 @@ def zip_file_is_safe(zip_file):
 def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
     if user is None and (repo_owner is None or repo_name is None):
         raise TypeError("If user=None, you must call with repo_owner and repo_name")
-    gh = gh_given_user(user) if user else gh_as_app(repo_owner, repo_name)
+    gh = gh_as_user(user) if user else gh_as_app(repo_owner, repo_name)
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)
     return gh.repository_with_id(repo_id)

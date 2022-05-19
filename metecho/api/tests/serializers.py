@@ -102,13 +102,13 @@ class TestEpicSerializer:
         assert serializer.is_valid(), serializer.errors
 
         with ExitStack() as stack:
-            gh_given_user = stack.enter_context(patch("metecho.api.gh.gh_given_user"))
+            gh_as_user = stack.enter_context(patch("metecho.api.gh.gh_as_user"))
             gh_module = stack.enter_context(patch("metecho.api.models.gh"))
             repo = MagicMock()
             repo.url = "test"
             gh = MagicMock()
             gh.repositories.return_value = [repo]
-            gh_given_user.return_value = gh
+            gh_as_user.return_value = gh
             gh_module.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (

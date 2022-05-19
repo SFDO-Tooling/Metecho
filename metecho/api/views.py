@@ -235,7 +235,7 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
     def members(self, request, pk):
         """Fetch the members of an Organization from GitHub"""
         org: GitHubOrganization = self.get_object()
-        gh_api = gh.gh_given_user(request.user)
+        gh_api = gh.gh_as_user(request.user)
         gh_org = gh_api.organization(org.login)
         members = sorted(
             (member.as_dict() for member in gh_org.members()),

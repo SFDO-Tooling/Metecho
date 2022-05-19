@@ -35,7 +35,7 @@ from .gh import (
     get_project_config,
     get_repo_info,
     gh_as_full_access_org,
-    gh_given_user,
+    gh_as_user,
     local_github_checkout,
     normalize_commit,
     try_to_make_branch,
@@ -171,8 +171,8 @@ def create_repository(
 
     try:
         # Ensure the user is part of the org that owns the project
-        gh_as_user = gh_given_user(user)
-        user_orgs = [org.login for org in gh_as_user.organizations()]
+        user_gh = gh_as_user(user)
+        user_orgs = [org.login for org in user_gh.organizations()]
         if project.repo_owner not in user_orgs:
             raise ValueError(
                 _(
@@ -183,10 +183,10 @@ def create_repository(
             )
 
         # Get a GitHub session with write permissions on the org
-        gh_as_org = gh_as_full_access_org(project.repo_owner)
-        org = gh_as_org.organization(project.repo_owner)
+        org_gh = gh_as_full_access_org(project.repo_owner)
+        org = org_gh.organization(project.repo_owner)
         if template_repo_owner and template_repo_name:
-            tpl_repo = gh_as_org.repository(template_repo_owner, template_repo_name)
+            tpl_repo = org_gh.repository(template_repo_owner, template_repo_name)
             branch_name = tpl_repo.default_branch or "main"
         else:
             tpl_repo = None
@@ -204,9 +204,7 @@ def create_repository(
         with temporary_dir():
             # Populate files from the template repository
             if tpl_repo:
-                zipfile = download_extract_github(
-                    gh_as_org, tpl_repo.owner, tpl_repo.name
-                )
+                zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
                 zipfile.extractall()
 
             # Bootstrap repository with CumulusCI
@@ -238,7 +236,7 @@ def create_repository(
                 git config user.email {user.email};
                 git add --all;
                 git commit -m 'Bootstrap project (via Metecho)';
-                git push https://{gh_as_user.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
+                git push https://{user_gh.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
                 """,  # noqa: B950
                 shell=True,
             )
@@ -763,7 +761,7 @@ def refresh_github_organizations_for_user(user: User):
     """
 
     try:
-        gh_user = gh_given_user(user)
+        gh_user = gh_as_user(user)
         orgs = GitHubOrganization.objects.filter(
             login__in=(org.login for org in gh_user.organizations())
         )

@@ -655,8 +655,8 @@ class TestRefreshGitHubOrganizationsForUser:
         notify_changed = mocker.patch.object(
             user, "notify_changed", wraps=user.notify_changed
         )
-        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
-        gh_given_user.return_value.organizations.return_value = (
+        gh_as_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user")
+        gh_as_user.return_value.organizations.return_value = (
             mocker.MagicMock(login="member-org"),
         )
 
@@ -672,8 +672,8 @@ class TestRefreshGitHubOrganizationsForUser:
         notify_error = mocker.patch.object(
             user, "notify_error", wraps=user.notify_error
         )
-        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
-        gh_given_user.return_value.organizations.side_effect = Exception("Oh no!")
+        gh_as_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user")
+        gh_as_user.return_value.organizations.side_effect = Exception("Oh no!")
 
         with pytest.raises(Exception):
             refresh_github_organizations_for_user(user)
@@ -1356,9 +1356,7 @@ class TestCreateRepository:
         team = mocker.MagicMock()
         repo = mocker.MagicMock(id=123456, html_url="", permissions=[])
 
-        gh_user = mocker.patch(
-            f"{PATCH_ROOT}.gh_given_user", autospec=True
-        ).return_value
+        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user", autospec=True).return_value
         gh_user.organizations.return_value = [
             mocker.MagicMock(login=project.repo_owner, spec=Organization)
         ]
@@ -1409,7 +1407,7 @@ class TestCreateRepository:
     def test__gh_error(self, mocker, caplog, project, user_factory):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
-        mocker.patch(f"{PATCH_ROOT}.gh_given_user", side_effect=Exception("Oh no!"))
+        mocker.patch(f"{PATCH_ROOT}.gh_as_user", side_effect=Exception("Oh no!"))
 
         with pytest.raises(Exception, match="Oh no!"):
             create_repository(project, user=user, dependencies=[])
@@ -1477,7 +1475,7 @@ class TestCreateRepository:
     def test_not_a_member(self, mocker, caplog, project, user_factory):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
-        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user").return_value
+        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user").return_value
         gh_user.organizations.return_value = []  # No orgs
 
         with pytest.raises(ValueError, match="you are not a member"):

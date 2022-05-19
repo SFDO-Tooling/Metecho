@@ -145,7 +145,7 @@ class TestGitHubOrganizationViewset:
             "avatar_url": "http://456.com",
         }
         gh = mocker.patch("metecho.api.views.gh", autospec=True)
-        gh.gh_given_user.return_value.organization.return_value.members.return_value = (
+        gh.gh_as_user.return_value.organization.return_value.members.return_value = (
             member1,
             member2,
         )
