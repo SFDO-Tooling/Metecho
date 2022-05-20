@@ -19,7 +19,19 @@
   }
 
   .slds-accordion__section {
-    padding: $spacing-x-small $spacing-medium;
+    --slds-c-accordion-section-spacing-block-start: #{$spacing-x-small};
+    --slds-c-accordion-section-spacing-block-end: #{$spacing-x-small};
+    --slds-c-accordion-section-spacing-inline-start: #{$spacing-medium};
+    --slds-c-accordion-section-spacing-inline-end: #{$spacing-medium};
+  }
+
+  .accordion-no-padding {
+    .slds-is-open {
+      .slds-accordion__section {
+        --slds-c-accordion-section-spacing-inline-start: #{$spacing-large};
+        --slds-c-accordion-section-spacing-inline-end: 0;
+      }
+    }
   }
 
   &.has-checkboxes {
@@ -33,20 +45,11 @@
       flex-grow: 1;
     }
   }
-
-  .accordion-no-padding {
-    .slds-is-open {
-      .slds-accordion__section {
-        padding-right: 0;
-      }
-    }
-  }
 }
 
 .metecho-nested-checkboxes {
   // line up with above label; add grid + (faux checkbox + label margin)
-  // twice left padding of accordion + icon and icon margin spacing
-  padding-left: 2.875rem;
+  padding-left: $square-icon-x-small-boundary + $spacing-large;
 }
 
 [data-form='create-epic-branch'] {
