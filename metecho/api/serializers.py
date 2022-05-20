@@ -190,6 +190,11 @@ class GitHubOrganizationSerializer(HashIdModelSerializer):
         fields = ("id", "name", "avatar_url")
 
 
+class GitHubAppInstallationCheckSerializer(serializers.Serializer):
+    success = serializers.BooleanField()
+    messages = serializers.ListField(child=serializers.CharField())
+
+
 class OrgConfigNameSerializer(serializers.Serializer):
     key = serializers.CharField()
     label = serializers.CharField(required=False)

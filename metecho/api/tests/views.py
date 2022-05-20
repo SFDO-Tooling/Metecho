@@ -176,12 +176,75 @@ class TestGitHubOrganizationViewset:
         )
         assert response.json() == {"available": available}
 
-    def test_check_repo_name__missing_name(self, client, mocker, git_hub_organization):
+    def test_check_repo_name__missing_name(self, client, git_hub_organization):
         response = client.post(
             reverse("organization-check-repo-name", args=[git_hub_organization.id]),
             data={"name": ""},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
+
+    def test_check_app_installation(self, client, mocker, git_hub_organization):
+        org = git_hub_organization
+        installation = mocker.MagicMock(
+            repository_selection="all",
+            permissions={"members": "write", "administration": "write"},
+        )
+        gh = mocker.patch("metecho.api.views.gh")
+        gh.gh_as_user.return_value.organizations.return_value = [
+            mocker.Mock(login=org.login)
+        ]
+        gh.gh_as_app.return_value.app_installation_for_organization.return_value = (
+            installation
+        )
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        response = client.post(url)
+
+        assert response.json() == {"success": True, "messages": []}
+
+    def test_check_app_installation__not_installed(
+        self, client, mocker, git_hub_organization
+    ):
+        org = git_hub_organization
+        gh = mocker.patch("metecho.api.views.gh")
+        gh.gh_as_app.return_value.app_installation_for_organization.side_effect = (
+            NotFoundError(mocker.MagicMock())
+        )
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        data = client.post(url).json()
+
+        assert not data["success"]
+        assert "has not been installed" in data["messages"][0]
+
+    def test_check_app_installation__no_member(
+        self, client, mocker, git_hub_organization
+    ):
+        org = git_hub_organization
+        mocker.patch("metecho.api.views.gh")
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        data = client.post(url).json()
+
+        assert not data["success"]
+        assert "not a member" in data["messages"][0]
+
+    def test_check_app_installation__no_permissions(
+        self, client, mocker, git_hub_organization
+    ):
+        org = git_hub_organization
+        gh = mocker.patch("metecho.api.views.gh")
+        gh.gh_as_user.return_value.organizations.return_value = [
+            mocker.Mock(login=org.login)
+        ]
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        data = client.post(url).json()
+
+        assert not data["success"]
+        assert (
+            len(data["messages"]) == 3
+        ), "Expected three error messages when permission checks fail"
 
 
 @pytest.mark.django_db

@@ -134,7 +134,7 @@ class TestGitHubOrganizationAdmin:
         response = admin_client.post(url, data={"name": "Test", "login": "test"})
 
         assert not GitHubOrganization.objects.exists()
-        assert b"Could not access this organization on GitHub" in response.content
+        assert b"has not been installed" in response.content
 
     def test_org__good(self, admin_client, mocker):
         gh = mocker.patch("metecho.api.admin.gh", autospec=True)

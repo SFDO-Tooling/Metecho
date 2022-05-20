@@ -441,6 +441,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/GitHubOrganization'
           description: ''
+  /api/organizations/{id}/check_app_installation/:
+    post:
+      operationId: organizations_check_app_installation_create
+      description: Verify the GitHub App has been installed correctly in the organization
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this GitHub organization.
+        required: true
+      tags:
+      - organizations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitHubAppInstallationCheck'
+          description: ''
   /api/organizations/{id}/check_repo_name/:
     post:
       operationId: organizations_check_repo_name_create
@@ -1702,6 +1726,18 @@ components:
       - username
       - uses_global_devhub
       - valid_token_for
+    GitHubAppInstallationCheck:
+      type: object
+      properties:
+        success:
+          type: boolean
+        messages:
+          type: array
+          items:
+            type: string
+      required:
+      - messages
+      - success
     GitHubIssue:
       type: object
       properties:

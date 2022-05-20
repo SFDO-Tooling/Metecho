@@ -8,6 +8,8 @@ from django.template.defaultfilters import urlize
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 
+from metecho.api.constants import GitHubAppErrors
+
 from . import gh
 from .models import (
     Epic,
@@ -59,12 +61,7 @@ class GitHubOrganizationForm(forms.ModelForm):
             session = gh.gh_as_org(orgname=login)
             org = session.organization(login)
         except Exception:
-            raise forms.ValidationError(
-                _(
-                    "Could not access this organization on GitHub. "
-                    "Has the Metecho GitHub App been installed on this organization?"
-                )
-            )
+            raise forms.ValidationError(GitHubAppErrors.NOT_INSTALLED)
         self.cleaned_data["avatar_url"] = org.avatar_url
 
 

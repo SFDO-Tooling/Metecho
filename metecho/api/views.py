@@ -18,6 +18,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelV
 
 from . import gh
 from .authentication import GitHubHookAuthentication
+from .constants import GitHubAppErrors
 from .filters import (
     EpicFilter,
     GitHubIssueFilter,
@@ -51,6 +52,7 @@ from .serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubAppInstallationCheckSerializer,
     GitHubIssueSerializer,
     GitHubOrganizationSerializer,
     GuidedTourSerializer,
@@ -241,8 +243,7 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
             (member.as_dict() for member in gh_org.members()),
             key=lambda member: member["login"].lower(),
         )
-        members = ShortGitHubUserSerializer(data=members, many=True)
-        members.is_valid(raise_exception=True)
+        members = ShortGitHubUserSerializer(members, many=True)
         return Response(members.data)
 
     @extend_schema(
@@ -267,6 +268,42 @@ class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
         else:
             available = False
         return Response({"available": available})
+
+    @extend_schema(request=None, responses=GitHubAppInstallationCheckSerializer)
+    @action(detail=True, methods=["POST"])
+    def check_app_installation(self, request, pk):
+        """Verify the GitHub App has been installed correctly in the organization"""
+        org: GitHubOrganization = self.get_object()
+
+        try:
+            app = gh.gh_as_app()
+            installation = app.app_installation_for_organization(org.login)
+        except NotFoundError:
+            serializer = GitHubAppInstallationCheckSerializer(
+                {"success": False, "messages": [GitHubAppErrors.NOT_INSTALLED]}
+            )
+            return Response(serializer.data)
+
+        user_gh = gh.gh_as_user(request.user)
+        user_orgs = [org.login for org in user_gh.organizations()]
+        if org.login not in user_orgs:
+            serializer = GitHubAppInstallationCheckSerializer(
+                {"success": False, "messages": [GitHubAppErrors.NO_MEMBER]}
+            )
+            return Response(serializer.data)
+
+        errors = []
+        if installation.repository_selection != "all":
+            errors.append(GitHubAppErrors.LIMITED_REPOS)
+        if installation.permissions.get("members") != "write":
+            errors.append(GitHubAppErrors.MEMBERS_PERM)
+        if installation.permissions.get("administration") != "write":
+            errors.append(GitHubAppErrors.ADMIN_PERM)
+
+        serializer = GitHubAppInstallationCheckSerializer(
+            {"success": not errors, "messages": errors}
+        )
+        return Response(serializer.data)
 
 
 class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
