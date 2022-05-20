@@ -76,12 +76,12 @@ Setting up the GitHub App
 -------------------------
 
 To deploy this app, you will need to set up a GitHub App and give it proper
-permissions. You can do that at ``https://github.com/organizations/<your
-org>/settings/apps``
+permissions. You can do that at
+``https://github.com/organizations/<your_org>/settings/apps``
 
-The GitHub app let's users log into Metecho with their GitHub account,
-connect to repositories, create branches, pull requests, and commit code. The
-app will need the following permissions:
+The GitHub app lets users log into Metecho with their GitHub account, connect to
+repositories, create branches, pull requests, and commit code. The app will need
+the following permissions:
 
 - Repository permissions
     - Contents: Read & write
@@ -98,8 +98,8 @@ app will need the following permissions:
     - Pull request review
     - Push
 
-If you want to allow Metecho to create new repositories in your organization you
-must grant access to the app to all repositories, not a subset of them, and
+If you want to allow Metecho to create new repositories in your organization,
+you must grant access to the app to all repositories, not a subset of them, and
 enable these additional permissions:
 
 - Repository permissions

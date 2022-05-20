@@ -6,7 +6,7 @@ LIST = "list"
 
 
 class GitHubAppErrors:
-    NO_MEMBER = _("You are not a member of the this organization")
+    NO_MEMBER = _("You are not a member of this organization")
     NOT_INSTALLED = _("GitHub App has not been installed on this organization")
     MEMBERS_PERM = _(
         "GitHub App is missing write permission for Organization / Members"
