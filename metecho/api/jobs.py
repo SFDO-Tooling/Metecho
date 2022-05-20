@@ -194,9 +194,9 @@ def create_repository(
 
         # Create team & repository on GitHub
         team = org.create_team(f"{project} Team")
-        team.add_or_update_membership(user.username, role="maintainer")
         for collaborator in project.github_users:
-            team.add_or_update_membership(collaborator["login"], role="member")
+            role = "maintainer" if collaborator["login"] == user.username else "member"
+            team.add_or_update_membership(collaborator["login"], role=role)
         repo = org.create_repository(project.repo_name, private=False)
         team.add_repository(repo.full_name, permission="push")
         project.repo_id = repo.id

@@ -1389,8 +1389,8 @@ class TestCreateRepository:
         assert project.repo_id == 123456
         assert user.repositories.filter(repo_id=123456).exists()
         assert (
-            team.add_or_update_membership.call_count == 3
-        ), "Expected three calls: one for the user and two for the collaborators"
+            team.add_or_update_membership.call_count == 2
+        ), "Expected one call each collaborator"
         async_to_sync.return_value.assert_called_with(
             project,
             {

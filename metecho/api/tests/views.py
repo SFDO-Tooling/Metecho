@@ -563,7 +563,8 @@ class TestProjectViewset:
         assert project.repo_name == "foo"
         assert project.repo_owner == git_hub_organization.login
         assert project.github_users == [
-            {"id": "123", "login": "abc", "avatar_url": "http://example.com"}
+            {"id": "123", "login": "abc", "avatar_url": "http://example.com"},
+            {"login": client.user.username},
         ]
         create_repository_job.delay.assert_called_with(
             project,

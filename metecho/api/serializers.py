@@ -174,9 +174,9 @@ class RepoPermissionSerializer(serializers.Serializer):
 class ShortGitHubUserSerializer(serializers.Serializer):
     """See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser"""  # noqa: B950
 
-    id = serializers.CharField()
+    id = serializers.CharField(required=False)
     login = serializers.CharField()
-    avatar_url = serializers.URLField()
+    avatar_url = serializers.URLField(required=False)
 
 
 class GitHubUserSerializer(ShortGitHubUserSerializer):
@@ -284,6 +284,14 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             "github_users",
             "dependencies",
         )
+
+    def validate_github_users(self, github_users):
+        """Ensure the current user is always added as collaborator"""
+        user = self.context["request"].user
+        logins = [u["login"] for u in github_users]
+        if user.username not in logins:
+            github_users.append({"login": user.username})
+        return github_users
 
     def save(self, *args, **kwargs) -> Project:
         # `organization` is not an actual field on Project so we convert it to `repo_owner`

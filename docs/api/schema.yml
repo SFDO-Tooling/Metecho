@@ -1836,8 +1836,6 @@ components:
         permissions:
           $ref: '#/components/schemas/RepoPermission'
       required:
-      - avatar_url
-      - id
       - login
     GuidedTour:
       type: object
@@ -2615,8 +2613,6 @@ components:
           type: string
           format: uri
       required:
-      - avatar_url
-      - id
       - login
     Task:
       type: object
