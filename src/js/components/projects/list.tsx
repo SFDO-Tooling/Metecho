@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/js/components/404';
 import CreateProjectModal from '@/js/components/projects/createProjectModal';
@@ -25,11 +26,18 @@ import {
   selectProjects,
   selectProjectsRefreshing,
 } from '@/js/store/projects/selectors';
+import { addToast } from '@/js/store/toasts/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { OBJECT_TYPES, SHOW_PROJECT_CREATE_ERROR } from '@/js/utils/constants';
 
-const ProjectList = () => {
+const ProjectList = (
+  props: RouteComponentProps<
+    any,
+    any,
+    { [SHOW_PROJECT_CREATE_ERROR]?: { name: string; message?: string } }
+  >,
+) => {
   const { t } = useTranslation();
   const scrollY = useScrollPosition();
   const user = useSelector(selectUserState) as User;
@@ -40,6 +48,10 @@ const ProjectList = () => {
   const projects = useSelector(selectProjects);
   const refreshing = useSelector(selectProjectsRefreshing);
   const next = useSelector(selectNextUrl);
+  const {
+    history,
+    location: { state },
+  } = props;
 
   const openCreateProjectModal = () => {
     setCreateProjectModalOpen(true);
@@ -51,6 +63,25 @@ const ProjectList = () => {
   const doRefreshProjects = useCallback(() => {
     dispatch(refreshProjects());
   }, [dispatch]);
+
+  // Show error message if redirected after project creation failed
+  const { name, message } = state?.[SHOW_PROJECT_CREATE_ERROR] || {};
+  useEffect(() => {
+    if (name) {
+      // Remove location state
+      history.replace({ state: {} });
+      dispatch(
+        addToast({
+          heading: t(
+            'Uh oh. There was an error creating your new Project: “{{project_name}}.”',
+            { project_name: name },
+          ),
+          details: message,
+          variant: 'error',
+        }),
+      );
+    }
+  }, [dispatch, history, message, name, t]);
 
   useEffect(() => {
     if (fetchingProjects || !next) {

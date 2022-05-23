@@ -4,9 +4,11 @@ import { ThunkResult } from '@/js/store';
 import { fetchObjects, FetchObjectsSucceeded } from '@/js/store/actions';
 import { isCurrentUser } from '@/js/store/helpers';
 import { Project } from '@/js/store/projects/reducer';
+import { selectProjectById } from '@/js/store/projects/selectors';
 import { addToast } from '@/js/store/toasts/actions';
 import apiFetch from '@/js/utils/api';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { OBJECT_TYPES, SHOW_PROJECT_CREATE_ERROR } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface ProjectUpdated {
   type: 'PROJECT_UPDATE';
@@ -199,8 +201,23 @@ export const projectCreateError =
     message?: string;
     originating_user_id: string | null;
   }): ThunkResult<ProjectDeleted> =>
-  (dispatch, getState) => {
-    if (isCurrentUser(originating_user_id, getState())) {
+  (dispatch, getState, history) => {
+    const appState = getState();
+    const project = selectProjectById(appState, model.id);
+    const currentUser = isCurrentUser(originating_user_id, appState);
+
+    if (
+      history.location.pathname ===
+      routes.project_detail(project?.slug || model.slug)
+    ) {
+      // Redirect to projects-list if still on deleted project page.
+      // Error toasts are cleared on navigation, so wait to show message
+      // (see <ProjectList> component where message will be shown)
+      const state = currentUser
+        ? { [SHOW_PROJECT_CREATE_ERROR]: { name: model.name, message } }
+        : undefined;
+      history.push(routes.project_list(), state);
+    } else if (currentUser) {
       dispatch(
         addToast({
           heading: t(
