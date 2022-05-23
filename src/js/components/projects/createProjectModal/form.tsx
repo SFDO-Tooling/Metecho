@@ -2,81 +2,39 @@ import Combobox from '@salesforce/design-system-react/components/combobox';
 import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { ComboboxOption } from '@/js/components/epics/createForm';
 import RefreshGitHubOrgsButton from '@/js/components/githubOrgs/refreshOrgsButton';
 import { CreateProjectData } from '@/js/components/projects/createProjectModal';
 import { UseFormProps } from '@/js/components/utils';
-import { ThunkDispatch } from '@/js/store';
 import { GitHubOrg } from '@/js/store/user/reducer';
-import apiFetch from '@/js/utils/api';
 
 interface Props {
   orgs: GitHubOrg[];
   isRefreshingOrgs: boolean;
+  isCheckingRepoName: boolean;
+  nameIsAvailable?: boolean;
+  orgErrors: string[];
   inputs: CreateProjectData;
   errors: UseFormProps['errors'];
   handleInputChange: UseFormProps['handleInputChange'];
   setInputs: UseFormProps['setInputs'];
-  setHasErrors: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const CreateProjectForm = ({
   orgs,
   isRefreshingOrgs,
+  isCheckingRepoName,
+  nameIsAvailable,
+  orgErrors,
   inputs,
   errors,
   handleInputChange,
   setInputs,
-  setHasErrors,
 }: Props) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<ThunkDispatch>();
-  const [isCheckingRepoName, setIsCheckingRepoName] = useState(false);
-  const [nameIsAvailable, setNameIsAvailable] = useState<boolean>();
-
-  const checkRepoName = useCallback(
-    async (org: string, name: string) => {
-      if (org && name) {
-        setIsCheckingRepoName(true);
-        const { available } = await apiFetch({
-          url: window.api_urls.organization_check_repo_name(org),
-          dispatch,
-          opts: {
-            method: 'POST',
-            body: JSON.stringify({ name }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
-        });
-        setNameIsAvailable(available);
-        setIsCheckingRepoName(false);
-      } else {
-        setNameIsAvailable(undefined);
-      }
-    },
-    [dispatch],
-  );
-
-  const debouncedCheckRepoName = useMemo(
-    () => debounce(checkRepoName, 500),
-    [checkRepoName],
-  );
-
-  // Check repo name availability when org or name changes
-  useEffect(() => {
-    setNameIsAvailable(undefined);
-    debouncedCheckRepoName(inputs.organization, inputs.repo_name);
-  }, [inputs.organization, inputs.repo_name, debouncedCheckRepoName]);
-
-  useEffect(() => {
-    setHasErrors(!nameIsAvailable);
-  }, [nameIsAvailable, setHasErrors]);
 
   const handleOrgSelection = (
     event: any,
@@ -127,7 +85,9 @@ const CreateProjectForm = ({
                 : []
             }
             errorText={
-              isRefreshingOrgs ? '' : errors.organization || orgErrorMsg
+              isRefreshingOrgs
+                ? ''
+                : errors.organization || orgErrorMsg || orgErrors.join(', ')
             }
             required
             aria-required

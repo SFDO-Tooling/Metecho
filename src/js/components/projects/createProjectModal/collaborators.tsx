@@ -1,9 +1,8 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import { intersectionBy, uniqBy } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { uniqBy } from 'lodash';
+import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import setupSvg from '@/img/setup.svg?raw';
 import { EmptyIllustration } from '@/js/components/404';
@@ -15,55 +14,24 @@ import {
   SpinnerWrapper,
   UseFormProps,
 } from '@/js/components/utils';
-import { ThunkDispatch } from '@/js/store';
 import { GitHubUser } from '@/js/store/user/reducer';
-import apiFetch from '@/js/utils/api';
 
 interface Props {
+  collaborators: GitHubUser[];
+  isRefreshingCollaborators: boolean;
   inputs: CreateProjectData;
   setInputs: UseFormProps['setInputs'];
+  fetchCollaborators: (org: string) => Promise<void>;
 }
 
-const SelectProjectCollaboratorsForm = ({ inputs, setInputs }: Props) => {
+const SelectProjectCollaboratorsForm = ({
+  collaborators,
+  isRefreshingCollaborators,
+  inputs,
+  setInputs,
+  fetchCollaborators,
+}: Props) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<ThunkDispatch>();
-  const [collaborators, setCollaborators] = useState<GitHubUser[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // @@@ move this up a level so that we don't refetch on every render?
-  const fetchCollaborators = useCallback(async () => {
-    if (inputs.organization) {
-      setIsRefreshing(true);
-      const response = await apiFetch({
-        url: window.api_urls.organization_members(inputs.organization),
-        dispatch,
-      });
-      setCollaborators(response || []);
-      setIsRefreshing(false);
-    } else {
-      setCollaborators([]);
-    }
-  }, [dispatch, inputs.organization]);
-
-  // Fetch GitHub Org members when organization changes
-  useEffect(() => {
-    if (inputs.organization) {
-      fetchCollaborators();
-    }
-  }, [fetchCollaborators, inputs.organization]);
-
-  // When available GitHub Org members change, reset selected collaborators
-  const collaboratorsRef = useRef(collaborators);
-  useEffect(() => {
-    const prevValue = collaboratorsRef.current;
-    if (collaborators !== prevValue) {
-      setInputs({
-        ...inputs,
-        github_users: intersectionBy(inputs.github_users, collaborators, 'id'),
-      });
-      collaboratorsRef.current = collaborators;
-    }
-  }, [collaborators, inputs, setInputs]);
 
   const handleUserClick = useCallback(
     (user: GitHubUser) => {
@@ -82,6 +50,11 @@ const SelectProjectCollaboratorsForm = ({ inputs, setInputs }: Props) => {
       }
     },
     [inputs, setInputs],
+  );
+
+  const doRefreshCollaborators = useCallback(
+    () => fetchCollaborators(inputs.organization),
+    [fetchCollaborators, inputs.organization],
   );
 
   const updateSelection = (
@@ -113,8 +86,8 @@ const SelectProjectCollaboratorsForm = ({ inputs, setInputs }: Props) => {
             slds-grid_align-end"
         >
           <RefreshCollaboratorsButton
-            isRefreshing={isRefreshing}
-            doRefresh={fetchCollaborators}
+            isRefreshing={isRefreshingCollaborators}
+            doRefresh={doRefreshCollaborators}
           />
         </div>
       </div>
@@ -138,14 +111,14 @@ const SelectProjectCollaboratorsForm = ({ inputs, setInputs }: Props) => {
           </DataTable>
         ) : (
           <div className="slds-p-around_medium">
-            {isRefreshing ? (
+            {isRefreshingCollaborators ? (
               <Illustration svg={setupSvg} />
             ) : (
               <EmptyIllustration message={t('No Available Collaborators')} />
             )}
           </div>
         )}
-        {isRefreshing && <SpinnerWrapper />}
+        {isRefreshingCollaborators && <SpinnerWrapper />}
       </div>
     </form>
   );

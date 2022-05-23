@@ -1,8 +1,14 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import ProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import { compact } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { compact, debounce, intersectionBy } from 'lodash';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -24,7 +30,8 @@ import {
   selectFetchingProjectDependencies,
   selectProjectDependencies,
 } from '@/js/store/projects/selectors';
-import { GitHubOrg } from '@/js/store/user/reducer';
+import { GitHubOrg, GitHubUser } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
@@ -55,9 +62,15 @@ const CreateProjectModal = ({
   const fetchingDependencies = useSelector(selectFetchingProjectDependencies);
   const [pageIndex, setPageIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasErrors, setHasErrors] = useState(false);
   const hasDeps = Boolean(dependencies.length);
   const [fetchedDependencies, setFetchedDependencies] = useState(hasDeps);
+  const [isCheckingRepoName, setIsCheckingRepoName] = useState(false);
+  const [nameIsAvailable, setNameIsAvailable] = useState<boolean>();
+  const [collaborators, setCollaborators] = useState<GitHubUser[]>([]);
+  const [isRefreshingCollaborators, setIsRefreshingCollaborators] =
+    useState(false);
+  const [orgIsValid, setOrgIsValid] = useState(false);
+  const [orgErrors, setOrgErrors] = useState<string[]>([]);
 
   // When modal opens, fetch dependencies if list is empty
   useEffect(() => {
@@ -148,8 +161,104 @@ const CreateProjectModal = ({
     setInputs,
   });
 
+  const checkRepoName = useCallback(
+    async (org: string, name: string) => {
+      if (org && name) {
+        setIsCheckingRepoName(true);
+        const { available } = await apiFetch({
+          url: window.api_urls.organization_check_repo_name(org),
+          dispatch,
+          opts: {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        });
+        setNameIsAvailable(available);
+        setIsCheckingRepoName(false);
+      } else {
+        setNameIsAvailable(undefined);
+      }
+    },
+    [dispatch],
+  );
+
+  const debouncedCheckRepoName = useMemo(
+    () => debounce(checkRepoName, 500),
+    [checkRepoName],
+  );
+
+  // Check repo name availability when org or name changes
+  useEffect(() => {
+    setNameIsAvailable(undefined);
+    debouncedCheckRepoName(inputs.organization, inputs.repo_name);
+  }, [inputs.organization, inputs.repo_name, debouncedCheckRepoName]);
+
+  const fetchCollaborators = useCallback(
+    async (org: string) => {
+      if (org) {
+        setIsRefreshingCollaborators(true);
+        const response = await apiFetch({
+          url: window.api_urls.organization_members(org),
+          dispatch,
+        });
+        setCollaborators(response || []);
+        setIsRefreshingCollaborators(false);
+      } else {
+        setCollaborators([]);
+      }
+    },
+    [dispatch],
+  );
+
+  const checkOrgPermissions = useCallback(
+    async (org: string) => {
+      setOrgIsValid(false);
+      setOrgErrors([]);
+      if (org) {
+        // setIsCheckingRepoName(true);
+        const { success, messages }: { success: boolean; messages: string[] } =
+          await apiFetch({
+            url: window.api_urls.organization_check_app_installation(org),
+            dispatch,
+            opts: { method: 'POST' },
+          });
+        setOrgIsValid(success);
+        setOrgErrors(messages);
+      }
+    },
+    [dispatch],
+  );
+
+  // Fetch GitHub Org members and check permissions when organization changes
+  useEffect(() => {
+    if (inputs.organization) {
+      fetchCollaborators(inputs.organization);
+      checkOrgPermissions(inputs.organization);
+    }
+  }, [checkOrgPermissions, fetchCollaborators, inputs.organization]);
+
+  // When available GitHub Org members change, reset selected collaborators
+  const collaboratorsRef = useRef(collaborators);
+  useEffect(() => {
+    const prevValue = collaboratorsRef.current;
+    if (collaborators !== prevValue) {
+      setInputs({
+        ...inputs,
+        github_users: intersectionBy(inputs.github_users, collaborators, 'id'),
+      });
+      collaboratorsRef.current = collaborators;
+    }
+  }, [collaborators, inputs, setInputs]);
+
   const canSubmit = Boolean(
-    !hasErrors && inputs.name && inputs.organization && inputs.repo_name,
+    nameIsAvailable &&
+      orgIsValid &&
+      inputs.name &&
+      inputs.organization &&
+      inputs.repo_name,
   );
 
   const doSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -228,11 +337,13 @@ const CreateProjectModal = ({
         <CreateProjectForm
           orgs={orgs}
           isRefreshingOrgs={isRefreshingOrgs}
+          isCheckingRepoName={isCheckingRepoName}
+          nameIsAvailable={nameIsAvailable}
+          orgErrors={orgErrors}
           inputs={inputs as CreateProjectData}
           errors={errors}
           handleInputChange={handleInputChange}
           setInputs={setInputs}
-          setHasErrors={setHasErrors}
         />
       ),
       footer: (
@@ -247,8 +358,11 @@ const CreateProjectModal = ({
       heading: t('Add Project Collaborators'),
       contents: (
         <SelectProjectCollaboratorsForm
+          collaborators={collaborators}
+          isRefreshingCollaborators={isRefreshingCollaborators}
           inputs={inputs as CreateProjectData}
           setInputs={setInputs}
+          fetchCollaborators={fetchCollaborators}
         />
       ),
       footer: (
