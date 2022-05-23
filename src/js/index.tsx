@@ -93,7 +93,11 @@ const App = withRouter(
               <ErrorBoundary>
                 <Switch>
                   <Route exact path={routePatterns.login} component={Login} />
-                  <Route exact path={routePatterns.manage} component={Manage} />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.manage}
+                    component={Manage}
+                  />
                   <Route exact path={routePatterns.terms} component={Terms} />
                   <Redirect
                     exact
