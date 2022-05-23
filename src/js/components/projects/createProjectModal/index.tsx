@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import ProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import { compact, debounce, intersectionBy } from 'lodash';
+import { compact, debounce, filter, intersectionBy } from 'lodash';
 import React, {
   useCallback,
   useEffect,
@@ -31,6 +31,7 @@ import {
   selectProjectDependencies,
 } from '@/js/store/projects/selectors';
 import { GitHubOrg, GitHubUser } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import apiFetch from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
@@ -58,6 +59,7 @@ const CreateProjectModal = ({
   const history = useHistory();
   const dispatch = useDispatch<ThunkDispatch>();
   const isMounted = useIsMounted();
+  const user = useSelector(selectUserState);
   const dependencies = useSelector(selectProjectDependencies);
   const fetchingDependencies = useSelector(selectFetchingProjectDependencies);
   const [pageIndex, setPageIndex] = useState(0);
@@ -198,19 +200,22 @@ const CreateProjectModal = ({
 
   const fetchCollaborators = useCallback(
     async (org: string) => {
+      setCollaborators([]);
       if (org) {
         setIsRefreshingCollaborators(true);
         const response = await apiFetch({
           url: window.api_urls.organization_members(org),
           dispatch,
         });
-        setCollaborators(response || []);
+        if (response && user?.github_id) {
+          setCollaborators(
+            filter(response, (member) => member.id !== user.github_id),
+          );
+        }
         setIsRefreshingCollaborators(false);
-      } else {
-        setCollaborators([]);
       }
     },
-    [dispatch],
+    [dispatch, user?.github_id],
   );
 
   const checkOrgPermissions = useCallback(
