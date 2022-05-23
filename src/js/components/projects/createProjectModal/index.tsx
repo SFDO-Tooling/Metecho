@@ -1,7 +1,13 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import ProgressIndicator from '@salesforce/design-system-react/components/progress-indicator';
-import { compact, debounce, filter, intersectionBy } from 'lodash';
+import {
+  compact,
+  debounce,
+  filter,
+  intersection,
+  intersectionBy,
+} from 'lodash';
 import React, {
   useCallback,
   useEffect,
@@ -32,7 +38,7 @@ import {
 } from '@/js/store/projects/selectors';
 import { GitHubOrg, GitHubUser } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
-import apiFetch from '@/js/utils/api';
+import apiFetch, { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
@@ -87,6 +93,8 @@ const CreateProjectModal = ({
     }
   }, [dispatch, fetchedDependencies, isOpen]);
 
+  const showDeps = hasDeps || fetchingDependencies;
+
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
   };
@@ -118,10 +126,28 @@ const CreateProjectModal = ({
     }
   };
 
-  /* istanbul ignore next */
-  const handleError = () => {
+  // eslint-disable-next-line handle-callback-err
+  const handleError = (
+    err: ApiError,
+    fieldErrors: { [key: string]: string },
+  ) => {
+    /* istanbul ignore else */
     if (isMounted.current) {
       setIsSaving(false);
+      if (
+        intersection(Object.keys(fieldErrors), [
+          'organization',
+          'name',
+          'repo_name',
+          'description',
+        ])
+      ) {
+        setPageIndex(0);
+      } else if (fieldErrors.collaborators) {
+        setPageIndex(1);
+      } else if (fieldErrors.dependencies && showDeps) {
+        setPageIndex(2);
+      }
     }
   };
 
@@ -298,7 +324,6 @@ const CreateProjectModal = ({
     />
   );
 
-  const showDeps = hasDeps || fetchingDependencies;
   const steps = compact([
     { id: 'details', label: t('Enter Project Details') },
     { id: 'collaborators', label: t('Add Project Collaborators') },

@@ -20,13 +20,15 @@ import {
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
-import { refreshProjects } from '@/js/store/projects/actions';
+import {
+  addProjectCreateError,
+  refreshProjects,
+} from '@/js/store/projects/actions';
 import {
   selectNextUrl,
   selectProjects,
   selectProjectsRefreshing,
 } from '@/js/store/projects/selectors';
-import { addToast } from '@/js/store/toasts/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
 import { OBJECT_TYPES, SHOW_PROJECT_CREATE_ERROR } from '@/js/utils/constants';
@@ -70,16 +72,7 @@ const ProjectList = (
     if (name) {
       // Remove location state
       history.replace({ state: {} });
-      dispatch(
-        addToast({
-          heading: t(
-            'Uh oh. There was an error creating your new Project: “{{project_name}}.”',
-            { project_name: name },
-          ),
-          details: message,
-          variant: 'error',
-        }),
-      );
+      dispatch(addProjectCreateError({ name, message }));
     }
   }, [dispatch, history, message, name, t]);
 

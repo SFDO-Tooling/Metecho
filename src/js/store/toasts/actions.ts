@@ -2,7 +2,7 @@ import uuid from 'uuid-random';
 
 import { ToastType } from '@/js/store/toasts/reducer';
 
-interface AddToastAction {
+export interface AddToastAction {
   type: 'TOAST_ADDED';
   payload: ToastType;
 }

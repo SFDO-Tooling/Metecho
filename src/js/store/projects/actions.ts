@@ -5,7 +5,7 @@ import { fetchObjects, FetchObjectsSucceeded } from '@/js/store/actions';
 import { isCurrentUser } from '@/js/store/helpers';
 import { Project } from '@/js/store/projects/reducer';
 import { selectProjectById } from '@/js/store/projects/selectors';
-import { addToast } from '@/js/store/toasts/actions';
+import { addToast, AddToastAction } from '@/js/store/toasts/actions';
 import apiFetch from '@/js/utils/api';
 import { OBJECT_TYPES, SHOW_PROJECT_CREATE_ERROR } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
@@ -191,6 +191,26 @@ export const projectCreated =
     return dispatch(updateProject(model));
   };
 
+export const addProjectCreateError =
+  ({
+    name,
+    message,
+  }: {
+    name: string;
+    message?: string;
+  }): ThunkResult<AddToastAction> =>
+  (dispatch) =>
+    dispatch(
+      addToast({
+        heading: t(
+          'Uh oh. There was an error creating your new Project: “{{project_name}}.”',
+          { project_name: name },
+        ),
+        details: message,
+        variant: 'error',
+      }),
+    );
+
 export const projectCreateError =
   ({
     model,
@@ -208,6 +228,7 @@ export const projectCreateError =
 
     if (
       history.location.pathname ===
+      // `model.slug` can be `null` here, so use Project from the store instead
       routes.project_detail(project?.slug || model.slug)
     ) {
       // Redirect to projects-list if still on deleted project page.
@@ -219,13 +240,9 @@ export const projectCreateError =
       history.push(routes.project_list(), state);
     } else if (currentUser) {
       dispatch(
-        addToast({
-          heading: t(
-            'Uh oh. There was an error creating your new Project: “{{project_name}}.”',
-            { project_name: model.name },
-          ),
-          details: message,
-          variant: 'error',
+        addProjectCreateError({
+          name: model.name,
+          message,
         }),
       );
     }
