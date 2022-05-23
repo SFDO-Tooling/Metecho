@@ -630,6 +630,7 @@ const EpicDetail = (
               />
               {epicCollaborators.length ? (
                 <UserCards
+                  className="slds-m-top_large"
                   users={epicCollaborators}
                   userId={currentUser.github_id}
                   canRemoveUser={project.has_push_permission}

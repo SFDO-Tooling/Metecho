@@ -5,6 +5,7 @@ import {
   compact,
   debounce,
   filter,
+  find,
   intersection,
   intersectionBy,
 } from 'lodash';
@@ -23,6 +24,7 @@ import { AnyAction } from 'redux';
 import SelectProjectCollaboratorsForm from '@/js/components/projects/createProjectModal/collaborators';
 import SelectProjectDependenciesForm from '@/js/components/projects/createProjectModal/dependencies';
 import CreateProjectForm from '@/js/components/projects/createProjectModal/form';
+import CreateProjectSummary from '@/js/components/projects/createProjectModal/summary';
 import {
   LabelWithSpinner,
   useForm,
@@ -292,6 +294,14 @@ const CreateProjectModal = ({
       inputs.repo_name,
   );
 
+  const selectedOrg = inputs.organization
+    ? find(orgs, { id: inputs.organization })
+    : undefined;
+
+  const selectedDeps = filter(dependencies, (d) =>
+    (inputs as CreateProjectData).dependencies.includes(d.id),
+  );
+
   const doSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     setIsSaving(true);
     handleSubmit(e as any);
@@ -421,9 +431,15 @@ const CreateProjectModal = ({
       ),
     },
     {
-      heading: t('Create Project'),
+      heading: t('Create Project: “{{project_name}}”', {
+        project_name: inputs.name,
+      }),
       contents: (
-        <div className="slds-p-around_large">This is a placeholder.</div>
+        <CreateProjectSummary
+          selectedOrg={selectedOrg}
+          selectedCollaborators={inputs.github_users}
+          selectedDeps={selectedDeps}
+        />
       ),
       footer: (
         <div className="slds-grid slds-grid_align-spread">
@@ -435,7 +451,7 @@ const CreateProjectModal = ({
               isSaving ? (
                 <LabelWithSpinner label={t('Creating…')} variant="inverse" />
               ) : (
-                t('Create Project')
+                t('Create')
               )
             }
             variant="brand"
