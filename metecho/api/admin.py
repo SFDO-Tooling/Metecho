@@ -55,6 +55,10 @@ class GitHubOrganizationForm(forms.ModelForm):
         model = GitHubOrganization
         exclude = ()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["avatar_url"].help_text = _("Will be auto-populated after saving")
+
     def clean(self):
         login = self.cleaned_data["login"]
         try:
