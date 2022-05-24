@@ -19,7 +19,19 @@
   }
 
   .slds-accordion__section {
-    padding: $spacing-x-small $spacing-medium;
+    --slds-c-accordion-section-spacing-block-start: #{$spacing-x-small};
+    --slds-c-accordion-section-spacing-block-end: #{$spacing-x-small};
+    --slds-c-accordion-section-spacing-inline-start: #{$spacing-medium};
+    --slds-c-accordion-section-spacing-inline-end: #{$spacing-medium};
+  }
+
+  .accordion-no-padding {
+    .slds-is-open {
+      .slds-accordion__section {
+        --slds-c-accordion-section-spacing-inline-start: #{$spacing-large};
+        --slds-c-accordion-section-spacing-inline-end: 0;
+      }
+    }
   }
 
   &.has-checkboxes {
@@ -28,29 +40,9 @@
     }
   }
 
-  .slds-is-open {
-    > .slds-accordion__summary {
-      margin-bottom: $spacing-x-small;
-    }
-  }
-
   .grow-inner-item {
     .slds-accordion__summary-action > .slds-truncate {
       flex-grow: 1;
-    }
-  }
-
-  .accordion-no-padding {
-    > .slds-accordion__list-item {
-      > .slds-is-open {
-        padding: 0;
-
-        > .slds-accordion__summary {
-          padding-top: $spacing-x-small;
-          padding-left: $spacing-medium;
-          padding-right: $spacing-medium;
-        }
-      }
     }
   }
 }
