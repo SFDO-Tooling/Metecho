@@ -361,6 +361,7 @@ const CreateProjectModal = ({
 
   const Progress = (
     <ProgressIndicator
+      className="slds-m-left_xx-small slds-m-right_xx-small"
       steps={steps}
       completedSteps={steps.slice(0, pageIndex)}
       disabledSteps={canSubmit ? [] : steps.slice(1)}
