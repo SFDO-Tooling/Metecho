@@ -100,7 +100,8 @@ const CreateProjectForm = ({
             slds-grow
             slds-shrink-none
             slds-grid_align-end
-            slds-grid_vertical-align-center"
+            slds-m-top_large
+            slds-grid_vertical-align-start"
         >
           <RefreshGitHubOrgsButton isRefreshing={isRefreshingOrgs} />
         </div>
