@@ -4,16 +4,11 @@ import { uniqBy } from 'lodash';
 import React, { useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import setupSvg from '@/img/setup.svg?raw';
 import { EmptyIllustration } from '@/js/components/404';
 import RefreshCollaboratorsButton from '@/js/components/githubOrgs/refreshCollaboratorsButton';
 import { UserTableCell } from '@/js/components/githubUsers/assignEpicCollaborators';
 import { CreateProjectData } from '@/js/components/projects/createProjectModal';
-import {
-  Illustration,
-  SpinnerWrapper,
-  UseFormProps,
-} from '@/js/components/utils';
+import { SpinnerWrapper, UseFormProps } from '@/js/components/utils';
 import { GitHubUser } from '@/js/store/user/reducer';
 
 interface Props {
@@ -111,11 +106,7 @@ const SelectProjectCollaboratorsForm = ({
           </DataTable>
         ) : (
           <div className="slds-p-around_medium">
-            {isRefreshingCollaborators ? (
-              <Illustration svg={setupSvg} />
-            ) : (
-              <EmptyIllustration message={t('No Available Collaborators')} />
-            )}
+            <EmptyIllustration message={t('No Available Collaborators')} />
           </div>
         )}
         {isRefreshingCollaborators && <SpinnerWrapper />}

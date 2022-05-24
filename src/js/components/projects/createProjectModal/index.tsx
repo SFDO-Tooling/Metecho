@@ -228,19 +228,18 @@ const CreateProjectModal = ({
 
   const fetchCollaborators = useCallback(
     async (org: string) => {
-      setCollaborators([]);
       if (org) {
         setIsRefreshingCollaborators(true);
         const response = await apiFetch({
           url: window.api_urls.organization_members(org),
           dispatch,
         });
-        if (response && user?.github_id) {
-          setCollaborators(
-            filter(response, (member) => member.id !== user.github_id),
-          );
-        }
+        setCollaborators(
+          filter(response || [], (member) => member.id !== user?.github_id),
+        );
         setIsRefreshingCollaborators(false);
+      } else {
+        setCollaborators([]);
       }
     },
     [dispatch, user?.github_id],
