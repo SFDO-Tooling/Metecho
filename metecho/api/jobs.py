@@ -22,7 +22,7 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
-from github3.exceptions import NotFoundError
+from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.github import GitHub
 from github3.repos.repo import Repository
 
@@ -192,11 +192,23 @@ def create_repository(
             tpl_repo = None
             branch_name = "main"
 
-        # Create team & repository on GitHub
-        team = org.create_team(f"{project} Team")
+        # Create team on GitHub
+        team = None
+        counter = 0
+        while team is None:
+            suffix = f" {counter}" if counter else ""
+            try:
+                team = org.create_team(f"{project} Team{suffix}")
+            except UnprocessableEntity as err:
+                if err.msg == "Validation Failed":
+                    counter += 1
+                else:
+                    raise
         for collaborator in project.github_users:
             role = "maintainer" if collaborator["login"] == user.username else "member"
             team.add_or_update_membership(collaborator["login"], role=role)
+
+        # Create repo on GitHub
         repo = org.create_repository(project.repo_name, private=False)
         team.add_repository(repo.full_name, permission="push")
         project.repo_id = repo.id

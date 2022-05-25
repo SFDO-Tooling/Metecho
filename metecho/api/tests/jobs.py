@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
-from github3.exceptions import NotFoundError
+from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.orgs import Organization
 from simple_salesforce.exceptions import SalesforceGeneralError
 
@@ -1350,7 +1350,7 @@ class TestCreateRepository:
     def github_mocks(self, mocker, project_factory):
         """
         Mock the best-case scenario where the user is a member of the GH organization
-        and the repository is created successfully
+        and the repository and team are created successfully
         """
         project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
         team = mocker.MagicMock()
@@ -1366,11 +1366,11 @@ class TestCreateRepository:
         gh_org.create_team.return_value = team
         gh_org.create_repository.return_value = repo
 
-        return project, team, repo
+        return project, gh_org, team, repo
 
     def test_ok(self, mocker, github_mocks, user_factory):
         user = user_factory()
-        project, team, repo = github_mocks
+        project, org, team, repo = github_mocks
         mocker.patch(f"{PATCH_ROOT}.init_from_context")
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
@@ -1430,12 +1430,49 @@ class TestCreateRepository:
             include_user=False,
         )
 
+    def test__team_name_taken(self, mocker, github_mocks, project, user_factory):
+        user = user_factory()
+        project, org, team, repo = github_mocks
+        resp = mocker.MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Validation Failed"}
+        # Simulate the first two team names being taken
+        org.create_team.side_effect = [
+            UnprocessableEntity(resp),
+            UnprocessableEntity(resp),
+            mocker.DEFAULT,
+        ]
+        mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
+        sarge.capture_both.return_value.returncode = 0
+        mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
+
+        create_repository(project, user=user, dependencies=[])
+
+        org.create_team.assert_has_calls(
+            [
+                mocker.call(f"{project} Team"),
+                mocker.call(f"{project} Team 1"),
+                mocker.call(f"{project} Team 2"),
+            ]
+        )
+
+    def test__team_error(self, mocker, github_mocks, project, user_factory):
+        user = user_factory()
+        project, org, team, repo = github_mocks
+        resp = mocker.MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Not a validation error"}
+        org.create_team.side_effect = UnprocessableEntity(resp)
+
+        with pytest.raises(UnprocessableEntity, match="Not a validation error"):
+            create_repository(project, user=user, dependencies=[])
+
     @pytest.mark.parametrize("fail_repo_delete", (True, False))
     def test__push_error(
         self, mocker, caplog, github_mocks, user_factory, fail_repo_delete
     ):
         user = user_factory()
-        project, team, repo = github_mocks
+        project, org, team, repo = github_mocks
         repo.teams.return_value = [team]
         if fail_repo_delete:
             repo.delete.side_effect = Exception("REPO DELETE FAIL")
