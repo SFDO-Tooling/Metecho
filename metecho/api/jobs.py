@@ -209,7 +209,9 @@ def create_repository(
             team.add_or_update_membership(collaborator["login"], role=role)
 
         # Create repo on GitHub
-        repo = org.create_repository(project.repo_name, private=False)
+        repo = org.create_repository(
+            project.repo_name, description=project.description, private=False
+        )
         team.add_repository(repo.full_name, permission="push")
         project.repo_id = repo.id
 
