@@ -308,6 +308,7 @@ const CreateProjectModal = ({
 
   const CancelBtn = (args: any) => (
     <Button
+      className="slds-shrink-none"
       label={t('Cancel')}
       onClick={handleClose}
       disabled={isSaving}
@@ -317,6 +318,7 @@ const CreateProjectModal = ({
 
   const BackBtn = (args: any) => (
     <Button
+      className="slds-shrink-none"
       label={t('Go Back')}
       variant="outline-brand"
       onClick={prevPage}
@@ -326,6 +328,7 @@ const CreateProjectModal = ({
 
   const NextBtn = (args: any) => (
     <Button
+      className="slds-shrink-none"
       label={t('Save & Next')}
       variant="brand"
       onClick={nextPage}
@@ -447,6 +450,7 @@ const CreateProjectModal = ({
           {Progress}
           <Button
             key="submit"
+            className="slds-shrink-none"
             label={
               isSaving ? (
                 <LabelWithSpinner label={t('Creating…')} variant="inverse" />
