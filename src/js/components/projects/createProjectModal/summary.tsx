@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import UserCards from '@/js/components/githubUsers/cards';
@@ -24,11 +24,6 @@ const CreateProjectSummary = ({
 
   return (
     <form className="slds-form slds-p-around_large">
-      <p className="slds-m-bottom_medium">
-        <Trans i18nKey="projectSummaryHelp">
-          What help text should go here?
-        </Trans>
-      </p>
       <div className="slds-m-bottom_medium">
         <h2 className="slds-text-heading_small">
           {t('Project Name: “{{project_name}}”', {

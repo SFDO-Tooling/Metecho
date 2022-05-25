@@ -64,7 +64,7 @@ const SelectProjectCollaboratorsForm = ({
       <div
         className="slds-grid
           slds-grid_vertical-align-start
-          slds-p-around_medium"
+          slds-p-bottom_medium"
       >
         <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
           <p>
