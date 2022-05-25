@@ -69,7 +69,7 @@ const CreateProjectForm = ({
 
   return (
     <form className="slds-form slds-p-around_large">
-      <div className="slds-grid slds-form-element_stacked slds-p-left_none">
+      <div className="slds-grid slds-wrap slds-form-element_stacked slds-p-left_none">
         <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
           <Combobox
             events={{
