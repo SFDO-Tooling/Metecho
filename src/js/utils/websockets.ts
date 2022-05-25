@@ -376,6 +376,7 @@ export const getAction = (event: EventType) => {
     case 'PROJECT_CREATE_ERROR':
       return hasModel(event) && projectCreateError(event.payload);
     case 'REFRESH_GH_USERS_ERROR': {
+      /* istanbul ignore else */
       if (hasModel(event)) {
         const { model } = event.payload;
         const heading = t(
@@ -384,9 +385,11 @@ export const getAction = (event: EventType) => {
         );
         return projectError({ ...event.payload, heading });
       }
+      /* istanbul ignore next */
       return false;
     }
     case 'REFRESH_GH_ISSUES_ERROR': {
+      /* istanbul ignore else */
       if (hasModel(event)) {
         const { model } = event.payload;
         const heading = t(
@@ -395,6 +398,7 @@ export const getAction = (event: EventType) => {
         );
         return projectError({ ...event.payload, heading });
       }
+      /* istanbul ignore next */
       return false;
     }
     case 'EPIC_CREATE':

@@ -49,7 +49,7 @@ export interface ProjectsState {
   fetchingDependencies: boolean;
 }
 
-const defaultState: ProjectsState = {
+export const defaultState: ProjectsState = {
   projects: [],
   next: null,
   notFound: [],

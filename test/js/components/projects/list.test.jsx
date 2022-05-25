@@ -1,12 +1,17 @@
 import useScrollPosition from '@react-hook/window-scroll';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 
 import ProjectList from '@/js/components/projects/list';
 import { fetchObjects } from '@/js/store/actions';
-import { refreshProjects } from '@/js/store/projects/actions';
+import {
+  addProjectCreateError,
+  refreshProjects,
+} from '@/js/store/projects/actions';
+import { SHOW_PROJECT_CREATE_ERROR } from '@/js/utils/constants';
 
+import { sampleUser1 } from '../../../../src/stories/fixtures';
 import {
   renderWithRedux,
   reRenderWithRedux,
@@ -19,31 +24,54 @@ jest.mock('@/js/store/projects/actions');
 
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+addProjectCreateError.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 useScrollPosition.mockReturnValue(0);
 
 afterEach(() => {
   fetchObjects.mockClear();
   refreshProjects.mockClear();
+  addProjectCreateError.mockClear();
 });
+
+const defaultState = {
+  projects: {
+    projects: [],
+    notFound: [],
+    next: null,
+    refreshing: false,
+    dependencies: [],
+    fetchingDependencies: false,
+  },
+  user: sampleUser1,
+};
 
 describe('<ProjectList />', () => {
   const setup = ({
-    initialState = {
-      projects: { projects: [], notFound: [], next: null },
-    },
+    initialState = defaultState,
+    location = {},
     props = {},
     rerender = null,
     store,
   } = {}) => {
+    const context = {};
+    const history = { replace: jest.fn() };
     const ui = (
-      <MemoryRouter>
-        <ProjectList {...props} />
-      </MemoryRouter>
+      <StaticRouter context={context}>
+        <ProjectList location={location} history={history} {...props} />
+      </StaticRouter>
     );
     if (rerender) {
-      return reRenderWithRedux(ui, store, rerender);
+      return {
+        ...reRenderWithRedux(ui, store, rerender),
+        context,
+        history,
+      };
     }
-    return renderWithRedux(ui, initialState, storeWithThunk);
+    return {
+      ...renderWithRedux(ui, initialState, storeWithThunk),
+      context,
+      history,
+    };
   };
 
   test('renders projects list (empty)', () => {
@@ -54,7 +82,9 @@ describe('<ProjectList />', () => {
 
   test('renders projects list', () => {
     const initialState = {
+      ...defaultState,
       projects: {
+        ...defaultState.projects,
         projects: [
           {
             id: 'r1',
@@ -65,8 +95,6 @@ describe('<ProjectList />', () => {
             repo_url: 'https://github.com/test/test-repo',
           },
         ],
-        notFound: [],
-        next: null,
       },
     };
     const { getByText } = setup({ initialState });
@@ -77,7 +105,9 @@ describe('<ProjectList />', () => {
 
   describe('fetching more projects', () => {
     const initialState = {
+      ...defaultState,
       projects: {
+        ...defaultState.projects,
         projects: [
           {
             id: 'r1',
@@ -88,7 +118,6 @@ describe('<ProjectList />', () => {
             repo_url: 'https://github.com/test/test-repo',
           },
         ],
-        notFound: [],
         next: 'next-url',
       },
     };
@@ -152,16 +181,51 @@ describe('<ProjectList />', () => {
     test('displays button as loading', () => {
       const { getByText } = setup({
         initialState: {
+          ...defaultState,
           projects: {
+            ...defaultState.projects,
             projects: [],
-            notFound: [],
-            next: null,
             refreshing: true,
           },
         },
       });
 
       expect(getByText('Syncing Projects…')).toBeVisible();
+    });
+  });
+
+  describe('CreateProjectModal', () => {
+    test('can open and close', () => {
+      const { getByText, getByLabelText, getByTitle, queryByLabelText } =
+        setup();
+      const btn = getByText('Create Project');
+
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(
+        getByLabelText('GitHub Repository Name', { exact: false }),
+      ).toBeVisible();
+
+      fireEvent.click(getByTitle('Cancel'));
+
+      expect(queryByLabelText('GitHub Repository Name')).toBeNull();
+    });
+  });
+
+  describe('redirect from create project error', () => {
+    test('shows error message', async () => {
+      const { history } = setup({
+        location: {
+          state: { [SHOW_PROJECT_CREATE_ERROR]: { name: 'Test Project' } },
+        },
+      });
+
+      await waitFor(() => {
+        expect(addProjectCreateError).toHaveBeenCalledTimes(1);
+      });
+      expect(history.replace).toHaveBeenCalledWith({ state: {} });
     });
   });
 });

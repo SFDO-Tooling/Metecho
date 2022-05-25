@@ -181,8 +181,12 @@ export const projectCreated =
             'Successfully created GitHub Repository for new Project: “{{project_name}}.”',
             { project_name: model.name },
           ),
-          linkText: model.repo_url ? t('View Project on GitHub.') : undefined,
-          linkUrl: model.repo_url ? model.repo_url : undefined,
+          linkText: model.repo_url
+            ? t('View Project on GitHub.')
+            : /* istanbul ignore next */ undefined,
+          linkUrl: model.repo_url
+            ? model.repo_url
+            : /* istanbul ignore next */ undefined,
           openLinkInNewWindow: true,
         }),
       );

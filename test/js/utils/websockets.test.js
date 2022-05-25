@@ -25,6 +25,8 @@ import {
   updateOrg,
 } from '@/js/store/orgs/actions';
 import {
+  projectCreated,
+  projectCreateError,
   projectError,
   projectsRefreshed,
   projectsRefreshError,
@@ -39,6 +41,7 @@ import {
   submitReviewFailed,
   updateTask,
 } from '@/js/store/tasks/actions';
+import { orgsRefreshError, refreshUser } from '@/js/store/user/actions';
 import * as sockets from '@/js/utils/websockets';
 
 jest.mock('@/js/store/actions');
@@ -46,36 +49,41 @@ jest.mock('@/js/store/orgs/actions');
 jest.mock('@/js/store/epics/actions');
 jest.mock('@/js/store/projects/actions');
 jest.mock('@/js/store/tasks/actions');
+jest.mock('@/js/store/user/actions');
 
 const actions = {
   commitFailed,
   commitSucceeded,
+  createEpic,
   createEpicPR,
   createEpicPRFailed,
+  createTask,
   createTaskPR,
   createTaskPRFailed,
   deleteFailed,
   deleteOrg,
   orgConvertFailed,
   orgProvisioning,
-  orgReassigned,
   orgReassignFailed,
+  orgReassigned,
   orgRefreshed,
+  orgsRefreshError,
+  projectCreateError,
+  projectCreated,
+  projectError,
+  projectsRefreshError,
+  projectsRefreshed,
   provisionFailed,
   provisionOrg,
   recreateOrg,
   refreshError,
+  refreshUser,
   removeObject,
-  projectError,
-  projectsRefreshed,
-  projectsRefreshError,
   submitReview,
   submitReviewFailed,
+  updateEpic,
   updateFailed,
   updateOrg,
-  createEpic,
-  createTask,
-  updateEpic,
   updateProject,
   updateTask,
 };
@@ -111,7 +119,8 @@ afterEach(() => {
 describe('getAction', () => {
   test.each([
     ['PROJECT_UPDATE', 'updateProject', true],
-    ['PROJECT_UPDATE_ERROR', 'projectError', false],
+    ['PROJECT_CREATE', 'projectCreated', false],
+    ['PROJECT_CREATE_ERROR', 'projectCreateError', false],
     ['EPIC_CREATE', 'createEpic', true],
     ['EPIC_UPDATE', 'updateEpic', true],
     ['EPIC_CREATE_PR', 'createEpicPR', false],
@@ -163,6 +172,51 @@ describe('getAction', () => {
       sockets.getAction(event);
 
       expect(projectsRefreshError).toHaveBeenCalledWith('foo');
+    });
+  });
+
+  describe('USER_ORGS_REFRESH', () => {
+    test('calls refreshUser', () => {
+      const event = { type: 'USER_ORGS_REFRESH' };
+      sockets.getAction(event);
+
+      expect(refreshUser).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('USER_ORGS_REFRESH_ERROR', () => {
+    test('calls orgsRefreshError', () => {
+      const event = {
+        type: 'USER_ORGS_REFRESH_ERROR',
+        payload: { message: 'foo' },
+      };
+      sockets.getAction(event);
+
+      expect(orgsRefreshError).toHaveBeenCalledWith('foo');
+    });
+  });
+
+  describe('REFRESH_GH_USERS_ERROR', () => {
+    test('calls projectError', () => {
+      const event = {
+        type: 'REFRESH_GH_USERS_ERROR',
+        payload: { model: { name: 'Test Name' } },
+      };
+      sockets.getAction(event);
+
+      expect(projectError).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('REFRESH_GH_ISSUES_ERROR', () => {
+    test('calls projectError', () => {
+      const event = {
+        type: 'REFRESH_GH_ISSUES_ERROR',
+        payload: { model: { name: 'Test Name' } },
+      };
+      sockets.getAction(event);
+
+      expect(projectError).toHaveBeenCalledTimes(1);
     });
   });
 
