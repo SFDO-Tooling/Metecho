@@ -47,7 +47,6 @@ def copy_branch_protection(source: Branch, target: Branch):
 
     - Require signed commits
     - Require deployments to succeed before merging
-    - Restrict pushes that create matching branches
 
     [1]: https://docs.github.com/en/rest/branches/branch-protection#get-branch-protection
     [2]: https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection
@@ -100,8 +99,8 @@ def copy_branch_protection(source: Branch, target: Branch):
         },
     }
     # Setting the protection rules on the destination could be achieved by calling
-    # `dst.protect()`, but that relies on github3py supporting all GitHub API fields as
-    # function arguments. Instead of waiting for that we `_put` the data directly and
+    # `target.protect()`, but that relies on github3py supporting all GitHub API fields
+    # as function arguments. Instead of waiting for that we `_put` the data directly and
     # can update at our own pace if GitHub changes the protection schema
     target_url = target._build_url("protection", base_url=target._api)
     resp = target._put(target_url, json=data)
