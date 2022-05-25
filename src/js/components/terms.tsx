@@ -42,6 +42,7 @@ export const TermsModal = ({
     <Modal
       isOpen={isRequired || isOpen || false}
       disableClose={isRequired}
+      dismissOnClickOutside={false}
       heading={t('Metecho Terms of Service')}
       size="medium"
       assistiveText={{ closeButton: t('Close') }}

@@ -11,6 +11,7 @@ export const api_urls = {
   salesforce_login: () => '/accounts/salesforce/login/',
   current_user_detail: () => '/api/user/',
   current_user_refresh: () => '/api/user/refresh/',
+  current_user_refresh_orgs: () => '/api/user/refresh_orgs/',
   current_user_disconnect: () => '/api/user/disconnect/',
   current_user_agree_to_tos: () => '/api/user/agree_to_tos/',
   current_user_complete_onboarding: () => '/api/user/complete_onboarding/',
@@ -41,6 +42,11 @@ export const api_urls = {
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
   issue_list: () => '/api/issues/',
+  organization_check_repo_name: (id: string) =>
+    `/api/organizations/${id}/check_repo_name/`,
+  organization_members: (id: string) => `/api/organizations/${id}/members/`,
+  organization_check_app_installation: (id: string) =>
+    `/api/organizations/${id}/check_app_installation/`,
 };
 
 export const sampleUser1 = {
@@ -868,4 +874,22 @@ export const sampleIssue4 = {
     slug: sampleTask1.slug,
     epic_slug: null,
   },
+};
+
+export const sampleProjectDependency = {
+  id: 'dep-1',
+  name: 'A Test Dependency',
+  recommended: false,
+};
+
+export const sampleGitHubOrg = {
+  id: 'org-1',
+  name: 'A Test Org',
+  avatar_url: '',
+};
+
+export const sampleGitHubOrg2 = {
+  id: 'org-2',
+  name: 'Another Test Org',
+  avatar_url: '',
 };

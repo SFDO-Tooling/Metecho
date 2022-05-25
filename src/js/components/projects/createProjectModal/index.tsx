@@ -471,6 +471,7 @@ const CreateProjectModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={isSaving}
+      dismissOnClickOutside={false}
       heading={pages[pageIndex].heading}
       assistiveText={{ closeButton: t('Cancel') }}
       footer={pages[pageIndex].footer}

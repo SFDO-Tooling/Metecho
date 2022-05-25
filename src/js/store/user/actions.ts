@@ -280,10 +280,6 @@ export const refreshOrgs =
     }
   };
 
-export const orgsRefreshing = (): OrgsRefreshing => ({
-  type: 'REFRESHING_ORGS',
-});
-
 export const orgsRefreshError =
   (message?: string): ThunkResult<OrgsRefreshError> =>
   (dispatch) => {

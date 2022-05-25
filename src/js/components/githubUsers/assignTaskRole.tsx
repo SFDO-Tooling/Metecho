@@ -129,6 +129,7 @@ const AssignTaskRoleModal = ({
       isOpen={isOpen}
       onRequestClose={handleClose}
       assistiveText={{ closeButton: t('Cancel') }}
+      dismissOnClickOutside={false}
       heading={heading}
       directional
       size="small"

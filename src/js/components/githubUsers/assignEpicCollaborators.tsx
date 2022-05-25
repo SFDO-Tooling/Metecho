@@ -115,6 +115,7 @@ const AssignEpicCollaboratorsModal = ({
           : null
       }
       size="small"
+      dismissOnClickOutside={false}
       onRequestClose={handleClose}
     >
       <div

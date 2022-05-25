@@ -180,6 +180,7 @@ const CreateTaskModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={isSaving || isSavingBatch}
+      dismissOnClickOutside={false}
       heading={heading}
       assistiveText={{ closeButton: t('Cancel') }}
       onRequestClose={closeModal}

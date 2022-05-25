@@ -245,6 +245,7 @@ const CreateEpicModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={isSaving}
+      dismissOnClickOutside={false}
       heading={heading}
       onRequestClose={closeForm}
       assistiveText={{ closeButton: t('Cancel') }}

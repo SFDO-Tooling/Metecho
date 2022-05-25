@@ -9,7 +9,7 @@ interface Props {
   doRefresh: () => void;
 }
 
-const RefreshGitHubOrgsButton = ({ isRefreshing, doRefresh }: Props) => {
+const RefreshCollaboratorsButton = ({ isRefreshing, doRefresh }: Props) => {
   const { t } = useTranslation();
 
   return (
@@ -36,4 +36,4 @@ const RefreshGitHubOrgsButton = ({ isRefreshing, doRefresh }: Props) => {
   );
 };
 
-export default RefreshGitHubOrgsButton;
+export default RefreshCollaboratorsButton;

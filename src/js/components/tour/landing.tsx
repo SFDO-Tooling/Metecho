@@ -58,6 +58,7 @@ const LandingModal = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
+      dismissOnClickOutside={false}
       assistiveText={{ closeButton: t('Close') }}
       size="medium"
       className="metecho-transition-in"
