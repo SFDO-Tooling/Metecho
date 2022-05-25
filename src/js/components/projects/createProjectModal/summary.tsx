@@ -8,12 +8,14 @@ import { Dependency } from '@/js/store/projects/reducer';
 import { GitHubOrg, GitHubUser } from '@/js/store/user/reducer';
 
 interface Props {
+  name: string;
   selectedOrg?: GitHubOrg;
   selectedCollaborators: GitHubUser[];
   selectedDeps: Dependency[];
 }
 
 const CreateProjectSummary = ({
+  name,
   selectedOrg,
   selectedCollaborators,
   selectedDeps,
@@ -27,6 +29,13 @@ const CreateProjectSummary = ({
           What help text should go here?
         </Trans>
       </p>
+      <div className="slds-m-bottom_medium">
+        <h2 className="slds-text-heading_small">
+          {t('Project Name: “{{project_name}}”', {
+            project_name: name,
+          })}
+        </h2>
+      </div>
       <div className="slds-m-bottom_medium">
         <h2 className="slds-text-heading_small slds-m-bottom_x-small">
           {t('GitHub Organization')}

@@ -434,11 +434,10 @@ const CreateProjectModal = ({
       ),
     },
     {
-      heading: t('Create Project: “{{project_name}}”', {
-        project_name: inputs.name,
-      }),
+      heading: t('Create Project'),
       contents: (
         <CreateProjectSummary
+          name={inputs.name}
           selectedOrg={selectedOrg}
           selectedCollaborators={inputs.github_users}
           selectedDeps={selectedDeps}
