@@ -176,12 +176,14 @@ const ProjectList = (
         className="slds-align-middle"
       />
       {refreshing ? (
-        <Button
-          label={<LabelWithSpinner label={t('Syncing Projects…')} />}
-          variant="outline-brand"
-          className="slds-align-middle"
-          disabled
-        />
+        <div className="slds-m-left_x-small inline-container">
+          <Button
+            label={<LabelWithSpinner label={t('Syncing Projects…')} />}
+            variant="outline-brand"
+            className="slds-align-middle"
+            disabled
+          />
+        </div>
       ) : (
         <div className="slds-is-relative inline-container slds-m-left_x-small">
           <Button
