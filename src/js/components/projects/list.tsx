@@ -183,7 +183,7 @@ const ProjectList = (
           disabled
         />
       ) : (
-        <div className="slds-is-relative inline-container slds-m-left_xx-small">
+        <div className="slds-is-relative inline-container slds-m-left_x-small">
           <Button
             label={t('Re-Sync Projects')}
             variant="outline-brand"
