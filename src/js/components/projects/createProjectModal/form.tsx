@@ -70,7 +70,7 @@ const CreateProjectForm = ({
   return (
     <form className="slds-form slds-p-around_large">
       <div className="slds-grid slds-wrap slds-form-element_stacked slds-p-left_none">
-        <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+        <div className="slds-grid slds-wrap slds-shrink">
           <Combobox
             events={{
               onSelect: handleOrgSelection,
@@ -101,6 +101,7 @@ const CreateProjectForm = ({
             slds-shrink-none
             slds-grid_align-end
             slds-m-top_large
+            slds-m-left_medium
             slds-grid_vertical-align-start"
         >
           <RefreshGitHubOrgsButton isRefreshing={isRefreshingOrgs} />
