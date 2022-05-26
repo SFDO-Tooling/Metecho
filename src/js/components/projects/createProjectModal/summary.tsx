@@ -23,14 +23,12 @@ const CreateProjectSummary = ({
   const { t } = useTranslation();
 
   return (
-    <form className="slds-form slds-p-around_large">
-      <div className="slds-m-bottom_medium">
-        <h3 className="slds-text-heading_small">
-          {t('Project Name: “{{project_name}}”', {
-            project_name: name,
-          })}
-        </h3>
-      </div>
+    <form className="slds-form slds-p-around_large slds-m-bottom_medium">
+      <h3 className="slds-text-heading_small">
+        {t('Project Name: “{{project_name}}”', {
+          project_name: name,
+        })}
+      </h3>
       <div className="slds-m-bottom_medium">
         <h3 className="slds-text-heading_small slds-m-bottom_x-small">
           {t('GitHub Organization')}
