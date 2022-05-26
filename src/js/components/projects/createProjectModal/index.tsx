@@ -369,7 +369,7 @@ const CreateProjectModal = ({
 
   const Progress = (
     <ProgressIndicator
-      className="slds-m-horizontal_x-small create-progress"
+      className="slds-m-horizontal_x-small metecho-create-project-progress"
       steps={steps}
       completedSteps={steps.slice(0, pageIndex)}
       disabledSteps={canSubmit ? [] : steps.slice(1)}
