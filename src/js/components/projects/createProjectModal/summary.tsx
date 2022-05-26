@@ -25,16 +25,16 @@ const CreateProjectSummary = ({
   return (
     <form className="slds-form slds-p-around_large">
       <div className="slds-m-bottom_medium">
-        <h2 className="slds-text-heading_small">
+        <h3 className="slds-text-heading_small">
           {t('Project Name: “{{project_name}}”', {
             project_name: name,
           })}
-        </h2>
+        </h3>
       </div>
       <div className="slds-m-bottom_medium">
-        <h2 className="slds-text-heading_small slds-m-bottom_x-small">
+        <h3 className="slds-text-heading_small slds-m-bottom_x-small">
           {t('GitHub Organization')}
-        </h2>
+        </h3>
         <div
           className="slds-button
             slds-size_full
@@ -49,9 +49,9 @@ const CreateProjectSummary = ({
       </div>
       {selectedCollaborators.length ? (
         <div className="slds-m-bottom_medium">
-          <h2 className="slds-text-heading_small slds-m-bottom_x-small">
+          <h3 className="slds-text-heading_small slds-m-bottom_x-small">
             {t('Project Collaborators')}
-          </h2>
+          </h3>
           <UserCards users={selectedCollaborators} twoColumn />
         </div>
       ) : null}
