@@ -496,7 +496,7 @@ const EpicDetail = (
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container">
+        <div className="slds-is-relative inline-container slds-m-left_x-small">
           <ExternalLink
             url={branchLink}
             showButtonIcon

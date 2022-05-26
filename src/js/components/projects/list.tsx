@@ -175,41 +175,41 @@ const ProjectList = (
         onClick={openCreateProjectModal}
         className="slds-align-middle"
       />
-      {refreshing ? (
-        <div className="slds-m-left_x-small inline-container">
+      <div className="slds-is-relative inline-container slds-m-left_x-small">
+        {refreshing ? (
           <Button
             label={<LabelWithSpinner label={t('Syncing Projects…')} />}
             variant="outline-brand"
             className="slds-align-middle"
             disabled
           />
-        </div>
-      ) : (
-        <div className="slds-is-relative inline-container slds-m-left_x-small">
-          <Button
-            label={t('Re-Sync Projects')}
-            variant="outline-brand"
-            iconCategory="utility"
-            iconName="refresh"
-            iconPosition="left"
-            onClick={doRefreshProjects}
-            className="slds-align-middle"
-          />
-          <TourPopover
-            id="tour-projects-resync-list"
-            align="bottom right"
-            heading={t('View an updated Project list')}
-            body={
-              <Trans i18nKey="tourUpdateProject">
-                If you have recently been added to a Project on GitHub, you may
-                not yet see your new Project in this list. First, make sure you
-                are logged in with the correct GitHub account. Next, use the
-                re-sync button to get an updated list of Projects.
-              </Trans>
-            }
-          />
-        </div>
-      )}
+        ) : (
+          <>
+            <Button
+              label={t('Re-Sync Projects')}
+              variant="outline-brand"
+              iconCategory="utility"
+              iconName="refresh"
+              iconPosition="left"
+              onClick={doRefreshProjects}
+              className="slds-align-middle"
+            />
+            <TourPopover
+              id="tour-projects-resync-list"
+              align="bottom right"
+              heading={t('View an updated Project list')}
+              body={
+                <Trans i18nKey="tourUpdateProject">
+                  If you have recently been added to a Project on GitHub, you
+                  may not yet see your new Project in this list. First, make
+                  sure you are logged in with the correct GitHub account. Next,
+                  use the re-sync button to get an updated list of Projects.
+                </Trans>
+              }
+            />
+          </>
+        )}
+      </div>
     </PageHeaderControl>
   );
 
