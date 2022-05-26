@@ -12,27 +12,21 @@ interface Props {
 const RefreshCollaboratorsButton = ({ isRefreshing, doRefresh }: Props) => {
   const { t } = useTranslation();
 
-  return (
-    <>
-      {isRefreshing ? (
-        <Button
-          label={
-            <LabelWithSpinner label={t('Syncing GitHub Collaborators…')} />
-          }
-          variant="outline-brand"
-          disabled
-        />
-      ) : (
-        <Button
-          label={t('Re-Sync GitHub Collaborators')}
-          variant="outline-brand"
-          iconCategory="utility"
-          iconName="refresh"
-          iconPosition="left"
-          onClick={doRefresh}
-        />
-      )}
-    </>
+  return isRefreshing ? (
+    <Button
+      label={<LabelWithSpinner label={t('Syncing GitHub Collaborators…')} />}
+      variant="outline-brand"
+      disabled
+    />
+  ) : (
+    <Button
+      label={t('Re-Sync GitHub Collaborators')}
+      variant="outline-brand"
+      iconCategory="utility"
+      iconName="refresh"
+      iconPosition="left"
+      onClick={doRefresh}
+    />
   );
 };
 

@@ -18,27 +18,21 @@ const RefreshGitHubOrgsButton = ({ isRefreshing }: Props) => {
     dispatch(refreshOrgs());
   }, [dispatch]);
 
-  return (
-    <>
-      {isRefreshing ? (
-        <Button
-          label={
-            <LabelWithSpinner label={t('Syncing GitHub Organizations…')} />
-          }
-          variant="outline-brand"
-          disabled
-        />
-      ) : (
-        <Button
-          label={t('Re-Sync GitHub Organizations')}
-          variant="outline-brand"
-          iconCategory="utility"
-          iconName="refresh"
-          iconPosition="left"
-          onClick={doRefreshOrgs}
-        />
-      )}
-    </>
+  return isRefreshing ? (
+    <Button
+      label={<LabelWithSpinner label={t('Syncing GitHub Organizations…')} />}
+      variant="outline-brand"
+      disabled
+    />
+  ) : (
+    <Button
+      label={t('Re-Sync GitHub Organizations')}
+      variant="outline-brand"
+      iconCategory="utility"
+      iconName="refresh"
+      iconPosition="left"
+      onClick={doRefreshOrgs}
+    />
   );
 };
 
