@@ -247,7 +247,8 @@ def create_repository(
                 f"""
                 git init;
                 git checkout -b {branch_name};
-                git config user.email {user.email};
+                git config user.name '{user.get_full_name() or user.username}';
+                git config user.email '{user.email}';
                 git add --all;
                 git commit -m 'Bootstrap project (via Metecho)';
                 git push https://{user_gh.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
