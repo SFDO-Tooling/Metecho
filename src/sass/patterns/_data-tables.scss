@@ -20,6 +20,12 @@
   }
 }
 
+// Override React LDS checkbox background color change on hover inside of table headers
+.align-checkboxes .slds-th__action:focus,
+.slds-th__action:hover {
+  background-color: inherit;
+}
+
 // Override LDS table cell padding to make click target fill the whole row
 .table-row-targets {
   label {
