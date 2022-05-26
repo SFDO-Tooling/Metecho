@@ -136,6 +136,7 @@ const CreateProjectModal = ({
     /* istanbul ignore else */
     if (isMounted.current) {
       setIsSaving(false);
+      /* istanbul ignore else */
       if (
         intersection(Object.keys(fieldErrors), [
           'organization',
@@ -228,6 +229,7 @@ const CreateProjectModal = ({
 
   const fetchCollaborators = useCallback(
     async (org: string) => {
+      /* istanbul ignore else */
       if (org) {
         setIsRefreshingCollaborators(true);
         const response = await apiFetch({
@@ -235,7 +237,10 @@ const CreateProjectModal = ({
           dispatch,
         });
         setCollaborators(
-          filter(response || [], (member) => member.id !== user?.github_id),
+          filter(
+            response || /* istanbul ignore next */ [],
+            (member) => member.id !== user?.github_id,
+          ),
         );
         setIsRefreshingCollaborators(false);
       } else {
@@ -249,8 +254,8 @@ const CreateProjectModal = ({
     async (org: string) => {
       setOrgIsValid(false);
       setOrgErrors([]);
+      /* istanbul ignore else */
       if (org) {
-        // setIsCheckingRepoName(true);
         const { success, messages }: { success: boolean; messages: string[] } =
           await apiFetch({
             url: window.api_urls.organization_check_app_installation(org),
@@ -355,6 +360,7 @@ const CreateProjectModal = ({
     },
   ) => {
     const idx = steps.indexOf(step);
+    /* istanbul ignore if */
     if (idx < 0) {
       return;
     }

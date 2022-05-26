@@ -67,9 +67,10 @@ const SelectProjectDependenciesForm = ({
           />
         ))
       ) : (
+        /* istanbul ignore next */
         <p className="slds-p-top_x-small">{t('No Available Dependencies')}</p>
       )}
-      {fetchingDependencies && <SpinnerWrapper />}
+      {/* istanbul ignore next */ fetchingDependencies && <SpinnerWrapper />}
     </form>
   );
 };

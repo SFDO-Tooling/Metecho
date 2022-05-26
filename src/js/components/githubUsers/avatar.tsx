@@ -27,6 +27,7 @@ const GitHubUserAvatar = ({
     );
   }
 
+  /* istanbul ignore else */
   if (org) {
     return (
       <Avatar
@@ -39,6 +40,7 @@ const GitHubUserAvatar = ({
     );
   }
 
+  /* istanbul ignore next */
   return null;
 };
 

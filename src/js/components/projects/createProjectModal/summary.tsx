@@ -52,7 +52,7 @@ const CreateProjectSummary = ({
           </h3>
           <UserCards users={selectedCollaborators} twoColumn />
         </div>
-      ) : null}
+      ) : /* istanbul ignore next */ null}
       {selectedDeps.length ? (
         <ModalCard heading={t('Project Dependencies')}>
           <ul className="slds-list_dotted">
@@ -61,7 +61,7 @@ const CreateProjectSummary = ({
             ))}
           </ul>
         </ModalCard>
-      ) : null}
+      ) : /* istanbul ignore next */ null}
     </form>
   );
 };

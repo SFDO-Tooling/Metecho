@@ -882,6 +882,12 @@ export const sampleProjectDependency = {
   recommended: false,
 };
 
+export const sampleProjectDependency2 = {
+  id: 'dep-2',
+  name: 'Another Test Dependency',
+  recommended: true,
+};
+
 export const sampleGitHubOrg = {
   id: 'org-1',
   name: 'A Test Org',

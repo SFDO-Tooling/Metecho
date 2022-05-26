@@ -40,7 +40,10 @@ const CreateProjectForm = ({
     event: any,
     { selection }: { selection: ComboboxOption[] },
   ) => {
-    setInputs({ ...inputs, organization: selection[0]?.id || '' });
+    setInputs({
+      ...inputs,
+      organization: selection[0]?.id || /* istanbul ignore next */ '',
+    });
   };
 
   const handleProjectNameChange = (
