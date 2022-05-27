@@ -8,6 +8,9 @@ WORKDIR /app
 ENV PYTHONPATH /app
 ENV DJANGO_SETTINGS_MODULE config.settings.production
 
+# Install sfdx
+RUN npm install --location=global sfdx-cli --ignore-scripts
+
 # Python requirements:
 COPY ./requirements requirements
 RUN pip install --no-cache-dir --upgrade pip pip-tools \
@@ -15,9 +18,6 @@ RUN pip install --no-cache-dir --upgrade pip pip-tools \
 RUN if [ "${BUILD_ENV}" = "development" ] ; then \
     pip install --no-cache-dir -r requirements/dev.txt; \
     fi
-
-# Install sfdx
-RUN npm install --location=global sfdx-cli --ignore-scripts
 
 # JS client setup:
 COPY ./package.json package.json
