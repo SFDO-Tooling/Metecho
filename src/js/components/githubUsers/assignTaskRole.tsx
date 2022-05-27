@@ -17,6 +17,7 @@ import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
 const AssignTaskRoleModal = ({
   projectId,
+  taskHasEpic,
   epicUsers,
   githubUsers,
   selectedUser,
@@ -27,6 +28,7 @@ const AssignTaskRoleModal = ({
   setUser,
 }: {
   projectId: string;
+  taskHasEpic: boolean;
   epicUsers: GitHubUser[] | null;
   githubUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
@@ -175,7 +177,7 @@ const AssignTaskRoleModal = ({
       >
         <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
           <p>
-            {epicUsers ? (
+            {epicUsers && taskHasEpic ? (
               <Trans i18nKey="assignUserHelper">
                 Assign any user to this role, and they will also be added as an
                 Epic Collaborator.
@@ -212,7 +214,7 @@ const AssignTaskRoleModal = ({
             placeholder={t('Search for user')}
           />
         </div>
-        {epicUsers ? (
+        {epicUsers && taskHasEpic ? (
           <div className="slds-p-horizontal_medium slds-p-bottom_medium">
             <h3 className="slds-text-heading_small slds-m-bottom_x-small">
               {t('Epic Collaborators')}
