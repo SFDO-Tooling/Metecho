@@ -12,10 +12,9 @@ Cloning the project
 Docker-based development
 ------------------------
 
-1. Install `Docker Desktop (Community Edition)`_ and make sure it is
-   running. Ensure you're running ``docker-compose`` at least version
-   ``1.25.2`` to avoid container-abort bugs. The latest Docker Desktop
-   should come with this version or later.
+1. Install `Docker Desktop`_ and make sure it is running. Ensure you're running
+   ``docker-compose`` at least version ``1.25.2`` to avoid container-abort bugs.
+   The latest Docker Desktop should come with this version or later.
 
 2. Create an ``.env`` file with the required environment variables::
 
@@ -69,7 +68,7 @@ Docker-based development
    images/containers. (``docker-compose ps`` will tell you what containers are
    currently running.)
 
-.. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
+.. _Docker Desktop: https://www.docker.com/products/docker-desktop
 .. _this issue: https://github.com/moby/moby/issues/12997
 
 Setting up the GitHub App

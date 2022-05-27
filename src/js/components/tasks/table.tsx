@@ -240,6 +240,7 @@ const AssigneeTableCell = ({
         />
         <AssignTaskRoleModal
           projectId={projectId}
+          taskHasEpic={Boolean(item.epic)}
           epicUsers={epicCollaborators}
           githubUsers={githubUsers}
           selectedUser={assignedUser || null}

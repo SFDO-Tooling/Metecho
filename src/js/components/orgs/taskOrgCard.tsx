@@ -333,6 +333,7 @@ const TaskOrgCard = ({
       </Card>
       <AssignTaskRoleModal
         projectId={projectId}
+        taskHasEpic={Boolean(task.epic)}
         epicUsers={epicUsers}
         githubUsers={githubUsers}
         selectedUser={assignedUser}
