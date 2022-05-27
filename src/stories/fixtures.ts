@@ -301,6 +301,8 @@ export const sampleTask1 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
+  next: {},
+  count: {},
 };
 
 export const sampleTask2 = {
@@ -809,7 +811,7 @@ export const sampleIssue1 = {
   html_url: 'https://example.com',
   project: sampleProject1.id,
   epic: null,
-  task: null,
+  task: sampleTask1,
 };
 
 export const sampleIssue2 = {

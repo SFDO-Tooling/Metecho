@@ -149,6 +149,8 @@ const defaultState = {
     p1: {
       fetched: ['epic1'],
       notFound: [],
+      count: {},
+      next: {},
       tasks: [
         {
           id: 'task1',
