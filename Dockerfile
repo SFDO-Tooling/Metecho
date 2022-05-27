@@ -17,7 +17,7 @@ RUN if [ "${BUILD_ENV}" = "development" ] ; then \
     fi
 
 # Install sfdx
-RUN npm install --global sfdx-cli --ignore-scripts
+RUN npm install --location=global sfdx-cli --ignore-scripts
 
 # JS client setup:
 COPY ./package.json package.json
