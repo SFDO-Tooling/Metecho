@@ -338,14 +338,12 @@ describe('reducer', () => {
   });
 
   describe('FETCH_OBJECT_SUCCEEDED', () => {
-    test('adds epic', () => {
+    test('adds task', () => {
       const task = {
         id: 't1',
         slug: 'task-1',
         epic,
         root_project: 'p1',
-        count: {},
-        next: {},
       };
       const task2 = {
         id: 't2',
@@ -449,8 +447,6 @@ describe('reducer', () => {
         slug: 'task-2',
         epic,
         root_project: 'p1',
-        count: {},
-        next: {},
       };
       const expected = {
         p1: { tasks: [editedTask, task2] },
@@ -494,8 +490,6 @@ describe('reducer', () => {
         id: 't1',
         epic,
         root_project: 'p1',
-        count: {},
-        next: {},
       };
       const expected = {
         p1: { tasks: [task], fetched: [], notFound: [], count: {}, next: {} },
@@ -750,15 +744,11 @@ describe('reducer', () => {
         epic,
         name: 'Task Name',
         root_project: 'p1',
-        count: {},
-        next: {},
       };
       const task2 = {
         id: 't2',
         epic,
         root_project: 'p1',
-        count: {},
-        next: {},
       };
       const actual = reducer(
         {

@@ -315,6 +315,7 @@ const TaskTable = ({
     : [];
 
   const fetchMoreTasks = useCallback(() => {
+    /* istanbul ignore else */
     if (isFetched && projectId && next) {
       /* istanbul ignore else */
       if (isMounted.current) {

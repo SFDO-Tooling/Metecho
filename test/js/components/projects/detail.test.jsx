@@ -134,9 +134,9 @@ const defaultState = {
           status: 'Review',
         },
       ],
-      next: 'next-url',
+      next: 'next-epic-url',
       notFound: [],
-      fetched: ['all'],
+      fetched: true,
     },
   },
   tasks: {},
@@ -266,7 +266,7 @@ describe('<ProjectDetail />', () => {
             epics: [],
             next: null,
             notFound: [],
-            fetched: [],
+            fetched: true,
           },
         },
       },
@@ -297,7 +297,7 @@ describe('<ProjectDetail />', () => {
             epics: [],
             next: null,
             notFound: [],
-            fetched: [],
+            fetched: true,
           },
         },
       },
@@ -416,9 +416,9 @@ describe('<ProjectDetail />', () => {
                   slug: 'epic-1',
                 },
               ],
-              next: 'next-url',
+              next: 'next-epic-url',
               notFound: [],
-              fetched: ['all'],
+              fetched: true,
             },
           },
         },
@@ -433,7 +433,7 @@ describe('<ProjectDetail />', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'p1' },
         objectType: 'epic',
-        url: 'next-url',
+        url: 'next-epic-url',
       });
 
       await findByText('Loading…');
@@ -460,7 +460,7 @@ describe('<ProjectDetail />', () => {
               ],
               next: null,
               notFound: [],
-              fetched: ['all'],
+              fetched: true,
             },
           },
         },
@@ -472,7 +472,20 @@ describe('<ProjectDetail />', () => {
 
   describe('Tasks tab', () => {
     test('fetches tasks list', () => {
-      const { getAllByText } = setup();
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              fetched: ['epic1'],
+              notFound: [],
+              tasks: [],
+              next: {},
+              count: {},
+            },
+          },
+        },
+      });
       fireEvent.click(getAllByText('Tasks')[0]);
 
       expect(fetchObjects).toHaveBeenCalledWith({
@@ -608,13 +621,13 @@ describe('<ProjectDetail />', () => {
               fetched: ['all'],
               notFound: [],
               tasks: [],
-              count: {},
               next: {},
+              count: {},
             },
           },
         },
       });
-      // expect.assertions(3);
+
       fireEvent.click(getAllByText('Tasks')[0]);
 
       const btn = await findByText('Create Task from GitHub Issue');
@@ -1239,16 +1252,20 @@ describe('<ProjectDetail />', () => {
 
   describe('fetching more tasks', () => {
     test('fetches next page of tasks', async () => {
-      const { findByText, getByText, getAllByText } = setup({
+      const { findByText, getAllByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
             p1: {
               tasks,
-              next: {},
+              next: {
+                all: 'next-task-url',
+              },
               notFound: [],
               fetched: ['all'],
-              count: {},
+              count: {
+                all: tasks.length + 5,
+              },
             },
           },
         },
@@ -1258,16 +1275,13 @@ describe('<ProjectDetail />', () => {
       const task = await findByText('Task 2');
       expect(task).toBeVisible();
 
-      const btn = getByText('Load More');
-
-      expect(btn).toBeVisible();
-
+      const btn = getAllByText('Load More')[1];
       fireEvent.click(btn);
 
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'p1' },
         objectType: 'task',
-        url: 'next-url',
+        url: 'next-task-url',
       });
 
       await findByText('Loading…');
@@ -1275,16 +1289,20 @@ describe('<ProjectDetail />', () => {
     });
 
     test('hides btn when at end of list', async () => {
-      const { queryByText, getAllByText, findByText, getByText } = setup({
+      const { getAllByText, findByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
             p1: {
               tasks,
-              next: {},
+              next: {
+                all: 'next-task-url',
+              },
               notFound: [],
               fetched: ['all'],
-              count: {},
+              count: {
+                all: tasks.length,
+              },
             },
           },
         },
@@ -1295,9 +1313,9 @@ describe('<ProjectDetail />', () => {
       const task = await findByText('Task 2');
       expect(task).toBeVisible();
 
-      fireEvent.click(getByText('Load More'));
+      const btns = getAllByText('Load More');
 
-      expect(queryByText('Load More')).toBeNull();
+      expect(btns).toHaveLength(1);
     });
   });
 });

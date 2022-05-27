@@ -118,7 +118,9 @@ const reducer = (
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
         const { results, next, count } = response as PaginatedObjectResponse;
-        const projectTasks = tasks[project] || { ...defaultProjectTasks };
+        const projectTasks = tasks[project] || /* istanbul ignore next */ {
+          ...defaultProjectTasks,
+        };
         const fetched = projectTasks.fetched;
         if (epic) {
           return {
