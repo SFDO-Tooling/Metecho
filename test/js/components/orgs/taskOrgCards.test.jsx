@@ -84,6 +84,7 @@ const defaultState = {
 };
 const defaultTask = {
   id: 'task-id',
+  epic: {},
   assigned_dev: 'user-id',
   assigned_qa: 'user-id',
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
