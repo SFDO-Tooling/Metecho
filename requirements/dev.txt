@@ -91,7 +91,7 @@ inflection==0.5.1
     #   pytest-factoryboy
 iniconfig==1.1.1
     # via pytest
-ipython==8.3.0
+ipython==8.4.0
     # via -r requirements/dev.in
 isort==5.10.1
     # via -r requirements/dev.in
@@ -205,7 +205,7 @@ six==1.16.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==4.5.0
+sphinx==5.0.0
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
