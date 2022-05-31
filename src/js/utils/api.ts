@@ -5,6 +5,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import { addError } from '@/js/store/errors/actions';
 import { logError } from '@/js/utils/logging';
 
+import { ObjectTypes } from './constants';
+
 interface UrlParams {
   [key: string]: string | number | boolean | undefined;
 }
@@ -122,6 +124,22 @@ export const removeUrlParam = (key: string, search?: string) => {
   // This deletes _all_ occurrences of the given key
   params.delete(key);
   return params.toString();
+};
+
+export const getDeleteObjectUrl = (
+  objectType: ObjectTypes,
+  id: string,
+  userDeleteUrl: string | undefined,
+) => {
+  if (userDeleteUrl) {
+    return userDeleteUrl;
+  }
+  const urlFn = window.api_urls[`${objectType}_detail`];
+  let baseUrl;
+  if (urlFn && id) {
+    baseUrl = urlFn(id);
+  }
+  return baseUrl;
 };
 
 export default apiFetch;

@@ -1,7 +1,7 @@
 import { ThunkResult } from '@/js/store';
 import { Epic } from '@/js/store/epics/reducer';
 import { Task } from '@/js/store/tasks/reducer';
-import apiFetch, { addUrlParams } from '@/js/utils/api';
+import apiFetch, { addUrlParams, getDeleteObjectUrl } from '@/js/utils/api';
 import { ObjectTypes } from '@/js/utils/constants';
 
 interface CreateObjectPayload {
@@ -70,7 +70,8 @@ interface DeleteObjectAction {
   type:
     | 'DELETE_OBJECT_STARTED'
     | 'DELETE_OBJECT_SUCCEEDED'
-    | 'DELETE_OBJECT_FAILED';
+    | 'DELETE_OBJECT_FAILED'
+    | 'USER_LOGGED_OUT';
   payload: { object: any } & CreateObjectPayload;
 }
 interface ObjectRemoved {
@@ -294,17 +295,15 @@ export const deleteObject =
     objectType,
     object,
     shouldSubscribeToObject = false,
+    userDeleteUrl,
   }: {
     objectType: ObjectTypes;
     object: { id: string; [key: string]: any };
     shouldSubscribeToObject?: boolean | ((obj: any) => boolean);
+    userDeleteUrl?: string | undefined;
   }): ThunkResult<Promise<DeleteObjectAction>> =>
   async (dispatch) => {
-    const urlFn = window.api_urls[`${objectType}_detail`];
-    let baseUrl;
-    if (urlFn && object.id) {
-      baseUrl = urlFn(object.id);
-    }
+    const baseUrl = getDeleteObjectUrl(objectType, object.id, userDeleteUrl);
     dispatch({
       type: 'DELETE_OBJECT_STARTED',
       payload: { objectType, url: baseUrl, object },
@@ -327,6 +326,12 @@ export const deleteObject =
         window.socket.subscribe({
           model: objectType,
           id: object.id,
+        });
+      }
+      if (objectType === 'user') {
+        return dispatch({
+          type: 'USER_LOGGED_OUT' as const,
+          payload: { objectType, url: baseUrl, object },
         });
       }
       return dispatch({

@@ -1,5 +1,6 @@
 import html
 import logging
+import traceback
 from contextlib import suppress
 from datetime import timedelta
 from typing import Dict, Iterable, Optional, Tuple
@@ -215,6 +216,25 @@ class User(PushMixin, HashIdMixin, AbstractUser):
             return self.salesforce_account.extra_data[ORGANIZATION_DETAILS][key]
         except (AttributeError, KeyError, TypeError):
             return None
+
+    def delete(self, *args, **kwargs):
+
+        try:
+            for scratch_org_to_delete in self.scratchorg_set.all():
+                scratch_org_to_delete.owner = None
+                scratch_org_to_delete.save()
+                scratch_org_to_delete.queue_delete(originating_user_id=self.id)
+        except Exception as e:
+            async_to_sync(push.report_scratch_org_error)(
+                scratch_org_to_delete,
+                error=e,
+                type_="SCRATCH_ORG_DELETE_FAILED",
+                originating_user_id=self.id,
+            )
+            tb = traceback.format_exc()
+            logger.error(tb)
+            raise
+        super().delete(*args, **kwargs)
 
     @property
     def github_id(self) -> Optional[str]:
@@ -1198,7 +1218,7 @@ class ScratchOrg(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = StringField(choices=ScratchOrgType.choices)
     org_config_name = StringField()
-    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     last_modified_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     latest_commit = StringField(blank=True)

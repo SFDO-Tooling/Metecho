@@ -19,11 +19,13 @@ const DeleteAccount = () => {
   };
   return (
     <div>
-      <div className="slds-text-heading_large">Delete Account</div>
-      <div>
-        Deleting this account will not remove you as a Project collaborator on
-        Github. Your Dev Orgs will be deleted, and any unretrieved changes will
-        be lost. This action cannot be undone.
+      <div className="slds-text-heading_large slds-m-bottom_small">
+        Delete Account
+      </div>
+      <div className="slds-m-bottom_medium slds-text-body_regular">
+        Your Dev Orgs will be deleted, and any unretrieved changes will be lost.
+        This action cannot be undone. Deleting this account will not remove you
+        as a Project collaborator on Github.
       </div>
       <Button
         key="delete"
@@ -35,9 +37,21 @@ const DeleteAccount = () => {
         model={user as User}
         modelType={OBJECT_TYPES.USER}
         isOpen={deleteModalOpen}
-        redirect={routes.home()}
+        redirect={routes.login()}
         handleClose={closeDeleteModal}
       />
+
+      <div className="slds-m-top_xx-large">
+        <div className="slds-text-heading_large slds-m-bottom_small">
+          Tasks With Unretrieved Changes
+        </div>
+        <div className="slds-m-bottom_medium slds-text-body_regular">
+          Below is a list of Tasks where you are currently assigned as the
+          Developer or Tester. If you have any Dev Orgs with unsaved work,
+          access them from the Task page to retrieve changes before deleting
+          your account.
+        </div>
+      </div>
     </div>
   );
 };

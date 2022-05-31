@@ -21,6 +21,14 @@ interface Props extends RouteComponentProps {
   handleClose: () => void;
 }
 
+const getModelDeleteUrl = (modelType: ObjectTypes) => {
+  let deleteUrl;
+  if (modelType === 'user') {
+    deleteUrl = window.api_urls.current_user_detail();
+  }
+  return deleteUrl;
+};
+
 const DeleteModal = ({
   model,
   modelType,
@@ -40,6 +48,7 @@ const DeleteModal = ({
       deleteObject({
         objectType: modelType,
         object: model,
+        userDeleteUrl: getModelDeleteUrl(modelType),
       }),
     )
       .then(() => {
@@ -60,8 +69,8 @@ const DeleteModal = ({
       heading = t('Confirm Deleting Epic');
       message = (
         <Trans i18nKey="confirmDeleteEpic">
-          Are you sure you want to delete Epic “{{ name: model.name }}”? This
-          will also delete any Tasks and Orgs in this Epic.
+          Are you sure you want to delete Epic “{{ name: (model as Epic).name }}
+          ”? This will also delete any Tasks and Orgs in this Epic.
         </Trans>
       );
       break;
@@ -69,8 +78,8 @@ const DeleteModal = ({
       heading = t('Confirm Deleting Task');
       message = (
         <Trans i18nKey="confirmDeleteTask">
-          Are you sure you want to delete Task “{{ name: model.name }}”? This
-          will also delete any Orgs in this Task.
+          Are you sure you want to delete Task “{{ name: (model as Task).name }}
+          ”? This will also delete any Orgs in this Task.
         </Trans>
       );
       break;
