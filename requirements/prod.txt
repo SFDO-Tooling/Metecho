@@ -414,7 +414,7 @@ urllib3==1.26.8
     #   snowfakery
 webencodings==0.5.1
     # via bleach
-whitenoise==6.0.0
+whitenoise==6.1.0
     # via -r requirements/prod.in
 wrapt==1.13.3
     # via
