@@ -13,12 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Determine node version
-        run:
-          echo "NODE_VERSION=$(grep -oP 'node\K\d+' Dockerfile)" >> $GITHUB_ENV
       - uses: actions/setup-node@v3
         with:
-          node-version: '${{ env.NODE_VERSION }}'
+          node-version-file: .nvmrc
           cache: yarn
       - run: yarn install --frozen--lockfile
       - run: yarn deploy-storybook --ci
