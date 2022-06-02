@@ -3,6 +3,7 @@ import fetchMock from 'fetch-mock';
 import { addError } from '@/js/store/errors/actions';
 import apiFetch, {
   addUrlParams,
+  getDeleteObjectUrl,
   getUrlParam,
   removeUrlParam,
 } from '@/js/utils/api';
@@ -180,5 +181,31 @@ describe('removeUrlParam', () => {
     const expected = window.location.search;
 
     return expect(actual).toBe(expected);
+  });
+
+  describe('getDeleteObjectUrl', () => {
+    test('returns correct url for user object type', () => {
+      const expected = '/api/user/';
+
+      const actual = getDeleteObjectUrl('user', '123', '/api/user/');
+
+      return expect(actual).toBe(expected);
+    });
+
+    test('returns correct url for task object type', () => {
+      const expected = '/api/tasks/123/';
+
+      const actual = getDeleteObjectUrl('task', '123');
+
+      return expect(actual).toBe(expected);
+    });
+
+    test('returns correct url for epic object type', () => {
+      const expected = '/api/epics/123/';
+
+      const actual = getDeleteObjectUrl('epic', '123');
+
+      return expect(actual).toBe(expected);
+    });
   });
 });

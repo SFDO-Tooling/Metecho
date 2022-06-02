@@ -604,6 +604,38 @@ describe('deleteObject', () => {
       });
     });
 
+    test('sends DELETE to api for user delete', () => {
+      const store = storeWithThunk({});
+      const userUrl = '/api/user/';
+      fetchMock.deleteOnce(userUrl, 204);
+      const userObjectPayload = {
+        objectType: 'user',
+        url: '/api/user/',
+        object: { id: '123' },
+      };
+      const started = {
+        type: 'DELETE_OBJECT_STARTED',
+        payload: userObjectPayload,
+      };
+      const succeeded = {
+        type: 'USER_LOGGED_OUT',
+        payload: userObjectPayload,
+      };
+
+      expect.assertions(1);
+      return store
+        .dispatch(
+          actions.deleteObject({
+            objectType: 'user',
+            object: { id: '123' },
+            userDeleteUrl: userUrl,
+          }),
+        )
+        .then(() => {
+          expect(store.getActions()).toEqual([started, succeeded]);
+        });
+    });
+
     describe('with shouldSubscribeToObject', () => {
       let store, org;
 

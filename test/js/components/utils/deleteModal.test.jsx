@@ -4,6 +4,7 @@ import { StaticRouter } from 'react-router-dom';
 
 import { DeleteModal } from '@/js/components/utils';
 import { deleteObject } from '@/js/store/actions';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -60,5 +61,28 @@ describe('<DeleteModal />', () => {
     });
     expect(context.action).toBe('PUSH');
     expect(context.url).toBe('/foo');
+  });
+
+  test('deletes user and redirects', async () => {
+    const defaultUser = { id: '123' };
+    const { findByText, getByText, context } = setup({
+      model: defaultUser,
+      modelType: 'user',
+      redirect: routes.login(),
+    });
+
+    fireEvent.click(getByText('Delete'));
+
+    expect.assertions(4);
+    await findByText('Deleting…');
+
+    expect(deleteObject).toHaveBeenCalledTimes(1);
+    expect(deleteObject).toHaveBeenCalledWith({
+      objectType: 'user',
+      object: defaultUser,
+      userDeleteUrl: '/api/user/',
+    });
+    expect(context.action).toBe('PUSH');
+    expect(context.url).toBe('/login');
   });
 });
