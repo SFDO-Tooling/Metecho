@@ -328,6 +328,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       isOpen={isOpen}
       size="small"
       disableClose={capturingChanges}
+      dismissOnClickOutside={false}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}
       assistiveText={{ closeButton: t('Close') }}

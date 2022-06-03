@@ -208,6 +208,7 @@ export const ConnectionInfoModal = ({
     <Modal
       isOpen={isConnected && isOpen}
       assistiveText={{ closeButton: t('Close') }}
+      dismissOnClickOutside={false}
       heading={
         user.is_devhub_enabled ? t('Dev Hub Enabled') : t('Enable Dev Hub')
       }

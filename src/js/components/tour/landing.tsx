@@ -58,15 +58,16 @@ const LandingModal = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
+      dismissOnClickOutside={false}
       assistiveText={{ closeButton: t('Close') }}
       size="medium"
       className="metecho-transition-in"
     >
       <div className="slds-p-around_x-large">
         <div className="slds-text-align_center slds-p-bottom_small">
-          <h2 className="slds-text-heading_small slds-p-bottom_x-small">
+          <h3 className="slds-text-heading_small slds-p-bottom_x-small">
             <strong>{t('Hello! What can Metecho help you do today?')}</strong>
-          </h2>
+          </h3>
           <p>{t('Select a box below to discover what’s possible.')}</p>
         </div>
         <div className="slds-grid slds-wrap slds-p-bottom_small">

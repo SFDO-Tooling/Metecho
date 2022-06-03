@@ -27,12 +27,14 @@ def test_serialize(user_factory):
                 "is_devhub_enabled": False,
                 "sf_username": None,
                 "currently_fetching_repos": True,
+                "currently_fetching_orgs": False,
                 "devhub_username": "",
                 "uses_global_devhub": False,
                 "agreed_to_tos_at": None,
                 "onboarded_at": None,
                 "self_guided_tour_enabled": True,
                 "self_guided_tour_state": None,
+                "organizations": [],
             }
         )
     )

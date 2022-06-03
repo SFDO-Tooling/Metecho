@@ -2,9 +2,10 @@ import fetchMock from 'fetch-mock';
 
 import { fetchObjects } from '@/js/store/actions';
 import * as actions from '@/js/store/projects/actions';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { OBJECT_TYPES, SHOW_PROJECT_CREATE_ERROR } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
-import { storeWithThunk } from './../../utils';
+import { getStoreWithHistory, storeWithThunk } from './../../utils';
 
 jest.mock('@/js/store/actions');
 
@@ -192,6 +193,188 @@ describe('updateProject', () => {
   });
 });
 
+describe('projectCreated', () => {
+  test('adds success message and updates project', () => {
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
+      repo_url: 'http://www.example.com',
+    };
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+    });
+    const action = {
+      type: 'PROJECT_UPDATE',
+      payload: project,
+    };
+    store.dispatch(
+      actions.projectCreated({
+        model: project,
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toMatch(
+      'Successfully created GitHub Repository for new Project',
+      { exact: false },
+    );
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('does not add message if not owned by current user', () => {
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
+      repo_url: 'http://www.example.com',
+    };
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+    });
+    const action = {
+      type: 'PROJECT_UPDATE',
+      payload: project,
+    };
+    store.dispatch(
+      actions.projectCreated({
+        model: project,
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
+  });
+});
+
+describe('projectCreateError', () => {
+  test('adds error message and deletes project', () => {
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
+    };
+    const store = getStoreWithHistory()({
+      user: { id: 'user-id' },
+      projects: { projects: [project] },
+    });
+    const action = {
+      type: 'PROJECT_DELETED',
+      payload: project.id,
+    };
+    store.dispatch(
+      actions.projectCreateError({
+        model: project,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error creating your new Project',
+      { exact: false },
+    );
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('redirects if currently on project page', () => {
+    const project = {
+      id: 'project-id',
+      slug: 'my-project',
+      name: 'My Project',
+    };
+    const history = {
+      push: jest.fn(),
+      location: {
+        pathname: routes.project_detail(project.slug),
+      },
+    };
+    const store = getStoreWithHistory(history)({
+      user: { id: 'user-id' },
+      projects: { projects: [project] },
+    });
+    const action = {
+      type: 'PROJECT_DELETED',
+      payload: project.id,
+    };
+    store.dispatch(
+      actions.projectCreateError({
+        model: project,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(history.push).toHaveBeenCalledWith(routes.project_list(), {
+      [SHOW_PROJECT_CREATE_ERROR]: { name: project.name, message: 'error msg' },
+    });
+    expect(allActions).toEqual([action]);
+  });
+
+  test('does not show toast after redirect if not the current user', () => {
+    const project = {
+      id: 'project-id',
+      slug: 'my-project',
+      name: 'My Project',
+    };
+    const history = {
+      push: jest.fn(),
+      location: {
+        pathname: routes.project_detail(project.slug),
+      },
+    };
+    const store = getStoreWithHistory(history)({
+      user: { id: 'user-id' },
+      projects: { projects: [project] },
+    });
+    const action = {
+      type: 'PROJECT_DELETED',
+      payload: project.id,
+    };
+    store.dispatch(
+      actions.projectCreateError({
+        model: project,
+        message: 'error msg',
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(history.push).toHaveBeenCalledWith(routes.project_list(), undefined);
+    expect(allActions).toEqual([action]);
+  });
+
+  test('does not add message if not owned by current user', () => {
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
+    };
+    const store = getStoreWithHistory()({
+      user: { id: 'user-id' },
+      projects: { projects: [project] },
+    });
+    const action = {
+      type: 'PROJECT_DELETED',
+      payload: project.id,
+    };
+    store.dispatch(
+      actions.projectCreateError({
+        model: project,
+        message: 'error msg',
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
+  });
+});
+
 describe('projectError', () => {
   test('adds error message and updates project', () => {
     const store = storeWithThunk({ user: { id: 'user-id' } });
@@ -206,6 +389,7 @@ describe('projectError', () => {
     store.dispatch(
       actions.projectError({
         model: project,
+        heading: 'Uh oh.',
         message: 'error msg',
         originating_user_id: 'user-id',
       }),
@@ -213,9 +397,7 @@ describe('projectError', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toBe('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error re-syncing GitHub Collaborators for this Project: “My Project.”',
-    );
+    expect(allActions[0].payload.heading).toMatch('Uh oh.');
     expect(allActions[0].payload.details).toBe('error msg');
     expect(allActions[0].payload.variant).toBe('error');
     expect(allActions[1]).toEqual(action);

@@ -11,10 +11,17 @@ from ..models import (
     Epic,
     EpicStatus,
     ScratchOrgType,
+    SiteProfile,
     Task,
     TaskStatus,
     user_logged_in_handler,
 )
+
+
+class TestSiteProfile:
+    def test_str(self):
+        profile = SiteProfile(name="Hello world")
+        assert str(profile) == "Hello world"
 
 
 @pytest.mark.django_db
@@ -937,6 +944,21 @@ class TestScratchOrg:
         assert scratch_org.config == {"anything else": "good"}
 
 
+@pytest.mark.django_db
+class TestProjectDependency:
+    def test_str(self, project_dependency_factory):
+        org = project_dependency_factory(name="Dep ABC")
+        assert str(org) == "Dep ABC"
+
+
+@pytest.mark.django_db
+class TestGitHubOrganization:
+    def test_str(self, git_hub_organization_factory):
+        org = git_hub_organization_factory(name="Foo Org")
+        assert str(org) == "Foo Org"
+
+
+@pytest.mark.django_db
 class TestGitHubRepository:
     def test_str(self, git_hub_repository_factory):
         gh_repo = git_hub_repository_factory.build()
@@ -953,5 +975,7 @@ class TestGitHubIssue:
 def test_login_handler(user_factory):
     user = user_factory()
     user.queue_refresh_repositories = MagicMock()
+    user.queue_refresh_organizations = MagicMock()
     user_logged_in_handler(None, user=user)
     user.queue_refresh_repositories.assert_called_once()
+    user.queue_refresh_organizations.assert_called_once()

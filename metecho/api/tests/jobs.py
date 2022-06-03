@@ -6,7 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
-from github3.exceptions import NotFoundError
+from github3.exceptions import NotFoundError, UnprocessableEntity
+from github3.orgs import Organization
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
@@ -20,11 +21,13 @@ from ..jobs import (
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
     create_pr,
+    create_repository,
     delete_scratch_org,
     get_social_image,
     get_unsaved_changes,
     refresh_commits,
     refresh_github_issues,
+    refresh_github_organizations_for_user,
     refresh_github_repositories_for_user,
     refresh_github_users,
     refresh_scratch_org,
@@ -605,7 +608,9 @@ def test_delete_scratch_org__exception(scratch_org_factory):
 class TestRefreshGitHubRepositoriesForUser:
     def test_success(self, mocker, user_factory):
         user = user_factory(currently_fetching_repos=True)
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        notify_changed = mocker.patch.object(
+            user, "notify_changed", wraps=user.notify_changed
+        )
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos",
             return_value=[
@@ -619,7 +624,7 @@ class TestRefreshGitHubRepositoriesForUser:
 
         assert not user.currently_fetching_repos
         assert user.repositories.count() == 2
-        assert async_to_sync.called
+        assert notify_changed.called
 
     def test_error(self, mocker, caplog, user_factory, git_hub_repository_factory):
         user = user_factory(currently_fetching_repos=True)
@@ -627,7 +632,9 @@ class TestRefreshGitHubRepositoriesForUser:
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos", side_effect=Exception("Oh no!")
         )
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        notify_error = mocker.patch.object(
+            user, "notify_error", wraps=user.notify_error
+        )
 
         with pytest.raises(Exception):
             refresh_github_repositories_for_user(user)
@@ -635,7 +642,46 @@ class TestRefreshGitHubRepositoriesForUser:
 
         assert not user.currently_fetching_repos
         assert user.repositories.count() == 1
-        assert async_to_sync.called
+        assert notify_error.called
+        assert "Oh no!" in caplog.text
+
+
+@pytest.mark.django_db
+class TestRefreshGitHubOrganizationsForUser:
+    def test_success(self, mocker, user_factory, git_hub_organization_factory):
+        member_org = git_hub_organization_factory(login="member-org")
+        git_hub_organization_factory()  # Another unrelated org
+        user = user_factory(currently_fetching_orgs=True)
+        notify_changed = mocker.patch.object(
+            user, "notify_changed", wraps=user.notify_changed
+        )
+        gh_as_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user")
+        gh_as_user.return_value.organizations.return_value = (
+            mocker.MagicMock(login="member-org"),
+        )
+
+        refresh_github_organizations_for_user(user)
+        user.refresh_from_db()
+
+        assert not user.currently_fetching_orgs
+        assert tuple(user.organizations.all()) == (member_org,)
+        assert notify_changed.called
+
+    def test_error(self, mocker, caplog, user_factory):
+        user = user_factory(currently_fetching_orgs=True)
+        notify_error = mocker.patch.object(
+            user, "notify_error", wraps=user.notify_error
+        )
+        gh_as_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user")
+        gh_as_user.return_value.organizations.side_effect = Exception("Oh no!")
+
+        with pytest.raises(Exception):
+            refresh_github_organizations_for_user(user)
+        user.refresh_from_db()
+
+        assert not user.currently_fetching_orgs
+        assert not user.organizations.exists()
+        assert notify_error.called
         assert "Oh no!" in caplog.text
 
 
@@ -1296,3 +1342,194 @@ class TestUserReassign:
             user_reassign(scratch_org, new_user=user, originating_user_id=str(user.id))
 
             assert async_to_sync.called
+
+
+@pytest.mark.django_db
+class TestCreateRepository:
+    @pytest.fixture
+    def github_mocks(self, mocker, project_factory):
+        """
+        Mock the best-case scenario where the user is a member of the GH organization
+        and the repository and team are created successfully
+        """
+        project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
+        team = mocker.MagicMock()
+        repo = mocker.MagicMock(id=123456, html_url="", permissions=[])
+
+        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user", autospec=True).return_value
+        gh_user.organizations.return_value = [
+            mocker.MagicMock(login=project.repo_owner, spec=Organization)
+        ]
+        gh_org = mocker.patch(
+            f"{PATCH_ROOT}.gh_as_org", autospec=True
+        ).return_value.organization.return_value
+        gh_org.create_team.return_value = team
+        gh_org.create_repository.return_value = repo
+
+        return project, gh_org, team, repo
+
+    def test_ok(self, mocker, github_mocks, user_factory):
+        user = user_factory()
+        project, org, team, repo = github_mocks
+        mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
+        sarge.capture_both.return_value.returncode = 0
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
+
+        create_repository(
+            project,
+            user=user,
+            dependencies=["http://foo.com"],
+            template_repo_owner="owner",
+            template_repo_name="repo",
+        )
+        project.refresh_from_db()
+
+        assert project.repo_id == 123456
+        assert user.repositories.filter(repo_id=123456).exists()
+        assert (
+            team.add_or_update_membership.call_count == 2
+        ), "Expected one call each collaborator"
+        async_to_sync.return_value.assert_called_with(
+            project,
+            {
+                "type": "PROJECT_CREATE",
+                "payload": {"originating_user_id": user.pk},
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+        assert sarge.capture_both.called
+        assert zipfile.extractall.called
+
+    def test__gh_error(self, mocker, caplog, project, user_factory):
+        user = user_factory()
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(f"{PATCH_ROOT}.gh_as_user", side_effect=Exception("Oh no!"))
+
+        with pytest.raises(Exception, match="Oh no!"):
+            create_repository(project, user=user, dependencies=[])
+
+        with pytest.raises(project.DoesNotExist):
+            # Expect project to be deleted from the DB since repo creation failed
+            project.refresh_from_db()
+        assert "Oh no!" in caplog.text
+        async_to_sync.return_value.assert_called_with(
+            project,
+            {
+                "type": "PROJECT_CREATE_ERROR",
+                "payload": {
+                    "originating_user_id": user.pk,
+                    "message": "Oh no!",
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+
+    def test__team_name_taken(self, mocker, github_mocks, project, user_factory):
+        user = user_factory()
+        project, org, team, repo = github_mocks
+        resp = mocker.MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Validation Failed"}
+        # Simulate the first two team names being taken
+        org.create_team.side_effect = [
+            UnprocessableEntity(resp),
+            UnprocessableEntity(resp),
+            mocker.DEFAULT,
+        ]
+        mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
+        sarge.capture_both.return_value.returncode = 0
+        mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
+
+        create_repository(project, user=user, dependencies=[])
+
+        org.create_team.assert_has_calls(
+            [
+                mocker.call(f"{project} Team"),
+                mocker.call(f"{project} Team 1"),
+                mocker.call(f"{project} Team 2"),
+            ]
+        )
+
+    def test__team_error(self, mocker, github_mocks, project, user_factory):
+        user = user_factory()
+        project, org, team, repo = github_mocks
+        resp = mocker.MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Not a validation error"}
+        org.create_team.side_effect = UnprocessableEntity(resp)
+
+        with pytest.raises(UnprocessableEntity, match="Not a validation error"):
+            create_repository(project, user=user, dependencies=[])
+
+    @pytest.mark.parametrize("fail_repo_delete", (True, False))
+    def test__push_error(
+        self, mocker, caplog, github_mocks, user_factory, fail_repo_delete
+    ):
+        user = user_factory()
+        project, org, team, repo = github_mocks
+        repo.teams.return_value = [team]
+        if fail_repo_delete:
+            repo.delete.side_effect = Exception("REPO DELETE FAIL")
+        mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        cmd = mocker.patch(
+            f"{PATCH_ROOT}.sarge", autospec=True
+        ).capture_both.return_value
+        cmd.returncode = 1
+        cmd.stderr.text = "REPO PUSH FAIL"
+
+        with pytest.raises(Exception, match="Failed to push"):
+            create_repository(project, user=user, dependencies=[])
+
+        with pytest.raises(project.DoesNotExist):
+            # Expect project to be deleted from the DB since repo creation failed
+            project.refresh_from_db()
+        assert repo.delete.called
+        assert team.delete.called
+        if fail_repo_delete:
+            assert "REPO DELETE FAIL" in caplog.text
+        assert "REPO PUSH FAIL" in caplog.text
+        async_to_sync.return_value.assert_called_with(
+            project,
+            {
+                "type": "PROJECT_CREATE_ERROR",
+                "payload": {
+                    "originating_user_id": user.pk,
+                    "message": "Failed to push files to GitHub repository",
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+
+    def test_not_a_member(self, mocker, caplog, project, user_factory):
+        user = user_factory()
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        gh_user = mocker.patch(f"{PATCH_ROOT}.gh_as_user").return_value
+        gh_user.organizations.return_value = []  # No orgs
+
+        with pytest.raises(ValueError, match="you are not a member"):
+            create_repository(project, user=user, dependencies=[])
+
+        assert "you are not a member" in caplog.text
+        async_to_sync.return_value.assert_called_with(
+            project,
+            {
+                "type": "PROJECT_CREATE_ERROR",
+                "payload": {
+                    "originating_user_id": user.pk,
+                    "message": f"Either you are not a member of the {project.repo_owner} "
+                    "organization or it hasn't installed the Metecho GitHub app",
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )

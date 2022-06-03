@@ -15,7 +15,9 @@ from .fields import MarkdownField
 from .models import (
     Epic,
     GitHubIssue,
+    GitHubOrganization,
     Project,
+    ProjectDependency,
     ScratchOrg,
     ScratchOrgType,
     SiteProfile,
@@ -169,12 +171,28 @@ class RepoPermissionSerializer(serializers.Serializer):
     admin = serializers.BooleanField(required=False)
 
 
-class GitHubUserSerializer(serializers.Serializer):
-    id = serializers.CharField()
+class ShortGitHubUserSerializer(serializers.Serializer):
+    """See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser"""  # noqa: B950
+
+    id = serializers.CharField(required=False)
     login = serializers.CharField()
+    avatar_url = serializers.URLField(required=False)
+
+
+class GitHubUserSerializer(ShortGitHubUserSerializer):
     name = serializers.CharField(required=False)
-    avatar_url = serializers.URLField()
     permissions = RepoPermissionSerializer(required=False)
+
+
+class GitHubOrganizationSerializer(HashIdModelSerializer):
+    class Meta:
+        model = GitHubOrganization
+        fields = ("id", "name", "avatar_url")
+
+
+class GitHubAppInstallationCheckSerializer(serializers.Serializer):
+    success = serializers.BooleanField()
+    messages = serializers.ListField(child=serializers.CharField())
 
 
 class OrgConfigNameSerializer(serializers.Serializer):
@@ -196,6 +214,7 @@ class GuidedTourSerializer(serializers.ModelSerializer):
 
 class FullUserSerializer(HashIdModelSerializer):
     sf_username = serializers.SerializerMethodField()
+    organizations = GitHubOrganizationSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -212,12 +231,14 @@ class FullUserSerializer(HashIdModelSerializer):
             "is_devhub_enabled",
             "sf_username",
             "currently_fetching_repos",
+            "currently_fetching_orgs",
             "devhub_username",
             "uses_global_devhub",
             "agreed_to_tos_at",
             "onboarded_at",
             "self_guided_tour_enabled",
             "self_guided_tour_state",
+            "organizations",
         )
 
     def get_sf_username(self, obj) -> Optional[str]:
@@ -230,6 +251,58 @@ class MinimalUserSerializer(HashIdModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "avatar_url")
+
+
+class ProjectDependencySerializer(HashIdModelSerializer):
+    class Meta:
+        model = ProjectDependency
+        fields = ("id", "name", "recommended")
+
+
+class CheckRepoNameSerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+
+class ProjectCreateSerializer(serializers.ModelSerializer):
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubOrganization.objects.all(), pk_field=serializers.CharField()
+    )
+    dependencies = serializers.PrimaryKeyRelatedField(
+        many=True,
+        pk_field=serializers.CharField(),
+        queryset=ProjectDependency.objects.all(),
+    )
+    github_users = ShortGitHubUserSerializer(many=True, allow_empty=True, required=True)
+
+    class Meta:
+        model = Project
+        fields = (
+            "name",
+            "description",
+            "organization",
+            "repo_name",
+            "github_users",
+            "dependencies",
+        )
+
+    def validate_github_users(self, github_users):
+        """Ensure the current user is always added as collaborator"""
+        user = self.context["request"].user
+        logins = [u["login"] for u in github_users]
+        if user.username not in logins:
+            github_users.append({"login": user.username})
+        return github_users
+
+    def save(self, *args, **kwargs) -> Project:
+        # `organization` is not an actual field on Project so we convert it to `repo_owner`
+        organization = self.validated_data.pop("organization", None)
+        if organization is not None:
+            kwargs.setdefault("repo_owner", organization.login)
+
+        # Dependencies are used by the view, not stored in the model
+        self.validated_data.pop("dependencies", None)
+
+        return super().save(*args, **kwargs)
 
 
 class ProjectSerializer(HashIdModelSerializer):

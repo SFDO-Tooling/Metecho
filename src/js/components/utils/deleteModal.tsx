@@ -81,6 +81,7 @@ const DeleteModal = ({
       size="small"
       assistiveText={{ closeButton: t('Cancel') }}
       disableClose={isSaving}
+      dismissOnClickOutside={false}
       heading={heading}
       onRequestClose={handleClose}
       prompt="warning"

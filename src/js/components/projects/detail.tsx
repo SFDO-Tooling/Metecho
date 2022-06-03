@@ -8,6 +8,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
+import { EmptyIllustration } from '@/js/components/404';
 import CreateEpicModal from '@/js/components/epics/createForm';
 import EpicTable from '@/js/components/epics/table';
 import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
@@ -28,6 +29,7 @@ import {
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
   OrgData,
+  SpinnerWrapper,
   useAssignUserToTask,
   useFetchEpicsIfMissing,
   useFetchOrgsIfMissing,
@@ -351,277 +353,298 @@ const ProjectDetail = (
           />
         }
         description={project.description_rendered}
-        headerUrl={project.repo_url}
-        headerUrlText={`${project.repo_owner}/${project.repo_name}`}
+        headerUrl={project.latest_sha && project.repo_url}
+        headerUrlText={
+          project.latest_sha && `${project.repo_owner}/${project.repo_name}`
+        }
         breadcrumb={[{ name: project.name }]}
         image={project.repo_image_url}
         sidebar={
-          <div
-            className="slds-m-bottom_x-large
-              metecho-secondary-block
-              tour-scratch-org"
-          >
-            <div className="slds-is-relative heading">
-              <TourPopover
-                id="tour-project-scratch-org"
-                align="top"
-                heading={t('View & play with a Project')}
-                body={
-                  <Trans i18nKey="tourProjectScratchOrg">
-                    Scratch Orgs are a temporary place for you to view the work
-                    on this Project. You can use Scratch Orgs to play with
-                    changes to the Project without affecting the Project. Create
-                    a Scratch Org for the entire Project or visit an Epic or
-                    Task to create a Scratch Org for specific work in-progress.
-                  </Trans>
-                }
-              />
-              <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-                {t('My Project Scratch Org')}
-              </h2>
-            </div>
-            {orgs || runningPlayTour ? (
-              <>
-                {playgroundOrg ? (
-                  <div
-                    className="slds-grid
-                      slds-wrap
-                      slds-grid_pull-padded-x-small"
-                  >
-                    <div className="slds-size_1-of-1 slds-p-around_x-small">
-                      <PlaygroundOrgCard
-                        org={playgroundOrg}
-                        project={project}
-                        repoUrl={project.repo_url}
-                        openContributeModal={openContributeModal}
-                      />
+          project.latest_sha ? (
+            <div
+              className="slds-m-bottom_x-large
+                metecho-secondary-block
+                tour-scratch-org"
+            >
+              <div className="slds-is-relative heading">
+                <TourPopover
+                  id="tour-project-scratch-org"
+                  align="top"
+                  heading={t('View & play with a Project')}
+                  body={
+                    <Trans i18nKey="tourProjectScratchOrg">
+                      Scratch Orgs are a temporary place for you to view the
+                      work on this Project. You can use Scratch Orgs to play
+                      with changes to the Project without affecting the Project.
+                      Create a Scratch Org for the entire Project or visit an
+                      Epic or Task to create a Scratch Org for specific work
+                      in-progress.
+                    </Trans>
+                  }
+                />
+                <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                  {t('My Project Scratch Org')}
+                </h2>
+              </div>
+              {orgs || runningPlayTour ? (
+                <>
+                  {playgroundOrg ? (
+                    <div
+                      className="slds-grid
+                        slds-wrap
+                        slds-grid_pull-padded-x-small"
+                    >
+                      <div className="slds-size_1-of-1 slds-p-around_x-small">
+                        <PlaygroundOrgCard
+                          org={playgroundOrg}
+                          project={project}
+                          repoUrl={project.repo_url}
+                          openContributeModal={openContributeModal}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Button
-                    className="tour-create-scratch-org"
-                    label={t('Create Scratch Org')}
-                    variant="outline-brand"
-                    onClick={openCreateOrgModal}
-                  />
-                )}
-              </>
-            ) : (
-              // Fetching scratch orgs from API
-              <Button
-                className="tour-scratch-org"
-                label={<LabelWithSpinner label={t('Loading Scratch Orgs…')} />}
-                disabled
-              />
-            )}
-          </div>
+                  ) : (
+                    <Button
+                      className="tour-create-scratch-org"
+                      label={t('Create Scratch Org')}
+                      variant="outline-brand"
+                      onClick={openCreateOrgModal}
+                    />
+                  )}
+                </>
+              ) : (
+                // Fetching scratch orgs from API
+                <Button
+                  className="tour-scratch-org"
+                  label={
+                    <LabelWithSpinner label={t('Loading Scratch Orgs…')} />
+                  }
+                  disabled
+                />
+              )}
+            </div>
+          ) : null
         }
       >
-        <Tabs
-          variant="scoped"
-          onSelect={handleTabSelect}
-          selectedIndex={selectedTabOverride}
-        >
-          <TabsPanel
-            label={
-              <div className="tour-project-epics-list">
-                <TourPopover
-                  id="tour-project-epics-list"
-                  align="top left"
-                  heading={t('List of Epics')}
-                  body={
-                    <Trans i18nKey="tourEpicsList">
-                      Select the Epics tab to see a list of all Epics for this
-                      Project. Each Epic is a group of related Tasks.
-                    </Trans>
-                  }
-                />
-                {t('Epics')}
-              </div>
-            }
+        {project.latest_sha ? (
+          <Tabs
+            variant="scoped"
+            onSelect={handleTabSelect}
+            selectedIndex={selectedTabOverride}
           >
-            <div className="slds-m-bottom_x-small">
-              <span className="slds-is-relative metecho-btn-container">
-                <Button
-                  label={
-                    epics?.fetched || tourRunning
-                      ? t('Create an Epic')
-                      : t('Loading Epics…')
-                  }
-                  variant="brand"
-                  onClick={openCreateEpicModal}
-                  className="slds-m-bottom_x-small tour-create-epic"
-                  disabled={
-                    !tourRunning &&
-                    (!project.has_push_permission || !epics?.fetched)
-                  }
-                />
-                <TourPopover
-                  id="tour-project-create-epic"
-                  align="top left"
-                  body={
-                    <Trans i18nKey="tourCreateEpic">
-                      Create an Epic to make a group of related Tasks. Invite
-                      multiple Collaborators to your Epic and assign people as
-                      Developers and Testers for each Task. Epics are equivalent
-                      to GitHub branches, just like Tasks.
-                    </Trans>
-                  }
-                  heading={t('Create Epics to group Tasks')}
-                />
-              </span>
-              <span className="slds-is-relative metecho-btn-container">
-                <Button
-                  label={t('Create Epic from GitHub Issue')}
-                  variant="outline-brand"
-                  onClick={() => openSelectIssueModal('epic')}
-                  className="slds-m-bottom_x-small tour-create-epic-from-issue"
-                  disabled={
-                    !tourRunning &&
-                    (!project.has_push_permission || !epics?.fetched)
-                  }
-                />
-                <TourPopover
-                  id="tour-project-create-epic-from-issue"
-                  align="top left"
-                  body={
-                    <Trans i18nKey="tourCreateEpicFromIssue">
-                      If you want to help as a Developer on this Project, one
-                      option is to browse the list of GitHub Issues. Issues are
-                      items in GitHub’s bug and enhancement tracking system.
-                      Select an Issue to work on, and create an Epic or Task.
-                      Create an Epic for an Issue if it will require multiple
-                      Tasks to complete. If you’re unsure, begin with a Task and
-                      create an Epic later, as needed.
-                    </Trans>
-                  }
-                  heading={t('Create Epic from GitHub Issue')}
-                />
-              </span>
-            </div>
-            <EpicTable
-              epics={
-                /* istanbul ignore next */ tourRunning && !epics?.epics?.length
-                  ? [
-                      getDemoEpic({
-                        project: project.id,
-                        github_id: user.github_id,
-                      }),
-                    ]
-                  : epics?.epics || []
+            <TabsPanel
+              label={
+                <div className="tour-project-epics-list">
+                  <TourPopover
+                    id="tour-project-epics-list"
+                    align="top left"
+                    heading={t('List of Epics')}
+                    body={
+                      <Trans i18nKey="tourEpicsList">
+                        Select the Epics tab to see a list of all Epics for this
+                        Project. Each Epic is a group of related Tasks.
+                      </Trans>
+                    }
+                  />
+                  {t('Epics')}
+                </div>
               }
-              isFetched={Boolean(epics?.fetched)}
-              userHasPermissions={project.has_push_permission}
-              projectSlug={project.slug}
-            />
-            {epics?.epics?.length && epics?.next ? (
-              <div className="slds-m-top_large">
-                <Button
-                  label={fetchingEpics ? <LabelWithSpinner /> : t('Load More')}
-                  onClick={fetchMoreEpics}
-                />
+            >
+              <div className="slds-m-bottom_x-small">
+                <span className="slds-is-relative metecho-btn-container">
+                  <Button
+                    label={
+                      epics?.fetched || tourRunning
+                        ? t('Create an Epic')
+                        : t('Loading Epics…')
+                    }
+                    variant="brand"
+                    onClick={openCreateEpicModal}
+                    className="slds-m-bottom_x-small tour-create-epic"
+                    disabled={
+                      !tourRunning &&
+                      (!project.has_push_permission || !epics?.fetched)
+                    }
+                  />
+                  <TourPopover
+                    id="tour-project-create-epic"
+                    align="top left"
+                    body={
+                      <Trans i18nKey="tourCreateEpic">
+                        Create an Epic to make a group of related Tasks. Invite
+                        multiple Collaborators to your Epic and assign people as
+                        Developers and Testers for each Task. Epics are
+                        equivalent to GitHub branches, just like Tasks.
+                      </Trans>
+                    }
+                    heading={t('Create Epics to group Tasks')}
+                  />
+                </span>
+                <span className="slds-is-relative metecho-btn-container">
+                  <Button
+                    label={t('Create Epic from GitHub Issue')}
+                    variant="outline-brand"
+                    onClick={() => openSelectIssueModal('epic')}
+                    className="slds-m-bottom_x-small
+                      tour-create-epic-from-issue"
+                    disabled={
+                      !tourRunning &&
+                      (!project.has_push_permission || !epics?.fetched)
+                    }
+                  />
+                  <TourPopover
+                    id="tour-project-create-epic-from-issue"
+                    align="top left"
+                    body={
+                      <Trans i18nKey="tourCreateEpicFromIssue">
+                        If you want to help as a Developer on this Project, one
+                        option is to browse the list of GitHub Issues. Issues
+                        are items in GitHub’s bug and enhancement tracking
+                        system. Select an Issue to work on, and create an Epic
+                        or Task. Create an Epic for an Issue if it will require
+                        multiple Tasks to complete. If you’re unsure, begin with
+                        a Task and create an Epic later, as needed.
+                      </Trans>
+                    }
+                    heading={t('Create Epic from GitHub Issue')}
+                  />
+                </span>
               </div>
-            ) : /* istanbul ignore next */ null}
-          </TabsPanel>
-          <TabsPanel
-            label={
-              <div className="tour-project-tasks-list">
-                <TourPopover
-                  id="tour-project-tasks-list"
-                  align="top left"
-                  heading={t('List of Tasks')}
-                  body={
-                    <Trans i18nKey="tourTasksList">
-                      Select the Tasks tab to see a list of all the work being
-                      done on this Project and who is working on it. Tasks
-                      represent small changes to the Project, and may be part of
-                      an Epic.
-                    </Trans>
-                  }
-                />
-                {t('Tasks')}
+              <EpicTable
+                epics={
+                  /* istanbul ignore next */ tourRunning &&
+                  !epics?.epics?.length
+                    ? [
+                        getDemoEpic({
+                          project: project.id,
+                          github_id: user.github_id,
+                        }),
+                      ]
+                    : epics?.epics || []
+                }
+                isFetched={Boolean(epics?.fetched)}
+                userHasPermissions={project.has_push_permission}
+                projectSlug={project.slug}
+              />
+              {epics?.epics?.length && epics?.next ? (
+                <div className="slds-m-top_large">
+                  <Button
+                    label={
+                      fetchingEpics ? <LabelWithSpinner /> : t('Load More')
+                    }
+                    onClick={fetchMoreEpics}
+                  />
+                </div>
+              ) : /* istanbul ignore next */ null}
+            </TabsPanel>
+            <TabsPanel
+              label={
+                <div className="tour-project-tasks-list">
+                  <TourPopover
+                    id="tour-project-tasks-list"
+                    align="top left"
+                    heading={t('List of Tasks')}
+                    body={
+                      <Trans i18nKey="tourTasksList">
+                        Select the Tasks tab to see a list of all the work being
+                        done on this Project and who is working on it. Tasks
+                        represent small changes to the Project, and may be part
+                        of an Epic.
+                      </Trans>
+                    }
+                  />
+                  {t('Tasks')}
+                </div>
+              }
+            >
+              <div className="slds-m-bottom_x-small">
+                <span className="slds-is-relative metecho-btn-container">
+                  <Button
+                    label={
+                      tasks || tourRunning
+                        ? t('Create a Task')
+                        : t('Loading Tasks…')
+                    }
+                    variant="brand"
+                    className="slds-m-bottom_x-small tour-create-task"
+                    onClick={openCreateTaskModal}
+                    disabled={
+                      !tourRunning && (!project.has_push_permission || !tasks)
+                    }
+                  />
+                  <TourPopover
+                    id="tour-project-add-task"
+                    align="top left"
+                    heading={t('Create a Task to contribute')}
+                    body={
+                      <Trans i18nKey="tourProjectCreateTask">
+                        To get started contributing to this Project, create a
+                        Task. Tasks represent small changes to this Project;
+                        each one has a Developer and a Tester. Tasks are
+                        equivalent to GitHub branches.
+                      </Trans>
+                    }
+                  />
+                </span>
+                <span className="slds-is-relative metecho-btn-container">
+                  <Button
+                    label={t('Create Task from GitHub Issue')}
+                    variant="outline-brand"
+                    onClick={() => openSelectIssueModal('task')}
+                    className="slds-m-bottom_x-small
+                      tour-create-task-from-issue"
+                    disabled={
+                      !tourRunning && (!project.has_push_permission || !tasks)
+                    }
+                  />
+                  <TourPopover
+                    id="tour-project-create-task-from-issue"
+                    align="top left"
+                    body={
+                      <Trans i18nKey="tourCreateTaskFromIssue">
+                        If you want to help as a Developer on this Project, one
+                        option is to browse the list of GitHub Issues. Issues
+                        are items in GitHub’s bug and enhancement tracking
+                        system. Select an Issue to work on, and create an Epic
+                        or Task. Create an Epic for an Issue if it will require
+                        multiple Tasks to complete. If you’re unsure, begin with
+                        a Task and create an Epic later, as needed.
+                      </Trans>
+                    }
+                    heading={t('Create Task from GitHub Issue')}
+                  />
+                </span>
               </div>
+              <TasksTableComponent
+                projectId={project.id}
+                projectSlug={project.slug}
+                tasks={
+                  tourRunning && !tasks?.length
+                    ? [
+                        getDemoTask({
+                          project: project.id,
+                          github_id: user.github_id,
+                        }),
+                      ]
+                    : tasks || []
+                }
+                isFetched={Boolean(tasks)}
+                githubUsers={project.github_users}
+                canAssign={project.has_push_permission}
+                isRefreshingUsers={project.currently_fetching_github_users}
+                assignUserAction={assignUser}
+                viewEpicsColumn
+              />
+            </TabsPanel>
+          </Tabs>
+        ) : (
+          <EmptyIllustration
+            heading={t('Creating GitHub Repository for Project…')}
+            message={
+              <SpinnerWrapper className="slds-is-relative slds-p-top_x-large" />
             }
-          >
-            <div className="slds-m-bottom_x-small">
-              <span className="slds-is-relative metecho-btn-container">
-                <Button
-                  label={
-                    tasks || tourRunning
-                      ? t('Create a Task')
-                      : t('Loading Tasks…')
-                  }
-                  variant="brand"
-                  className="slds-m-bottom_x-small tour-create-task"
-                  onClick={openCreateTaskModal}
-                  disabled={
-                    !tourRunning && (!project.has_push_permission || !tasks)
-                  }
-                />
-                <TourPopover
-                  id="tour-project-add-task"
-                  align="top left"
-                  heading={t('Create a Task to contribute')}
-                  body={
-                    <Trans i18nKey="tourProjectCreateTask">
-                      To get started contributing to this Project, create a
-                      Task. Tasks represent small changes to this Project; each
-                      one has a Developer and a Tester. Tasks are equivalent to
-                      GitHub branches.
-                    </Trans>
-                  }
-                />
-              </span>
-              <span className="slds-is-relative metecho-btn-container">
-                <Button
-                  label={t('Create Task from GitHub Issue')}
-                  variant="outline-brand"
-                  onClick={() => openSelectIssueModal('task')}
-                  className="slds-m-bottom_x-small tour-create-task-from-issue"
-                  disabled={
-                    !tourRunning && (!project.has_push_permission || !tasks)
-                  }
-                />
-                <TourPopover
-                  id="tour-project-create-task-from-issue"
-                  align="top left"
-                  body={
-                    <Trans i18nKey="tourCreateTaskFromIssue">
-                      If you want to help as a Developer on this Project, one
-                      option is to browse the list of GitHub Issues. Issues are
-                      items in GitHub’s bug and enhancement tracking system.
-                      Select an Issue to work on, and create an Epic or Task.
-                      Create an Epic for an Issue if it will require multiple
-                      Tasks to complete. If you’re unsure, begin with a Task and
-                      create an Epic later, as needed.
-                    </Trans>
-                  }
-                  heading={t('Create Task from GitHub Issue')}
-                />
-              </span>
-            </div>
-            <TasksTableComponent
-              projectId={project.id}
-              projectSlug={project.slug}
-              tasks={
-                tourRunning && !tasks?.length
-                  ? [
-                      getDemoTask({
-                        project: project.id,
-                        github_id: user.github_id,
-                      }),
-                    ]
-                  : tasks || []
-              }
-              isFetched={Boolean(tasks)}
-              githubUsers={project.github_users}
-              canAssign={project.has_push_permission}
-              isRefreshingUsers={project.currently_fetching_github_users}
-              assignUserAction={assignUser}
-              viewEpicsColumn
-            />
-          </TabsPanel>
-        </Tabs>
+          />
+        )}
         <SelectIssueModal
           projectId={project.id}
           projectSlug={project.slug}
