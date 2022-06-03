@@ -205,7 +205,7 @@ class CurrentUserViewSet(GenericViewSet):
         """Queue a job to refresh the user's list of GitHub organizations."""
         request.user.queue_refresh_organizations()
         return Response(status=status.HTTP_202_ACCEPTED)
-    
+
     @extend_schema(request=None)
     @action(methods=["delete"], detail=True)
     def delete(self, request, *args, **kwargs):

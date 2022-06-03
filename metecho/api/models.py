@@ -1,6 +1,5 @@
 import html
 import logging
-import traceback
 from contextlib import suppress
 from datetime import timedelta
 from typing import Dict, Iterable, Optional, Tuple
@@ -218,22 +217,11 @@ class User(PushMixin, HashIdMixin, AbstractUser):
             return None
 
     def delete(self, *args, **kwargs):
+        for scratch_org_to_delete in self.scratchorg_set.all():
+            scratch_org_to_delete.owner = None
+            scratch_org_to_delete.save()
+            scratch_org_to_delete.queue_delete(originating_user_id=self.id)
 
-        try:
-            for scratch_org_to_delete in self.scratchorg_set.all():
-                scratch_org_to_delete.owner = None
-                scratch_org_to_delete.save()
-                scratch_org_to_delete.queue_delete(originating_user_id=self.id)
-        except Exception as e:
-            async_to_sync(push.report_scratch_org_error)(
-                scratch_org_to_delete,
-                error=e,
-                type_="SCRATCH_ORG_DELETE_FAILED",
-                originating_user_id=self.id,
-            )
-            tb = traceback.format_exc()
-            logger.error(tb)
-            raise
         super().delete(*args, **kwargs)
 
     @property

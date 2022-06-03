@@ -246,6 +246,10 @@ class TestGitHubOrganizationViewset:
             len(data["messages"]) == 3
         ), "Expected three error messages when permission checks fail"
 
+    def test_delete(self, client, mocker):
+        response = client.delete(reverse("current-user-detail"))
+        assert response.status_code == 204
+
 
 @pytest.mark.django_db
 class TestGitHubIssueViewset:

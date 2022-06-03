@@ -777,6 +777,23 @@ class TestUser:
             get_devhub_api.return_value = client
             assert not user.is_devhub_enabled
 
+    def test_user_delete_triggers_scratch_org_delete(
+        self, user_factory, scratch_org_factory
+    ):
+        user = user_factory()
+        with ExitStack() as stack:
+            delete_scratch_org_job = stack.enter_context(
+                patch("metecho.api.jobs.delete_scratch_org_job")
+            )
+
+            scratch_org = scratch_org_factory(last_modified_at=now(), owner=user)
+
+            assert user.scratchorg_set.first() == scratch_org
+
+            user.delete()
+
+            assert delete_scratch_org_job.delay.called
+
 
 @pytest.mark.django_db
 class TestScratchOrg:
@@ -841,6 +858,18 @@ class TestScratchOrg:
             scratch_org.delete()
 
             assert async_to_sync.called
+
+    def test_delete_scratch_org_with_no_owner(self, scratch_org_factory):
+        with ExitStack() as stack:
+            delete_scratch_org_job = stack.enter_context(
+                patch("metecho.api.jobs.delete_scratch_org_job")
+            )
+
+            scratch_org = scratch_org_factory(last_modified_at=now())
+            scratch_org.owner = None
+            scratch_org.save()
+            scratch_org.queue_delete(originating_user_id=None)
+            assert delete_scratch_org_job.delay.called
 
     def test_get_unsaved_changes(self, scratch_org_factory):
         with ExitStack() as stack:
