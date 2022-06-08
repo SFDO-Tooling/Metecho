@@ -12,7 +12,7 @@ interface ObjectPayload extends CreateObjectPayload {
   filters: ObjectFilters;
   reset?: boolean;
 }
-interface ObjectFilters {
+export interface ObjectFilters {
   [key: string]: string;
 }
 interface ObjectData {
@@ -22,6 +22,7 @@ type ObjectResponse = any[];
 export interface PaginatedObjectResponse {
   next: string | null;
   results: ObjectResponse;
+  count: number;
 }
 
 interface FetchObjectsStarted {
