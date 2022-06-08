@@ -43,6 +43,7 @@ const ConfirmRemoveUserModal = ({
         { count },
       )}
       prompt="warning"
+      dismissOnClickOutside={false}
       onRequestClose={handleClose}
       assistiveText={{ closeButton: t('Cancel') }}
       footer={[

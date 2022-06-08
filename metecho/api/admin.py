@@ -4,16 +4,21 @@ from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 from django.db.models import JSONField
 from django.forms.widgets import Textarea
+from django.template.defaultfilters import urlize
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
+
+from metecho.api.constants import GitHubAppErrors
 
 from . import gh
 from .models import (
     Epic,
     EpicSlug,
     GitHubIssue,
+    GitHubOrganization,
     GitHubRepository,
     Project,
+    ProjectDependency,
     ProjectSlug,
     ScratchOrg,
     SiteProfile,
@@ -43,6 +48,25 @@ class ProjectForm(forms.ModelForm):
                     "Does the Metecho app need to be installed for this repository?"
                 )
             )
+
+
+class GitHubOrganizationForm(forms.ModelForm):
+    class Meta:
+        model = GitHubOrganization
+        exclude = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["avatar_url"].help_text = _("Will be auto-populated after saving")
+
+    def clean(self):
+        login = self.cleaned_data["login"]
+        try:
+            session = gh.gh_as_org(orgname=login)
+            org = session.organization(login)
+        except Exception:
+            raise forms.ValidationError(GitHubAppErrors.NOT_INSTALLED)
+        self.cleaned_data["avatar_url"] = org.avatar_url
 
 
 class JSONWidget(Textarea):
@@ -84,7 +108,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
     list_filter = ("is_active", "is_staff", "is_superuser")
     search_fields = ("username", "email")
-    filter_horizontal = ("groups", "user_permissions")
+    filter_horizontal = ("groups", "user_permissions", "organizations")
 
 
 @admin.register(Project)
@@ -107,6 +131,23 @@ class ProjectSlugAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     list_select_related = ("parent",)
     search_fields = ("slug",)
+
+
+@admin.register(ProjectDependency)
+class ProjectDependencyAdmin(admin.ModelAdmin):
+    list_display = ("name", "recommended")
+    list_filter = ("recommended",)
+    search_fields = ("name",)
+
+
+@admin.register(GitHubOrganization)
+class GitHubOrganizationAdmin(admin.ModelAdmin):
+    form = GitHubOrganizationForm
+    list_display = ("name", "github_link")
+    search_fields = ("name", "login")
+
+    def github_link(self, obj):
+        return urlize(obj.github_url)
 
 
 @admin.register(GitHubRepository)

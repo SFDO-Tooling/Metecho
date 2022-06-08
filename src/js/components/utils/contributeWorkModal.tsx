@@ -227,6 +227,7 @@ const ContributeWorkModal = ({
         ) : null,
       ]}
       prompt={hasPermissions ? undefined : 'warning'}
+      dismissOnClickOutside={false}
       onRequestClose={doClose}
       assistiveText={{ closeButton: t('Cancel') }}
     >

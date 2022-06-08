@@ -5,14 +5,16 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.urls import reverse
-from github3.exceptions import ResponseError
+from github3.exceptions import NotFoundError, ResponseError
+from github3.users import User as gh_user
 from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
 
-from ..models import ScratchOrgType
+from ..models import Project, ScratchOrgType, SiteProfile
 
 Branch = namedtuple("Branch", ["name"])
 
@@ -77,13 +79,172 @@ class TestCurrentUserViewSet:
 
     def test_refresh(self, client, mocker):
         refresh_github_repositories_for_user_job = mocker.patch(
-            "metecho.api.jobs.refresh_github_repositories_for_user_job"
+            "metecho.api.jobs.refresh_github_repositories_for_user_job", autospec=True
         )
+
         response = client.post(reverse("current-user-refresh"))
+
         client.user.refresh_from_db()
         assert response.status_code == 202
         assert refresh_github_repositories_for_user_job.delay.called
         assert client.user.currently_fetching_repos
+
+    def test_refresh_orgs(self, client, mocker):
+        get_orgs_for_user_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_organizations_for_user_job", autospec=True
+        )
+
+        response = client.post(reverse("current-user-refresh-orgs"))
+
+        client.user.refresh_from_db()
+        assert response.status_code == 202
+        assert get_orgs_for_user_job.delay.called
+        assert client.user.currently_fetching_orgs
+
+
+@pytest.mark.django_db
+class TestProjectDependencyViewset:
+    def test_list(self, client, project_dependency):
+        response = client.get(reverse("dependency-list"))
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["id"] == project_dependency.id
+
+    def test_retrieve(self, client, project_dependency):
+        response = client.get(
+            reverse("dependency-detail", args=[str(project_dependency.id)])
+        )
+        assert tuple(response.json().keys()) == ("id", "name", "recommended")
+
+
+@pytest.mark.django_db
+class TestGitHubOrganizationViewset:
+    def test_list(self, client, git_hub_organization):
+        response = client.get(reverse("organization-list"))
+        data = response.json()
+        assert data["count"] == 1
+        assert data["results"][0]["id"] == str(git_hub_organization.id)
+
+    def test_retrieve(self, client, git_hub_organization):
+        response = client.get(
+            reverse("organization-detail", args=[str(git_hub_organization.id)])
+        )
+        assert tuple(response.json().keys()) == ("id", "name", "avatar_url")
+
+    def test_members(self, client, mocker, git_hub_organization):
+        member1 = mocker.MagicMock(spec=gh_user)
+        member1.as_dict.return_value = {
+            "id": 123,
+            "login": "user-xyz",
+            "avatar_url": "http://123.com",
+        }
+        member2 = mocker.MagicMock(spec=gh_user)
+        member2.as_dict.return_value = {
+            "id": 456,
+            "login": "user-abc",
+            "avatar_url": "http://456.com",
+        }
+        gh = mocker.patch("metecho.api.views.gh", autospec=True)
+        gh.gh_as_user.return_value.organization.return_value.members.return_value = (
+            member1,
+            member2,
+        )
+
+        response = client.get(
+            reverse("organization-members", args=[git_hub_organization.id])
+        )
+
+        assert response.json() == [
+            {"id": "456", "login": "user-abc", "avatar_url": "http://456.com"},
+            {"id": "123", "login": "user-xyz", "avatar_url": "http://123.com"},
+        ]
+
+    @pytest.mark.parametrize(
+        "available",
+        (
+            pytest.param(False, id="Repo name taken"),
+            pytest.param(True, id="Repo name available"),
+        ),
+    )
+    def test_check_repo_name(self, client, mocker, git_hub_organization, available):
+        gh = mocker.patch("metecho.api.views.gh")
+        if available:
+            gh.get_repo_info.side_effect = NotFoundError(mocker.MagicMock())
+        response = client.post(
+            reverse("organization-check-repo-name", args=[git_hub_organization.id]),
+            data={"name": "repo-name"},
+        )
+        assert response.json() == {"available": available}
+
+    def test_check_repo_name__missing_name(self, client, git_hub_organization):
+        response = client.post(
+            reverse("organization-check-repo-name", args=[git_hub_organization.id]),
+            data={"name": ""},
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
+
+    def test_check_app_installation(self, client, mocker, git_hub_organization):
+        org = git_hub_organization
+        installation = mocker.MagicMock(
+            repository_selection="all",
+            permissions={"members": "write", "administration": "write"},
+        )
+        gh = mocker.patch("metecho.api.views.gh")
+        gh.gh_as_user.return_value.organizations.return_value = [
+            mocker.Mock(login=org.login)
+        ]
+        gh.gh_as_app.return_value.app_installation_for_organization.return_value = (
+            installation
+        )
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        response = client.post(url)
+
+        assert response.json() == {"success": True, "messages": []}
+
+    def test_check_app_installation__not_installed(
+        self, client, mocker, git_hub_organization
+    ):
+        org = git_hub_organization
+        gh = mocker.patch("metecho.api.views.gh")
+        gh.gh_as_app.return_value.app_installation_for_organization.side_effect = (
+            NotFoundError(mocker.MagicMock())
+        )
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        data = client.post(url).json()
+
+        assert not data["success"]
+        assert "has not been installed" in data["messages"][0]
+
+    def test_check_app_installation__no_member(
+        self, client, mocker, git_hub_organization
+    ):
+        org = git_hub_organization
+        mocker.patch("metecho.api.views.gh")
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        data = client.post(url).json()
+
+        assert not data["success"]
+        assert "not a member" in data["messages"][0]
+
+    def test_check_app_installation__no_permissions(
+        self, client, mocker, git_hub_organization
+    ):
+        org = git_hub_organization
+        gh = mocker.patch("metecho.api.views.gh")
+        gh.gh_as_user.return_value.organizations.return_value = [
+            mocker.Mock(login=org.login)
+        ]
+
+        url = reverse("organization-check-app-installation", args=[org.id])
+        data = client.post(url).json()
+
+        assert not data["success"]
+        assert (
+            len(data["messages"]) == 3
+        ), "Expected three error messages when permission checks fail"
 
 
 @pytest.mark.django_db
@@ -190,7 +351,7 @@ class TestProjectViewset:
             git_hub_repository_factory(user=client.user, repo_id=123)
             project = project_factory(repo_id=123)
             available_org_config_names_job = stack.enter_context(
-                patch("metecho.api.jobs.available_org_config_names_job")
+                patch("metecho.api.jobs.available_org_config_names_job", autospec=True)
             )
             response = client.post(
                 reverse(
@@ -207,7 +368,7 @@ class TestProjectViewset:
         git_hub_repository_factory(user=client.user, repo_id=123)
         project = project_factory(repo_id=123)
         refresh_github_users_job = mocker.patch(
-            "metecho.api.jobs.refresh_github_users_job"
+            "metecho.api.jobs.refresh_github_users_job", autospec=True
         )
 
         response = client.post(
@@ -362,6 +523,57 @@ class TestProjectViewset:
         data = response.json()
         assert data["count"] == 3, data
 
+    def test_create(
+        self, client, mocker, git_hub_organization, project_dependency_factory
+    ):
+        dep1 = project_dependency_factory(url="http://foo.com")
+        dep2 = project_dependency_factory(url="http://bar.com")
+        SiteProfile.objects.create(
+            site=Site.objects.get(),
+            template_repo_owner="orgname",
+            template_repo_name="reponame",
+        )
+
+        create_repository_job = mocker.patch(
+            "metecho.api.jobs.create_repository_job", autospec=True
+        )
+        mocker.patch(
+            # Simulate the actual GH repo not existing during the first save
+            "metecho.api.models.gh.get_repo_info",
+            side_effect=NotFoundError(mocker.MagicMock()),
+        )
+
+        response = client.post(
+            reverse("project-list"),
+            data={
+                "organization": str(git_hub_organization.pk),
+                "name": "Foo",
+                "repo_name": "foo",
+                "github_users": [
+                    {"id": "123", "login": "abc", "avatar_url": "http://example.com"}
+                ],
+                "dependencies": [dep1.id, dep2.id],
+            },
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK, response.content
+        project = Project.objects.get()
+        assert project.name == "Foo"
+        assert project.repo_name == "foo"
+        assert project.repo_owner == git_hub_organization.login
+        assert project.github_users == [
+            {"id": "123", "login": "abc", "avatar_url": "http://example.com"},
+            {"login": client.user.username},
+        ]
+        create_repository_job.delay.assert_called_with(
+            project,
+            user=client.user,
+            dependencies=["http://foo.com", "http://bar.com"],
+            template_repo_owner="orgname",
+            template_repo_name="reponame",
+        )
+
 
 @pytest.mark.django_db
 class TestHookView:
@@ -410,7 +622,7 @@ class TestHookView:
             task = _task_factory(**task_data, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_commits_job")
+                patch("metecho.api.jobs.refresh_commits_job", autospec=True)
             )
             response = client.post(
                 reverse("hook"),
@@ -464,7 +676,7 @@ class TestHookView:
             epic = epic_factory(project=project, branch_name="test-epic")
 
             refresh_commits_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_commits_job")
+                patch("metecho.api.jobs.refresh_commits_job", autospec=True)
             )
             response = client.post(
                 reverse("hook"),
@@ -516,7 +728,7 @@ class TestHookView:
             git_hub_repository_factory(repo_id=123)
 
             refresh_commits_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_commits_job")
+                patch("metecho.api.jobs.refresh_commits_job", autospec=True)
             )
             response = client.post(
                 reverse("hook"),
@@ -578,7 +790,9 @@ class TestHookView:
         settings.GITHUB_HOOK_SECRET = b""
         project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
-        with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
+        with patch(
+            "metecho.api.jobs.refresh_commits_job", autospec=True
+        ) as refresh_commits_job:
             response = client.post(
                 reverse("hook"),
                 json.dumps(
@@ -671,7 +885,7 @@ class TestScratchOrgViewSet:
     def test_commit_happy_path(self, client, scratch_org_factory):
         with ExitStack() as stack:
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
 
             scratch_org = scratch_org_factory(
@@ -696,7 +910,7 @@ class TestScratchOrgViewSet:
             scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
 
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
@@ -715,7 +929,7 @@ class TestScratchOrgViewSet:
             scratch_org = scratch_org_factory(org_type="Dev")
 
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
@@ -730,7 +944,7 @@ class TestScratchOrgViewSet:
             scratch_org = scratch_org_factory(org_type="Dev")
 
             commit_changes_from_org_job = stack.enter_context(
-                patch("metecho.api.jobs.commit_changes_from_org_job")
+                patch("metecho.api.jobs.commit_changes_from_org_job", autospec=True)
             )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
@@ -796,7 +1010,7 @@ class TestScratchOrgViewSet:
             )
 
             get_unsaved_changes_job = stack.enter_context(
-                patch("metecho.api.jobs.get_unsaved_changes_job")
+                patch("metecho.api.jobs.get_unsaved_changes_job", autospec=True)
             )
             url = reverse("scratch-org-list")
             response = client.get(url)
@@ -817,7 +1031,7 @@ class TestScratchOrgViewSet:
             )
 
             get_unsaved_changes_job = stack.enter_context(
-                patch("metecho.api.jobs.get_unsaved_changes_job")
+                patch("metecho.api.jobs.get_unsaved_changes_job", autospec=True)
             )
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
@@ -935,7 +1149,7 @@ class TestScratchOrgViewSet:
             scratch_org = scratch_org_factory(owner=client.user)
 
             refresh_scratch_org_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_scratch_org_job")
+                patch("metecho.api.jobs.refresh_scratch_org_job", autospec=True)
             )
             url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
             response = client.post(url)
@@ -948,7 +1162,7 @@ class TestScratchOrgViewSet:
             scratch_org = scratch_org_factory()
 
             refresh_scratch_org_job = stack.enter_context(
-                patch("metecho.api.jobs.refresh_scratch_org_job")
+                patch("metecho.api.jobs.refresh_scratch_org_job", autospec=True)
             )
             url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
             response = client.post(url)
@@ -1066,7 +1280,7 @@ class TestTaskViewSet:
             task = task_factory(pr_is_open=True, review_valid=True)
 
             submit_review_job = stack.enter_context(
-                patch("metecho.api.jobs.submit_review_job")
+                patch("metecho.api.jobs.submit_review_job", autospec=True)
             )
             data = {
                 "notes": "",

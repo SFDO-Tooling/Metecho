@@ -38,7 +38,6 @@ const PageOptions = ({
       iconName="settings"
       iconVariant="more"
       width="xx-small"
-      triggerClassName="slds-m-right_xx-small"
       assistiveText={{ icon: assistiveText }}
       onSelect={handleSelect}
       options={[

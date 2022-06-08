@@ -69,6 +69,7 @@ const ConnectModal = ({
     <Modal
       isOpen={isOpen && !isConnected}
       heading={t('Connect to Salesforce')}
+      dismissOnClickOutside={false}
       assistiveText={{ closeButton: t('Close') }}
       tagline={
         <Trans i18nKey="devHubInfo">

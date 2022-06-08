@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from github3.exceptions import NotFoundError
 
 from ..admin import JSONWidget, ProjectForm, SiteAdminForm, SoftDeletedListFilter
-from ..models import Epic
+from ..models import Epic, GitHubOrganization
 
 
 @pytest.mark.django_db
@@ -117,6 +117,37 @@ class TestProjectAdmin:
         )
 
         assert get_social_image_job.delay.called == should_fetch
+
+
+@pytest.mark.django_db
+class TestGitHubOrganizationAdmin:
+    def test_github_link(self, admin_client, git_hub_organization):
+        href = f'href="https://github.com/{git_hub_organization.login}"'
+        response = admin_client.get(reverse("admin:api_githuborganization_changelist"))
+        assert href in str(response.content)
+
+    def test_org__bad(self, admin_client, mocker):
+        gh = mocker.patch("metecho.api.admin.gh", autospec=True)
+        gh.gh_as_org.side_effect = Exception
+        url = reverse("admin:api_githuborganization_add")
+
+        response = admin_client.post(url, data={"name": "Test", "login": "test"})
+
+        assert not GitHubOrganization.objects.exists()
+        assert b"has not been installed" in response.content
+
+    def test_org__good(self, admin_client, mocker):
+        gh = mocker.patch("metecho.api.admin.gh", autospec=True)
+        gh.gh_as_org.return_value.organization.return_value = mocker.MagicMock(
+            avatar_url="http://example.com"
+        )
+
+        url = reverse("admin:api_githuborganization_add")
+        admin_client.post(url, data={"name": "Test", "login": "test"})
+
+        assert GitHubOrganization.objects.filter(
+            name="Test", login="test", avatar_url="http://example.com"
+        ).exists()
 
 
 def test_json_widget():

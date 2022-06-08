@@ -4,6 +4,48 @@ info:
   version: 0.1.0
   description: 2019–2021, Salesforce.org
 paths:
+  /api/dependencies/:
+    get:
+      operationId: dependencies_list
+      description: Dependencies available during Project creation
+      tags:
+      - dependencies
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectDependency'
+          description: ''
+  /api/dependencies/{id}/:
+    get:
+      operationId: dependencies_retrieve
+      description: Dependencies available during Project creation
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this project dependency.
+        required: true
+      tags:
+      - dependencies
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDependency'
+          description: ''
   /api/epics/:
     get:
       operationId: epics_list
@@ -352,6 +394,143 @@ paths:
               schema:
                 $ref: '#/components/schemas/GitHubIssue'
           description: ''
+  /api/organizations/:
+    get:
+      operationId: organizations_list
+      description: GitHub Organizations available during Project creation
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - organizations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGitHubOrganizationList'
+          description: ''
+  /api/organizations/{id}/:
+    get:
+      operationId: organizations_retrieve
+      description: GitHub Organizations available during Project creation
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this GitHub organization.
+        required: true
+      tags:
+      - organizations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitHubOrganization'
+          description: ''
+  /api/organizations/{id}/check_app_installation/:
+    post:
+      operationId: organizations_check_app_installation_create
+      description: Verify the GitHub App has been installed correctly in the organization
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this GitHub organization.
+        required: true
+      tags:
+      - organizations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitHubAppInstallationCheck'
+          description: ''
+  /api/organizations/{id}/check_repo_name/:
+    post:
+      operationId: organizations_check_repo_name_create
+      description: Determine if a repository name is available for the Organization
+        on GitHub
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this GitHub organization.
+        required: true
+      tags:
+      - organizations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckRepoName'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CheckRepoName'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CheckRepoName'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: boolean
+          description: ''
+  /api/organizations/{id}/members/:
+    get:
+      operationId: organizations_members_list
+      description: Fetch the members of an Organization from GitHub
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this GitHub organization.
+        required: true
+      tags:
+      - organizations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShortGitHubUser'
+          description: ''
   /api/projects/:
     get:
       operationId: projects_list
@@ -378,6 +557,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedProjectList'
+          description: ''
+    post:
+      operationId: projects_create
+      description: Read-only information about Metecho Projects.
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
           description: ''
   /api/projects/{id}/:
     get:
@@ -1204,6 +1410,18 @@ paths:
       responses:
         '202':
           description: No response body
+  /api/user/refresh_orgs/:
+    post:
+      operationId: user_refresh_orgs_create
+      description: Queue a job to refresh the user's list of GitHub organizations.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
   /api/users/:
     get:
       operationId: users_list
@@ -1263,6 +1481,13 @@ components:
       required:
       - gh_uid
       - role
+    CheckRepoName:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+      - name
     Commit:
       type: object
       properties:
@@ -1466,6 +1691,8 @@ components:
           readOnly: true
         currently_fetching_repos:
           type: boolean
+        currently_fetching_orgs:
+          type: boolean
         devhub_username:
           type: string
         uses_global_devhub:
@@ -1486,6 +1713,11 @@ components:
           type: object
           additionalProperties: {}
           nullable: true
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GitHubOrganization'
+          readOnly: true
       required:
       - avatar_url
       - github_id
@@ -1493,10 +1725,23 @@ components:
       - is_devhub_enabled
       - org_name
       - org_type
+      - organizations
       - sf_username
       - username
       - uses_global_devhub
       - valid_token_for
+    GitHubAppInstallationCheck:
+      type: object
+      properties:
+        success:
+          type: boolean
+        messages:
+          type: array
+          items:
+            type: string
+      required:
+      - messages
+      - success
     GitHubIssue:
       type: object
       properties:
@@ -1564,23 +1809,37 @@ components:
       - project
       - task
       - title
-    GitHubUser:
+    GitHubOrganization:
       type: object
       properties:
         id:
           type: string
-        login:
-          type: string
+          readOnly: true
         name:
           type: string
         avatar_url:
           type: string
           format: uri
+          maxLength: 200
+      required:
+      - id
+      - name
+    GitHubUser:
+      type: object
+      description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
+      properties:
+        id:
+          type: string
+        login:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        name:
+          type: string
         permissions:
           $ref: '#/components/schemas/RepoPermission'
       required:
-      - avatar_url
-      - id
       - login
     GuidedTour:
       type: object
@@ -1667,6 +1926,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GitHubIssue'
+    PaginatedGitHubOrganizationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GitHubOrganization'
     PaginatedMinimalUserList:
       type: object
       properties:
@@ -2120,6 +2399,46 @@ components:
       - repo_owner
       - repo_url
       - slug
+    ProjectCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        organization:
+          type: string
+          format: HashID
+        repo_name:
+          type: string
+        github_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShortGitHubUser'
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: HashID
+      required:
+      - dependencies
+      - github_users
+      - name
+      - organization
+      - repo_name
+    ProjectDependency:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        recommended:
+          type: boolean
+      required:
+      - id
+      - name
     RepoPermission:
       type: object
       properties:
@@ -2306,6 +2625,19 @@ components:
       - unsaved_changes
       - url
       - valid_target_directories
+    ShortGitHubUser:
+      type: object
+      description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
+      properties:
+        id:
+          type: string
+        login:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+      required:
+      - login
     Task:
       type: object
       properties:

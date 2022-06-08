@@ -6,6 +6,7 @@ from ..api.model_mixins import Request
 from ..api.push import push_message_about_instance, report_error
 from ..api.serializers import (
     EpicSerializer,
+    FullUserSerializer,
     ProjectSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -18,6 +19,36 @@ from ..routing import websockets
 def serialize_model(serializer_model, instance, user):
     serializer = serializer_model(instance, context={"request": Request(user)})
     return serializer.data
+
+
+@pytest.mark.django_db
+async def test_push_notification_consumer__user(user_factory):
+    user = await database_sync_to_async(user_factory)()
+
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
+    communicator.scope["user"] = user
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to(
+        {"model": "user", "id": user.id, "action": "SUBSCRIBE"}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await push_message_about_instance(
+        user,
+        {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}},
+        include_user=True,
+    )
+    response = await communicator.receive_json_from()
+    model = await serialize_model(FullUserSerializer, user, user)
+    assert response == {
+        "type": "TEST_MESSAGE",
+        "payload": {"originating_user_id": "abc", "model": model},
+    }
+
+    await communicator.disconnect()
 
 
 @pytest.mark.django_db

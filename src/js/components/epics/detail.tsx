@@ -496,7 +496,7 @@ const EpicDetail = (
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container">
+        <div className="slds-is-relative inline-container slds-m-left_x-small">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -630,6 +630,7 @@ const EpicDetail = (
               />
               {epicCollaborators.length ? (
                 <UserCards
+                  className="slds-m-top_large"
                   users={epicCollaborators}
                   userId={currentUser.github_id}
                   canRemoveUser={project.has_push_permission}

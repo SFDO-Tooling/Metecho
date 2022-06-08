@@ -66,8 +66,6 @@ describe('<CreateEpicModal/>', () => {
         target: { value: 'This is the description' },
       });
       fireEvent.click(submit);
-
-      expect.assertions(1);
       await findByText('Creating…');
       await findByText('Create');
 
@@ -135,11 +133,8 @@ describe('<CreateEpicModal/>', () => {
         const nameInput = getByLabelText('*Epic Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
         fireEvent.click(submit);
-
-        expect.assertions(2);
         await findByText('Creating…');
         await findByText('Create');
-        await createObject;
 
         expect(context.action).toBe('PUSH');
         expect(context.url).toEqual(
@@ -169,7 +164,6 @@ describe('<CreateEpicModal/>', () => {
         fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
         fireEvent.click(submit);
 
-        expect.assertions(3);
         await findByText('Creating…');
         await findByText('Create');
         await findByText('Do not do that');
@@ -196,7 +190,6 @@ describe('<CreateEpicModal/>', () => {
         fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
         fireEvent.click(submit);
 
-        expect.assertions(1);
         await findByText('Creating…');
         await findByText('Create');
         await waitFor(() => {

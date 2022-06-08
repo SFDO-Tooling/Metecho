@@ -2,11 +2,10 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
-from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -24,6 +23,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from github3.exceptions import NotFoundError
 from model_utils import FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from requests.exceptions import HTTPError
@@ -32,7 +32,7 @@ from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 from simple_salesforce.exceptions import SalesforceError
 
-from . import gh, push
+from . import gh
 from .constants import CHANNELS_GROUP_NAME, ORGANIZATION_DETAILS
 from .email_utils import get_user_facing_url
 from .model_mixins import (
@@ -88,11 +88,26 @@ class IssueStates(models.TextChoices):
 
 class SiteProfile(TranslatableModel):
     site = models.OneToOneField(Site, on_delete=models.CASCADE)
+    template_repo_owner = StringField(
+        blank=True,
+        help_text=_(
+            "Owner of the GitHub repository to be used as a template for new Projects"
+        ),
+    )
+    template_repo_name = StringField(
+        blank=True,
+        help_text=_(
+            "Name of the GitHub repository to be used as a template for new Projects"
+        ),
+    )
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
         clickthrough_agreement=MarkdownField(property_suffix="_markdown", blank=True),
     )
+
+    def __str__(self) -> str:
+        return str(self.name)
 
 
 class UserQuerySet(models.QuerySet):
@@ -104,9 +119,13 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
         return self.get_or_create(username=settings.GITHUB_USER_NAME)[0]
 
 
-class User(HashIdMixin, AbstractUser):
+class User(PushMixin, HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
+    currently_fetching_orgs = models.BooleanField(default=False)
+    organizations = models.ManyToManyField(
+        "api.GitHubOrganization", related_name="users"
+    )
     devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
@@ -147,19 +166,49 @@ class User(HashIdMixin, AbstractUser):
         self.currently_fetching_repos = False
         self.save()
         if error is None:
-            message = {"type": "USER_REPOS_REFRESH"}
+            self.notify_changed(type_="USER_REPOS_REFRESH", originating_user_id=None)
         else:
-            message = {
-                "type": "USER_REPOS_ERROR",
-                "payload": {"message": str(error)},
-            }
-        async_to_sync(push.push_message_about_instance)(self, message)
+            self.notify_error(error, type_="USER_REPOS_ERROR", originating_user_id=None)
+
+    def queue_refresh_organizations(self):
+        from .jobs import refresh_github_organizations_for_user_job
+
+        if not self.currently_fetching_orgs:
+            self.currently_fetching_orgs = True
+            self.save()
+            refresh_github_organizations_for_user_job.delay(user=self)
+
+    def finalize_refresh_organizations(self, *, error: Exception = None):
+        self.refresh_from_db()
+        self.currently_fetching_orgs = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="USER_ORGS_REFRESH", originating_user_id=None, include_user=True
+            )
+        else:
+            self.notify_error(
+                error, type_="USER_ORGS_REFRESH_ERROR", originating_user_id=None
+            )
 
     def invalidate_salesforce_credentials(self):
         self.socialaccount_set.filter(provider="salesforce").delete()
 
     def subscribable_by(self, user):
         return self == user
+
+    # begin PushMixin configuration:
+    push_update_type = "USER_UPDATE"
+    push_error_type = "USER_ERROR"
+
+    def get_serialized_representation(self, user):
+        from .serializers import FullUserSerializer
+
+        return FullUserSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
+
+    # end PushMixin configuration
 
     def _get_org_property(self, key):
         try:
@@ -379,24 +428,60 @@ class Project(
         unique_together = (("repo_owner", "repo_name"),)
 
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            repo = gh.get_repo_info(
-                None, repo_owner=self.repo_owner, repo_name=self.repo_name
-            )
-            self.branch_name = repo.default_branch
-            self.latest_sha = repo.branch(repo.default_branch).latest_sha()
-
-        if not self.latest_sha:
-            repo = gh.get_repo_info(
-                None, repo_owner=self.repo_owner, repo_name=self.repo_name
-            )
-            self.latest_sha = repo.branch(self.branch_name).latest_sha()
+        # Ignore GitHub 404 errors if the repository for a Project has not been created
+        with suppress(NotFoundError):
+            if not self.branch_name:
+                repo = gh.get_repo_info(
+                    None, repo_owner=self.repo_owner, repo_name=self.repo_name
+                )
+                self.branch_name = repo.default_branch
+                self.latest_sha = repo.branch(repo.default_branch).latest_sha()
+            elif not self.latest_sha:
+                repo = gh.get_repo_info(
+                    None, repo_owner=self.repo_owner, repo_name=self.repo_name
+                )
+                self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
         super().save(*args, **kwargs)
 
     def finalize_get_social_image(self):
         self.save()
         self.notify_changed(originating_user_id=None)
+
+    def queue_create_repository(
+        self,
+        *,
+        user: User,
+        dependencies: Iterable[str],
+        template_repo_owner: str = None,
+        template_repo_name: str = None,
+    ):
+        from .jobs import create_repository_job
+
+        create_repository_job.delay(
+            self,
+            user=user,
+            dependencies=dependencies,
+            template_repo_owner=template_repo_owner,
+            template_repo_name=template_repo_name,
+        )
+
+    def finalize_create_repository(self, *, error=None, user: User):
+        originating_user_id = str(user.id)
+        if error is None:
+            self.save()
+            self.notify_changed(
+                type_="PROJECT_CREATE", originating_user_id=originating_user_id
+            )
+            # Get fresh permission information for each collaborator
+            self.queue_refresh_github_users(originating_user_id=originating_user_id)
+        else:
+            self.notify_error(
+                error,
+                type_="PROJECT_CREATE_ERROR",
+                originating_user_id=originating_user_id,
+            )
+            self.delete()
 
     def queue_refresh_github_users(self, *, originating_user_id):
         from .jobs import refresh_github_users_job
@@ -414,7 +499,11 @@ class Project(
         if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
         else:
-            self.notify_error(error, originating_user_id=originating_user_id)
+            self.notify_error(
+                error,
+                type_="REFRESH_GH_USERS_ERROR",
+                originating_user_id=originating_user_id,
+            )
 
     def queue_refresh_github_issues(self, *, originating_user_id):
         from .jobs import refresh_github_issues_job
@@ -433,7 +522,11 @@ class Project(
         if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
         else:
-            self.notify_error(error, originating_user_id=originating_user_id)
+            self.notify_error(
+                error,
+                type_="REFRESH_GH_ISSUES_ERROR",
+                originating_user_id=originating_user_id,
+            )
 
     def queue_refresh_commits(self, *, ref, originating_user_id):
         from .jobs import refresh_commits_job
@@ -487,6 +580,37 @@ class Project(
             return [u for u in self.github_users if u["id"] == gh_uid][0]
         except IndexError:
             return None
+
+
+class ProjectDependency(HashIdMixin, TimestampsMixin):
+    name = StringField()
+    url = models.URLField()
+    recommended = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("project dependency")
+        verbose_name_plural = _("project dependencies")
+        ordering = ("-recommended", "name")
+
+
+class GitHubOrganization(HashIdMixin, TimestampsMixin):
+    name = StringField()
+    login = StringField(unique=True, help_text="Organization's 'username' on GitHub")
+    avatar_url = models.URLField(_("Avatar URL"), blank=True)
+
+    class Meta:
+        verbose_name = _("GitHub organization")
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def github_url(self):
+        return f"https://github.com/{self.login}"
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -1441,6 +1565,7 @@ class ScratchOrg(
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
     user.queue_refresh_repositories()
+    user.queue_refresh_organizations()
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):

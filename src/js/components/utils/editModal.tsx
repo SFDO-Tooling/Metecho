@@ -156,6 +156,7 @@ const EditModal = ({
       size="small"
       assistiveText={{ closeButton: t('Cancel') }}
       disableClose={isSaving}
+      dismissOnClickOutside={false}
       heading={heading}
       onRequestClose={doClose}
       footer={[

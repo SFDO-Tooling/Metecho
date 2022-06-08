@@ -1,22 +1,24 @@
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
+from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiResponse, extend_schema
-from github3.exceptions import ConnectionError, ResponseError
+from github3.exceptions import ConnectionError, NotFoundError, ResponseError
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
+from .constants import GitHubAppErrors
 from .filters import (
     EpicFilter,
     GitHubIssueFilter,
@@ -33,7 +35,9 @@ from .models import (
     Epic,
     EpicStatus,
     GitHubIssue,
+    GitHubOrganization,
     Project,
+    ProjectDependency,
     ScratchOrg,
     ScratchOrgType,
     Task,
@@ -42,17 +46,23 @@ from .models import (
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
+    CheckRepoNameSerializer,
     CommitSerializer,
     CreatePrSerializer,
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubAppInstallationCheckSerializer,
     GitHubIssueSerializer,
+    GitHubOrganizationSerializer,
     GuidedTourSerializer,
     MinimalUserSerializer,
+    ProjectCreateSerializer,
+    ProjectDependencySerializer,
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
+    ShortGitHubUserSerializer,
     TaskAssigneeSerializer,
     TaskSerializer,
 )
@@ -189,6 +199,13 @@ class CurrentUserViewSet(GenericViewSet):
         request.user.queue_refresh_repositories()
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=None, responses={202: None})
+    @action(methods=["POST"], detail=False)
+    def refresh_orgs(self, request):
+        """Queue a job to refresh the user's list of GitHub organizations."""
+        request.user.queue_refresh_organizations()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """Read-only information about all users."""
@@ -197,6 +214,96 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     serializer_class = MinimalUserSerializer
     pagination_class = CustomPaginator
     queryset = User.objects.all()
+
+
+class ProjectDependencyViewSet(ReadOnlyModelViewSet):
+    """Dependencies available during Project creation"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ProjectDependencySerializer
+    queryset = ProjectDependency.objects.all()
+
+
+class GitHubOrganizationViewSet(ReadOnlyModelViewSet):
+    """GitHub Organizations available during Project creation"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GitHubOrganizationSerializer
+    pagination_class = CustomPaginator
+    queryset = GitHubOrganization.objects.all()
+
+    @extend_schema(request=None, responses=ShortGitHubUserSerializer(many=True))
+    @action(detail=True, methods=["GET"], pagination_class=None)
+    def members(self, request, pk):
+        """Fetch the members of an Organization from GitHub"""
+        org: GitHubOrganization = self.get_object()
+        gh_api = gh.gh_as_user(request.user)
+        gh_org = gh_api.organization(org.login)
+        members = sorted(
+            (member.as_dict() for member in gh_org.members()),
+            key=lambda member: member["login"].lower(),
+        )
+        members = ShortGitHubUserSerializer(members, many=True)
+        return Response(members.data)
+
+    @extend_schema(
+        request=CheckRepoNameSerializer,
+        responses=OpenApiResponse(
+            {"type": "object", "properties": {"available": {"type": "boolean"}}},
+            description="",
+        ),
+    )
+    @action(detail=True, methods=["POST"])
+    def check_repo_name(self, request, pk):
+        """Determine if a repository name is available for the Organization on GitHub"""
+        org: GitHubOrganization = self.get_object()
+        serializer = CheckRepoNameSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            gh.get_repo_info(
+                None, repo_owner=org.login, repo_name=serializer.validated_data["name"]
+            )
+        except NotFoundError:
+            available = True
+        else:
+            available = False
+        return Response({"available": available})
+
+    @extend_schema(request=None, responses=GitHubAppInstallationCheckSerializer)
+    @action(detail=True, methods=["POST"])
+    def check_app_installation(self, request, pk):
+        """Verify the GitHub App has been installed correctly in the organization"""
+        org: GitHubOrganization = self.get_object()
+
+        try:
+            app = gh.gh_as_app()
+            installation = app.app_installation_for_organization(org.login)
+        except NotFoundError:
+            serializer = GitHubAppInstallationCheckSerializer(
+                {"success": False, "messages": [GitHubAppErrors.NOT_INSTALLED]}
+            )
+            return Response(serializer.data)
+
+        user_gh = gh.gh_as_user(request.user)
+        user_orgs = [org.login for org in user_gh.organizations()]
+        if org.login not in user_orgs:
+            serializer = GitHubAppInstallationCheckSerializer(
+                {"success": False, "messages": [GitHubAppErrors.NO_MEMBER]}
+            )
+            return Response(serializer.data)
+
+        errors = []
+        if installation.repository_selection != "all":
+            errors.append(GitHubAppErrors.LIMITED_REPOS)
+        if installation.permissions.get("members") != "write":
+            errors.append(GitHubAppErrors.MEMBERS_PERM)
+        if installation.permissions.get("administration") != "write":
+            errors.append(GitHubAppErrors.ADMIN_PERM)
+
+        serializer = GitHubAppInstallationCheckSerializer(
+            {"success": not errors, "messages": errors}
+        )
+        return Response(serializer.data)
 
 
 class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
@@ -232,6 +339,23 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
 
         repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
         return self.queryset.filter(repo_id__in=repo_ids)
+
+    @extend_schema(request=ProjectCreateSerializer)
+    def create(self, request):
+        serializer = ProjectCreateSerializer(
+            data=request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        dependencies = [dep.url for dep in serializer.validated_data["dependencies"]]
+        site_profile = getattr(get_current_site(request), "siteprofile", None)
+        project = serializer.save()
+        project.queue_create_repository(
+            user=request.user,
+            dependencies=dependencies,
+            template_repo_owner=getattr(site_profile, "template_repo_owner", ""),
+            template_repo_name=getattr(site_profile, "template_repo_name", ""),
+        )
+        return Response(self.get_serializer(project).data)
 
     @extend_schema(request=None, responses={202: None})
     @action(detail=True, methods=["POST"])

@@ -1,8 +1,11 @@
+import { t } from 'i18next';
+
 import { ThunkResult } from '@/js/store';
 import {
   projectsRefreshed,
   projectsRefreshing,
 } from '@/js/store/projects/actions';
+import { addToast } from '@/js/store/toasts/actions';
 import { User } from '@/js/store/user/reducer';
 import apiFetch from '@/js/utils/api';
 import { LIST_CHANNEL_ID, OBJECT_TYPES } from '@/js/utils/constants';
@@ -55,6 +58,15 @@ interface UpdateTourSucceeded {
   type: 'TOUR_UPDATE_SUCCEEDED';
   payload: User;
 }
+interface OrgsRefreshAction {
+  type: 'REFRESH_ORGS_REQUESTED' | 'REFRESH_ORGS_REJECTED';
+}
+interface OrgsRefreshing {
+  type: 'REFRESHING_ORGS';
+}
+export interface OrgsRefreshError {
+  type: 'REFRESH_ORGS_ERROR';
+}
 
 export type UserAction =
   | LoginAction
@@ -69,7 +81,10 @@ export type UserAction =
   | OnboardingAction
   | UpdateTourAction
   | UpdateTourSucceeded
-  | OnboardingSucceeded;
+  | OnboardingSucceeded
+  | OrgsRefreshAction
+  | OrgsRefreshing
+  | OrgsRefreshError;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -243,4 +258,39 @@ export const updateTour =
       dispatch({ type: 'TOUR_UPDATE_FAILED' });
       throw err;
     }
+  };
+
+export const refreshOrgs =
+  (): ThunkResult<Promise<OrgsRefreshing>> => async (dispatch) => {
+    dispatch({ type: 'REFRESH_ORGS_REQUESTED' });
+    try {
+      await apiFetch({
+        url: window.api_urls.current_user_refresh_orgs(),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESHING_ORGS' as const,
+      });
+    } catch (err) {
+      dispatch({ type: 'REFRESH_ORGS_REJECTED' });
+      throw err;
+    }
+  };
+
+export const orgsRefreshError =
+  (message?: string): ThunkResult<OrgsRefreshError> =>
+  (dispatch) => {
+    dispatch(
+      addToast({
+        heading: t(
+          'Uh oh. There was an error re-syncing your GitHub Organizations.',
+        ),
+        details: message,
+        variant: 'error',
+      }),
+    );
+    return dispatch({ type: 'REFRESH_ORGS_ERROR' });
   };

@@ -450,3 +450,65 @@ describe('updateTour', () => {
     });
   });
 });
+
+describe('refreshOrgs', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.current_user_refresh_orgs();
+  });
+
+  describe('success', () => {
+    test('dispatches REFRESHING_ORGS action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, 202);
+      const started = { type: 'REFRESH_ORGS_REQUESTED' };
+      const succeeded = { type: 'REFRESHING_ORGS' };
+
+      expect.assertions(1);
+      return store.dispatch(actions.refreshOrgs()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches REFRESH_ORGS_REJECTED action', async () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, 500);
+      const started = { type: 'REFRESH_ORGS_REQUESTED' };
+      const failed = { type: 'REFRESH_ORGS_REJECTED' };
+
+      expect.assertions(4);
+      try {
+        await store.dispatch(actions.refreshOrgs());
+      } catch (error) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toBe('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+      }
+    });
+  });
+});
+
+describe('orgsRefreshError', () => {
+  test('adds toast and dispatches REFRESH_ORGS_ERROR action', () => {
+    const store = storeWithThunk({});
+    const action = { type: 'REFRESH_ORGS_ERROR' };
+    store.dispatch(actions.orgsRefreshError('error msg'));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toBe('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error re-syncing your GitHub Organizations.',
+    );
+    expect(allActions[0].payload.details).toBe('error msg');
+    expect(allActions[0].payload.variant).toBe('error');
+    expect(allActions[1]).toEqual(action);
+  });
+});
