@@ -15,7 +15,7 @@
 **/*.orig
 **/*.pot
 **/*.py[cod]
-**/*.rst
+**/*.md
 **/*.sage.py
 **/*.spec
 **/*.sql
