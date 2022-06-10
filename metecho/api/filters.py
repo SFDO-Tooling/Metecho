@@ -57,6 +57,11 @@ class TaskFilter(filters.FilterSet):
     project = filters.ModelChoiceFilter(
         queryset=Project.objects.all(), method="filter_project"
     )
+    assigned_to_me = filters.BooleanFilter(
+        label="Assigned to me",
+        method="filter_by_assigned",
+        help_text="Filter/exclude tasks assigned to the current user",
+    )
 
     class Meta:
         model = Task
@@ -64,6 +69,12 @@ class TaskFilter(filters.FilterSet):
 
     def filter_project(self, queryset, name, project):
         return queryset.filter(Q(project=project) | Q(epic__project=project))
+
+    def filter_by_assigned(self, queryset, name, assigned_to_me):
+        gh_id = self.request.user.github_id
+        lookup = queryset.filter if assigned_to_me else queryset.exclude
+
+        return lookup(Q(assigned_dev=gh_id) | Q(assigned_qa=gh_id))
 
 
 class ScratchOrgFilter(filters.FilterSet):

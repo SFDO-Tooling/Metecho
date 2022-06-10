@@ -114,7 +114,7 @@ const reducer = (
       const {
         response,
         objectType,
-        filters: { epic, project },
+        filters: { epic, project, assigned_to_me },
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
         const { results, next, count } = response as PaginatedObjectResponse;
@@ -155,6 +155,11 @@ const reducer = (
               all: count,
             },
           },
+        };
+      } else if (objectType === OBJECT_TYPES.TASK && assigned_to_me) {
+        return {
+          tasks: response,
+          fetched: true,
         };
       }
       return tasks;

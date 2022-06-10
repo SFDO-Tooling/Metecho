@@ -4,6 +4,7 @@ import { createSelector } from 'reselect';
 import { AppState, RouteProps } from '@/js/store';
 import { selectEpic, selectEpicSlug } from '@/js/store/epics/selectors';
 import { selectProject } from '@/js/store/projects/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
 import { TASKS_BY_PROJECT_KEY } from '@/js/utils/constants';
 
 export const selectTaskState = (appState: AppState) => appState.tasks;
@@ -50,6 +51,16 @@ export const selectTasksByEpic = createSelector(
           count: tasks[epic.project].count[epic.id],
         };
       }
+    }
+    return undefined;
+  },
+);
+
+export const selectUserTasks = createSelector(
+  [selectTaskState, selectUserState],
+  (tasks, user) => {
+    if (user) {
+      return tasks.tasks;
     }
     return undefined;
   },
