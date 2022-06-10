@@ -45,7 +45,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Metecho"
-copyright = "2019–2020, Salesforce.org"
+copyright = "2019–2022, Salesforce.org"
 author = "Salesforce.org"
 
 # The version info for the project you're documenting, acts as replacement for

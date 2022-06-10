@@ -34,8 +34,7 @@
     `Ctrl-D` on OS X or Linux. Alternatively, you could also type the Python
     command `exit()` and press `Enter`.
 
-    Finally, set the following environment variables (if you\'re an OddBird, you
-    can find these values in the shared Keybase team folder \--`metecho/env`):
+    Finally, set the following environment variables:
 
         DOCKER_SFDX_HUB_KEY=...
         SFDX_CLIENT_ID=...
@@ -143,9 +142,6 @@ point to the `/api/hook/` path of your ngrok tunnel (e.g.
 `https://<some hash>.ngrok.io/api/hook/`). This means that it\'s a
 one-person-at-a-time thing, which is a problem for which we don\'t yet have a
 solution.
-
-As an OddBird, you can access the app at
-<https://github.com/organizations/oddbird/settings/apps/metecho-local-dev>.
 
 ## Setting up the database
 
