@@ -286,8 +286,10 @@ const UserDropdown = () => {
                   >
                     {user.username}
                   </h2>
-                  <ManageAccountButton className="slds-text-heading_small" />
-                  <Logout className="slds-text-heading_small" />
+                  <div className="slds-m-top_xx-small">
+                    <ManageAccountButton />
+                  </div>
+                  <Logout className="slds-m-top_xx-small" />
                 </div>
               </div>
             </header>

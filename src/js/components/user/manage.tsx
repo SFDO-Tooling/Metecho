@@ -13,7 +13,7 @@ export const ManageAccountButton = (props: any) => {
 
   return (
     <Link to={routes.manage()} {...props}>
-      <h2>{t('Manage Account')}</h2>
+      {t('Manage Account')}
     </Link>
   );
 };
