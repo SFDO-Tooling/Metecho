@@ -19,6 +19,7 @@ const DeleteAccount = () => {
     setDeleteModalOpen(true);
   };
   const { t } = useTranslation();
+
   return (
     <div>
       <div className="slds-text-heading_large slds-m-bottom_small">
@@ -28,11 +29,10 @@ const DeleteAccount = () => {
         <Trans i18nKey="deleteAccountChanges">
           Your Dev Orgs will be deleted, and any unretrieved changes will be
           lost. This action cannot be undone. Deleting this account will not
-          remove you as a Project collaborator on Github.
+          remove you as a Project collaborator on GitHub.
         </Trans>
       </div>
       <Button
-        key="delete"
         label={t('Delete Account')}
         variant="brand"
         onClick={openDeleteModal}
@@ -47,4 +47,5 @@ const DeleteAccount = () => {
     </div>
   );
 };
+
 export default DeleteAccount;

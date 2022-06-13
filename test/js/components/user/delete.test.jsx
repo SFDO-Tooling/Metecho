@@ -25,6 +25,7 @@ describe('<DeleteAccount /> tests', () => {
 
   test('Delete Account button renders', () => {
     const { getByRole } = setup();
+
     expect(getByRole('button', { name: 'Delete Account' })).toBeVisible();
   });
 

@@ -33,8 +33,8 @@ const Manage = () => {
         <div>
           <div
             className="slds-p-horizontal_x-large
-            slds-p-top_x-small
-            metecho-breadcrumb"
+              slds-p-top_x-small
+              metecho-breadcrumb"
           >
             <BreadCrumb
               trail={[
@@ -50,10 +50,9 @@ const Manage = () => {
         </div>
         <div className="slds-p-around_x-large">
           <div
-            className="
-                slds-m-bottom_medium
-                slds-p-right_x-large
-                restricted-container"
+            className="slds-m-bottom_medium
+              slds-p-right_x-large
+              restricted-container"
           >
             <DeleteAccount />
           </div>

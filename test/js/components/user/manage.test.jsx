@@ -24,6 +24,7 @@ describe('<Manage /> tests', () => {
 
   test('Manage Account heading renders', () => {
     const { getByRole } = setup();
+
     expect(
       getByRole('heading', { level: 1, name: 'Manage Account' }),
     ).toBeVisible();
@@ -32,6 +33,7 @@ describe('<Manage /> tests', () => {
   test('Manage Account breadcrumb renders', () => {
     const result = setup();
     const breadCrumb = result.container.querySelector('.slds-breadcrumb');
+
     expect(breadCrumb).toBeVisible();
   });
 });
