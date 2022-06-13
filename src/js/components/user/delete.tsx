@@ -1,5 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { DeleteModal } from '@/js/components/utils';
@@ -17,19 +18,22 @@ const DeleteAccount = () => {
   const openDeleteModal = () => {
     setDeleteModalOpen(true);
   };
+  const { t } = useTranslation();
   return (
     <div>
       <div className="slds-text-heading_large slds-m-bottom_small">
-        Delete Account
+        {t('Delete Account')}
       </div>
       <div className="slds-m-bottom_medium slds-text-body_regular">
-        Your Dev Orgs will be deleted, and any unretrieved changes will be lost.
-        This action cannot be undone. Deleting this account will not remove you
-        as a Project collaborator on Github.
+        <Trans i18nKey="deleteAccountChanges">
+          Your Dev Orgs will be deleted, and any unretrieved changes will be
+          lost. This action cannot be undone. Deleting this account will not
+          remove you as a Project collaborator on Github.
+        </Trans>
       </div>
       <Button
         key="delete"
-        label="Delete Account"
+        label={t('Delete Account')}
         variant="brand"
         onClick={openDeleteModal}
       />
@@ -40,18 +44,6 @@ const DeleteAccount = () => {
         redirect={routes.login()}
         handleClose={closeDeleteModal}
       />
-
-      <div className="slds-m-top_xx-large">
-        <div className="slds-text-heading_large slds-m-bottom_small">
-          Tasks With Unretrieved Changes
-        </div>
-        <div className="slds-m-bottom_medium slds-text-body_regular">
-          Below is a list of Tasks where you are currently assigned as the
-          Developer or Tester. If you have any Dev Orgs with unsaved work,
-          access them from the Task page to retrieve changes before deleting
-          your account.
-        </div>
-      </div>
     </div>
   );
 };

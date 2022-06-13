@@ -219,6 +219,9 @@ class User(PushMixin, HashIdMixin, AbstractUser):
     def delete(self, *args, **kwargs):
         for scratch_org_to_delete in self.scratchorg_set.all():
             scratch_org_to_delete.owner = None
+            scratch_org_to_delete.owner_sf_username = ""
+            scratch_org_to_delete.owner_gh_username = ""
+            scratch_org_to_delete.owner_gh_id = ""
             scratch_org_to_delete.save()
             scratch_org_to_delete.queue_delete(originating_user_id=self.id)
 
@@ -1273,7 +1276,7 @@ class ScratchOrg(
         self.clean_config()
         ret = super().save(*args, **kwargs)
 
-        if is_new:
+        if is_new and self.owner:
             self.queue_provision(originating_user_id=str(self.owner.id))
             self.notify_org_provisioning(originating_user_id=str(self.owner.id))
 
