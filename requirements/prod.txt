@@ -86,7 +86,7 @@ cryptography==37.0.2
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.59.1
+cumulusci==3.60.0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -112,7 +112,7 @@ django==4.0.5
     #   djangorestframework
     #   drf-spectacular
     #   sfdo-template-helpers
-django-allauth==0.50.0
+django-allauth==0.51.0
     # via -r requirements/prod.in
 django-anymail[mailgun]==8.6
     # via -r requirements/prod.in
@@ -189,6 +189,7 @@ inflection==0.5.1
     # via drf-spectacular
 jeepney==0.8.0
     # via
+    #   cumulusci
     #   keyring
     #   secretstorage
 jinja2==2.11.3
@@ -203,7 +204,7 @@ logfmt==0.4
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-lxml==4.8.0
+lxml==4.9.0
     # via cumulusci
 markdown==3.3.7
     # via
@@ -337,7 +338,9 @@ salesforce-bulk==2.2.0
 sarge==0.1.7.post1
     # via cumulusci
 secretstorage==3.3.2
-    # via keyring
+    # via
+    #   cumulusci
+    #   keyring
 selenium==3.141.0
     # via
     #   cumulusci
@@ -366,7 +369,7 @@ six==1.16.0
     #   salesforce-bulk
     #   service-identity
     #   snowfakery
-snowfakery==3.1.0
+snowfakery==3.2.1
     # via cumulusci
 soupsieve==2.3.2.post1
     # via beautifulsoup4
