@@ -3,7 +3,6 @@ import { isUndefined } from 'lodash';
 import { ThunkDispatch } from 'redux-thunk';
 
 import { addError } from '@/js/store/errors/actions';
-import { ObjectTypes } from '@/js/utils/constants';
 import { logError } from '@/js/utils/logging';
 
 interface UrlParams {
