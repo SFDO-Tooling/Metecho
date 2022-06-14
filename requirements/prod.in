@@ -4,7 +4,7 @@ beautifulsoup4==4.10.0
 bleach==4.1.0
 channels-redis==3.3.1
 channels==3.0.4
-cumulusci==3.52.0
+cumulusci==3.61.0.dev0
 dj-database-url==0.5.0
 django-allauth==0.48.0
 django-anymail[mailgun]==8.5
@@ -17,7 +17,7 @@ django-rq==2.5.1
 djangorestframework==3.13.1
 drf-spectacular==0.21.2
 furl==2.1.3
-github3-py==3.0.0
+github3-py==3.2.0
 honcho==1.1.0
 logfmt==0.4
 markdown==3.3.6

@@ -412,10 +412,12 @@ CACHES = {
         "OPTIONS": {},
     }
 }
+MAXIMUM_JOB_LENGTH = env("REDIS_JOB_TIMEOUT", type_=int, default=3600)
+
 RQ_QUEUES = {
     "default": {
         "URL": REDIS_LOCATION,
-        "DEFAULT_TIMEOUT": env("REDIS_JOB_TIMEOUT", type_=int, default=3600),
+        "DEFAULT_TIMEOUT": MAXIMUM_JOB_LENGTH,
         "DEFAULT_RESULT_TTL": 720,
     }
 }
