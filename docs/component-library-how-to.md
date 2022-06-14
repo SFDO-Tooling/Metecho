@@ -42,7 +42,7 @@ In general, this consists of:
 - Importing the component from `src/js/components`
 - Setting where and how Storybook lists the component with a
 [default export](https://storybook.js.org/docs/react/writing-stories/introduction#default-export)
-- [Creating a template](https://storybook.js.org/docs/react/writing-stories/introduction#default-export) for how `args` map to rendering
+- [Creating a template](https://storybook.js.org/docs/react/writing-stories/introduction#using-args) for how `args` map to rendering
 - Setting the component `args` and `argTypes`
 - Naming the component story by setting a `storyName`
 
