@@ -149,6 +149,12 @@ const defaultState = {
     p1: {
       fetched: ['epic1'],
       notFound: [],
+      count: {
+        epic1: 8,
+      },
+      next: {
+        epic1: null,
+      },
       tasks: [
         {
           id: 'task1',
@@ -440,6 +446,39 @@ describe('<EpicDetail/>', () => {
         filters: { project: 'p1', epic: 'epic1' },
         objectType: 'task',
       });
+    });
+  });
+
+  describe('fetching more tasks', () => {
+    test('fetches next page of tasks', async () => {
+      const { findByText, getByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            p1: {
+              ...defaultState.tasks.p1,
+              next: {
+                epic1: 'next-task-url',
+              },
+              count: {
+                epic1: defaultState.tasks.p1.tasks.length + 5,
+              },
+            },
+          },
+        },
+      });
+
+      const btn = getByText('Load More');
+      fireEvent.click(btn);
+
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'p1', epic: 'epic1' },
+        objectType: 'task',
+        url: 'next-task-url',
+      });
+
+      await findByText('Loading…');
+      await findByText('Load More');
     });
   });
 

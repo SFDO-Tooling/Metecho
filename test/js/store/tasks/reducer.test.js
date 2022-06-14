@@ -45,7 +45,7 @@ describe('reducer', () => {
   );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
-    test('resets task list for project', () => {
+    test('fetches next page of task list for project', () => {
       const task1 = {
         id: 't1',
         slug: 'task-1',
@@ -58,21 +58,26 @@ describe('reducer', () => {
         slug: 'task-2',
         name: 'Task 2',
         description: 'This is another test task.',
-        epic2,
+        epic: epic2,
       };
       const expected = {
         p1: {
-          tasks: [task1, task2],
-          fetched: true,
-          notFound: [],
+          tasks: [task2, task1],
+          fetched: ['all'],
+          count: {
+            all: 2,
+          },
+          next: {
+            all: null,
+          },
         },
       };
       const actual = reducer(
-        {},
+        { p1: { tasks: [task1], fetched: ['all'] } },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
-            response: [task1, task2],
+            response: { results: [task2], count: 2, next: null },
             objectType: 'task',
             filters: { project: 'p1' },
           },
@@ -95,16 +100,22 @@ describe('reducer', () => {
         slug: 'task-2',
         name: 'Task 2',
         description: 'This is another test task.',
-        epic2,
+        epic: epic2,
       };
       const expected = {
         p1: {
           tasks: [task2, task1],
           fetched: ['epic-1', 'epic-2'],
+          count: {
+            'epic-2': 1,
+          },
+          next: {
+            'epic-2': null,
+          },
         },
         p2: {
           tasks: [],
-          fetched: true,
+          fetched: [],
         },
       };
       const actual = reducer(
@@ -115,13 +126,13 @@ describe('reducer', () => {
           },
           p2: {
             tasks: [],
-            fetched: true,
+            fetched: [],
           },
         },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
-            response: [task2],
+            response: { results: [task2], next: null, count: 1 },
             objectType: 'task',
             filters: { project: 'p1', epic: 'epic-2' },
           },
@@ -166,7 +177,13 @@ describe('reducer', () => {
           root_project: 'p1',
         };
         const expected = {
-          p1: { tasks: [task], fetched: [], notFound: [] },
+          p1: {
+            tasks: [task],
+            fetched: [],
+            notFound: [],
+            count: {},
+            next: {},
+          },
         };
         const actual = reducer(
           {},
@@ -263,12 +280,16 @@ describe('reducer', () => {
           epic,
           currently_creating_pr: false,
           root_project: 'p1',
+          count: {},
+          next: {},
         };
         const expected = {
           p1: {
             tasks: [{ ...task, currently_creating_pr: true }],
             fetched: [],
             notFound: [],
+            count: {},
+            next: {},
           },
         };
         const actual = reducer(
@@ -317,7 +338,7 @@ describe('reducer', () => {
   });
 
   describe('FETCH_OBJECT_SUCCEEDED', () => {
-    test('adds epic', () => {
+    test('adds task', () => {
       const task = {
         id: 't1',
         slug: 'task-1',
@@ -358,6 +379,8 @@ describe('reducer', () => {
           tasks: [],
           fetched: [],
           notFound: ['missing-epic-missing-task'],
+          count: {},
+          next: {},
         },
       };
       const actual = reducer(
@@ -385,6 +408,8 @@ describe('reducer', () => {
           tasks: [],
           fetched: [],
           notFound: ['missing-task'],
+          count: {},
+          next: {},
         },
       };
       const actual = reducer(
@@ -467,7 +492,7 @@ describe('reducer', () => {
         root_project: 'p1',
       };
       const expected = {
-        p1: { tasks: [task], fetched: [], notFound: [] },
+        p1: { tasks: [task], fetched: [], notFound: [], count: {}, next: {} },
       };
       const actual = reducer(
         {},
@@ -494,7 +519,13 @@ describe('reducer', () => {
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        p1: { tasks: [editedTask, task2], fetched: [], notFound: [] },
+        p1: {
+          tasks: [editedTask, task2],
+          fetched: [],
+          notFound: [],
+          count: {},
+          next: {},
+        },
       };
       const actual = reducer(expected, {
         type: 'TASK_CREATE',
@@ -513,7 +544,7 @@ describe('reducer', () => {
         root_project: 'p1',
       };
       const expected = {
-        p1: { tasks: [task], fetched: [], notFound: [] },
+        p1: { tasks: [task], fetched: [], notFound: [], count: {}, next: {} },
       };
       const actual = reducer(
         {},
@@ -540,11 +571,23 @@ describe('reducer', () => {
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        p1: { tasks: [editedTask, task2], fetched: [], notFound: [] },
+        p1: {
+          tasks: [editedTask, task2],
+          fetched: [],
+          notFound: [],
+          count: {},
+          next: {},
+        },
       };
       const actual = reducer(
         {
-          p1: { tasks: [task, task2], fetched: [], notFound: [] },
+          p1: {
+            tasks: [task, task2],
+            fetched: [],
+            notFound: [],
+            count: {},
+            next: {},
+          },
         },
         {
           type: 'TASK_UPDATE',
@@ -571,11 +614,23 @@ describe('reducer', () => {
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        p1: { tasks: [editedTask, task2], fetched: [], notFound: [] },
+        p1: {
+          tasks: [editedTask, task2],
+          fetched: [],
+          notFound: [],
+          count: {},
+          next: {},
+        },
       };
       const actual = reducer(
         {
-          p1: { tasks: [task, task2], fetched: [], notFound: [] },
+          p1: {
+            tasks: [task, task2],
+            fetched: [],
+            notFound: [],
+            count: {},
+            next: {},
+          },
         },
         {
           type: 'UPDATE_OBJECT_SUCCEEDED',
@@ -600,11 +655,23 @@ describe('reducer', () => {
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        p1: { tasks: [task, task2], fetched: [], notFound: [] },
+        p1: {
+          tasks: [task, task2],
+          fetched: [],
+          notFound: [],
+          count: {},
+          next: {},
+        },
       };
       const actual = reducer(
         {
-          p1: { tasks: [task, task2], fetched: [], notFound: [] },
+          p1: {
+            tasks: [task, task2],
+            fetched: [],
+            notFound: [],
+            count: {},
+            next: {},
+          },
         },
         {
           type: 'UPDATE_OBJECT_SUCCEEDED',
@@ -684,7 +751,15 @@ describe('reducer', () => {
         root_project: 'p1',
       };
       const actual = reducer(
-        { p1: { tasks: [task, task2], fetched: [], notFound: [] } },
+        {
+          p1: {
+            tasks: [task, task2],
+            fetched: [],
+            notFound: [],
+            count: {},
+            next: {},
+          },
+        },
         {
           type: 'DELETE_OBJECT_SUCCEEDED',
           payload: { object: task, objectType: 'task' },
@@ -707,7 +782,13 @@ describe('reducer', () => {
         root_project: 'p1',
       };
       const initial = {
-        p1: { tasks: [task, task2], fetched: [], notFound: [] },
+        p1: {
+          tasks: [task, task2],
+          fetched: [],
+          notFound: [],
+          count: {},
+          next: {},
+        },
       };
       const actual = reducer(initial, {
         type: 'DELETE_OBJECT_SUCCEEDED',
@@ -732,7 +813,15 @@ describe('reducer', () => {
         root_project: 'p1',
       };
       const actual = reducer(
-        { p1: { tasks: [task, task2], fetched: [], notFound: [] } },
+        {
+          p1: {
+            tasks: [task, task2],
+            fetched: [],
+            notFound: [],
+            count: {},
+            next: {},
+          },
+        },
         {
           type: 'OBJECT_REMOVED',
           payload: task,
@@ -755,7 +844,13 @@ describe('reducer', () => {
         root_project: 'p1',
       };
       const initial = {
-        p1: { tasks: [task, task2], fetched: [], notFound: [] },
+        p1: {
+          tasks: [task, task2],
+          fetched: [],
+          notFound: [],
+          count: {},
+          next: {},
+        },
       };
       const actual = reducer(initial, {
         type: 'OBJECT_REMOVED',

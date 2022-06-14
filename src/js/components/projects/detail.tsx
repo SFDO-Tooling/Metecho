@@ -85,7 +85,7 @@ const ProjectDetail = (
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing({ projectId: project?.id }, props);
   const { orgs } = useFetchOrgsIfMissing({ projectId: project?.id }, props);
-  const { tasks } = useFetchProjectTasksIfMissing(
+  const { tasks, next, count } = useFetchProjectTasksIfMissing(
     {
       projectId: project?.id,
       tasksTabViewed,
@@ -628,6 +628,8 @@ const ProjectDetail = (
                       ]
                     : tasks || []
                 }
+                next={next}
+                count={count}
                 isFetched={Boolean(tasks)}
                 githubUsers={project.github_users}
                 canAssign={project.has_push_permission}
