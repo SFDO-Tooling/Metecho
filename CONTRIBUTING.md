@@ -8,7 +8,7 @@
 ## Docker-based development
 
 1.  Install [Docker Desktop](https://www.docker.com/products/docker-desktop) and
-    make sure it is running. Ensure you\'re running `docker-compose` at least
+    make sure it is running. Ensure you're running `docker-compose` at least
     version `1.25.2` to avoid container-abort bugs. The latest Docker Desktop
     should come with this version or later.
 
@@ -57,7 +57,7 @@
 
 5.  Visit <http://localhost:8080/> in your browser.
 
-6.  When you\'re done working on Metecho, `Ctrl-C` in the terminal where the
+6.  When you're done working on Metecho, `Ctrl-C` in the terminal where the
     containers are running to exit. You can also `./derrick down` to stop all
     running containers, or `./derrick prune` to clean up unused
     images/containers. (`docker-compose ps` will tell you what containers are
@@ -97,19 +97,19 @@ enable these additional permissions:
 - Organization permissions
   - Members: Read & write
 
-To enable logging in with GitHub, set the \"User authorization callback URL\" to
+To enable logging in with GitHub, set the "User authorization callback URL" to
 `https://<your-deployed-url>/accounts/github/login/callback/`, and be sure the
-\"Request user authorization (OAuth) during installation\" box is checked.
+"Request user authorization (OAuth) during installation" box is checked.
 
-To enable GitHub webhooks, set the \"Webhook URL\" to
-`https://<your-deployed-url>/api/hook/`, and be sure the \"Active\" box is
-checked and \"SSL verification\" is enabled.
+To enable GitHub webhooks, set the "Webhook URL" to
+`https://<your-deployed-url>/api/hook/`, and be sure the "Active" box is checked
+and "SSL verification" is enabled.
 
-Use the \"Webhook secret\" value as your `GITHUB_HOOK_SECRET` environment
-variable in Metecho.
+Use the "Webhook secret" value as your `GITHUB_HOOK_SECRET` environment variable
+in Metecho.
 
-Use the app\'s \"App ID\" as `GITHUB_APP_ID`, \"Client ID\" as
-`GITHUB_CLIENT_ID`, and \"Client secret\" as `GITHUB_CLIENT_SECRET`.
+Use the app's "App ID" as `GITHUB_APP_ID`, "Client ID" as `GITHUB_CLIENT_ID`,
+and "Client secret" as `GITHUB_CLIENT_SECRET`.
 
 Finally, generate a new private key for the app, replace newlines with `\n`, and
 set it as the `DOCKER_GITHUB_APP_KEY` environment variable (the entire key, not
@@ -139,8 +139,8 @@ to your computer. Run it like so:
 You will get output that indicates the name of the ngrok tunnel, which will look
 like `https://<some hash>.ngrok.io`. You will need to adjust the GitHub App to
 point to the `/api/hook/` path of your ngrok tunnel (e.g.
-`https://<some hash>.ngrok.io/api/hook/`). This means that it\'s a
-one-person-at-a-time thing, which is a problem for which we don\'t yet have a
+`https://<some hash>.ngrok.io/api/hook/`). This means that it's a
+one-person-at-a-time thing, which is a problem for which we don't yet have a
 solution.
 
 ## Setting up the database
@@ -154,11 +154,11 @@ To populate the database with sample data for development, run:
     $ ./derrick truncate
     $ ./derrick populate
 
-To allow automated emails to send with correct links, you\'ll need to set up the
-default `Site` object in the Django admin. Assuming you\'ve already set your
-user up as a superuser, go to <http://localhost:8080/admin/sites/site/1/change/>
-and set the \"Domain name\" field appropriately (to `localhost:8080`). If you
-are setting up a deployed production or staging instance, set this value to the
+To allow automated emails to send with correct links, you'll need to set up the
+default `Site` object in the Django admin. Assuming you've already set your user
+up as a superuser, go to <http://localhost:8080/admin/sites/site/1/change/> and
+set the "Domain name" field appropriately (to `localhost:8080`). If you are
+setting up a deployed production or staging instance, set this value to the
 domain from which you are serving that instance.
 
 ## Docker development tasks
@@ -190,7 +190,7 @@ run them inside the Docker image. This takes the general form
 `docker-compose run --no-deps web [command]`. In some cases, such as for
 migrations or a Django shell, you will want to omit the `--no-deps` flag.
 
-You shouldn\'t need to run any other setup tasks; the Docker images will take
+You shouldn't need to run any other setup tasks; the Docker images will take
 care of setting up a database and installing Python and JS dependencies for you.
 
 When you change Python or JS dependencies, you will need to rebuild the Docker
@@ -212,8 +212,8 @@ extension pack.
 Once you have the extension pack installed, when you open the Metecho folder in
 VS Code, you will be prompted to `Reopen in Container`. Doing so will
 effectively run `docker-compose up` and reload your window, now running inside
-the Docker container. If you do not see the prompt, run the \"Remote-Containers:
-Open Folder in Container\...\" command from the VS Code Command Palette to start
+the Docker container. If you do not see the prompt, run the "Remote-Containers:
+Open Folder in Container\..." command from the VS Code Command Palette to start
 the Docker container.
 
 A number of project-specific VS Code extensions will be automatically installed
@@ -264,7 +264,7 @@ build. When this file changes, translations must be copied over to the
 `locales/en/translation.json` file in order to have any effect.
 
 Strings with dynamic content (i.e. known only at runtime) cannot be
-automatically parsed, but will log errors while the app is running if they\'re
+automatically parsed, but will log errors while the app is running if they're
 missing from the served translation files. To resolve, add the missing key:value
 translations to `locales/<language>/translation.json`.
 
