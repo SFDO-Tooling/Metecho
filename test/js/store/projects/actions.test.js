@@ -496,16 +496,16 @@ describe('refreshIssues', () => {
     url = window.api_urls.project_refresh_github_issues(projectId);
   });
 
-  test('dispatches RefreshGithubIssues action', () => {
+  test('dispatches RefreshGitHubIssues action', () => {
     const store = storeWithThunk({});
     fetchMock.postOnce(url, {
       status: 202,
     });
-    const RefreshGithubIssuesRequested = {
+    const RefreshGitHubIssuesRequested = {
       type: 'REFRESH_GH_ISSUES_REQUESTED',
       payload: projectId,
     };
-    const RefreshGithubIssuesAccepted = {
+    const RefreshGitHubIssuesAccepted = {
       type: 'REFRESH_GH_ISSUES_ACCEPTED',
       payload: projectId,
     };
@@ -513,8 +513,8 @@ describe('refreshIssues', () => {
     expect.assertions(1);
     return store.dispatch(actions.refreshGitHubIssues(projectId)).then(() => {
       expect(store.getActions()).toEqual([
-        RefreshGithubIssuesRequested,
-        RefreshGithubIssuesAccepted,
+        RefreshGitHubIssuesRequested,
+        RefreshGitHubIssuesAccepted,
       ]);
     });
   });
