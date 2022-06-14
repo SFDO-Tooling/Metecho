@@ -125,20 +125,4 @@ export const removeUrlParam = (key: string, search?: string) => {
   return params.toString();
 };
 
-export const getDeleteObjectUrl = (
-  objectType: ObjectTypes,
-  id: string,
-  userDeleteUrl: string | undefined,
-) => {
-  if (userDeleteUrl) {
-    return userDeleteUrl;
-  }
-  const urlFn = window.api_urls[`${objectType}_detail`];
-  let baseUrl;
-  if (urlFn && id) {
-    baseUrl = urlFn(id);
-  }
-  return baseUrl;
-};
-
 export default apiFetch;

@@ -80,7 +80,7 @@ describe('<DeleteModal />', () => {
     expect(deleteObject).toHaveBeenCalledWith({
       objectType: 'user',
       object: defaultUser,
-      userDeleteUrl: '/api/user/',
+      url: '/api/user/',
     });
     expect(context.action).toBe('PUSH');
     expect(context.url).toBe('/login');

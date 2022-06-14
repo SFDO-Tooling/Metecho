@@ -48,7 +48,7 @@ const DeleteModal = ({
       deleteObject({
         objectType: modelType,
         object: model,
-        userDeleteUrl: getModelDeleteUrl(modelType),
+        url: getModelDeleteUrl(modelType),
       }),
     )
       .then(() => {

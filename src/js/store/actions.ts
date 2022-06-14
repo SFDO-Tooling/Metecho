@@ -1,7 +1,7 @@
 import { ThunkResult } from '@/js/store';
 import { Epic } from '@/js/store/epics/reducer';
 import { Task } from '@/js/store/tasks/reducer';
-import apiFetch, { addUrlParams, getDeleteObjectUrl } from '@/js/utils/api';
+import apiFetch, { addUrlParams } from '@/js/utils/api';
 import { ObjectTypes } from '@/js/utils/constants';
 
 interface CreateObjectPayload {
@@ -293,27 +293,34 @@ export const createObject =
 export const deleteObject =
   ({
     objectType,
+    url,
     object,
     shouldSubscribeToObject = false,
-    userDeleteUrl,
   }: {
     objectType: ObjectTypes;
+    url?: string;
     object: { id: string; [key: string]: any };
     shouldSubscribeToObject?: boolean | ((obj: any) => boolean);
-    userDeleteUrl?: string | undefined;
   }): ThunkResult<Promise<DeleteObjectAction>> =>
   async (dispatch) => {
-    const baseUrl = getDeleteObjectUrl(objectType, object.id, userDeleteUrl);
+    if (!url) {
+      const urlFn = window.api_urls[`${objectType}_detail`];
+      if (urlFn && object.id) {
+        // eslint-disable-next-line no-param-reassign
+        url = urlFn(object.id);
+      }
+    }
+
     dispatch({
       type: 'DELETE_OBJECT_STARTED',
-      payload: { objectType, url: baseUrl, object },
+      payload: { objectType, url, object },
     });
     try {
-      if (!baseUrl) {
+      if (!url) {
         throw new Error(`No URL found for object: ${objectType}`);
       }
       await apiFetch({
-        url: baseUrl,
+        url,
         dispatch,
         opts: { method: 'DELETE' },
       });
@@ -331,17 +338,17 @@ export const deleteObject =
       if (objectType === 'user') {
         return dispatch({
           type: 'USER_LOGGED_OUT' as const,
-          payload: { objectType, url: baseUrl, object },
+          payload: { objectType, url, object },
         });
       }
       return dispatch({
         type: 'DELETE_OBJECT_SUCCEEDED' as const,
-        payload: { objectType, url: baseUrl, object },
+        payload: { objectType, url, object },
       });
     } catch (err) {
       dispatch({
         type: 'DELETE_OBJECT_FAILED',
-        payload: { objectType, url: baseUrl, object },
+        payload: { objectType, url, object },
       });
       throw err;
     }

@@ -628,7 +628,7 @@ describe('deleteObject', () => {
           actions.deleteObject({
             objectType: 'user',
             object: { id: '123' },
-            userDeleteUrl: userUrl,
+            url: userUrl,
           }),
         )
         .then(() => {
