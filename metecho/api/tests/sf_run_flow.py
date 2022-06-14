@@ -22,6 +22,7 @@ from ..sf_run_flow import (
     get_org_result,
     is_org_good,
     mutate_scratch_org,
+    poll_for_scratch_org_completion,
     refresh_access_token,
     run_flow,
 )
@@ -146,15 +147,26 @@ def test_get_org_details():
 
 
 def test_get_org_result(settings):
+    devhub_api = MagicMock()
+    devhub_api.ScratchOrgInfo.describe.return_value = {
+        "fields": [{"name": "FooField", "createable": True}]
+    }
+
     result = get_org_result(
         email=MagicMock(),
         repo_owner=MagicMock(),
         repo_name=MagicMock(),
         repo_branch=MagicMock(),
         scratch_org_config=MagicMock(),
-        scratch_org_definition={"edition": MagicMock()},
+        scratch_org_definition={
+            "features": ["Communities", "MarketingUser"],
+            "description": "foo",
+            "template": "0TTxxxxxxxxxxxx",
+            "fooField": "barValue",
+            "settings": {"FooSettings": {"UseFoo": True}},
+        },
         cci=MagicMock(),
-        devhub_api=MagicMock(),
+        devhub_api=devhub_api,
     )
 
     assert result
@@ -236,6 +248,7 @@ class TestRunFlow:
             get_org_details.return_value = (MagicMock(), MagicMock())
             stack.enter_context(patch(f"{PATCH_ROOT}.get_org_result"))
             stack.enter_context(patch(f"{PATCH_ROOT}.mutate_scratch_org"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.poll_for_scratch_org_completion"))
             stack.enter_context(patch(f"{PATCH_ROOT}.get_access_token"))
             stack.enter_context(patch(f"{PATCH_ROOT}.deploy_org_settings"))
 
@@ -276,3 +289,35 @@ def test_delete_org(scratch_org_factory):
         delete_org(scratch_org)
 
         assert devhub_api.ActiveScratchOrg.delete.called
+
+
+@patch("metecho.api.sf_run_flow.time.sleep")
+def test_poll_for_scratch_org_completion__success(sleep):
+    scratch_org_info_id = "2SR4p000000DTAaGAO"
+    devhub_api = MagicMock()
+    initial_result = {
+        "Id": scratch_org_info_id,
+        "Status": "Creating",
+        "ErrorCode": None,
+    }
+    end_result = {"Id": scratch_org_info_id, "Status": "Active", "ErrorCode": None}
+    devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
+
+    org_result = poll_for_scratch_org_completion(devhub_api, initial_result)
+    assert org_result == end_result
+
+
+@patch("metecho.api.sf_run_flow.time.sleep")
+def test_poll_for_scratch_org_completion__failure(sleep):
+    scratch_org_info_id = "2SR4p000000DTAaGAO"
+    devhub_api = MagicMock()
+    initial_result = {
+        "Id": scratch_org_info_id,
+        "Status": "Creating",
+        "ErrorCode": None,
+    }
+    end_result = {"Id": scratch_org_info_id, "Status": "Failed", "ErrorCode": "Foo"}
+    devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
+
+    with pytest.raises(ScratchOrgError, match="Scratch org creation failed"):
+        poll_for_scratch_org_completion(devhub_api, initial_result)
