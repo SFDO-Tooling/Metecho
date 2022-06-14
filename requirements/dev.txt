@@ -51,7 +51,7 @@ django==4.0.2
     #   django-extensions
 django-extensions==3.1.5
     # via -r requirements/dev.in
-doc8==0.10.1
+doc8==0.11.2
     # via -r requirements/dev.in
 docopt==0.6.2
     # via coveralls
