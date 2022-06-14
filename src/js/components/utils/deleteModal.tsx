@@ -21,14 +21,6 @@ interface Props extends RouteComponentProps {
   handleClose: () => void;
 }
 
-const getModelDeleteUrl = (modelType: ObjectTypes) => {
-  let deleteUrl;
-  if (modelType === 'user') {
-    deleteUrl = window.api_urls.current_user_detail();
-  }
-  return deleteUrl;
-};
-
 const DeleteModal = ({
   model,
   modelType,
@@ -48,7 +40,10 @@ const DeleteModal = ({
       deleteObject({
         objectType: modelType,
         object: model,
-        url: getModelDeleteUrl(modelType),
+        url:
+          modelType === OBJECT_TYPES.USER
+            ? window.api_urls.current_user_detail()
+            : undefined,
       }),
     )
       .then(() => {

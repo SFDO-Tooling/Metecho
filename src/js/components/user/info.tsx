@@ -240,6 +240,10 @@ const UserDropdown = () => {
   const { t } = useTranslation();
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   if (!user) {
     return null;
@@ -248,6 +252,8 @@ const UserDropdown = () => {
   return (
     <>
       <Popover
+        isOpen={isDropdownOpen}
+        onClick={toggleDropdown}
         align="bottom right"
         body={
           <>
@@ -287,7 +293,8 @@ const UserDropdown = () => {
                     {user.username}
                   </h2>
                   <div className="slds-m-top_xx-small">
-                    <ManageAccountButton /> | <Logout />
+                    <ManageAccountButton onClick={toggleDropdown} /> |{' '}
+                    <Logout />
                   </div>
                 </div>
               </div>

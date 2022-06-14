@@ -2,7 +2,7 @@ import { ThunkResult } from '@/js/store';
 import { Epic } from '@/js/store/epics/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import apiFetch, { addUrlParams } from '@/js/utils/api';
-import { ObjectTypes } from '@/js/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 interface CreateObjectPayload {
   objectType?: ObjectTypes;
@@ -335,7 +335,7 @@ export const deleteObject =
           id: object.id,
         });
       }
-      if (objectType === 'user') {
+      if (objectType === OBJECT_TYPES.USER) {
         return dispatch({
           type: 'USER_LOGGED_OUT' as const,
           payload: { objectType, url, object },
