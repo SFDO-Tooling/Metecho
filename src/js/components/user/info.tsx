@@ -24,13 +24,16 @@ import { selectUserState } from '@/js/store/user/selectors';
 
 const ConnectToSalesforce = ({
   toggleModal,
+  closeDropdown,
 }: {
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  closeDropdown: () => void;
 }) => {
   const { t } = useTranslation();
 
   const openConnectModal = () => {
     toggleModal(true);
+    closeDropdown();
   };
 
   return (
@@ -244,6 +247,9 @@ const UserDropdown = () => {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+  const closeDropdown = () => {
+    setIsDropdownOpen(false);
+  };
 
   if (!user) {
     return null;
@@ -254,6 +260,7 @@ const UserDropdown = () => {
       <Popover
         isOpen={isDropdownOpen}
         onClick={toggleDropdown}
+        onRequestClose={closeDropdown}
         align="bottom right"
         body={
           <>
@@ -304,7 +311,10 @@ const UserDropdown = () => {
                 {user.valid_token_for || user.devhub_username ? (
                   <ConnectionInfo user={user} />
                 ) : (
-                  <ConnectToSalesforce toggleModal={setModalOpen} />
+                  <ConnectToSalesforce
+                    toggleModal={setModalOpen}
+                    closeDropdown={closeDropdown}
+                  />
                 )}
               </div>
             )}
