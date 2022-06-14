@@ -114,7 +114,7 @@ django==4.0.2
     #   sfdo-template-helpers
 django-allauth==0.48.0
     # via -r requirements/prod.in
-django-anymail[mailgun]==8.5
+django-anymail[mailgun]==8.6
     # via -r requirements/prod.in
 django-filter==21.1
     # via sfdo-template-helpers
