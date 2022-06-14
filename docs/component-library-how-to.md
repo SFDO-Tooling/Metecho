@@ -4,26 +4,28 @@ The Metecho component library is a source for developers and non-developers
 alike to get a quick overview of how components that make up the project behave
 and appear.
 
-Components used in in the project are custom versions of SLDS components.
+Components used in in the project are custom versions of
+[SLDS components](https://react.lightningdesignsystem.com/).
 
-The library was created with Storybook and is deployed using
+The library was created with [Storybook](https://storybook.js.org/)
+and is deployed using
 [Storybook Deployer](https://github.com/storybookjs/storybook-deployer).
 
 ## Component Library Structure
 
-Components for the library live in `src/stories/` in folders organized similarly
-to how the original component is organized in the `src/js/components` directory.
+Components for the library are located in `src/stories/` in folders organized
+similarly to how the original components are organized in `src/js/components`.
 For example, the component library version of the modal for creating a new
 **Epic**, the `createForm` component, would be found in the `epics/` directory:
 
-```
-src/
-  stories/
-    epics/
-    createForm/
-      index.stories.mdx
-      index.stories.tsx
-```
+
+    src/
+      stories/
+        epics/
+        createForm/
+          index.stories.mdx
+          index.stories.tsx
+
 
 Each component folder consists of two files. The `.mdx` file is where
 documentation for each component is stored. The rendering of the component, with
@@ -35,35 +37,57 @@ To render a component, follow the the general
 [Storybook steps](https://storybook.js.org/docs/react/writing-stories/introduction)
 for configuring a story.
 
+In general, this consists of:
+
+- Importing the component from `src/js/components`
+- Setting where and how Storybook lists the component with a
+[default export](https://storybook.js.org/docs/react/writing-stories/introduction#default-export)
+- [Creating a template](https://storybook.js.org/docs/react/writing-stories/introduction#default-export) for how `args` map to rendering
+- Setting the component `args` and `argTypes`
+- Naming the component story by setting a `storyName`
+
+## Run Component Library Locally
+
+To view changes while you work on the library, use one of the below commands:
+
+    $ ./derrick storybook  # if running outside of container
+    $ yarn storybook  # if working in a remote container in VS Code
+
+After running one of these commands, you can view the Storybook at
+<http://localhost:6006/> in your browser.
+
+# Decorators
+
 If a component needs to be wrapped in a
 [decorator](https://storybook.js.org/docs/react/writing-stories/decorators),
-first, import the mock Redux store:
+first import the mock Redux store:
 
-```
-import { withRedux } from '../decorators';
 
-```
+    import { withRedux } from '../decorators';
 
-and add a `decorators` prop to the default export:
 
-```
-export default {
-  title: 'Commits/List/Example',
-  component: CommitListComponent,
-  decorators: [withRedux()],
-};
 
-```
+and then add a `decorators` prop to the default export:
+
+
+    export default {
+      title: 'Commits/List/Example',
+      component: CommitListComponent,
+      decorators: [withRedux()],
+    };
+
+
 
 ## Sample Data
 
-Some components require sample data to function correctly. These, and other
-required API url routes, can be found in the `fixtures.ts` file in the
-`/stories` directory.
+Some components require sample data and props to function correctly. This data,
+and other required API url routes, can be found in `stories/fixtures.ts`.
 
 Storybook defaults to showing each component prop as a control for each
-component in the library. For this project, props that less relevant to the
-various states of the component have been disabled.
+component in the library. For this project, props that are less relevant to the
+various states of the component have been disabled. Props more relevant to state
+and display are set with appropriate
+[control types](https://storybook.js.org/docs/react/essentials/controls#choosing-the-control-type.
 
 ## Documenting Components
 
@@ -81,8 +105,8 @@ and states are written as `code`.
 ## Deploying to Github Pages
 
 Through [Storybook Deployer](https://github.com/storybookjs/storybook-deployer),
-the library is set to deploy automatically to Github Pages each time a new
-commit is made to the main branch.
+the library is set to deploy automatically as a static site to Github Pages each
+time a commit is made to the main branch.
 
 The workflow for this job is located in `.github/workflows/deploy-storybook.yml`
 
