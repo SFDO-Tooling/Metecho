@@ -1,7 +1,7 @@
 Django==4.0.2
 autobahn==22.1.1
 beautifulsoup4==4.10.0
-bleach==4.1.0
+bleach==5.0.0
 channels-redis==3.3.1
 channels==3.0.4
 cumulusci==3.61.0.dev0
