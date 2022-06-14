@@ -80,7 +80,8 @@ many times as they like while they are working.*
 - Select the location to retrieve changes.
   - Use the preselected Package Directory unless you know of a specific reason
     to select a different option.
-- Select the changes to retrieve (or ignore).
+- Select the changes to retrieve (or ignore changes you do not intend to
+  retrieve).
 - Create a commit message that briefly describes the changes.
 - Select Retrieve Selected Changes.
 - Retrieving changes can take a number of minutes. Feel free to leave the page.
@@ -125,8 +126,8 @@ Developer’s work on a specific Task. Test Orgs expire after 30 days.*
   who is responsible for the next step.
 - To begin testing, a Task Tester will need to select Create Org in the Test Org
   card.
-- Dev Org creation can take a number of minutes. Feel free to leave the page.
-  Metecho will provide an alert when the Dev Org is ready.
+- Test Org creation can take a number of minutes. Feel free to leave the page.
+  Metecho will provide an alert when the Test Org is ready.
 
 ## Step 10 - Test Changes in Test Org
 - **This step takes place in the new Salesforce Test Org, not in Metecho.**
@@ -166,12 +167,12 @@ from the Epic branch in GitHub.*
 
 - Select the Epics tab.
 - Create a new Epic of your own (or from an existing GitHub Issue).
-- Name the Epic.
+  - Name the Epic.
   - The name can be a brief description of the work.
-- Select create a branch on GitHub unless you know the name of a specific branch
-  you would like to use.
-- Use the optional description section for more detail, if needed.
-- Select Create to save and navigate to your Epic detail view.
+  - Select create a branch on GitHub unless you know the name of a specific
+    branch you would like to use.
+  - Use the optional description section for more detail, if needed.
+  - Select Create to save and navigate to your Epic detail view.
 - If you need to edit the Epic name or description, or delete the Epic, select
   the gear icon in the top right corner. Deleting an Epic deletes all Tasks and
   Orgs as well.
@@ -199,11 +200,12 @@ To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task)
 - Select a GitHub Organization.
 - Create a Project name.
 - Select people to add as Collaborators on the Project.
-- If you do not see the people you want to add, contact an admin for the
-  repository on GitHub and ensure that the people are collaborators. Then
-  re-sync GitHub collaborators in Metecho.
-- Review your Project selections. Go Back to make edits, Cancel, or Create
-  Project.
+  - If you do not see the people you want to add, contact an admin for the
+    repository on GitHub and ensure that the people are collaborators. Then
+    re-sync GitHub collaborators in Metecho.
+- Select any dependencies for your new Project.
+- Review your Project selections. Select Create to save and navigate to your
+  Project detail view.
 
 To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task) or
 [Step 13 - Create an Epic](#step-13---create-an-epic)
