@@ -1,5 +1,0 @@
-=======
-Credits
-=======
-
-Salesforce.org

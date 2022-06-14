@@ -13,6 +13,7 @@ flake8
 flake8-bugbear
 ipython
 isort
+myst-parser
 pytest
 pytest-asyncio
 pytest-cov
