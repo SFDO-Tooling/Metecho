@@ -118,7 +118,7 @@ django-anymail[mailgun]==8.5
     # via -r requirements/prod.in
 django-filter==21.1
     # via sfdo-template-helpers
-django-hashid-field==3.3.3
+django-hashid-field==3.3.4
     # via -r requirements/prod.in
 django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
     # via -r requirements/prod.in
