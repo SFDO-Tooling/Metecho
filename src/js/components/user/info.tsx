@@ -40,7 +40,7 @@ const ConnectToSalesforce = ({
     <>
       <Button
         label={t('Connect to Salesforce')}
-        className="slds-text-body_regular slds-p-right_xx-small"
+        className="slds-text-heading_small slds-p-right_xx-small"
         variant="link"
         onClick={openConnectModal}
       />
@@ -299,9 +299,16 @@ const UserDropdown = () => {
                   >
                     {user.username}
                   </h2>
+                </div>
+                <div>
                   <div className="slds-m-top_xx-small">
-                    <ManageAccountButton onClick={toggleDropdown} /> |{' '}
-                    <Logout />
+                    <h2 className="slds-text-heading_small slds-p-top_small">
+                      <ManageAccountButton onClick={toggleDropdown} />
+                    </h2>
+                    <h2 className="slds-text-heading_small slds-p-top_small">
+                      {' '}
+                      <Logout />
+                    </h2>
                   </div>
                 </div>
               </div>
