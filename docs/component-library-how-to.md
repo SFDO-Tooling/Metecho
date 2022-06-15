@@ -79,7 +79,7 @@ Storybook defaults to showing each component prop as a control for each
 component in the library. For this project, props that are less relevant to the
 various states of the component have been disabled. Props more relevant to state
 and display are set with appropriate
-[control types](https://storybook.js.org/docs/react/essentials/controls#choosing-the-control-type.
+[control types](https://storybook.js.org/docs/react/essentials/controls#choosing-the-control-type).
 
 ## Documenting Components
 
