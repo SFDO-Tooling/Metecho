@@ -115,7 +115,6 @@ def refresh_access_token(
     org_name,
     keychain=None,
     originating_user_id=None,
-    sbx_login=False,
 ):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -126,7 +125,7 @@ def refresh_access_token(
         scratch_org=scratch_org, originating_user_id=originating_user_id
     ):
         org_config = OrgConfig(config, org_name, keychain=keychain)
-        org_config.refresh_oauth_token(keychain, is_sandbox=sbx_login)
+        org_config.refresh_oauth_token(keychain, is_sandbox=True)
         return org_config
 
 
@@ -299,7 +298,6 @@ def deploy_org_settings(
         org_name=org_name,
         keychain=cci.keychain,
         originating_user_id=originating_user_id,
-        sbx_login=True,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
