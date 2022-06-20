@@ -86,7 +86,7 @@ cryptography==37.0.2
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.60.0
+cumulusci==3.61.0.dev0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -116,11 +116,11 @@ django-allauth==0.51.0
     # via -r requirements/prod.in
 django-anymail[mailgun]==8.6
     # via -r requirements/prod.in
-django-environ==0.8.1
+django-environ==0.9.0
     # via -r requirements/prod.in
-django-filter==21.1
+django-filter==22.1
     # via sfdo-template-helpers
-django-hashid-field==3.3.4
+django-hashid-field==3.3.5
     # via -r requirements/prod.in
 django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
     # via -r requirements/prod.in
