@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Path from '@/js/components/path';
 import { EPIC_STATUSES, EpicStatuses } from '@/js/utils/constants';
@@ -10,6 +10,8 @@ interface Props {
 }
 
 const EpicStatusPath = ({ status, prIsOpen }: Props) => {
+  const { t } = useTranslation();
+
   let activeIdx = 0;
   let isCompleted = false;
   const steps = [t('Planned'), t('In progress'), t('Review'), t('Merged')];
@@ -29,6 +31,7 @@ const EpicStatusPath = ({ status, prIsOpen }: Props) => {
       isCompleted = true;
       break;
   }
+
   return (
     <div className="slds-p-bottom_x-large">
       <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />

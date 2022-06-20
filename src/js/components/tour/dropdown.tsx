@@ -2,8 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
@@ -29,6 +29,7 @@ const TourDropdown = ({
   className?: string;
   triggerClassName?: string;
 }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
   const match = useRouteMatch(routePatterns.project_detail) || {
@@ -151,7 +152,6 @@ const TourDropdown = ({
         className={triggerClassName}
         iconCategory="utility"
         iconName="question"
-        iconSize="large"
         iconVariant="more"
       />
     </Popover>

@@ -49,6 +49,7 @@ describe('AssignTaskRole', () => {
     ...renderWithRedux(
       <AssignTaskRoleModal
         projectId="p1"
+        taskHasEpic
         epicUsers={epicUsers}
         githubUsers={githubUsers}
         selectedUser={null}

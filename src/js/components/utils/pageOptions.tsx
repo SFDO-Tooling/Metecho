@@ -1,6 +1,6 @@
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
@@ -11,6 +11,8 @@ const PageOptions = ({
   modelType: ObjectTypes;
   handleOptionSelect: (id: 'edit' | 'delete') => void;
 }) => {
+  const { t } = useTranslation();
+
   const handleSelect = (option: { id: 'edit' | 'delete'; label: string }) => {
     handleOptionSelect(option.id);
   };
@@ -34,7 +36,6 @@ const PageOptions = ({
       align="right"
       iconCategory="utility"
       iconName="settings"
-      iconSize="large"
       iconVariant="more"
       width="xx-small"
       triggerClassName="slds-m-right_xx-small"

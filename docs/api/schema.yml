@@ -756,6 +756,7 @@ paths:
         name: project
         schema:
           type: string
+          format: HashID
       - in: query
         name: slug
         schema:
@@ -1318,6 +1319,10 @@ components:
           items:
             type: string
           readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
         project:
           type: string
           format: HashID
@@ -1374,6 +1379,7 @@ components:
       required:
       - branch_diff_url
       - branch_url
+      - created_at
       - currently_creating_branch
       - currently_creating_pr
       - description_rendered
@@ -1718,6 +1724,10 @@ components:
           items:
             type: string
           readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
         project:
           type: string
           format: HashID
@@ -1919,6 +1929,10 @@ components:
           type: array
           items:
             type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
           readOnly: true
         has_unmerged_commits:
           type: boolean
@@ -2297,6 +2311,10 @@ components:
           items:
             type: string
           readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
         has_unmerged_commits:
           type: boolean
           readOnly: true
@@ -2380,6 +2398,7 @@ components:
       - branch_diff_url
       - branch_url
       - commits
+      - created_at
       - currently_creating_branch
       - currently_creating_pr
       - currently_submitting_review

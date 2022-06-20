@@ -9,6 +9,7 @@ export interface Epic {
   name: string;
   slug: string;
   old_slugs: string[];
+  created_at: string;
   description: string;
   description_rendered: string;
   task_count: number;
@@ -83,14 +84,14 @@ const reducer = (
           };
         }
         // Store list of known epic IDs to filter out duplicates
-        const ids = projectEpics.epics.map((p) => p.id);
+        const ids = projectEpics.epics.map((e) => e.id);
         return {
           ...epics,
           [project]: {
             ...projectEpics,
             epics: [
               ...projectEpics.epics,
-              ...results.filter((p) => !ids.includes(p.id)),
+              ...results.filter((e) => !ids.includes(e.id)),
             ],
             next,
             fetched: true,
@@ -105,7 +106,7 @@ const reducer = (
       if (objectType === OBJECT_TYPES.EPIC && object) {
         const project = epics[object.project] || { ...defaultState };
         // Do not store if (somehow) we already know about this epic
-        if (!project.epics.filter((p) => object.id === p.id).length) {
+        if (!project.epics.filter((e) => object.id === e.id).length) {
           return {
             ...epics,
             [object.project]: {
@@ -136,7 +137,7 @@ const reducer = (
           };
         }
         // Do not store if we already know about this epic
-        if (!projectEpics.epics.filter((p) => object.id === p.id).length) {
+        if (!projectEpics.epics.filter((e) => object.id === e.id).length) {
           return {
             ...epics,
             [object.project]: {
@@ -171,7 +172,7 @@ const reducer = (
       const projectEpics = epics[epic.project] || {
         ...defaultState,
       };
-      const existingEpic = projectEpics.epics.find((p) => p.id === epic.id);
+      const existingEpic = projectEpics.epics.find((e) => e.id === epic.id);
       if (existingEpic) {
         // Don't update existing epic on EPIC_CREATE event
         if (action.type === 'EPIC_CREATE') {
@@ -181,11 +182,11 @@ const reducer = (
           ...epics,
           [epic.project]: {
             ...projectEpics,
-            epics: projectEpics.epics.map((p) => {
-              if (p.id === epic.id) {
+            epics: projectEpics.epics.map((e) => {
+              if (e.id === epic.id) {
                 return { ...epic };
               }
-              return p;
+              return e;
             }),
           },
         };
@@ -203,17 +204,17 @@ const reducer = (
       const projectEpics = epics[epic.project] || {
         ...defaultState,
       };
-      const existingEpic = projectEpics.epics.find((p) => p.id === epic.id);
+      const existingEpic = projectEpics.epics.find((e) => e.id === epic.id);
       if (existingEpic) {
         return {
           ...epics,
           [epic.project]: {
             ...projectEpics,
-            epics: projectEpics.epics.map((p) => {
-              if (p.id === epic.id) {
+            epics: projectEpics.epics.map((e) => {
+              if (e.id === epic.id) {
                 return { ...epic, currently_creating_pr: false };
               }
-              return p;
+              return e;
             }),
           },
         };
@@ -247,7 +248,7 @@ const reducer = (
         ...epics,
         [epic.project]: {
           ...projectEpics,
-          epics: projectEpics.epics.filter((p) => p.id !== epic.id),
+          epics: projectEpics.epics.filter((e) => e.id !== epic.id),
         },
       };
     }

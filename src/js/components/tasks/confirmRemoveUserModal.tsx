@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { AssignedUserTracker } from '@/js/components/orgs/taskOrgCards';
 
@@ -22,6 +22,8 @@ const ConfirmRemoveUserModal = ({
     shouldAlertAssignee,
   }: AssignedUserTracker) => void;
 }) => {
+  const { t } = useTranslation();
+
   const handleSubmit = () => {
     handleClose();
     /* istanbul ignore else */

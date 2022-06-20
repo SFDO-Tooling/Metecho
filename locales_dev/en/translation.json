@@ -423,7 +423,7 @@
   "createEpicHelpText": "Epics in Metecho are the high-level features that can be broken down into smaller parts by creating Tasks. You can create a new Epic or create an Epic based on an existing GitHub branch. Every Epic requires a unique Epic name, which becomes the branch name in GitHub unless you choose to use an existing branch.",
   "createProjectScratchOrgHelp": "<0>Visit an Epic or Task to create a Scratch Org from a work in progress.</0>",
   "createScratchOrgContributeWarning": "<0><0>You will not be able to retrieve any changes made in this Scratch Org.</0></0>",
-  "createScratchOrgHelp": "<0>You are creating a Scratch Org for <1>{{type}}</1> “<3>{{name}}</3>.”</0><1>Your new Org will expire in 30 days.<1></1>You will be able to access your Org from this <3>{{type}}</3> page.</1>",
+  "createScratchOrgHelp": "<0>You are creating a Scratch Org for <1>{{type}}</1> “<3>{{name}}</3>.”</0><1>Your new Org will expire in 30 days.<1></1>You will be able to access your Org from this <4>{{type}}</4> page.</1>",
   "devHubInfo": "Connection to a Salesforce Org with Dev Hub enabled is required to create a Dev, Test, or Scratch Org. Learn how to <2>create a Developer Edition Org</2> and <6>enable Dev Hub</6>.",
   "devHubNotEnabled": "This Salesforce Org does not have Dev Hub enabled or your user does not have permission to create Dev, Test, or Scratch Orgs. Learn how to <2>enable Dev Hub</2>.",
   "epicCollaborators": "Only users who have access to the GitHub repository for this Epic will appear in the list below. Visit GitHub to invite additional Collaborators.",

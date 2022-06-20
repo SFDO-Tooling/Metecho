@@ -37,7 +37,6 @@ exports[`<Path /> renders completed list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -73,7 +72,6 @@ exports[`<Path /> renders completed list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -109,7 +107,6 @@ exports[`<Path /> renders completed list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -145,7 +142,6 @@ exports[`<Path /> renders completed list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
                 <span
                   class="slds-assistive-text"
@@ -204,7 +200,6 @@ exports[`<Path /> renders list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -235,7 +230,6 @@ exports[`<Path /> renders list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -266,7 +260,6 @@ exports[`<Path /> renders list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span
@@ -297,7 +290,6 @@ exports[`<Path /> renders list of steps 1`] = `
                   >
                     <use />
                   </svg>
-                  
                 </span>
               </span>
               <span

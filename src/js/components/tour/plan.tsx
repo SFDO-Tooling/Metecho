@@ -1,6 +1,6 @@
-import { t } from 'i18next';
+import * as i18n from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -17,13 +17,14 @@ export const getDemoEpic = ({
   project: string;
   github_id: string | null;
 }): Epic => {
-  const description = t(
+  const description = i18n.t(
     'This is a sample description to show where the description of the Epic would appear.',
   );
 
   return {
     id: 'demo-epic',
-    name: t('This is a Sample Epic'),
+    name: i18n.t('This is a Sample Epic'),
+    created_at: '',
     description,
     description_rendered: `<p>${description}</p>`,
     slug: 'this-is-a-sample-epic',
@@ -47,6 +48,8 @@ export const getDemoEpic = ({
 };
 
 const PlanTour = (props: TourProps) => {
+  const { t } = useTranslation();
+
   /*
     Note: Any step which targets an element that may be hidden (or not in the
     DOM) will be skipped unless the element is made visible when the *prior*

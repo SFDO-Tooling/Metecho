@@ -4,9 +4,8 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
-import { t } from 'i18next';
 import React, { ReactNode } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import TourPopover from '@/js/components/tour/popover';
 import { ExternalLink } from '@/js/components/utils';
@@ -38,6 +37,8 @@ const CommitTableCell = ({ item, className, ...props }: TableCellProps) => {
 CommitTableCell.displayName = DataTableCell.displayName;
 
 const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
+  const { t } = useTranslation();
+
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -97,8 +98,10 @@ const TimestampTableCell = ({ item, className, ...props }: TableCellProps) => {
 };
 TimestampTableCell.displayName = DataTableCell.displayName;
 
-const CommitList = ({ commits }: { commits: Commit[] }) =>
-  commits.length ? (
+const CommitList = ({ commits }: { commits: Commit[] }) => {
+  const { t } = useTranslation();
+
+  return commits.length ? (
     <>
       <div className="slds-is-relative heading">
         <TourPopover
@@ -164,5 +167,6 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
       </DataTable>
     </>
   ) : null;
+};
 
 export default CommitList;

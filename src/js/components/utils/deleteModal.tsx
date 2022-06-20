@@ -1,8 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { t } from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
@@ -29,6 +28,7 @@ const DeleteModal = ({
   handleClose,
   history,
 }: Props) => {
+  const { t } = useTranslation();
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const [isSaving, setIsSaving] = useState(false);

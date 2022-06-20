@@ -6,9 +6,8 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import { t } from 'i18next';
 import React, { useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -52,6 +51,7 @@ const CreateEpicModal = ({
 }: Props) => {
   const history = useHistory();
   const isMounted = useIsMounted();
+  const { t } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
   // state related to setting base branch on epic creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
@@ -143,7 +143,7 @@ const CreateEpicModal = ({
     // fetching feature branches here when option selected,
     // in lieu of storing in store...
     const baseBranches = await apiFetch({
-      url: `${window.api_urls.project_feature_branches(project.id)}`,
+      url: window.api_urls.project_feature_branches(project.id),
       dispatch,
     });
     /* istanbul ignore else */
@@ -312,7 +312,6 @@ const CreateEpicModal = ({
           </RadioGroup>
           {fromBranchChecked && (
             <Combobox
-              id="combobox-inline-single"
               events={{
                 onSelect: handleBranchSelection,
                 onChange: handleBranchChange,

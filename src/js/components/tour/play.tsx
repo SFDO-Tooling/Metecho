@@ -1,7 +1,7 @@
 import { addDays, subHours } from 'date-fns';
-import { t } from 'i18next';
+import * as i18n from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -21,7 +21,7 @@ export const getDemoOrg = ({
   Org,
   'project' | 'owner' | 'owner_gh_username' | 'owner_gh_id' | 'latest_commit'
 >): Org => {
-  const description = t(
+  const description = i18n.t(
     'This is a sample description to show where the description of the Org would appear.',
   );
   const expires_at = addDays(subHours(new Date(), 12), 30).toISOString();
@@ -63,6 +63,8 @@ export const getDemoOrg = ({
 };
 
 const PlayTour = (props: TourProps) => {
+  const { t } = useTranslation();
+
   /*
     Note: Any step which targets an element that may be hidden (or not in the
     DOM) will be skipped unless the element is made visible when the *prior*

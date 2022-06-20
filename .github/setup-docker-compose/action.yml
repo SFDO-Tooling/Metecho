@@ -1,0 +1,48 @@
+name: Setup docker-compose
+description: Build and tag the Dockerfile to enable its use with docker-compose
+
+inputs:
+  service:
+    required: false
+    default: web
+    description: Name of the service that uses the Dockerfile
+  cache-from:
+    required: false
+    default: type=gha
+    description: Refer to build-push-action for usage
+  cache-to:
+    required: false
+    default: ''
+    description: Refer to build-push-action for usage
+
+outputs:
+  tag:
+    description: Tag of the newly built image
+    value: ${{ steps.tag.outputs.tag }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set variables
+      shell: bash
+      # Avoid using ${{ github.event.* }} because it's unavailable during scheduled runs
+      run: |
+        echo "TAG=$GITHUB_REF_NAME:latest" >> $GITHUB_ENV
+        echo "REPO=$(cut -d / -f2 <<< ${{ github.repository }})" >> $GITHUB_ENV
+    - uses: docker/setup-buildx-action@v1
+    - name: Build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        load: true
+        tags: ${{ env.TAG }}
+        cache-from: ${{ inputs.cache-from }}
+        cache-to: ${{ inputs.cache-to }}
+        build-args: PROD_ASSETS=1
+    - name: Add tag alias for compose
+      id: tag
+      shell: bash
+      run: |
+        # The weird ",," syntax forces lowercase
+        docker tag $TAG ${REPO,,}_${{ inputs.service }}:latest
+        echo "::set-output name=tag::$TAG"

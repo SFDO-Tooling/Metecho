@@ -1,7 +1,7 @@
-import { t } from 'i18next';
+import * as i18n from 'i18next';
 import { pick } from 'lodash';
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
 
 import GuidedTour, {
@@ -23,7 +23,8 @@ export const getDemoTask = ({
 
   return {
     id: 'demo-task',
-    name: t('This is a Sample Task'),
+    name: i18n.t('This is a Sample Task'),
+    created_at: '',
     description: '',
     description_rendered: '',
     epic: pick(epic, ['id', 'name', 'slug', 'github_users']),
@@ -55,6 +56,7 @@ export const getDemoTask = ({
 };
 
 const HelpTour = (props: TourProps) => {
+  const { t } = useTranslation();
   /*
     Note: Any step which targets an element that may be hidden (or not in the
     DOM) will be skipped unless the element is made visible when the *prior*

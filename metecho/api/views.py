@@ -37,6 +37,7 @@ from .models import (
     ScratchOrg,
     ScratchOrgType,
     Task,
+    TaskStatus,
 )
 from .paginators import CustomPaginator
 from .serializers import (
@@ -336,6 +337,18 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for testing.")
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        whens = [
+            When(status=TaskStatus.IN_PROGRESS, then=0),
+            When(status=TaskStatus.PLANNED, then=1),
+            When(status=TaskStatus.COMPLETED, then=2),
+            When(status=TaskStatus.CANCELED, then=3),
+        ]
+        return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
+            "ordering", "-created_at", "name"
+        )
 
     @extend_schema(request=ReviewSerializer)
     @action(detail=True, methods=["POST"])

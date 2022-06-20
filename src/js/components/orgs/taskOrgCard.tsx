@@ -1,8 +1,7 @@
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
-import { t } from 'i18next';
 import React, { ReactNode, useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import AssignTaskRoleModal from '@/js/components/githubUsers/assignTaskRole';
@@ -86,6 +85,8 @@ const TaskOrgCard = ({
   testOrgReadyForReview,
   testOrgSubmittingReview,
 }: TaskOrgCardProps) => {
+  const { t } = useTranslation();
+
   let assignedUserId: string | null = null;
   let heading, orgHeading;
   let popover: ReactNode = null;
@@ -332,6 +333,7 @@ const TaskOrgCard = ({
       </Card>
       <AssignTaskRoleModal
         projectId={projectId}
+        taskHasEpic={Boolean(task.epic)}
         epicUsers={epicUsers}
         githubUsers={githubUsers}
         selectedUser={assignedUser}

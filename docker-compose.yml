@@ -12,8 +12,6 @@ services:
       - redis
     links:
       - redis
-    env_file:
-      - .env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.local
       DATABASE_URL: postgres://metecho:sample_db_password@postgres:5432/metecho

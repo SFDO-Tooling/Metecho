@@ -40,7 +40,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: all tasks complete 1
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -76,7 +75,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: all tasks complete 1
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -112,7 +110,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: all tasks complete 1
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -148,7 +145,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: all tasks complete 1
                     >
                       <use />
                     </svg>
-                    
                   </span>
                 </span>
                 <span
@@ -206,7 +202,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: in progress 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -242,7 +237,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: in progress 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -278,7 +272,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: in progress 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                 </span>
                 <span
@@ -309,7 +302,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: in progress 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                 </span>
                 <span
@@ -367,7 +359,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: merged 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -403,7 +394,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: merged 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -439,7 +429,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: merged 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -475,7 +464,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: merged 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -538,7 +526,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: planned 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -574,7 +561,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: planned 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                 </span>
                 <span
@@ -605,7 +591,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: planned 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                 </span>
                 <span
@@ -636,7 +621,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: planned 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                 </span>
                 <span
@@ -694,7 +678,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: pr opened 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -730,7 +713,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: pr opened 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -766,7 +748,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: pr opened 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
@@ -802,7 +783,6 @@ exports[`<EpicStatusPath /> renders steps from epic status: pr opened 1`] = `
                     >
                       <use />
                     </svg>
-                    
                   </span>
                   <span
                     class="slds-assistive-text"
