@@ -53,12 +53,12 @@ const ProjectListItem = ({ project }: { project: Project }) => {
             slds-grid_vertical
             content-fill-height"
         >
-          <h2
+          <h3
             className="slds-truncate slds-text-heading_small"
             title={project.name}
           >
             {project.name}
-          </h2>
+          </h3>
           <div className="slds-m-top_small">
             {project.description_rendered ? (
               <div

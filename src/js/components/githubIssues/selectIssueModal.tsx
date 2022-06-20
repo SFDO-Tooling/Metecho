@@ -288,9 +288,9 @@ const SelectIssueModal = ({
         <form className="slds-form">
           <div className="slds-grid slds-gutters slds-wrap">
             <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-              <h3 className="slds-text-heading_small">
+              <h2 className="slds-text-heading_small">
                 {t('Available Issues')}
-              </h3>
+              </h2>
               <RadioGroup
                 assistiveText={{
                   label: t('Available Issues'),
@@ -321,9 +321,9 @@ const SelectIssueModal = ({
               </RadioGroup>
             </div>
             <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-              <h3 className="slds-text-heading_small">
+              <h2 className="slds-text-heading_small">
                 {t('Attached Issues')}
-              </h3>
+              </h2>
               {attachedIssues?.length ? (
                 attachedIssues.map((issue, idx) => (
                   <div key={idx} className="slds-p-vertical_x-small">
