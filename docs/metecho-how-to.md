@@ -2,6 +2,7 @@
 
 ## What's In a Name
 **Pronunciation:** *“Met” rhymes with “bet.” “Echo” as in the reflection of sound waves.*
+
 **Definition:** *(Greek) To share or participate in.*
 
 Metecho makes it easier to view, test, and contribute to Salesforce Projects without learning to edit code on GitHub. Collaborate with a team. Create temporary Saleforce Orgs. Make changes, retrieve them, and add your work to a Project with this interactive tool.
@@ -35,23 +36,23 @@ Epic](#step-13---create-an-epic)
 **Task** - *Tasks represent small changes to the Project, and may stand alone or
 be part of an Epic. Creating a Task creates a branch in GitHub.*
 
-- Select the `Tasks` tab.
+- On the Project's detail page, select the `Tasks` tab.
 - Create a new Task of your own (or from an existing GitHub Issue).
   - Name the Task.
   - The name can be a brief description of the work.
   - Use the optional description section for more detail, if needed.
   - Use the recommended dev org type unless you know of a specific reason to use
-    a different one.
-  - Select `Create` to save and navigate to your Task detail view. Select `Create &
-    New` to continue creating multiple Tasks that are unrelated to each other.
+    a different one.  
+  - If you want to create a single Task, select `Create` to save and navigate to your Task detail view. 
+  - If you want to create this Task, plus additional Tasks that are unrelated to each other, select `Create & New`.
 - If you need to edit the Task name or description, or delete the Task, select
   the gear icon in the top right corner. Deleting a Task deletes all the Orgs as
   well.
 
-## Step 3 - Assign Task Developer
+## Step 3 - Assign a Task Developer
 **Developer** - *The person assigned to do the work of a Task.*
 
-- `Assign` yourself or another person to be the Developer for each Task you
+- On the Task's detail page, `Assign` yourself or another person to be the Developer for each Task you
   created.
 - If you do not see the person you want to assign, contact an admin for the
   repository on GitHub and ensure that the person is a collaborator. Then
@@ -59,12 +60,12 @@ be part of an Epic. Creating a Task creates a branch in GitHub.*
 - If you need to change or remove the Task Developer, use the drop down menu on
   the Developer card in the Task detail view.
 
-## Step 4 - Create Dev Org
+## Step 4 - Create a Dev Org in Metecho
 **Dev Org** - *A temporary Salesforce org where a Developer can work on
 contributions to a Project. Dev Orgs expire after 30 days, and all unretrieved
 work is deleted.*
 
-- Review the `Next Steps for This Task` list to see progress and who is
+- On the Task's detail page, you can review the `Next Steps for This Task` list to see progress and who is
   responsible for the next step.
 - To begin work, the Developer will need to select `Create Org` in the Dev Org
   card.
@@ -72,16 +73,16 @@ work is deleted.*
   Metecho will provide an alert when the Dev Org is ready.
 
 ## Step 5 - Make Changes in Dev Org
-- **This step takes place in the new Salesforce Dev Org, not in Metecho.**
+- **Changes to a Dev Org must be made in the Salesforce UI, not in Metecho.**
 - Select `View Org` on the Dev Org card to navigate out of Metecho and make your
-  changes in the temporary Salesforce Dev Org.
+  changes in the temporary Dev Org in Salesforce.
 
 ## Step 6 - Retrieve Changes from Dev Org
-**Retrieve Changes** - *Pull the work you did in your Salesforce Dev Org into
+**Retrieve Changes** - *Pull the work you did in your Dev Org in Salesforce into
 Metecho so that other people can review it. Developers may retrieve changes as
 many times as they like while they are working.*
 
-- When the Developer is ready to pull the Salesforce Dev Org work into Metecho, they need to select `Retrieve Changes from Dev Org` (button located just above the Developer card in the Task detail view). 
+- When the Developer is ready to pull the Dev Org work from Salesforce into Metecho, they need to select `Retrieve Changes from Dev Org` (button located just above the Developer card in the Task detail view). 
   - If that button does not appear, then they can select `Check for Unretrieved Changes` (located on the Dev Org card). The Developer may not need to do this step as changes are retrieved automatically when first navigating to the page.
 - Select the location to retrieve changes.
   - Use the preselected package directory unless you know of a specific reason
@@ -96,8 +97,8 @@ many times as they like while they are working.*
   History list in the Task detail view.
 
 ## Step 7 - Submit Task Changes for Testing
-**Submit Changes** - *Document all the changes a Developer made in a Salesforce
-Dev Org so that a Tester can test the work and leave a review. This action
+**Submit Changes** - *Document all the changes a Developer made in a
+Dev Org within Salesforce so that a Tester can test the work and leave a review. This action
 creates a pull request in GitHub.*
 
 **Pull Request** - *A way to propose changes on GitHub so that the maintainers
@@ -106,10 +107,10 @@ of a Project can review them and accept the changes or request revisions.*
 - When the Developer is finished working and retrieving changes, they need to
   select `Submit Task for Testing` (button located just above the Developer card
   in the Task detail view).
-- Each commit message briefly described what changed. Now, when submitting the
+- Each commit message should briefly describe what changed. Now, when submitting the
   Task for testing, describe all the critical changes and why they were made so
   the Tester will understand how to test them.
-- Select Submit Task for Testing.
+- Select `Submit Task for Testing`.
 
 ## Step 8 - Assign a Tester
 **Tester** - *The person who will look at the Developer’s work, and then approve
@@ -124,25 +125,25 @@ completed.*
 - If you need to change or remove the Task Tester, use the drop down menu on the
   Tester card in the Task detail view.
 
-## Step 9 - Create Test Org
+## Step 9 - Create a Test Org
 **Test Org** - *A temporary Salesforce org where the Tester can look over the
 Developer’s work on a specific Task. Test Orgs expire after 30 days.*
 
-- Remember, you can review the Next Steps for This Task list to see progress and
+- Remember, you can review the `Next Steps for This Task` list to see progress and
   who is responsible for the next step.
 - To begin testing, a Task Tester will need to select `Create Org` in the Test Org
   card.
 - Test Org creation can take a number of minutes. Feel free to leave the page.
   Metecho will provide an alert when the Test Org is ready.
 
-## Step 10 - Test Changes in Test Org
-- **This step takes place in the new Salesforce Test Org, not in Metecho.**
+## Step 10 - Test Changes in a Test Org
+- **Testing of a Test Org must be done in the Salesforce UI, not in Metecho.**
 - Select `View Org` on the Test Org card to navigate out of Metecho and test the
-  Developer’s changes in the temporary Salesforce Test Org.
+  Developer’s changes in the temporary Test Org in Salesforce.
 
 ## Step 11 - Submit a Review
 - When the Tester is finished testing the Developer’s changes in the Test Org,
-  they need to select `Submit Review` on the Test Org card.
+  they need to go back to Metecho and select `Submit Review` on the Test Org card.
 - Select `Approve` if no more work is needed.
 - Select `Request Changes` if the Developer needs to make revisions.
 - Leave a description, especially if there are still changes the Developer needs
@@ -155,10 +156,10 @@ Developer’s work on a specific Task. Test Orgs expire after 30 days.*
   - If any change needs to be made to the review, select `Update Review` in the
     Test Org card.
 
-## Step 12 - Merge Pull Request on GitHub
+## Step 12 - Merge a Pull Request on GitHub
 **Merge** - *To add proposed changes to the Project on GitHub.*
 
-- **This step takes place on GitHub, not in Metecho.**
+- **Merging a Pull Request must be done in GitHub, not in Metecho.**
 - A contributor with write access to the GitHub repository will need to review
   and merge the pull request. When the pull request has been merged on GitHub,
   the Task status will update to Complete on Metecho.
@@ -171,7 +172,7 @@ Task. Epics are more than containers for multiple Tasks. Like Tasks, creating an
 Epic creates a branch in GitHub. Tasks that are part of an Epic create branches
 from the Epic branch in GitHub.*
 
-- Select the `Epics` tab.
+- On a Project's detail page, select the `Epics` tab.
 - Create a new Epic of your own (or from an existing GitHub Issue).
   - Name the Epic.
   - The name can be a brief description of the work.
@@ -184,7 +185,7 @@ from the Epic branch in GitHub.*
   Orgs as well.
 
 ## Step 14 - Add Collaborators
-- Select `Add or Remove Collaborators`.
+- On the Epic's detail page, select `Add or Remove Collaborators`.
 - Select one or more Collaborators to do the work on the Tasks in this Epic.
 - If you do not see the people you want to add, contact an admin for the
   repository on GitHub and ensure that the people are collaborators. Then
