@@ -1,5 +1,7 @@
 # Steps to Guide a Team Through Metecho
 
+Could we add an intro paragraph on what Metecho does and why its useful? Something highlighting that usually contributing to SF projects requires editing code on GitHub but Metecho makes it much easier and interactive.
+
 ## Step 0 - Log In with GitHub
 - Create a [GitHub](https://github.com) account, if you don’t yet have one.
 - Contact an admin for the GitHub repository you want to contribute to (e.g.
@@ -74,9 +76,8 @@ work is deleted.*
 Metecho so that other people can review it. Developers may retrieve changes as
 many times as they like while they are working.*
 
-- When the Developer is ready to pull the Salesforce Dev Org work into Metecho,
-  they need to select `Check for Unretrieved Changes` (button located just above
-  the Developer card in the Task detail view).
+- When the Developer is ready to pull the Salesforce Dev Org work into Metecho, they need to select `Retrieve Changes from Dev Org` (button located just above the Developer card in the Task detail view). 
+  - If that button does not appear, then they can select `Check for Unretrieved Changes` (located on the Dev Org card). The Developer may not need to do this step as changes are retrieved automatically when first navigating to the page.
 - Select the location to retrieve changes.
   - Use the preselected package directory unless you know of a specific reason
     to select a different option.
