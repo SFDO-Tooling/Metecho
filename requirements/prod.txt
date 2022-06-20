@@ -86,7 +86,7 @@ cryptography==37.0.2
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.60.0
+cumulusci==3.61.0.dev0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
