@@ -1,6 +1,11 @@
 # Steps to Guide a Team Through Metecho
 
-Could we add an intro paragraph on what Metecho does and why its useful? Something highlighting that usually contributing to SF projects requires editing code on GitHub but Metecho makes it much easier and interactive.
+## What's In a Name
+**Pronunciation:** *“Met” rhymes with “bet.” “Echo” as in the reflection of sound waves.*
+**Definition:** *(Greek) To share or participate in.*
+
+Metecho makes it easier to view, test, and contribute to Salesforce Projects without learning to edit code on GitHub. Collaborate with a team. Create temporary Saleforce Orgs. Make changes, retrieve them, and add your work to a Project with this interactive tool.
+
 
 ## Step 0 - Log In with GitHub
 - Create a [GitHub](https://github.com) account, if you don’t yet have one.
