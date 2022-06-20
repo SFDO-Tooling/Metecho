@@ -30,7 +30,7 @@ authlib==1.0.1
     # via
     #   cumulusci
     #   simple-salesforce
-autobahn==22.4.2
+autobahn==22.5.1
     # via
     #   -r requirements/prod.in
     #   daphne
@@ -86,7 +86,7 @@ cryptography==37.0.2
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.59.0
+cumulusci==3.61.0.dev0
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -96,7 +96,7 @@ deprecated==1.2.13
     # via redis
 dj-database-url==0.5.0
     # via -r requirements/prod.in
-django==4.0.4
+django==4.0.5
     # via
     #   -r requirements/prod.in
     #   channels
@@ -112,15 +112,15 @@ django==4.0.4
     #   djangorestframework
     #   drf-spectacular
     #   sfdo-template-helpers
-django-allauth==0.50.0
+django-allauth==0.51.0
     # via -r requirements/prod.in
 django-anymail[mailgun]==8.6
     # via -r requirements/prod.in
-django-environ==0.8.1
+django-environ==0.9.0
     # via -r requirements/prod.in
-django-filter==21.1
+django-filter==22.1
     # via sfdo-template-helpers
-django-hashid-field==3.3.4
+django-hashid-field==3.3.5
     # via -r requirements/prod.in
 django-js-reverse @ https://github.com/ierror/django-js-reverse/archive/7cab78c4531780ab4b32033d5104ccd5be1a246a.tar.gz
     # via -r requirements/prod.in
@@ -189,13 +189,14 @@ inflection==0.5.1
     # via drf-spectacular
 jeepney==0.8.0
     # via
+    #   cumulusci
     #   keyring
     #   secretstorage
 jinja2==2.11.3
     # via
     #   cumulusci
     #   snowfakery
-jsonschema==4.5.1
+jsonschema==4.6.0
     # via drf-spectacular
 keyring==23.0.1
     # via cumulusci
@@ -203,7 +204,7 @@ logfmt==0.4
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
-lxml==4.8.0
+lxml==4.9.0
     # via cumulusci
 markdown==3.3.7
     # via
@@ -214,7 +215,7 @@ markupsafe==2.0.1
     #   cumulusci
     #   jinja2
     #   snowfakery
-msgpack==1.0.3
+msgpack==1.0.4
     # via channels-redis
 oauthlib==3.2.0
     # via requests-oauthlib
@@ -278,7 +279,7 @@ pyyaml==6.0
     #   cumulusci
     #   drf-spectacular
     #   snowfakery
-redis==4.3.1
+redis==4.3.3
     # via
     #   django-rq
     #   rq
@@ -337,7 +338,9 @@ salesforce-bulk==2.2.0
 sarge==0.1.7.post1
     # via cumulusci
 secretstorage==3.3.2
-    # via keyring
+    # via
+    #   cumulusci
+    #   keyring
 selenium==3.141.0
     # via
     #   cumulusci
@@ -366,7 +369,7 @@ six==1.16.0
     #   salesforce-bulk
     #   service-identity
     #   snowfakery
-snowfakery==3.1.0
+snowfakery==3.2.1
     # via cumulusci
 soupsieve==2.3.2.post1
     # via beautifulsoup4
@@ -404,7 +407,7 @@ urllib3==1.26.9
     #   snowfakery
 webencodings==0.5.1
     # via bleach
-whitenoise==6.1.0
+whitenoise==6.2.0
     # via -r requirements/prod.in
 wrapt==1.14.1
     # via deprecated

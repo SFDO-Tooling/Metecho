@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 from datetime import datetime
+import time
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
@@ -108,7 +109,12 @@ def is_org_good(org):
 
 
 def refresh_access_token(
-    *, scratch_org, config, org_name, keychain=None, originating_user_id=None
+    *,
+    scratch_org,
+    config,
+    org_name,
+    keychain=None,
+    originating_user_id=None,
 ):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
@@ -119,7 +125,7 @@ def refresh_access_token(
         scratch_org=scratch_org, originating_user_id=originating_user_id
     ):
         org_config = OrgConfig(config, org_name, keychain=keychain)
-        org_config.refresh_oauth_token(keychain)
+        org_config.refresh_oauth_token(keychain, is_sandbox=True)
         return org_config
 
 
@@ -172,33 +178,68 @@ def get_org_result(
     and get the result."""
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
+
+    scratch_org_definition = {k.lower(): v for k, v in scratch_org_definition.items()}
     features = scratch_org_definition.get("features", [])
+    # Map between fields in the scratch org definition and fields on the ScratchOrgInfo object.
+    # Start with fields that have special handling outside the .json.
     create_args = {
-        "AdminEmail": email,
-        "ConnectedAppConsumerKey": SF_CLIENT_ID,
-        "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
-        "Description": f"{repo_owner}/{repo_name} {repo_branch}",
+        "adminemail": email,
+        "connectedappconsumerkey": SF_CLIENT_ID,
+        "connectedappcallbackurl": SF_CALLBACK_URL,
+        "description": f"{repo_owner}/{repo_name} {repo_branch}",
         # Override whatever is in scratch_org_config.days:
-        "DurationDays": DURATION_DAYS,
-        "Edition": scratch_org_definition["edition"],
-        "Features": ";".join(features) if isinstance(features, list) else features,
-        "HasSampleData": scratch_org_definition.get("hasSampleData", False),
-        "Namespace": (
+        "durationdays": DURATION_DAYS,
+        "features": ";".join(features) if isinstance(features, list) else features,
+        "namespace": (
             cci.project_config.project__package__namespace
             if scratch_org_config.namespaced
             else None
         ),
-        "OrgName": scratch_org_definition.get("orgName", "Metecho Task Org"),
-        # should really flesh this out to pass the other
-        # optional fields from the scratch org definition file,
-        # but this will work for a start
     }
+    # Loop over remaining fields from the ScratchOrgInfo schema and map to
+    # data from the org definition.
+    fields = [
+        f["name"]
+        for f in devhub_api.ScratchOrgInfo.describe()["fields"]
+        if f["createable"] and f["name"].lower() not in create_args
+    ]
+
+    # Note that the special fields `objectSettings` and `settings`
+    # are not in the ScratchOrgInfo schema.
+    for field in fields:
+        field_name = field.lower()
+        if field_name in scratch_org_definition:
+            create_args[field_name] = scratch_org_definition[field_name]
+
+    # Lastly, populate default items.
+    create_args.setdefault("orgname", "Metecho Task Org")
+    create_args.setdefault("hassampledata", False)
+
     if SFDX_SIGNUP_INSTANCE:  # pragma: nocover
         create_args["Instance"] = SFDX_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
     return devhub_api.ScratchOrgInfo.get(response["id"])
+
+
+def poll_for_scratch_org_completion(devhub_api, org_result):
+    total_time_waiting = 0
+    # Don't allow waiting more than the default job timeout.
+    while (
+        org_result["Status"] in ["New", "Creating"]
+        and total_time_waiting < settings.MAXIMUM_JOB_LENGTH
+    ):
+        time.sleep(10)
+        total_time_waiting += 10
+        org_result = devhub_api.ScratchOrgInfo.get(org_result["Id"])
+
+    if org_result["Status"] != "Active":
+        error = org_result["ErrorCode"] or _("Org creation timed out")
+        raise ScratchOrgError(f"Scratch org creation failed: {error}")
+
+    return org_result
 
 
 def mutate_scratch_org(*, scratch_org_config, org_result, email):
@@ -307,6 +348,7 @@ def create_org(
         cci=cci,
         devhub_api=devhub_api,
     )
+    org_result = poll_for_scratch_org_completion(devhub_api, org_result)
     mutate_scratch_org(
         scratch_org_config=scratch_org_config, org_result=org_result, email=email
     )
