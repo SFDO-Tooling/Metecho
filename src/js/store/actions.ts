@@ -2,7 +2,7 @@ import { ThunkResult } from '@/js/store';
 import { Epic } from '@/js/store/epics/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import apiFetch, { addUrlParams } from '@/js/utils/api';
-import { ObjectTypes } from '@/js/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 interface CreateObjectPayload {
   objectType?: ObjectTypes;
@@ -70,7 +70,8 @@ interface DeleteObjectAction {
   type:
     | 'DELETE_OBJECT_STARTED'
     | 'DELETE_OBJECT_SUCCEEDED'
-    | 'DELETE_OBJECT_FAILED';
+    | 'DELETE_OBJECT_FAILED'
+    | 'USER_LOGGED_OUT';
   payload: { object: any } & CreateObjectPayload;
 }
 interface ObjectRemoved {
@@ -292,29 +293,34 @@ export const createObject =
 export const deleteObject =
   ({
     objectType,
+    url,
     object,
     shouldSubscribeToObject = false,
   }: {
     objectType: ObjectTypes;
+    url?: string;
     object: { id: string; [key: string]: any };
     shouldSubscribeToObject?: boolean | ((obj: any) => boolean);
   }): ThunkResult<Promise<DeleteObjectAction>> =>
   async (dispatch) => {
-    const urlFn = window.api_urls[`${objectType}_detail`];
-    let baseUrl;
-    if (urlFn && object.id) {
-      baseUrl = urlFn(object.id);
+    if (!url) {
+      const urlFn = window.api_urls[`${objectType}_detail`];
+      if (urlFn && object.id) {
+        // eslint-disable-next-line no-param-reassign
+        url = urlFn(object.id);
+      }
     }
+
     dispatch({
       type: 'DELETE_OBJECT_STARTED',
-      payload: { objectType, url: baseUrl, object },
+      payload: { objectType, url, object },
     });
     try {
-      if (!baseUrl) {
+      if (!url) {
         throw new Error(`No URL found for object: ${objectType}`);
       }
       await apiFetch({
-        url: baseUrl,
+        url,
         dispatch,
         opts: { method: 'DELETE' },
       });
@@ -329,14 +335,20 @@ export const deleteObject =
           id: object.id,
         });
       }
+      if (objectType === OBJECT_TYPES.USER) {
+        return dispatch({
+          type: 'USER_LOGGED_OUT' as const,
+          payload: { objectType, url, object },
+        });
+      }
       return dispatch({
         type: 'DELETE_OBJECT_SUCCEEDED' as const,
-        payload: { objectType, url: baseUrl, object },
+        payload: { objectType, url, object },
       });
     } catch (err) {
       dispatch({
         type: 'DELETE_OBJECT_FAILED',
-        payload: { objectType, url: baseUrl, object },
+        payload: { objectType, url, object },
       });
       throw err;
     }

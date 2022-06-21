@@ -777,6 +777,19 @@ class TestUser:
             get_devhub_api.return_value = client
             assert not user.is_devhub_enabled
 
+    def test_user_delete_triggers_scratch_org_delete(
+        self, mocker, user_factory, scratch_org_factory
+    ):
+        mocker.patch("metecho.api.admin.gh")
+        scratch_org_delete_job = mocker.patch("metecho.api.jobs.delete_scratch_org_job")
+
+        user = user_factory()
+        scratch_org = scratch_org_factory(last_modified_at=now(), owner=user)
+        assert user.scratchorg_set.first() == scratch_org
+
+        user.delete()
+        assert scratch_org_delete_job.delay.called
+
 
 @pytest.mark.django_db
 class TestScratchOrg:
