@@ -292,24 +292,14 @@ const UserDropdown = () => {
                     size="small"
                   />
                 )}
-                <div className="slds-p-left_x-large">
-                  <h2
-                    id="user-info-heading"
-                    className="slds-text-heading_small"
-                  >
-                    {user.username}
+                <div className="slds-p-left_x-large slds-text-heading_small">
+                  <h2 id="user-info-heading">{user.username}</h2>
+                  <h2 className="slds-p-top_small slds-m-top_xx-small">
+                    <ManageAccountButton onClick={toggleDropdown} />
                   </h2>
-                </div>
-                <div>
-                  <div className="slds-m-top_xx-small">
-                    <h2 className="slds-text-heading_small slds-p-top_small">
-                      <ManageAccountButton onClick={toggleDropdown} />
-                    </h2>
-                    <h2 className="slds-text-heading_small slds-p-top_small">
-                      {' '}
-                      <Logout />
-                    </h2>
-                  </div>
+                  <h2 className="slds-p-top_small">
+                    <Logout />
+                  </h2>
                 </div>
               </div>
             </header>
