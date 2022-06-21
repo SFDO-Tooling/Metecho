@@ -259,6 +259,7 @@ const ProjectDetail = (
     },
     [closeTourLandingModal],
   );
+  /* istanbul ignore next */
   const handleTourClose = useCallback(() => {
     setTourRunning(null);
     setSelectedTabOverride(undefined);

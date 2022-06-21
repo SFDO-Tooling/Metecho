@@ -49,6 +49,7 @@ const GuidedTour = ({ steps, run, onStart, onClose, onBeforeStep }: Props) => {
         STATUS.FINISHED,
         STATUS.SKIPPED,
       ];
+      /* istanbul ignore next */
       if (finished.includes(status) || action === ACTIONS.CLOSE) {
         helpers?.reset(false);
         onClose?.();
