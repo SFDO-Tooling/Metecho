@@ -283,3 +283,6 @@ two commands:
 
 After running one of these commands, you can view the Storybook at
 <http://localhost:6006/> in your browser.
+
+For more detailed steps on contributing to the component library, see
+`docs/component-library-how-to.md`.
