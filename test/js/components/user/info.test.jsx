@@ -74,6 +74,7 @@ describe('<UserDropdown />', () => {
 
     expect(getByText('Test User')).toBeVisible();
     expect(getByText('Log Out')).toBeVisible();
+    expect(getByText('Manage Account')).toBeVisible();
   });
 
   describe('not connected', () => {

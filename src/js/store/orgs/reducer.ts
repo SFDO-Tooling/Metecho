@@ -19,7 +19,7 @@ export interface MinimalOrg {
 }
 
 export interface Org extends MinimalOrg {
-  owner: string;
+  owner: string | null;
   owner_gh_username: string;
   owner_gh_id: string | null;
   description: string;

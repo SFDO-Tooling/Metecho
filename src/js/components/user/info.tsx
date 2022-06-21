@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/js/components/user/connect';
 import Logout from '@/js/components/user/logout';
+import { ManageAccountButton } from '@/js/components/user/manage';
 import {
   ExternalLink,
   SpinnerWrapper,
@@ -23,20 +24,23 @@ import { selectUserState } from '@/js/store/user/selectors';
 
 const ConnectToSalesforce = ({
   toggleModal,
+  closeDropdown,
 }: {
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  closeDropdown: () => void;
 }) => {
   const { t } = useTranslation();
 
   const openConnectModal = () => {
     toggleModal(true);
+    closeDropdown();
   };
 
   return (
     <>
       <Button
         label={t('Connect to Salesforce')}
-        className="slds-text-body_regular slds-p-right_xx-small"
+        className="slds-text-heading_small slds-p-right_xx-small"
         variant="link"
         onClick={openConnectModal}
       />
@@ -239,6 +243,13 @@ const UserDropdown = () => {
   const { t } = useTranslation();
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const closeDropdown = () => {
+    setIsDropdownOpen(false);
+  };
 
   if (!user) {
     return null;
@@ -247,6 +258,9 @@ const UserDropdown = () => {
   return (
     <>
       <Popover
+        isOpen={isDropdownOpen}
+        onClick={toggleDropdown}
+        onRequestClose={closeDropdown}
         align="bottom right"
         body={
           <>
@@ -278,14 +292,14 @@ const UserDropdown = () => {
                     size="small"
                   />
                 )}
-                <div className="slds-p-left_x-large">
-                  <h2
-                    id="user-info-heading"
-                    className="slds-text-heading_small"
-                  >
-                    {user.username}
+                <div className="slds-p-left_x-large slds-text-heading_small">
+                  <h2 id="user-info-heading">{user.username}</h2>
+                  <h2 className="slds-p-top_small slds-m-top_xx-small">
+                    <ManageAccountButton onClick={toggleDropdown} />
                   </h2>
-                  <Logout className="slds-m-top_xx-small" />
+                  <h2 className="slds-p-top_small">
+                    <Logout />
+                  </h2>
                 </div>
               </div>
             </header>
@@ -294,7 +308,10 @@ const UserDropdown = () => {
                 {user.valid_token_for || user.devhub_username ? (
                   <ConnectionInfo user={user} />
                 ) : (
-                  <ConnectToSalesforce toggleModal={setModalOpen} />
+                  <ConnectToSalesforce
+                    toggleModal={setModalOpen}
+                    closeDropdown={closeDropdown}
+                  />
                 )}
               </div>
             )}
