@@ -55,9 +55,16 @@ be part of an Epic. Creating a Task creates a branch in GitHub.*
     your new Task.
   - If you want to create this Task, plus additional Tasks that are unrelated to
     each other, select `Create & New`.
+    
+    ![create tasks modal with create, create & new options](/docs/create-task-modal.jpg?raw=true)
+    
+    
 - If you need to edit the Task name or description, or delete the Task, select
   the gear icon in the top right corner. Deleting a Task deletes all the Orgs as
   well.
+  
+![task drop down edit and delete](/docs/task-gear.jpg?raw=true)
+
 
 ## Step 3 - Assign a Task Developer
 
@@ -70,6 +77,9 @@ be part of an Epic. Creating a Task creates a branch in GitHub.*
   `Re-Sync GitHub Collaborators` in Metecho.
 - If you need to change or remove the Task Developer, use the drop down menu on
   the Developer card in the Task detail view.
+  
+  ![developer drop down change and remove](/docs/developer-dropdown.jpg?raw=true)
+
 
 ## Step 4 - Create a Dev Org in Metecho
 
@@ -79,6 +89,10 @@ work is deleted.*
 
 - On the Task's detail page, you can review the `Next Steps for This Task` list
   to see progress and who is responsible for the next step.
+  
+  ![list of next steps for the tasks](/docs/task-next-steps.jpg?raw=true)
+  
+  
 - To begin work, the Developer will need to select `Create Org` in the Dev Org
   card.
 - Dev Org creation can take a number of minutes. Feel free to leave the page.
@@ -97,11 +111,17 @@ into Metecho so that other people can review it. Developers may retrieve changes
 as many times as they like while they are working.*
 
 - When the Developer is ready to pull the Dev Org work from Salesforce into
-  Metecho, they need to select `Retrieve Changes from Dev Org` (located above
-  the Developer card in the Task detail view).
-  - If that option does not appear, select `check again` (located on the Dev Org
-    card). The Developer may not need to do this step as changes are retrieved
+  Metecho, they need to select `Retrieve Changes from Dev Org`.
+  
+  ![retrieve changes button](/docs/retrieve-changes.jpg?raw=true)
+  
+  
+  - If that option does not appear, select `check again`. The Developer may not need to do this step as changes are retrieved
     automatically when first navigating to the page.
+    
+    ![check for unretrieved changes button](/docs/check-unretrieve.jpg?raw=true)
+    
+    
 - Select the location to retrieve changes.
   - Use the preselected package directory unless you know of a specific reason
     to select a different option.
@@ -111,8 +131,15 @@ as many times as they like while they are working.*
 - Select `Retrieve Selected Changes`.
 - Retrieving changes can take a number of minutes. Feel free to leave the page.
   Metecho will provide an alert when the changes have been retrieved.
+  
+  ![successfully finished retrieving changes](/docs/retrieve-success.jpg?raw=true)
+  
+  
 - Note that the Developer, commit message, and date now appear in a Commit
   History list in the Task detail view.
+  
+  ![list of commits](/docs/commit-history.jpg?raw=true)
+  
 
 ## Step 7 - Submit Task Changes for Testing
 
@@ -124,8 +151,11 @@ action creates a pull request in GitHub.*
 of a Project can review them and accept the changes or request revisions.*
 
 - When the Developer is finished working and retrieving changes, they need to
-  select `Submit Task for Testing` (located just above the Developer card in the
-  Task detail view).
+  select `Submit Task for Testing`.
+  
+  ![submit task for testing button](/docs/submit-testing.jpg?raw=true)
+  
+  
 - When submitting the Task for testing, describe all the critical changes and
   why they were made so the Tester will understand how to test them.
 - Select `Submit Task for Testing`.
@@ -208,6 +238,9 @@ from the Epic branch in GitHub.*
 - If you need to edit the Epic name or description, or delete the Epic, select
   the gear icon in the top right corner. Deleting an Epic deletes all Tasks and
   Orgs as well.
+  
+  ![epic drop down menu rename or delete](/docs/epic-gear.jpg?raw=true)
+  
 
 ## Step 14 - Add Collaborators
 
@@ -254,3 +287,5 @@ To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task) or
 - View specific walkthroughs.
 - Activate self-guided tour mode for more detail about everything Metecho can do
   for you.
+  
+  ![help button for guided walkthroughs and self-guided tour](/docs/help.jpg?raw=true)
