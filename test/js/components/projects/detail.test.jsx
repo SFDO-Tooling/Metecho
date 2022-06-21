@@ -1033,7 +1033,7 @@ describe('<ProjectDetail />', () => {
 
     describe('play tour click', () => {
       test('runs tour', async () => {
-        const { queryByText, findByText, getByText, getByTitle } = setup({
+        const { findByText, getByText } = setup({
           initialState: {
             ...defaultState,
             user: {
@@ -1050,18 +1050,12 @@ describe('<ProjectDetail />', () => {
         await waitFor(() => {
           expect(dialog).toBeVisible();
         });
-
-        fireEvent.click(getByTitle('Close'));
-
-        await waitFor(() => {
-          expect(queryByText('View & play with a Project')).toBeNull();
-        });
       });
     });
 
     describe('plan tour click', () => {
       test('runs tour', async () => {
-        const { queryByText, findByText, getByText, getByTitle } = setup({
+        const { findByText, getByText } = setup({
           initialState: {
             ...defaultState,
             user: {
@@ -1078,18 +1072,12 @@ describe('<ProjectDetail />', () => {
         await waitFor(() => {
           expect(dialog).toBeVisible();
         });
-
-        fireEvent.click(getByTitle('Close'));
-
-        await waitFor(() => {
-          expect(queryByText('List of Tasks')).toBeNull();
-        });
       });
     });
 
     describe('help tour click', () => {
       test('runs tour with task tab active', async () => {
-        const { queryByText, findByText, getByText, getByTitle } = setup({
+        const { findByText, getByText } = setup({
           initialState: {
             ...defaultState,
             user: {
@@ -1110,12 +1098,6 @@ describe('<ProjectDetail />', () => {
         const btn = await findByText('Create a Task');
 
         expect(btn).toBeVisible();
-
-        fireEvent.click(getByTitle('Close'));
-
-        await waitFor(() => {
-          expect(queryByText('List of Tasks')).toBeNull();
-        });
       });
     });
 
