@@ -18,9 +18,9 @@ export const EmptyIllustration = ({
       className="slds-m-top_xx-large"
       dangerouslySetInnerHTML={{ __html: desertSvg }}
     />
-    <h3 className="slds-illustration__header slds-text-heading_medium">
+    <h2 className="slds-illustration__header slds-text-heading_medium">
       {heading || '¯\\_(ツ)_/¯'}
-    </h3>
+    </h2>
     <p className="slds-text-body_regular">{message}</p>
   </div>
 );
