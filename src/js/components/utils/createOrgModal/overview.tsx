@@ -38,10 +38,10 @@ const Overview = ({
   // https://github.com/i18next/react-i18next/issues/1483
   const help = (
     <Trans i18nKey="createScratchOrgHelp">
-      <h3 className="slds-text-title_bold">
+      <h2 className="slds-text-title_bold">
         You are creating a Scratch Org for {{ type } as unknown as string} “
         {{ name } as unknown as string}.”
-      </h3>
+      </h2>
       <p>
         Your new Org will expire in 30 days.
         <br />
