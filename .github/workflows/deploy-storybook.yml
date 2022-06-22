@@ -10,7 +10,7 @@ concurrency:
 jobs:
   deploy:
     name: Build & deploy
-    runs-on: ubuntu-latest
+    runs-on: sfdc-ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
