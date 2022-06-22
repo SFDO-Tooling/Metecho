@@ -91,4 +91,6 @@ export const RETRIEVE_CHANGES = 'retrieve_changes';
 
 export const CREATE_TASK_FROM_ORG = 'create_task_from_org';
 
+export const TASKS_BY_PROJECT_KEY = 'all';
+
 export const SHOW_PROJECT_CREATE_ERROR = 'show_project_create_error';
