@@ -85,6 +85,7 @@ const defaultState = {
         repo_image_url: 'https://github.com/repo-image',
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
         has_push_permission: true,
+        latest_sha: 'abc123',
       },
     ],
     notFound: ['yet-another-project'],
@@ -306,6 +307,25 @@ describe('<ProjectDetail />', () => {
     expect(
       getByText('There are no Epics for this Project.', { exact: false }),
     ).toBeVisible();
+  });
+
+  test('renders loading while project is being created on github', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              latest_sha: '',
+            },
+          ],
+        },
+      },
+    });
+
+    expect(getByText('Creating GitHub Repository for Project…')).toBeVisible();
   });
 
   describe('project not found', () => {

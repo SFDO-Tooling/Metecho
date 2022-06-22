@@ -16,6 +16,12 @@ export interface GitHubUser {
   };
 }
 
+export interface GitHubOrg {
+  id: string;
+  name: string;
+  avatar_url: string;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -29,12 +35,14 @@ export interface User {
   is_devhub_enabled: boolean;
   is_staff: boolean;
   currently_fetching_repos: boolean;
+  currently_fetching_orgs: boolean;
   devhub_username: string;
   uses_global_devhub: boolean;
   agreed_to_tos_at: string | null;
   onboarded_at: string | null;
   self_guided_tour_enabled: boolean;
   self_guided_tour_state: string[] | null;
+  organizations: GitHubOrg[];
 }
 
 const reducer = (
@@ -54,6 +62,12 @@ const reducer = (
     case 'PROJECTS_REFRESHED':
     case 'REFRESH_PROJECTS_ERROR':
       return user ? { ...user, currently_fetching_repos: false } : user;
+    case 'REFRESH_ORGS_REQUESTED':
+    case 'REFRESHING_ORGS':
+      return user ? { ...user, currently_fetching_orgs: true } : user;
+    case 'REFRESH_ORGS_REJECTED':
+    case 'REFRESH_ORGS_ERROR':
+      return user ? { ...user, currently_fetching_orgs: false } : user;
   }
   return user;
 };

@@ -59,30 +59,46 @@ export const UserCard = ({
 };
 
 export const UserCards = ({
+  className,
   users,
   userId,
   canRemoveUser,
   removeUser,
+  twoColumn,
 }: {
+  className?: string;
   users: GitHubUser[];
-  userId: string | null;
-  canRemoveUser: boolean;
-  removeUser: (user: GitHubUser) => void;
+  userId?: string | null;
+  canRemoveUser?: boolean;
+  removeUser?: (user: GitHubUser) => void;
+  twoColumn?: boolean;
 }) => (
   <div
-    className="slds-grid
-      slds-wrap
-      slds-grid_pull-padded-xx-small
-      slds-m-top_large"
+    className={classNames(
+      className,
+      'slds-grid',
+      'slds-wrap',
+      'slds-grid_pull-padded-xx-small',
+    )}
   >
     {users.map((user) => {
       const doRemoveUser =
         canRemoveUser || userId === user.id
-          ? () => removeUser(user)
+          ? () => removeUser?.(user)
           : undefined;
       return (
-        <div key={user.id} className="slds-size_1-of-1 slds-p-around_xx-small">
-          <UserCard user={user} removeUser={doRemoveUser} showPermissions />
+        <div
+          key={user.id}
+          className={classNames('slds-size_1-of-1', 'slds-p-around_xx-small', {
+            'slds-large-size_1-of-2': twoColumn,
+          })}
+        >
+          <UserCard
+            className="slds-card_boundary"
+            user={user}
+            removeUser={doRemoveUser}
+            showPermissions
+          />
         </div>
       );
     })}

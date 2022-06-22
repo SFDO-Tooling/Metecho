@@ -131,6 +131,7 @@ const AssignTaskRoleModal = ({
       isOpen={isOpen}
       onRequestClose={handleClose}
       assistiveText={{ closeButton: t('Cancel') }}
+      dismissOnClickOutside={false}
       heading={heading}
       directional
       size="small"
@@ -157,9 +158,9 @@ const AssignTaskRoleModal = ({
       {selectedUser && (
         <>
           <div className="slds-p-around_medium">
-            <h3 className="slds-text-heading_small slds-m-bottom_x-small">
+            <h2 className="slds-text-heading_small slds-m-bottom_x-small">
               {t('Currently Assigned')}
-            </h3>
+            </h2>
             <GitHubUserButton
               user={selectedUser}
               isAssigned
@@ -215,9 +216,9 @@ const AssignTaskRoleModal = ({
         </div>
         {epicUsers && taskHasEpic ? (
           <div className="slds-p-horizontal_medium slds-p-bottom_medium">
-            <h3 className="slds-text-heading_small slds-m-bottom_x-small">
+            <h2 className="slds-text-heading_small slds-m-bottom_x-small">
               {t('Epic Collaborators')}
-            </h3>
+            </h2>
             {filteredEpicUsers.length ? (
               <ul>
                 {filteredEpicUsers.map((user) => (
@@ -240,11 +241,11 @@ const AssignTaskRoleModal = ({
           </div>
         ) : null}
         <div className="slds-p-horizontal_medium slds-p-bottom_medium">
-          <h3 className="slds-text-heading_small slds-m-bottom_x-small">
+          <h2 className="slds-text-heading_small slds-m-bottom_x-small">
             {epicUsers
               ? t('Other GitHub Collaborators')
               : t('GitHub Collaborators')}
-          </h3>
+          </h2>
           {filteredGitHubUsers.length ? (
             <ul>
               {filteredGitHubUsers.map((user) => (

@@ -192,6 +192,7 @@ const SelectIssueModal = ({
       isOpen={Boolean(isOpen)}
       size="small"
       heading={t('Select GitHub Issue to Develop')}
+      dismissOnClickOutside={false}
       onRequestClose={closeForm}
       assistiveText={{ closeButton: t('Cancel') }}
       footer={

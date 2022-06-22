@@ -18,7 +18,11 @@ interface TableCellProps {
   handleUserClick: (user: GitHubUser) => void;
 }
 
-const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
+export const UserTableCell = ({
+  item,
+  handleUserClick,
+  ...props
+}: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -111,6 +115,7 @@ const AssignEpicCollaboratorsModal = ({
           : null
       }
       size="small"
+      dismissOnClickOutside={false}
       onRequestClose={handleClose}
     >
       <div

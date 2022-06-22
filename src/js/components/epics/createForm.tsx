@@ -27,7 +27,7 @@ import apiFetch from '@/js/utils/api';
 import { CREATE_TASK_FROM_ORG, OBJECT_TYPES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
-interface ComboboxOption {
+export interface ComboboxOption {
   id: string;
   label: string;
 }
@@ -245,6 +245,7 @@ const CreateEpicModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={isSaving}
+      dismissOnClickOutside={false}
       heading={heading}
       onRequestClose={closeForm}
       assistiveText={{ closeButton: t('Cancel') }}

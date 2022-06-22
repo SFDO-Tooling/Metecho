@@ -2,7 +2,7 @@ import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
 import { ProjectsAction } from '@/js/store/projects/actions';
 import { LogoutAction } from '@/js/store/user/actions';
 import { GitHubUser } from '@/js/store/user/reducer';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/js/utils/constants';
 
 export interface OrgConfig {
   key: string;
@@ -33,18 +33,29 @@ export interface Project {
   has_push_permission: boolean;
   has_truncated_issues: boolean;
 }
+
+export interface Dependency {
+  id: string;
+  name: string;
+  recommended: boolean;
+}
+
 export interface ProjectsState {
   projects: Project[];
   next: string | null;
   notFound: string[];
   refreshing: boolean;
+  dependencies: Dependency[];
+  fetchingDependencies: boolean;
 }
 
-const defaultState = {
+export const defaultState: ProjectsState = {
   projects: [],
   next: null,
   notFound: [],
   refreshing: false,
+  dependencies: [],
+  fetchingDependencies: false,
 };
 
 const reducer = (
@@ -66,10 +77,27 @@ const reducer = (
         ].includes(action.type),
       };
     }
+    case 'PROJECT_DELETED': {
+      const id = action.payload;
+      return {
+        ...projects,
+        projects: projects.projects.filter((p) => p.id !== id),
+      };
+    }
+    case 'FETCH_OBJECTS_STARTED': {
+      const { objectType } = action.payload;
+      if (objectType === OBJECT_TYPES.PROJECT_DEPENDENCY) {
+        return {
+          ...projects,
+          fetchingDependencies: true,
+        };
+      }
+      return projects;
+    }
     case 'FETCH_OBJECTS_SUCCEEDED': {
       const { response, objectType, reset } = action.payload;
-      const { results, next } = response as PaginatedObjectResponse;
       if (objectType === OBJECT_TYPES.PROJECT) {
+        const { results, next } = response as PaginatedObjectResponse;
         if (reset) {
           return {
             ...projects,
@@ -90,6 +118,13 @@ const reducer = (
           refreshing: false,
         };
       }
+      if (objectType === OBJECT_TYPES.PROJECT_DEPENDENCY) {
+        return {
+          ...projects,
+          dependencies: response as Dependency[],
+          fetchingDependencies: false,
+        };
+      }
       return projects;
     }
     case 'FETCH_OBJECT_SUCCEEDED': {
@@ -105,6 +140,22 @@ const reducer = (
             notFound: [...projects.notFound, slug],
           };
         }
+        if (!projects.projects.find((project) => project.id === object.id)) {
+          return {
+            ...projects,
+            projects: [...projects.projects, object],
+          };
+        }
+      }
+      return projects;
+    }
+    case 'CREATE_OBJECT_SUCCEEDED': {
+      const {
+        object,
+        objectType,
+      }: { object: Project; objectType?: ObjectTypes } = action.payload;
+      if (objectType === OBJECT_TYPES.PROJECT && object) {
+        // Do not store if (somehow) we already know about this project
         if (!projects.projects.find((project) => project.id === object.id)) {
           return {
             ...projects,

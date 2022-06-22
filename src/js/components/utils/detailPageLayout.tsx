@@ -95,9 +95,11 @@ const DetailPageLayout = ({
             </span>
           }
           info={
-            <ExternalLink url={headerUrl} showGitHubIcon>
-              /{headerUrlText}
-            </ExternalLink>
+            headerUrl && headerUrlText ? (
+              <ExternalLink url={headerUrl} showGitHubIcon>
+                /{headerUrlText}
+              </ExternalLink>
+            ) : null
           }
           onRenderControls={onRenderHeaderActions}
           icon={

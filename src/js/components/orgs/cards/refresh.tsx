@@ -36,6 +36,7 @@ const RefreshOrgModal = ({
       heading={heading}
       size="small"
       assistiveText={{ closeButton: t('Close') }}
+      dismissOnClickOutside={false}
       onRequestClose={closeRefreshOrgModal}
     >
       <div className="slds-p-around_large">

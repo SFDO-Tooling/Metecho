@@ -227,44 +227,80 @@ initializeI18n((i18nError?: string) => {
       );
     };
 
+    const userFetching = () => {
+      const user = selectUserState(appStore.getState());
+      const fetching = new Set();
+      if (user?.currently_fetching_repos) {
+        fetching.add('currently_fetching_repos');
+      }
+      if (user?.currently_fetching_orgs) {
+        fetching.add('currently_fetching_orgs');
+      }
+      return fetching;
+    };
+
     if (userData) {
       // If logged in, fetch projects before rendering App
       (appStore.dispatch as ThunkDispatch)(
         fetchObjects({ objectType: OBJECT_TYPES.PROJECT, reset: true }),
       ).finally(() => {
-        let user = selectUserState(appStore.getState());
-        // If user is currently fetching projects,
-        // update state to show loading spinner.
-        if (user?.currently_fetching_repos) {
-          appStore.dispatch(projectsRefreshing());
-          // Because the refetch-projects job may complete before the
+        let fetching = userFetching();
+        if (fetching.size) {
+          // If user is currently fetching projects,
+          // update state to show loading spinner.
+          if (fetching.has('currently_fetching_repos')) {
+            appStore.dispatch(projectsRefreshing());
+          }
+          // Because the refetch-projects/orgs jobs may complete before the
           // websocket channel subscription is finalized, poll every second
-          // to check if job has finished:
+          // to check if jobs have finished:
           const POLLING_LIMIT = 10;
           let count = 0;
           const checkIfJobIsComplete = () => {
             window.setTimeout(() => {
-              user = selectUserState(appStore.getState());
-              if (user?.currently_fetching_repos) {
+              fetching = userFetching();
+              if (fetching.size) {
                 // Stop polling after 10 seconds
                 if (count >= POLLING_LIMIT) {
-                  (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
+                  if (fetching.has('currently_fetching_repos')) {
+                    (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
+                  }
                   return;
                 }
                 count = count + 1;
                 apiFetch({
                   url: window.api_urls.current_user_detail(),
                 }).then((payload: User | null) => {
-                  user = selectUserState(appStore.getState());
-                  if (!user?.currently_fetching_repos) {
-                    // If the user is no longer fetching, the job has completed
+                  fetching = userFetching();
+                  if (!fetching.size) {
+                    // If the user is no longer fetching, the job(s) completed
                     // and a websocket message was already received.
                     return;
                   }
-                  if (payload?.currently_fetching_repos) {
-                    checkIfJobIsComplete();
-                  } else {
+
+                  // If we are done fetching but did not receive a websocket,
+                  // stop polling and trigger end-of-fetching action.
+                  if (
+                    fetching.has('currently_fetching_orgs') &&
+                    !payload?.currently_fetching_orgs
+                  ) {
+                    appStore.dispatch({
+                      type: 'USER_REFRESH_SUCCEEDED',
+                      payload,
+                    });
+                  }
+                  if (
+                    fetching.has('currently_fetching_repos') &&
+                    !payload?.currently_fetching_repos
+                  ) {
                     (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
+                  }
+
+                  if (
+                    payload?.currently_fetching_repos ||
+                    payload?.currently_fetching_orgs
+                  ) {
+                    checkIfJobIsComplete();
                   }
                 });
               }

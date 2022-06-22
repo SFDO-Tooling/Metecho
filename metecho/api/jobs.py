@@ -4,10 +4,16 @@ import string
 import traceback
 from datetime import timedelta
 from pathlib import Path
+from typing import Iterable
 
+import cumulusci
 import requests
+import sarge
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
+from cumulusci.cli.project import init_from_context
+from cumulusci.cli.runtime import CliRuntime
+from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
 from django.db.models.query_utils import Q
@@ -16,22 +22,25 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
-from github3.exceptions import NotFoundError
+from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.github import GitHub
 from github3.repos.repo import Repository
 
 from .email_utils import get_user_facing_url
 from .gh import (
+    copy_branch_protection,
     get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
     get_project_config,
     get_repo_info,
+    gh_as_org,
+    gh_as_user,
     local_github_checkout,
     normalize_commit,
     try_to_make_branch,
 )
-from .models import TaskReviewStatus
+from .models import GitHubOrganization, Project, TaskReviewStatus, User
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -144,6 +153,150 @@ def _create_branches_on_github(
     task.finalize_task_update(originating_user_id=originating_user_id)
 
     return task_branch_name
+
+
+def create_repository(
+    project: Project,
+    *,
+    user: User,
+    dependencies: Iterable[str],
+    template_repo_owner: str = None,
+    template_repo_name: str = None,
+):
+    """
+    Given a local Metecho Project create and bootstrap the corresponding GitHub repository.
+    """
+    project.refresh_from_db()
+    repo = None
+
+    try:
+        # Ensure the user is part of the org that owns the project
+        user_gh = gh_as_user(user)
+        user_orgs = [org.login for org in user_gh.organizations()]
+        if project.repo_owner not in user_orgs:
+            raise ValueError(
+                _(
+                    "Either you are not a member of the %(name)s organization "
+                    "or it hasn't installed the Metecho GitHub app"
+                )
+                % {"name": project.repo_owner}
+            )
+
+        # Get a GitHub session with write permissions on the org
+        org_gh = gh_as_org(project.repo_owner)
+        org = org_gh.organization(project.repo_owner)
+        if template_repo_owner and template_repo_name:
+            tpl_repo = org_gh.repository(template_repo_owner, template_repo_name)
+            branch_name = tpl_repo.default_branch or "main"
+        else:
+            tpl_repo = None
+            branch_name = "main"
+
+        # Create team on GitHub
+        team = None
+        counter = 0
+        while team is None:
+            suffix = f" {counter}" if counter else ""
+            try:
+                team = org.create_team(f"{project} Team{suffix}")
+            except UnprocessableEntity as err:
+                if err.msg == "Validation Failed":
+                    counter += 1
+                else:
+                    raise
+        for collaborator in project.github_users:
+            role = "maintainer" if collaborator["login"] == user.username else "member"
+            team.add_or_update_membership(collaborator["login"], role=role)
+
+        # Create repo on GitHub
+        repo = org.create_repository(
+            project.repo_name, description=project.description, private=False
+        )
+        team.add_repository(repo.full_name, permission="push")
+        project.repo_id = repo.id
+
+        with temporary_dir():
+            # Populate files from the template repository
+            if tpl_repo:
+                zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
+                zipfile.extractall()
+
+            # Bootstrap repository with CumulusCI
+            runtime = CliRuntime()
+            context = {
+                "cci_version": cumulusci.__version__,
+                "project_name": project.repo_name,
+                "package_name": project.repo_name,
+                "package_namespace": None,
+                "api_version": runtime.universal_config.project__package__api_version,
+                "source_format": "sfdx",
+                "dependencies": [
+                    {"type": "github", "url": url} for url in dependencies
+                ],
+                "git": {
+                    "default_branch": branch_name,
+                    "prefix_feature": "feature/",
+                    "prefix_beta": "beta/",
+                    "prefix_release": "release/",
+                },
+                "test_name_match": None,
+                "code_coverage": 75,
+            }
+            init_from_context(context)
+            cmd = sarge.capture_both(
+                f"""
+                git init;
+                git checkout -b {branch_name};
+                git config user.name '{user.get_full_name() or user.username}';
+                git config user.email '{user.email}';
+                git add --all;
+                git commit -m 'Bootstrap project (via Metecho)';
+                git push https://{user_gh.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
+                """,  # noqa: B950
+                shell=True,
+            )
+            if cmd.returncode:  # non-zero return code, something's wrong
+                logger.error(cmd.stderr.text)
+                raise Exception("Failed to push files to GitHub repository")
+
+        # Copy branch protection rules from the template repo
+        if tpl_repo:
+            copy_branch_protection(
+                source=tpl_repo.branch(branch_name), target=repo.branch(branch_name)
+            )
+
+        # Create GitHubRepository instance for local permission checks
+        user.repositories.create(
+            repo_id=repo.id,
+            repo_url=repo.html_url,
+            permissions={"pull": True, "push": True},
+        )
+    except Exception as e:
+        project.finalize_create_repository(error=e, user=user)
+        tb = traceback.format_exc()
+        logger.error(tb)
+
+        if repo:
+            # Remove orphaned GitHub API resources
+            try:
+                for team in repo.teams():
+                    logger.info(
+                        f"Deleting GitHub team {team.name}. Result: {team.delete()}"
+                    )
+                logger.info(
+                    f"Deleting GitHub repository {repo}. Result: {repo.delete()}"
+                )
+            except Exception:
+                logger.exception(
+                    f"Failed to clean up after failed creation of Project {project}"
+                )
+
+        raise
+    else:
+        project.finalize_create_repository(user=user)
+
+
+create_repository_job = job(create_repository)
 
 
 def alert_user_about_expiring_org(*, org, days):
@@ -614,6 +767,30 @@ def refresh_github_repositories_for_user(user):
 
 
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
+
+
+def refresh_github_organizations_for_user(user: User):
+    """
+    Update the local set of GitHubOrganizations for a user to match the organizations
+    they have access to on GitHub.
+    """
+
+    try:
+        gh_user = gh_as_user(user)
+        orgs = GitHubOrganization.objects.filter(
+            login__in=(org.login for org in gh_user.organizations())
+        )
+        user.organizations.set(orgs)
+    except Exception as error:
+        user.finalize_refresh_organizations(error=error)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        user.finalize_refresh_organizations()
+
+
+refresh_github_organizations_for_user_job = job(refresh_github_organizations_for_user)
 
 
 def get_social_image(*, project):
