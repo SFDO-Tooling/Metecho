@@ -1,4 +1,4 @@
-import { act } from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
 
 import { useForm } from '@/js/components/utils';
 import { createObject } from '@/js/store/actions';

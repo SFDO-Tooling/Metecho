@@ -19,9 +19,9 @@ export default (
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const selectTasksWithProps = useCallback(selectTasksByProject, []);
-  const tasks = useSelector((state: AppState) =>
-    selectTasksWithProps(state, routeProps),
-  );
+  const { tasks, next, count } =
+    useSelector((state: AppState) => selectTasksWithProps(state, routeProps)) ||
+    {};
 
   useEffect(() => {
     if (projectId && !tasks && tasksTabViewed) {
@@ -35,5 +35,5 @@ export default (
     }
   }, [dispatch, projectId, tasks, tasksTabViewed]);
 
-  return { tasks };
+  return { tasks, next, count };
 };
