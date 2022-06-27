@@ -12,6 +12,8 @@ import {
   TaskStatuses,
 } from '@/js/utils/constants';
 
+import { GitHubUser } from '../user/reducer';
+
 export interface Commit {
   id: string;
   timestamp: string;
@@ -37,8 +39,13 @@ export interface Task {
     slug: string;
     github_users: string[];
   } | null;
-  project: string | null;
+  project: {
+    id: string;
+    slug: string;
+    github_users: GitHubUser[];
+  };
   root_project: string;
+  root_project_slug: string;
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;

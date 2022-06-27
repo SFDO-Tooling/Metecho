@@ -361,6 +361,15 @@ class ProjectSerializer(HashIdModelSerializer):
         return obj.has_push_permission(self.context["request"].user)
 
 
+class ProjectMinimalSerializer(HashIdModelSerializer):
+    slug = serializers.CharField(read_only=True)
+    github_users = StringListField(read_only=True)
+
+    class Meta:
+        model = Project
+        fields = ("id", "slug", "github_users")
+
+
 class EpicMinimalSerializer(HashIdModelSerializer):
     name = serializers.CharField(read_only=True)
     slug = serializers.CharField(read_only=True)
@@ -585,13 +594,15 @@ class TaskSerializer(HashIdModelSerializer):
         required=False,
         allow_null=True,
     )
-    project = serializers.PrimaryKeyRelatedField(
+    project = NestedPrimaryKeyRelatedField(
         queryset=Project.objects.all(),
         pk_field=serializers.CharField(),
+        serializer=ProjectMinimalSerializer,
         required=False,
         allow_null=True,
     )
     root_project = serializers.SerializerMethodField()
+    root_project_slug = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -626,6 +637,7 @@ class TaskSerializer(HashIdModelSerializer):
             "currently_creating_pr",
             "branch_name",
             "root_project",
+            "root_project_slug",
             "branch_url",
             "commits",
             "origin_sha",
@@ -649,6 +661,7 @@ class TaskSerializer(HashIdModelSerializer):
             "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
             "root_project": {"read_only": True},
+            "root_project_slug": {"read_only": True},
             "branch_url": {"read_only": True},
             "commits": {"read_only": True},
             "origin_sha": {"read_only": True},
@@ -668,6 +681,9 @@ class TaskSerializer(HashIdModelSerializer):
 
     def get_root_project(self, obj) -> str:
         return str(obj.root_project.pk)
+
+    def get_root_project_slug(self, obj) -> str:
+        return str(obj.root_project.slug)
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_branch_url(self, obj) -> Optional[str]:

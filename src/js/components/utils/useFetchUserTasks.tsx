@@ -1,24 +1,29 @@
-import { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { AppState, ThunkDispatch } from '@/js/store';
-import { fetchObjects } from '@/js/store/actions';
-import { selectUserTasks } from '@/js/store/tasks/selectors';
-import { OBJECT_TYPES } from '@/js/utils/constants';
+import { ThunkDispatch } from '@/js/store';
+import { Task } from '@/js/store/tasks/reducer';
+import apiFetch, { addUrlParams } from '@/js/utils/api';
 
 export default () => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const selectTasksWithProps = useCallback(selectUserTasks, []);
-  const tasks = useSelector((state: AppState) => selectTasksWithProps(state));
-  useEffect(() => {
-    // Fetch tasks from API
-    dispatch(
-      fetchObjects({
-        objectType: OBJECT_TYPES.TASK,
-        filters: { assigned_to_me: 'true' },
-      }),
-    );
-  }, [dispatch]);
+  const [tasks, setTasks] = useState<Task[]>();
+  const [fetched, setFetched] = useState(false);
 
-  return { tasks };
+  useEffect(() => {
+    const baseUrl = window.api_urls.task_list();
+    const fetchTasks = async () => {
+      const payload = await apiFetch({
+        url: addUrlParams(baseUrl, {
+          assigned_to_me: true,
+        }),
+        dispatch,
+      });
+      setTasks(payload?.results || /* istanbul ignore next */ []);
+      setFetched(true);
+    };
+    fetchTasks();
+  }, [dispatch, fetched]);
+
+  return { tasks, fetched };
 };
