@@ -6,7 +6,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import React, { useRef, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -133,7 +133,7 @@ const CreateEpicModal = ({
     }
   };
 
-  const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const doSubmit = (e: FormEvent<HTMLFormElement>) => {
     setIsSaving(true);
     handleSubmit(e, { success: onSuccess });
   };
@@ -167,9 +167,7 @@ const CreateEpicModal = ({
     setFromBranchChecked(false);
   };
 
-  const handleBranchCheckboxChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleBranchCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value === 'existing') {
       doGetBranches();
       setFromBranchChecked(true);

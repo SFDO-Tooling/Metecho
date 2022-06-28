@@ -4,7 +4,7 @@ import InputIcon from '@salesforce/design-system-react/components/icon/input-ico
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { orderBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -85,7 +85,7 @@ const AssignTaskRoleModal = ({
     : validGitHubUsers;
 
   const handleAlertAssignee = (
-    event: React.FormEvent<HTMLFormElement>,
+    event: FormEvent<HTMLFormElement>,
     { checked }: { checked: boolean },
   ) => {
     setShouldAlertAssignee(checked);
@@ -113,7 +113,7 @@ const AssignTaskRoleModal = ({
     handleClose();
   };
 
-  const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFindTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
   };
 

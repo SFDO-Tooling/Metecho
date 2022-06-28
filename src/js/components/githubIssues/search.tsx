@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Search from '@salesforce/design-system-react/components/input/search';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { pluralize } from '@/js/utils/helpers';
@@ -19,7 +19,7 @@ const SearchIssues = ({
   const { t } = useTranslation();
   const [searchterm, setSearchterm] = useState('');
   const handleSearchterm = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { value }: { value: string },
   ) => {
     setSearchterm(value);

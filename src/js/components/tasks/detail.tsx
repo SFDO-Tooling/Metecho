@@ -716,7 +716,7 @@ const TaskDetail = (
     </PageHeaderControl>
   );
 
-  let submitButton: React.ReactNode = null;
+  let submitButton: ReactNode = null;
   if (readyToSubmit && project.has_push_permission && !taskIsMerged) {
     const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
@@ -728,10 +728,9 @@ const TaskDetail = (
       t('Submit Task for Testing')
     );
     submitButton = (
-      <div className="slds-is-relative">
+      <div className="slds-is-relative slds-m-bottom_x-large">
         <Button
           label={submitButtonText}
-          className="slds-m-bottom_x-large slds-m-left_none"
           variant={isPrimary ? 'brand' : 'outline-brand'}
           onClick={openSubmitModal}
           disabled={currentlySubmitting}
@@ -753,19 +752,20 @@ const TaskDetail = (
     );
   }
 
-  let captureButton: React.ReactNode = null;
+  let captureButtons: ReactNode = null;
+  let captureDatasetButton: ReactNode = null;
   if (
     project.has_push_permission &&
     !taskIsMerged &&
     (readyToCaptureChanges || orgHasBeenVisited)
   ) {
-    let captureButtonText: JSX.Element = t('Check for Unretrieved Changes');
+    let captureMetadataText: JSX.Element = t('Check for Unretrieved Changes');
     const isPrimary =
       (orgHasChanges || !readyToSubmit) &&
       (!task.pr_is_open || hasReviewRejected);
     if (currentlyCommitting) {
       /* istanbul ignore next */
-      captureButtonText = (
+      captureMetadataText = (
         <LabelWithSpinner
           label={t('Retrieving Selected Changes…')}
           variant={isPrimary ? 'inverse' : 'base'}
@@ -773,7 +773,7 @@ const TaskDetail = (
       );
     } else if (fetchingChanges || currentlyFetching) {
       /* istanbul ignore next */
-      captureButtonText = (
+      captureMetadataText = (
         <LabelWithSpinner
           label={t('Checking for Unretrieved Changes…')}
           variant={isPrimary ? 'inverse' : 'base'}
@@ -781,23 +781,37 @@ const TaskDetail = (
       );
     } else if (currentlyReassigning) {
       /* istanbul ignore next */
-      captureButtonText = (
+      captureMetadataText = (
         <LabelWithSpinner
           label={t('Reassigning Org Ownership…')}
           variant={isPrimary ? 'inverse' : 'base'}
         />
       );
     } else if (orgHasChanges) {
-      captureButtonText = t('Retrieve Changes from Dev Org');
+      captureMetadataText = t('Retrieve Changes from Dev Org');
     }
-    captureButton = (
-      <div className="slds-is-relative">
+    if (!(currentlyReassigning || currentlyCommitting)) {
+      captureDatasetButton = (
+        <div className="inline-container slds-m-left_small">
+          <Button
+            label={t('Retrieve Dataset')}
+            variant="outline-brand"
+            className="slds-align-middle"
+          />
+        </div>
+      );
+    }
+    captureButtons = (
+      <div
+        className={classNames('slds-is-relative', {
+          'slds-m-bottom_medium': readyToSubmit,
+          'slds-m-bottom_x-large': !readyToSubmit,
+        })}
+      >
         <Button
-          label={captureButtonText}
-          className={classNames('slds-m-bottom_x-large', {
-            'slds-m-right_medium': readyToSubmit,
-          })}
+          label={captureMetadataText}
           variant={isPrimary ? 'brand' : 'outline-brand'}
+          className="slds-align-middle"
           onClick={doCaptureChanges}
           disabled={
             fetchingChanges ||
@@ -806,6 +820,7 @@ const TaskDetail = (
             currentlyReassigning
           }
         />
+        {captureDatasetButton}
         <TourPopover
           id="tour-task-retrieve"
           align="right"
@@ -992,7 +1007,7 @@ const TaskDetail = (
           </>
         }
       >
-        {captureButton}
+        {captureButtons}
         {submitButton}
 
         {taskOrgs ? (

@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useState,
+} from 'react';
 import { useDispatch } from 'react-redux';
 import { AnyAction } from 'redux';
 
@@ -12,10 +18,10 @@ import { ObjectTypes } from '@/js/utils/constants';
 export interface UseFormProps {
   inputs: { [key: string]: any };
   errors: { [key: string]: string };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  setInputs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  setInputs: Dispatch<SetStateAction<{ [key: string]: any }>>;
   handleSubmit: (
-    e: React.FormEvent<HTMLFormElement>,
+    e: FormEvent<HTMLFormElement>,
     opts?: {
       action?: (...args: any[]) => Promise<AnyAction>;
       success?: (...args: any[]) => void;
@@ -51,7 +57,7 @@ export default ({
     setInputs({ ...fields });
     setErrors({});
   };
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     let value: boolean | string = e.target.value;
     if (e.target.type === 'checkbox') {
       value = e.target.checked;
@@ -91,7 +97,7 @@ export default ({
     }
   };
   const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement>,
+    e: FormEvent<HTMLFormElement>,
     opts?: {
       action?: (...args: any[]) => Promise<AnyAction>;
       success?: (...args: any[]) => void;

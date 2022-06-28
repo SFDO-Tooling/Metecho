@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
-import React, { ReactNode, useState } from 'react';
+import React, { FormEvent, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -191,7 +191,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     }
   };
 
-  let ignoreLabel: React.ReactNode = t('Ignore Selected Changes');
+  let ignoreLabel: ReactNode = t('Ignore Selected Changes');
   if (ignoringChanges) {
     ignoreLabel = (
       <LabelWithSpinner
@@ -209,12 +209,12 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     resetForm();
   };
 
-  const submitChanges = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitChanges = (e: FormEvent<HTMLFormElement>) => {
     setCapturingChanges(true);
     handleSubmit(e);
   };
 
-  const saveIgnored = (e: React.FormEvent<HTMLFormElement>) => {
+  const saveIgnored = (e: FormEvent<HTMLFormElement>) => {
     setIgnoringChanges(true);
     handleSubmit(e, { action: submitIgnored, success: handleIgnoredSuccess });
   };

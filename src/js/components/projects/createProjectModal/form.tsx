@@ -2,7 +2,7 @@ import Combobox from '@salesforce/design-system-react/components/combobox';
 import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ComboboxOption } from '@/js/components/epics/createForm';
@@ -47,7 +47,7 @@ const CreateProjectForm = ({
   };
 
   const handleProjectNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { value }: { value: string },
   ) => {
     // When project name changes, also update repo_name

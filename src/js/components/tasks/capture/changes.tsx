@@ -4,7 +4,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -63,7 +63,7 @@ const ChangesList = ({
         const uniqueGroupName = `${type}-${groupName}`;
         const children = allChanges[groupName];
         const handleSelectThisGroup = (
-          event: React.ChangeEvent<HTMLInputElement>,
+          event: ChangeEvent<HTMLInputElement>,
           { checked }: { checked: boolean },
         ) => handleSelectGroup(type, groupName, checked);
         let checkedChildren = 0;
@@ -106,7 +106,7 @@ const ChangesList = ({
                   name="changes"
                   checked={Boolean(checkedChanges[groupName]?.includes(change))}
                   onChange={(
-                    event: React.ChangeEvent<HTMLInputElement>,
+                    event: ChangeEvent<HTMLInputElement>,
                     { checked }: { checked: boolean },
                   ) => handleChange({ groupName, change, checked })}
                 />
@@ -195,14 +195,14 @@ const ChangesForm = ({
   };
 
   const handleSelectAllChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     updateChecked(filteredChanges, checked);
   };
 
   const handleSelectAllIgnored = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     updateChecked(ignoredChanges, checked);

@@ -1,5 +1,5 @@
 import { action } from '@storybook/addon-actions';
-import React from 'react';
+import React, { ComponentClass } from 'react';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
@@ -13,7 +13,7 @@ const storyMiddleware = () => (next: (act: any) => any) => (act: any) => {
 export const withRedux =
   (state = {}) =>
   // eslint-disable-next-line react/display-name
-  (Story: React.ComponentClass) => {
+  (Story: ComponentClass) => {
     const store = configureStore([thunk, storyMiddleware])(state);
     return (
       <Provider store={store}>

@@ -3,7 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -145,7 +145,7 @@ const SelectIssueModal = ({
     setSearch(trimmed);
   };
 
-  const changeSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const changeSelection = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedIssue(event.target.value || /* istanbul ignore next */ '');
   };
 

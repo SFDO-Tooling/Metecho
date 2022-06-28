@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import cookies from 'js-cookie';
-import React, { useRef, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
@@ -37,18 +37,14 @@ const ConnectModal = ({
     setIsCustomDomain(false);
   };
 
-  const handleCustomDomainChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleCustomDomainChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUrl(event.target.value);
   };
 
   const customDomain = url.trim();
 
   /* istanbul ignore next */
-  const handleCustomDomainConnect = (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleCustomDomainConnect = (event: FormEvent<HTMLFormElement>) => {
     if (!customDomain) {
       event.preventDefault();
     }
