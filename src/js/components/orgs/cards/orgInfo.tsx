@@ -25,7 +25,7 @@ const OrgInfo = ({
   orgOutOfDate,
   missingCommits,
   doCheckForOrgChanges,
-  openCaptureModal,
+  openRetrieveMetadataModal,
 }: {
   org: Org | null;
   type: OrgTypes;
@@ -41,7 +41,7 @@ const OrgInfo = ({
   orgOutOfDate?: boolean;
   missingCommits: number;
   doCheckForOrgChanges?: () => void;
-  openCaptureModal?: () => void;
+  openRetrieveMetadataModal?: () => void;
 }) => {
   const { t } = useTranslation();
 
@@ -162,7 +162,7 @@ const OrgInfo = ({
               <Button
                 label={`${org.total_ignored_changes} ${t('ignored')}`}
                 variant="link"
-                onClick={openCaptureModal}
+                onClick={openRetrieveMetadataModal}
               />
               {')'}
             </>

@@ -871,7 +871,7 @@ paths:
   /api/scratch-orgs/{id}/commit/:
     post:
       operationId: scratch_orgs_commit_create
-      description: Queue a job that commits changes captured from a ScratchOrg.
+      description: Queue a job that commits changes retrieved from a ScratchOrg.
       parameters:
       - in: path
         name: id

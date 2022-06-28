@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
 import UserCards from '@/js/components/githubUsers/cards';
-import { ModalCard } from '@/js/components/tasks/capture';
+import { ModalCard } from '@/js/components/tasks/retrieveMetadata';
 import { Dependency } from '@/js/store/projects/reducer';
 import { GitHubOrg, GitHubUser } from '@/js/store/user/reducer';
 

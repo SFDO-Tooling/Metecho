@@ -2,7 +2,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import CaptureModal from '@/js/components/tasks/capture';
+import RetrieveMetadataModal from '@/js/components/tasks/retrieveMetadata';
 import { createObject, updateObject } from '@/js/store/actions';
 
 import {
@@ -43,7 +43,7 @@ const defaultOrg = {
   valid_target_directories: defaultDirs,
 };
 
-describe('<CaptureModal/>', () => {
+describe('<RetrieveMetadataModal/>', () => {
   const setup = (options = {}) => {
     const defaults = {
       org: defaultOrg,
@@ -53,7 +53,7 @@ describe('<CaptureModal/>', () => {
     const closeModal = jest.fn();
     const ui = (
       <MemoryRouter>
-        <CaptureModal org={opts.org} isOpen closeModal={closeModal} />
+        <RetrieveMetadataModal org={opts.org} isOpen closeModal={closeModal} />
       </MemoryRouter>
     );
     if (opts.rerender) {

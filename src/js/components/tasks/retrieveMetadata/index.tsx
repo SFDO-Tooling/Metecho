@@ -6,9 +6,9 @@ import React, { FormEvent, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import ChangesForm from '@/js/components/tasks/capture/changes';
-import TargetDirectoriesForm from '@/js/components/tasks/capture/directories';
-import CommitMessageForm from '@/js/components/tasks/capture/message';
+import ChangesForm from '@/js/components/tasks/retrieveMetadata/changes';
+import TargetDirectoriesForm from '@/js/components/tasks/retrieveMetadata/directories';
+import CommitMessageForm from '@/js/components/tasks/retrieveMetadata/message';
 import {
   LabelWithSpinner,
   useForm,
@@ -68,7 +68,7 @@ export const ModalCard = ({
   </Card>
 );
 
-const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
+const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   const { t } = useTranslation();
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
@@ -340,4 +340,4 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   );
 };
 
-export default CaptureModal;
+export default RetrieveMetadataModal;

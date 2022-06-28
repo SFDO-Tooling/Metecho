@@ -10,7 +10,7 @@ import {
   BooleanObject,
   CommitData,
   ModalCard,
-} from '@/js/components/tasks/capture';
+} from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 
 interface Props {
@@ -61,7 +61,7 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
         />
       </ModalCard>
       <ModalCard heading={t('Selected Changes')} noBodyPadding>
-        <div data-form="task-capture">
+        <div data-form="task-retrieve-changes">
           {Object.keys(inputs.changes)
             .sort()
             .map((groupName, index) => (

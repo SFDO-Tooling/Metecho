@@ -51,7 +51,7 @@ interface TaskOrgCardProps {
   handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
-  openCaptureModal?: () => void;
+  openRetrieveMetadataModal?: () => void;
   openSubmitReviewModal?: () => void;
   testOrgReadyForReview?: boolean;
   testOrgSubmittingReview?: boolean;
@@ -80,7 +80,7 @@ const TaskOrgCard = ({
   handleDelete,
   handleCheckForOrgChanges,
   handleRefresh,
-  openCaptureModal,
+  openRetrieveMetadataModal,
   openSubmitReviewModal,
   testOrgReadyForReview,
   testOrgSubmittingReview,
@@ -317,7 +317,7 @@ const TaskOrgCard = ({
                 orgOutOfDate={testOrgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
-                openCaptureModal={openCaptureModal}
+                openRetrieveMetadataModal={openRetrieveMetadataModal}
               />
               <OrgSpinner
                 org={org}

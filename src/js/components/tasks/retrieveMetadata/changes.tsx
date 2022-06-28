@@ -11,7 +11,7 @@ import {
   BooleanObject,
   CommitData,
   ModalCard,
-} from '@/js/components/tasks/capture';
+} from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 import { Changeset } from '@/js/store/orgs/reducer';
 import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
@@ -211,7 +211,7 @@ const ChangesForm = ({
   return (
     <form
       className="slds-form slds-p-around_large has-checkboxes"
-      data-form="task-capture"
+      data-form="task-retrieve-changes"
     >
       <ModalCard>
         <Icon category="utility" name="open_folder" size="small" />

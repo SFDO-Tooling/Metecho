@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { CommitData, ModalCard } from '@/js/components/tasks/capture';
+import { CommitData, ModalCard } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 import { TargetDirectories } from '@/js/store/orgs/reducer';
 

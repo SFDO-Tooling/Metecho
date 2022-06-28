@@ -661,7 +661,7 @@ class ScratchOrgViewSet(
     @extend_schema(request=CommitSerializer, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
     def commit(self, request, pk=None):
-        """Queue a job that commits changes captured from a ScratchOrg."""
+        """Queue a job that commits changes retrieved from a ScratchOrg."""
         serializer = CommitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         scratch_org = self.get_object()
