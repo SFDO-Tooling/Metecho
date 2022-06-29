@@ -1,3 +1,5 @@
+import fetchMock from 'fetch-mock';
+
 import * as actions from '@/js/store/tasks/actions';
 
 import { storeWithThunk } from './../../utils';
@@ -265,5 +267,70 @@ describe('submitReviewFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions).toEqual([action]);
+  });
+});
+
+describe('refreshDatasets', () => {
+  const project = 'project-id';
+  const task = 'task-id';
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.task_refresh_datasets(task);
+  });
+
+  test('dispatches RefreshDatasets actions', () => {
+    const store = storeWithThunk({});
+    fetchMock.postOnce(url, 202);
+    const RefreshDatasetsRequested = {
+      type: 'REFRESH_DATASETS_REQUESTED',
+      payload: { project, task },
+    };
+    const RefreshDatasetsAccepted = {
+      type: 'REFRESH_DATASETS_ACCEPTED',
+      payload: { project, task },
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.refreshDatasets({ project, task }))
+      .then(() => {
+        expect(store.getActions()).toEqual([
+          RefreshDatasetsRequested,
+          RefreshDatasetsAccepted,
+        ]);
+      });
+  });
+
+  describe('error', () => {
+    test('dispatches REFRESH_DATASETS_REJECTED action', async () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, {
+        status: 500,
+        body: { non_field_errors: ['Foobar'] },
+      });
+      const started = {
+        type: 'REFRESH_DATASETS_REQUESTED',
+        payload: { project, task },
+      };
+      const failed = {
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: { project, task },
+      };
+
+      expect.assertions(4);
+      try {
+        await store.dispatch(actions.refreshDatasets({ project, task }));
+      } catch (error) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual(['Foobar']);
+        expect(allActions[2]).toEqual(failed);
+      }
+    });
   });
 });

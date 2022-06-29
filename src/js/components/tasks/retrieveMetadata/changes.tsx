@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import {
   BooleanObject,
-  CommitData,
+  MetadataCommit,
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
@@ -19,7 +19,7 @@ import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 interface Props {
   changeset: Changeset;
   ignoredChanges: Changeset;
-  inputs: CommitData;
+  inputs: MetadataCommit;
   changesChecked: Changeset;
   ignoredChecked: Changeset;
   errors: UseFormProps['errors'];

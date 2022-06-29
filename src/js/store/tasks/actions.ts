@@ -4,6 +4,7 @@ import { ThunkResult } from '@/js/store';
 import { isCurrentUser } from '@/js/store/helpers';
 import { Task } from '@/js/store/tasks/reducer';
 import { addToast } from '@/js/store/toasts/actions';
+import apiFetch from '@/js/utils/api';
 
 interface TaskCreated {
   type: 'TASK_CREATE';
@@ -17,8 +18,19 @@ interface TaskCreatePRFailed {
   type: 'TASK_CREATE_PR_FAILED';
   payload: Task;
 }
+interface RefreshDatasetsAction {
+  type:
+    | 'REFRESH_DATASETS_REQUESTED'
+    | 'REFRESH_DATASETS_ACCEPTED'
+    | 'REFRESH_DATASETS_REJECTED';
+  payload: { project: string; task: string };
+}
 
-export type TaskAction = TaskCreated | TaskUpdated | TaskCreatePRFailed;
+export type TaskAction =
+  | TaskCreated
+  | TaskUpdated
+  | TaskCreatePRFailed
+  | RefreshDatasetsAction;
 
 export const createTask = (payload: Task): TaskCreated => ({
   type: 'TASK_CREATE',
@@ -137,4 +149,46 @@ export const submitReviewFailed =
     }
 
     return dispatch(updateTask(model));
+  };
+
+export const refreshDatasets =
+  ({
+    project,
+    task,
+  }: {
+    project: string;
+    task: string;
+  }): ThunkResult<Promise<RefreshDatasetsAction>> =>
+  // eslint-disable-next-line require-await
+  async (dispatch) => {
+    dispatch({
+      type: 'REFRESH_DATASETS_REQUESTED',
+      payload: { project, task },
+    });
+    try {
+      // @@@
+      await apiFetch({
+        url: window.api_urls.task_refresh_datasets(task),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      // setTimeout(() => {
+      //   dispatch({
+      //     type: 'REFRESH_DATASETS_REJECTED',
+      //     payload: { project, task },
+      //   });
+      // }, 2000);
+      return dispatch({
+        type: 'REFRESH_DATASETS_ACCEPTED' as const,
+        payload: { project, task },
+      });
+    } catch (err) {
+      dispatch({
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: { project, task },
+      });
+      throw err;
+    }
   };

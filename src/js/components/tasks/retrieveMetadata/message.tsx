@@ -8,13 +8,13 @@ import { useTranslation } from 'react-i18next';
 
 import {
   BooleanObject,
-  CommitData,
+  MetadataCommit,
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 
 interface Props {
-  inputs: CommitData;
+  inputs: MetadataCommit;
   errors: UseFormProps['errors'];
   handleInputChange: UseFormProps['handleInputChange'];
 }

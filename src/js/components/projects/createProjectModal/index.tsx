@@ -103,7 +103,7 @@ const CreateProjectModal = ({
   };
 
   const prevPage = () => {
-    setPageIndex(pageIndex - 1 || 0);
+    setPageIndex(Math.max(pageIndex - 1, 0));
   };
 
   const handleSuccess = (action: AnyAction) => {

@@ -863,6 +863,25 @@ describe('<TaskDetail/>', () => {
     });
   });
 
+  describe('<RetrieveDatasetModal />', () => {
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText, getByTitle } = setup();
+        fireEvent.click(getByText('Retrieve Dataset'));
+
+        expect(
+          getByText('Select the dataset to create or modify'),
+        ).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(
+          queryByText('Select the dataset to create or modify'),
+        ).toBeNull();
+      });
+    });
+  });
+
   describe('pr is closed', () => {
     test('renders "Submit Task for Testing" button', () => {
       const { getByText } = setup({

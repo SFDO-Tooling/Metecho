@@ -52,6 +52,8 @@ export const getDemoTask = ({
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,
     issue: null,
+    currently_fetching_datasets: false,
+    datasets: [],
   };
 };
 

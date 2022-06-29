@@ -44,6 +44,7 @@ export interface Task {
   has_unmerged_commits: boolean;
   currently_creating_branch: boolean;
   currently_creating_pr: boolean;
+  currently_fetching_datasets: boolean;
   branch_name: string;
   branch_url: string | null;
   branch_diff_url: string | null;
@@ -61,6 +62,7 @@ export interface Task {
   review_sha: string;
   org_config_name: string;
   issue: string | null;
+  datasets: string[];
 }
 
 export interface TaskByProjectState {
@@ -365,6 +367,33 @@ const reducer = (
           tasks: reject(projectTasks.tasks, ['id', task.id]),
         },
       };
+    }
+    case 'REFRESH_DATASETS_REQUESTED':
+    case 'REFRESH_DATASETS_REJECTED': {
+      const { project, task } = action.payload;
+      const projectTasks = tasks[project] || {
+        ...defaultProjectTasks,
+      };
+      const existingTask = find(projectTasks.tasks, ['id', task]);
+      if (existingTask) {
+        return {
+          ...tasks,
+          [project]: {
+            ...projectTasks,
+            tasks: projectTasks.tasks.map((t) => {
+              if (t.id === task) {
+                return {
+                  ...existingTask,
+                  currently_fetching_datasets:
+                    action.type === 'REFRESH_DATASETS_REQUESTED',
+                };
+              }
+              return t;
+            }),
+          },
+        };
+      }
+      return tasks;
     }
   }
   return tasks;

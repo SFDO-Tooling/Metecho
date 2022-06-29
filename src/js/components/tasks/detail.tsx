@@ -24,6 +24,7 @@ import TaskOrgCards, {
 import { Step } from '@/js/components/steps/stepsItem';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TaskStatusPath from '@/js/components/tasks/path';
+import RetrieveDatasetModal from '@/js/components/tasks/retrieveDataset';
 import RetrieveMetadataModal from '@/js/components/tasks/retrieveMetadata';
 import TaskStatusSteps from '@/js/components/tasks/steps';
 import TourPopover from '@/js/components/tour/popover';
@@ -94,6 +95,8 @@ const TaskDetail = (
   const dispatch = useDispatch<ThunkDispatch>();
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [retrieveMetadataModalOpen, setRetrieveMetadataModalOpen] =
+    useState(false);
+  const [retrieveDatasetModalOpen, setRetrieveDatasetModalOpen] =
     useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -229,6 +232,7 @@ const TaskDetail = (
     setSelectIssueModalOpen(true);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -243,6 +247,7 @@ const TaskDetail = (
   const openSubmitReviewModal = () => {
     setSubmitReviewModalOpen(true);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -257,6 +262,7 @@ const TaskDetail = (
   };
   const openRetrieveMetadataModal = () => {
     setRetrieveMetadataModalOpen(true);
+    setRetrieveDatasetModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
@@ -270,10 +276,27 @@ const TaskDetail = (
   const closeRetrieveMetadataModal = () => {
     setRetrieveMetadataModalOpen(false);
   };
+  const openRetrieveDatasetModal = () => {
+    setRetrieveDatasetModalOpen(true);
+    setRetrieveMetadataModalOpen(false);
+    setSubmitReviewModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
+  };
+  const closeRetrieveDatasetModal = () => {
+    setRetrieveDatasetModalOpen(false);
+  };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
@@ -288,6 +311,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
@@ -305,6 +329,7 @@ const TaskDetail = (
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -320,6 +345,7 @@ const TaskDetail = (
     setAssignUserModalOpen(type);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -339,6 +365,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -354,6 +381,7 @@ const TaskDetail = (
     setContributeModalOpen(true);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -372,6 +400,7 @@ const TaskDetail = (
     setContributeModalOpen(false);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -798,6 +827,7 @@ const TaskDetail = (
             label={t('Retrieve Dataset')}
             variant="outline-brand"
             className="slds-align-middle"
+            onClick={openRetrieveDatasetModal}
           />
         </div>
       );
@@ -1104,6 +1134,17 @@ const TaskDetail = (
                   closeModal={closeRetrieveMetadataModal}
                 />
               )}
+            {orgHasBeenVisited && (
+              <RetrieveDatasetModal
+                projectId={project.id}
+                taskId={task.id}
+                orgId={(devOrg as Org).id}
+                datasets={task.datasets || ['Default', 'Another Dataset']}
+                fetchingDatasets={task.currently_fetching_datasets}
+                isOpen={retrieveDatasetModalOpen}
+                closeModal={closeRetrieveDatasetModal}
+              />
+            )}
             {readyToSubmit && (
               <SubmitModal
                 instanceId={task.id}

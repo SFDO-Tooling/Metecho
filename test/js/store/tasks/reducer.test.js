@@ -860,4 +860,93 @@ describe('reducer', () => {
       expect(actual).toEqual(initial);
     });
   });
+
+  describe('REFRESH_DATASETS_REQUESTED', () => {
+    const task1 = {
+      id: 't1',
+      slug: 'task-1',
+      name: 'Task 1',
+      currently_fetching_datasets: false,
+    };
+    const task2 = {
+      id: 't2',
+      slug: 'task-2',
+      name: 'Task 2',
+      currently_fetching_datasets: false,
+    };
+    const initial = {
+      p1: {
+        tasks: [task1, task2],
+        fetched: [],
+        notFound: [],
+        count: {},
+        next: {},
+      },
+    };
+
+    test('sets currently_fetching_datasets: true', () => {
+      const expected = {
+        ...initial,
+        p1: {
+          ...initial.p1,
+          tasks: [{ ...task1, currently_fetching_datasets: true }, task2],
+        },
+      };
+      const actual = reducer(initial, {
+        type: 'REFRESH_DATASETS_REQUESTED',
+        payload: { project: 'p1', task: 't1' },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if payload is not known task id', () => {
+      const actual = reducer(initial, {
+        type: 'REFRESH_DATASETS_REQUESTED',
+        payload: { project: 'p2', task: 'unknown' },
+      });
+
+      expect(actual).toEqual(initial);
+    });
+  });
+
+  describe('REFRESH_DATASETS_REJECTED', () => {
+    const task1 = {
+      id: 't1',
+      slug: 'task-1',
+      name: 'Task 1',
+      currently_fetching_datasets: true,
+    };
+    const task2 = {
+      id: 't2',
+      slug: 'task-2',
+      name: 'Task 2',
+      currently_fetching_datasets: false,
+    };
+    const initial = {
+      p1: {
+        tasks: [task1, task2],
+        fetched: [],
+        notFound: [],
+        count: {},
+        next: {},
+      },
+    };
+
+    test('sets currently_fetching_datasets: false', () => {
+      const expected = {
+        ...initial,
+        p1: {
+          ...initial.p1,
+          tasks: [{ ...task1, currently_fetching_datasets: false }, task2],
+        },
+      };
+      const actual = reducer(initial, {
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: { project: 'p1', task: 't1' },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
 });

@@ -29,7 +29,7 @@ interface Props {
   closeModal: () => void;
 }
 
-export interface CommitData {
+export interface MetadataCommit {
   changes: Changeset;
   commit_message: string;
   target_directory: string;
@@ -70,7 +70,7 @@ export const ModalCard = ({
 
 const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   const { t } = useTranslation();
-  const [capturingChanges, setCapturingChanges] = useState(false);
+  const [retrievingChanges, setRetrievingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const { showTransientMessage, isShowingTransientMessage } =
@@ -83,13 +83,13 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   };
 
   const prevPage = () => {
-    setPageIndex(pageIndex - 1 || 0);
+    setPageIndex(Math.max(pageIndex - 1, 0));
   };
 
   const handleSuccess = () => {
     /* istanbul ignore else */
     if (isMounted.current) {
-      setCapturingChanges(false);
+      setRetrievingChanges(false);
       closeModal();
       setPageIndex(0);
     }
@@ -103,7 +103,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
     /* istanbul ignore else */
     if (isMounted.current) {
       setIgnoringChanges(false);
-      setCapturingChanges(false);
+      setRetrievingChanges(false);
       if (fieldErrors.target_directory) {
         setPageIndex(0);
       } else if (fieldErrors.changes) {
@@ -128,7 +128,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
       changes: {},
       commit_message: '',
       target_directory: defaultDir,
-    } as CommitData,
+    } as MetadataCommit,
     objectType: OBJECT_TYPES.COMMIT,
     url: window.api_urls.scratch_org_commit(org.id),
     onSuccess: handleSuccess,
@@ -210,7 +210,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   };
 
   const submitChanges = (e: FormEvent<HTMLFormElement>) => {
-    setCapturingChanges(true);
+    setRetrievingChanges(true);
     handleSubmit(e);
   };
 
@@ -226,7 +226,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
         <TargetDirectoriesForm
           key="page-1-contents"
           directories={org.valid_target_directories}
-          inputs={inputs as CommitData}
+          inputs={inputs as MetadataCommit}
           errors={errors}
           handleInputChange={handleInputChange}
         />
@@ -248,7 +248,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           key="page-2-contents"
           changeset={org.unsaved_changes}
           ignoredChanges={org.ignored_changes}
-          inputs={inputs as CommitData}
+          inputs={inputs as MetadataCommit}
           changesChecked={changesChecked}
           ignoredChecked={ignoredChecked}
           errors={errors}
@@ -289,7 +289,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
       contents: (
         <CommitMessageForm
           key="page-3-contents"
-          inputs={inputs as CommitData}
+          inputs={inputs as MetadataCommit}
           errors={errors}
           handleInputChange={handleInputChange}
         />
@@ -300,13 +300,13 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           label={t('Go Back')}
           variant="outline-brand"
           onClick={prevPage}
-          disabled={capturingChanges}
+          disabled={retrievingChanges}
         />,
         <Button
           key="page-3-button-2"
           type="submit"
           label={
-            capturingChanges ? (
+            retrievingChanges ? (
               <LabelWithSpinner
                 label={t('Retrieving Selected Changes…')}
                 variant="inverse"
@@ -317,7 +317,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           }
           variant="brand"
           onClick={submitChanges}
-          disabled={capturingChanges || !hasCommitMessage}
+          disabled={retrievingChanges || !hasCommitMessage}
         />,
       ],
     },
@@ -327,7 +327,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
     <Modal
       isOpen={isOpen}
       size="small"
-      disableClose={capturingChanges}
+      disableClose={retrievingChanges}
       dismissOnClickOutside={false}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}
