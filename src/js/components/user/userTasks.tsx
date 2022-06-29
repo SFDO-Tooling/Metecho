@@ -1,5 +1,4 @@
 import React from 'react';
-import { Task } from 'src/js/store/tasks/reducer';
 
 import TaskTable from '@/js/components/tasks/table';
 import useFetchUserTasks from '@/js/components/utils/useFetchUserTasks';
@@ -24,11 +23,11 @@ const UserTasks = () => {
 
           {tasks && fetchedTasks.fetched && (
             <TaskTable
-              tasks={tasks as Task[]}
+              tasks={tasks}
               isFetched={Boolean(tasks)}
               canAssign={false}
               isRefreshingUsers={false}
-              viewEpicsColumn={true}
+              viewEpicsColumn={false}
             />
           )}
         </div>

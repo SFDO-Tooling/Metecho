@@ -12,7 +12,7 @@ import { GitHubUser } from '@/js/store/user/reducer';
 interface Props {
   isRefreshing: boolean;
   projectId: string;
-  githubUsers: GitHubUser[];
+  githubUsers?: GitHubUser[];
 }
 
 const RefreshGitHubUsersButton = ({
@@ -28,7 +28,7 @@ const RefreshGitHubUsersButton = ({
 
   // If users are missing permissions, check again once...
   useEffect(() => {
-    if (!githubUsers.length || some(githubUsers, (u) => !u.permissions)) {
+    if (!githubUsers?.length || some(githubUsers, (u) => !u.permissions)) {
       refreshUsers();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

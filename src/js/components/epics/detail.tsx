@@ -782,7 +782,6 @@ const EpicDetail = (
                 <EpicProgress range={epicProgress} />
                 <TaskTable
                   projectId={project.id}
-                  projectSlug={project.slug}
                   tasks={tasks}
                   next={next}
                   count={count}

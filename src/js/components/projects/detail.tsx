@@ -618,7 +618,6 @@ const ProjectDetail = (
               </div>
               <TasksTableComponent
                 projectId={project.id}
-                projectSlug={project.slug}
                 tasks={
                   tourRunning && !tasks?.length
                     ? [

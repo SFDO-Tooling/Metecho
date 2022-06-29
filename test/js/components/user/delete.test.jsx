@@ -1,4 +1,5 @@
 import { fireEvent } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -22,6 +23,18 @@ describe('<DeleteAccount /> tests', () => {
 
     return result;
   };
+
+  beforeEach(() => {
+    fetchMock.get(
+      {
+        url: window.api_urls.task_list(),
+        query: { assigned_to_me: true },
+      },
+      {
+        results: [],
+      },
+    );
+  });
 
   test('Delete Account button renders', () => {
     const { getByRole } = setup();

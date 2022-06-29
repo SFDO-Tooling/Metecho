@@ -34,30 +34,6 @@ import {
 } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
-const taskProjectId = (
-  projectId: string | undefined,
-  item: Task | undefined,
-) => {
-  if (projectId) {
-    return projectId;
-  } else if (item) {
-    return item.root_project;
-  }
-  return '';
-};
-
-const taskGithubUsers = (
-  githubUsers: GitHubUser[] | undefined,
-  item: Task | undefined,
-) => {
-  if (!githubUsers && item) {
-    return item.project.github_users;
-  } else if (!githubUsers) {
-    return [];
-  }
-  return githubUsers;
-};
-
 type AssignUserAction = ({
   task,
   type,
@@ -79,7 +55,6 @@ interface TableCellProps {
 
 interface Props {
   projectId?: string;
-  projectSlug?: string;
   tasks: Task[];
   next?: string | null;
   count?: number;
@@ -94,27 +69,13 @@ interface Props {
 }
 
 const NameTableCell = ({
-  projectSlug,
   item,
   className,
   children,
   ...props
-}: TableCellProps & {
-  projectSlug?: string;
-}) => (
+}: TableCellProps) => (
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
-    {projectSlug && item && (
-      <Link
-        to={
-          item.epic
-            ? routes.epic_task_detail(projectSlug, item.epic.slug, item.slug)
-            : routes.project_task_detail(projectSlug, item.slug)
-        }
-      >
-        {children}
-      </Link>
-    )}
-    {!projectSlug && item && (
+    {item && (
       <Link
         to={
           item.epic
@@ -123,7 +84,7 @@ const NameTableCell = ({
                 item.epic.slug,
                 item.slug,
               )
-            : routes.project_task_detail(item.project.slug, item.slug)
+            : routes.project_task_detail(item.root_project_slug, item.slug)
         }
       >
         {children}
@@ -134,7 +95,6 @@ const NameTableCell = ({
 NameTableCell.displayName = DataTableCell.displayName;
 
 const EpicTableCell = ({
-  projectSlug,
   item,
   className,
   ...props
@@ -142,15 +102,8 @@ const EpicTableCell = ({
   projectSlug?: string;
 }) => (
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
-    {item?.epic?.slug && item?.epic?.name && projectSlug ? (
-      <Link to={routes.epic_detail(projectSlug, item.epic.slug)}>
-        {item.epic.name}
-      </Link>
-    ) : (
-      '-'
-    )}
-    {item?.epic?.slug && item?.epic?.name && item.project?.slug ? (
-      <Link to={routes.epic_detail(item.project.slug, item.epic.slug)}>
+    {item?.epic?.slug && item?.epic?.name ? (
+      <Link to={routes.epic_detail(item.root_project_slug, item.epic.slug)}>
         {item.epic.name}
       </Link>
     ) : (
@@ -190,7 +143,6 @@ StatusTableCell.displayName = DataTableCell.displayName;
 
 const AssigneeTableCell = ({
   type,
-  projectId,
   epicUsers,
   githubUsers,
   currentUser,
@@ -203,7 +155,6 @@ const AssigneeTableCell = ({
   ...props
 }: TableCellProps & {
   type: OrgTypes;
-  projectId?: string;
   epicUsers?: GitHubUser[];
   githubUsers?: GitHubUser[];
   currentUser?: User;
@@ -215,7 +166,7 @@ const AssigneeTableCell = ({
   const { t } = useTranslation();
 
   const assignedUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, taskProjectId(projectId, item), children),
+    selectProjectCollaborator(state, item?.root_project, children),
   );
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
@@ -270,9 +221,7 @@ const AssigneeTableCell = ({
 
     const epicCollaborators = item.epic
       ? epicUsers ||
-        taskGithubUsers(githubUsers, item)?.filter((user) =>
-          item.epic?.github_users.includes(user.id),
-        )
+        githubUsers?.filter((user) => item.epic?.github_users.includes(user.id))
       : null;
 
     contents = (
@@ -288,10 +237,10 @@ const AssigneeTableCell = ({
           onClick={openAssignUserModal}
         />
         <AssignTaskRoleModal
-          projectId={taskProjectId(projectId, item)}
+          projectId={item.root_project}
           taskHasEpic={Boolean(item.epic)}
           epicUsers={epicCollaborators}
-          githubUsers={taskGithubUsers(githubUsers, item)}
+          githubUsers={githubUsers}
           selectedUser={assignedUser || null}
           orgType={type}
           isOpen={assignUserModalOpen}
@@ -330,7 +279,6 @@ AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({
   projectId,
-  projectSlug,
   tasks,
   next,
   count,
@@ -430,7 +378,7 @@ const TaskTable = ({
               width={viewEpicsColumn ? '40%' : '60%'}
               primaryColumn
             >
-              <NameTableCell projectSlug={projectSlug} />
+              <NameTableCell />
             </DataTableColumn>
             {viewEpicsColumn && (
               <DataTableColumn
@@ -455,7 +403,7 @@ const TaskTable = ({
                 property="epic"
                 width="30%"
               >
-                <EpicTableCell projectSlug={projectSlug} />
+                <EpicTableCell />
               </DataTableColumn>
             )}
             <DataTableColumn
@@ -516,7 +464,6 @@ const TaskTable = ({
             >
               <AssigneeTableCell
                 type={ORG_TYPES.DEV}
-                projectId={taskProjectId(projectId, undefined)}
                 epicUsers={epicUsers}
                 githubUsers={githubUsers}
                 canAssign={canAssign}
@@ -551,7 +498,6 @@ const TaskTable = ({
             >
               <AssigneeTableCell
                 type={ORG_TYPES.QA}
-                projectId={taskProjectId(projectId, undefined)}
                 epicUsers={epicUsers}
                 githubUsers={githubUsers}
                 currentUser={currentUser}

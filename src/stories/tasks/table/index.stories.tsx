@@ -54,7 +54,6 @@ TasksTable.args = {
   tasks: Object.keys(sampleTasks),
   isFetched: true,
   projectId: sampleProject1.id,
-  projectSlug: sampleProject1.slug,
   epicUsers: [sampleGitHubUser1],
   githubUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   canAssign: true,

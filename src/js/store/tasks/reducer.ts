@@ -43,7 +43,7 @@ export interface Task {
     id: string;
     slug: string;
     github_users: GitHubUser[];
-  };
+  } | null;
   root_project: string;
   root_project_slug: string;
   description: string;
@@ -121,7 +121,7 @@ const reducer = (
       const {
         response,
         objectType,
-        filters: { epic, project, assigned_to_me },
+        filters: { epic, project },
       } = action.payload;
       if (objectType === OBJECT_TYPES.TASK && project) {
         const { results, next, count } = response as PaginatedObjectResponse;
@@ -162,11 +162,6 @@ const reducer = (
               all: count,
             },
           },
-        };
-      } else if (objectType === OBJECT_TYPES.TASK && assigned_to_me) {
-        return {
-          tasks: response,
-          fetched: true,
         };
       }
       return tasks;

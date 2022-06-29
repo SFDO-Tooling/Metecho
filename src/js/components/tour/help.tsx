@@ -36,6 +36,7 @@ export const getDemoTask = ({
     currently_creating_pr: false,
     branch_name: '',
     root_project: project,
+    root_project_slug: project,
     branch_url: null,
     commits: [],
     origin_sha: '',
