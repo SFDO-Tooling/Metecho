@@ -22,7 +22,7 @@ const DeleteAccount = () => {
   const { t } = useTranslation();
 
   return (
-    <div>
+    <>
       <div className="slds-text-heading_large slds-m-bottom_small">
         {t('Delete Account')}
       </div>
@@ -46,7 +46,7 @@ const DeleteAccount = () => {
         handleClose={closeDeleteModal}
       />
       <UserTasks />
-    </div>
+    </>
   );
 };
 

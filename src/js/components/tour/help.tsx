@@ -14,9 +14,11 @@ import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
 
 export const getDemoTask = ({
   project,
+  project_slug,
   github_id,
 }: {
   project: string;
+  project_slug: string;
   github_id: string | null;
 }): Task => {
   const epic = getDemoEpic({ project, github_id });
@@ -36,7 +38,7 @@ export const getDemoTask = ({
     currently_creating_pr: false,
     branch_name: '',
     root_project: project,
-    root_project_slug: project,
+    root_project_slug: project_slug,
     branch_url: null,
     commits: [],
     origin_sha: '',

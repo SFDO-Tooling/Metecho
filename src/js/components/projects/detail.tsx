@@ -623,6 +623,7 @@ const ProjectDetail = (
                     ? [
                         getDemoTask({
                           project: project.id,
+                          project_slug: project.slug,
                           github_id: user.github_id,
                         }),
                       ]

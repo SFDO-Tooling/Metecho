@@ -64,7 +64,7 @@ interface Props {
   githubUsers?: GitHubUser[];
   canAssign: boolean;
   isRefreshingUsers: boolean;
-  assignUserAction?: AssignUserAction | undefined;
+  assignUserAction?: AssignUserAction;
   viewEpicsColumn?: boolean;
 }
 
@@ -94,13 +94,7 @@ const NameTableCell = ({
 );
 NameTableCell.displayName = DataTableCell.displayName;
 
-const EpicTableCell = ({
-  item,
-  className,
-  ...props
-}: TableCellProps & {
-  projectSlug?: string;
-}) => (
+const EpicTableCell = ({ item, className, ...props }: TableCellProps) => (
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
     {item?.epic?.slug && item?.epic?.name ? (
       <Link to={routes.epic_detail(item.root_project_slug, item.epic.slug)}>
@@ -205,11 +199,12 @@ const AssigneeTableCell = ({
   if (!item) {
     return null;
   }
+
   let contents, title;
   if (assignedUser) {
     contents = <GitHubUserAvatar user={assignedUser} />;
     title = assignedUser.login;
-  } else if (canAssign) {
+  } else if (canAssign && assignUserAction && githubUsers) {
     switch (type) {
       case ORG_TYPES.DEV:
         title = t('Assign Developer');

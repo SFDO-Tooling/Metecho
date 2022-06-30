@@ -4,8 +4,7 @@ import TaskTable from '@/js/components/tasks/table';
 import useFetchUserTasks from '@/js/components/utils/useFetchUserTasks';
 
 const UserTasks = () => {
-  const fetchedTasks = useFetchUserTasks();
-  const tasks = fetchedTasks.tasks;
+  const { tasks } = useFetchUserTasks();
 
   return (
     <>
@@ -21,19 +20,15 @@ const UserTasks = () => {
             your account.
           </div>
 
-          {tasks && fetchedTasks.fetched && (
-            <TaskTable
-              tasks={tasks}
-              isFetched={Boolean(tasks)}
-              canAssign={false}
-              isRefreshingUsers={false}
-              viewEpicsColumn={false}
-            />
-          )}
+          <TaskTable
+            tasks={tasks}
+            isFetched
+            canAssign={false}
+            isRefreshingUsers={false}
+            viewEpicsColumn
+          />
         </div>
-      ) : (
-        <></>
-      )}
+      ) : null}
     </>
   );
 };

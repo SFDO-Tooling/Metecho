@@ -30,7 +30,7 @@ const AssignTaskRoleModal = ({
   projectId: string;
   taskHasEpic: boolean;
   epicUsers?: GitHubUser[] | null;
-  githubUsers?: GitHubUser[];
+  githubUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
   orgType: OrgTypes;
   isOpen: boolean;
@@ -60,7 +60,7 @@ const AssignTaskRoleModal = ({
   );
   const epicUserIds = validEpicUsers.map((u) => u.id);
   const validGitHubUsers = sort(
-    (githubUsers || []).filter(
+    githubUsers.filter(
       (u) =>
         (u.permissions?.push || orgType === ORG_TYPES.QA) &&
         u.id !== selectedUser?.id &&
