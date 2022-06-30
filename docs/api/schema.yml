@@ -954,6 +954,11 @@ paths:
       description: Manage Tasks related to a Metecho Project or Epic.
       parameters:
       - in: query
+        name: assigned_to_me
+        schema:
+          type: boolean
+        description: Filter/exclude tasks assigned to the current user
+      - in: query
         name: epic
         schema:
           type: string
@@ -2273,6 +2278,9 @@ components:
         root_project:
           type: string
           readOnly: true
+        root_project_slug:
+          type: string
+          readOnly: true
         branch_url:
           type: string
           format: uri
@@ -2707,6 +2715,9 @@ components:
         root_project:
           type: string
           readOnly: true
+        root_project_slug:
+          type: string
+          readOnly: true
         branch_url:
           type: string
           format: uri
@@ -2792,6 +2803,7 @@ components:
       - review_submitted_at
       - review_valid
       - root_project
+      - root_project_slug
       - slug
       - status
     TaskAssignee:

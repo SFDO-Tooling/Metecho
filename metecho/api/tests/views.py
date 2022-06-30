@@ -1210,6 +1210,20 @@ class TestTaskViewSet:
         response = client.get(url, data={"project": str(project.pk)})
         assert len(response.json()["results"]) == 2
 
+    def test_get__assigned_filter(self, client, task_factory, user_factory):
+        url = reverse("task-list")
+        other_user = user_factory()
+        task_factory(assigned_dev=client.user.github_id)
+        task_factory(assigned_dev=other_user.github_id)
+        # Other tasks in other epics and projects
+        task_factory()
+
+        response = client.get(url)
+        assert len(response.json()["results"]) == 3
+
+        response = client.get(url, data={"assigned_to_me": True})
+        assert len(response.json()["results"]) == 1
+
     def test_create__dev_org(
         self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
     ):

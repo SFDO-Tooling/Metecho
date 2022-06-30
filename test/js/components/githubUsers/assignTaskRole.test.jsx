@@ -72,6 +72,15 @@ describe('AssignTaskRole', () => {
     expect(getByText('GitHub Collaborators')).toBeVisible();
   });
 
+  test('renders without github users', () => {
+    const { getByText, queryByText } = setup({ githubUsers: undefined });
+
+    expect(queryByText('Epic Collaborators')).toBeVisible();
+    expect(
+      getByText('There are no available GitHub Collaborators.'),
+    ).toBeVisible();
+  });
+
   test('responds to epic user click', () => {
     const { getByText, getAllByTitle } = setup();
     const userBtn = getAllByTitle('Test User (test user)')[0];

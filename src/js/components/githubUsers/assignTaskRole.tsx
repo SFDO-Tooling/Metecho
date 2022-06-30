@@ -59,16 +59,14 @@ const AssignTaskRoleModal = ({
     ),
   );
   const epicUserIds = validEpicUsers.map((u) => u.id);
-  const validGitHubUsers = githubUsers
-    ? sort(
-        githubUsers.filter(
-          (u) =>
-            (u.permissions?.push || orgType === ORG_TYPES.QA) &&
-            u.id !== selectedUser?.id &&
-            !epicUserIds.includes(u.id),
-        ),
-      )
-    : [];
+  const validGitHubUsers = sort(
+    (githubUsers || []).filter(
+      (u) =>
+        (u.permissions?.push || orgType === ORG_TYPES.QA) &&
+        u.id !== selectedUser?.id &&
+        !epicUserIds.includes(u.id),
+    ),
+  );
 
   const filteredEpicUsers = findText
     ? validEpicUsers.filter(

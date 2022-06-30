@@ -4,7 +4,10 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import UserTasks from '@/js/components/user/userTasks';
-import { selectProjectById } from '@/js/store/projects/selectors';
+import {
+  selectProjectById,
+  selectProjectCollaborator,
+} from '@/js/store/projects/selectors';
 
 import {
   sampleGitHubUser2,
@@ -18,6 +21,7 @@ import {
 
 jest.mock('@/js/store/projects/selectors');
 selectProjectById.mockReturnValue(sampleTask7.root_project);
+selectProjectCollaborator.mockReturnValue(sampleGitHubUser2);
 
 describe('<UserTasks />', () => {
   const setup = ({ rerender = null, store = null, results } = {}) => {
@@ -59,7 +63,7 @@ describe('<UserTasks />', () => {
   });
 
   test('UserTasks renders with tasks', async () => {
-    const { rerender, store, queryByText, queryByRole } = setup({
+    const { rerender, store, queryByText, queryByRole, getAllByRole } = setup({
       results: [sampleTask7],
     });
 
@@ -68,5 +72,8 @@ describe('<UserTasks />', () => {
     expect(queryByText('Tasks With Unretrieved Changes')).toBeVisible();
     expect(queryByRole('table')).toBeVisible();
     expect(queryByText(sampleTask7.name)).toBeVisible();
+    expect(
+      getAllByRole('img', { title: sampleGitHubUser2.login }),
+    ).toHaveLength(2);
   });
 });
