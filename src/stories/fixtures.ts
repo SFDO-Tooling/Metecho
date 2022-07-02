@@ -311,7 +311,7 @@ export const sampleTask1 = {
   org_config_name: 'dev',
   issue: null,
   currently_fetching_datasets: false,
-  datasets: [],
+  datasets: {},
 };
 
 export const sampleTask2 = {
@@ -353,7 +353,7 @@ export const sampleTask2 = {
   org_config_name: 'dev',
   issue: null,
   currently_fetching_datasets: false,
-  datasets: [],
+  datasets: {},
 };
 
 export const sampleTask3 = {
@@ -396,7 +396,7 @@ export const sampleTask3 = {
   org_config_name: 'dev',
   issue: null,
   currently_fetching_datasets: false,
-  datasets: [],
+  datasets: {},
 };
 
 export const sampleTask4 = {
@@ -439,7 +439,7 @@ export const sampleTask4 = {
   org_config_name: 'dev',
   issue: null,
   currently_fetching_datasets: false,
-  datasets: [],
+  datasets: {},
 };
 
 export const sampleTask5 = {
@@ -481,7 +481,7 @@ export const sampleTask5 = {
   org_config_name: 'dev',
   issue: null,
   currently_fetching_datasets: false,
-  datasets: [],
+  datasets: {},
 };
 
 export const sampleTask6 = {
@@ -523,7 +523,7 @@ export const sampleTask6 = {
   org_config_name: 'dev',
   issue: null,
   currently_fetching_datasets: false,
-  datasets: [],
+  datasets: {},
 };
 
 export const sampleProject1 = {

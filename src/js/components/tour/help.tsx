@@ -53,7 +53,7 @@ export const getDemoTask = ({
     org_config_name: DEFAULT_ORG_CONFIG_NAME,
     issue: null,
     currently_fetching_datasets: false,
-    datasets: [],
+    datasets: {},
   };
 };
 

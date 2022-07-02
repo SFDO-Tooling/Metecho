@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
 // import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
-import { Changeset } from '@/js/store/orgs/reducer';
+import { DatasetObject, Datasets } from '@/js/store/tasks/reducer';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
@@ -15,7 +15,7 @@ interface Props {
   projectId: string;
   taskId: string;
   orgId: string;
-  datasets: string[];
+  datasets: Datasets;
   fetchingDatasets: boolean;
   isOpen: boolean;
   closeModal: () => void;
@@ -23,7 +23,7 @@ interface Props {
 
 export interface DatasetCommit {
   dataset: string;
-  changes: Changeset;
+  changes: DatasetObject[];
   commit_message: string;
 }
 
@@ -122,7 +122,7 @@ const RetrieveDatasetModal = ({
         <SelectDatasetForm
           projectId={projectId}
           taskId={taskId}
-          datasets={datasets}
+          datasets={Object.keys(datasets)}
           fetchingDatasets={fetchingDatasets}
           inputs={inputs as DatasetCommit}
           errors={errors}
@@ -180,7 +180,7 @@ const RetrieveDatasetModal = ({
       ],
     },
     {
-      heading: t('Describe the changes you are retrieving'),
+      heading: t('Describe the dataset you are retrieving'),
       contents: (
         // <CommitMessageForm
         //   inputs={inputs as DatasetCommit}

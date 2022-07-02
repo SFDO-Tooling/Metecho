@@ -75,7 +75,7 @@ describe('<RetrieveDatasetModal/>', () => {
   describe('no datasets', () => {
     beforeEach(() => {
       setup({
-        datasets: [],
+        datasets: {},
       });
     });
 
@@ -98,7 +98,7 @@ describe('<RetrieveDatasetModal/>', () => {
     test('cannot enter name of existing dataset', async () => {
       const { getByText, getByLabelText, findByPlaceholderText } = setup();
       fireEvent.click(getByLabelText('Create New Dataset'));
-      const input = await findByPlaceholderText('Dataset Name');
+      const input = await findByPlaceholderText('Dataset name');
 
       expect(input).toHaveFocus();
 
@@ -150,8 +150,8 @@ describe('<RetrieveDatasetModal/>', () => {
     test.each([
       ['dataset', 'Select the dataset to create or modify', true],
       ['changes', 'Select data to retrieve', false],
-      ['commit_message', 'Describe the changes you are retrieving', false],
-      ['foobar', 'Describe the changes you are retrieving', false],
+      ['commit_message', 'Describe the dataset you are retrieving', false],
+      ['foobar', 'Describe the dataset you are retrieving', false],
     ])(
       'navigates to correct page to show error: %s',
       async (field, text, showsErr) => {

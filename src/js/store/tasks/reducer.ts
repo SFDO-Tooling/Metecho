@@ -25,6 +25,21 @@ export interface Commit {
   url: string;
 }
 
+interface DatasetField {
+  label: string;
+  api_name: string;
+}
+
+export interface DatasetObject extends DatasetField {
+  fields: DatasetField[];
+  number_of_records: number;
+}
+
+export interface Datasets {
+  // `key` is the name of the Dataset
+  [key: string]: DatasetObject[];
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -62,7 +77,7 @@ export interface Task {
   review_sha: string;
   org_config_name: string;
   issue: string | null;
-  datasets: string[];
+  datasets: Datasets;
 }
 
 export interface TaskByProjectState {
