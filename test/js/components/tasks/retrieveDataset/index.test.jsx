@@ -28,7 +28,7 @@ afterEach(() => {
 //   Buz: ['Baz', 'Bing'],
 // };
 
-const defaultDatasets = ['Default', 'Another Dataset'];
+const defaultDatasets = { Default: [], 'Another Dataset': [] };
 
 const defaultProps = {
   projectId: 'project-id',
