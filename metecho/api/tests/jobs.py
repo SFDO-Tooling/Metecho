@@ -26,6 +26,7 @@ from ..jobs import (
     get_social_image,
     get_unsaved_changes,
     refresh_commits,
+    refresh_datasets,
     refresh_github_issues,
     refresh_github_organizations_for_user,
     refresh_github_repositories_for_user,
@@ -1533,3 +1534,101 @@ class TestCreateRepository:
             group_name=None,
             include_user=False,
         )
+
+
+DATASET_YAML = """
+Accounts:
+    sf_object: Account
+    fields:
+        - Name
+        - Description
+        - RecordTypeId
+"""
+
+
+@pytest.mark.django_db
+class TestRefreshDatasets:
+    def test_ok(self, mocker, task_factory, user_factory, tmp_path):
+        folder1 = tmp_path / "Default"
+        folder1.mkdir()
+        file1 = folder1 / "Default.extract.yml"
+        file1.write_text(DATASET_YAML)
+        folder2 = tmp_path / "MyDataset"
+        folder2.mkdir()
+        file2 = folder2 / "foobar.extract.yml"
+        file2.write_text("Hello:\n    - world")
+        mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
+        mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
+        task = task_factory(currently_refreshing_datasets=True)
+        task.get_repo_id = lambda: 1
+
+        refresh_datasets(task, user_factory())
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_datasets
+        assert task.datasets_parse_errors == []
+        assert task.datasets == {
+            "Default": {
+                "Accounts": {
+                    "sf_object": "Account",
+                    "fields": ["Name", "Description", "RecordTypeId"],
+                },
+            },
+            "MyDataset": {"Hello": ["world"]},
+        }
+
+    def test_exception(self, mocker, caplog, task_factory, user_factory):
+        mocker.patch(
+            f"{PATCH_ROOT}.local_github_checkout",
+            autospec=True,
+            side_effect=Exception("Oh no!"),
+        )
+        task = task_factory(currently_refreshing_datasets=True)
+
+        with pytest.raises(Exception, match="Oh no!"):
+            refresh_datasets(task, user_factory())
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_datasets
+        assert "Oh no!" in caplog.text
+
+    def test_errors(self, mocker, task_factory, user_factory, tmp_path):
+        (tmp_path / "invalid-top-level-file.csv").touch()
+        folder1 = tmp_path / "Default"
+        folder1.mkdir()
+        (folder1 / "Default.extract.yml").touch()
+        (folder1 / "Another.extract.yml").touch()
+        folder2 = tmp_path / "Empty"
+        folder2.mkdir()
+        (folder2 / "this-is-not-yaml.json").touch()
+        mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
+        mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
+        task = task_factory(currently_refreshing_datasets=True)
+        task.get_repo_id = lambda: 1
+
+        refresh_datasets(task, user_factory())
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_datasets
+        assert task.datasets_parse_errors == [
+            f"Expected a single '*.extract.yml' file inside '{tmp_path}/Default' but found 'Another.extract.yml', 'Default.extract.yml'",  # noqa: B950
+            f"Expected 'datasets/' to only contain directories but found file '{tmp_path}/invalid-top-level-file.csv'",  # noqa: B950
+            f"Expected a single '*.extract.yml' file inside '{tmp_path}/Empty' but found none",
+        ]
+        assert task.datasets == {}
+
+    def test_missing_folder(self, mocker, task_factory, user_factory):
+        mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
+        Path = mocker.patch(f"{PATCH_ROOT}.Path", autospec=True)
+        Path.return_value.exists.return_value = False
+        task = task_factory(currently_refreshing_datasets=True)
+        task.get_repo_id = lambda: 1
+
+        refresh_datasets(task, user_factory())
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_datasets
+        assert task.datasets_parse_errors == [
+            "Could not find 'datasets/' directory in the Task branch"
+        ]
+        assert task.datasets == {}

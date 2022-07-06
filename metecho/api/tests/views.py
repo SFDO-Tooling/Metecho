@@ -1426,6 +1426,19 @@ class TestTaskViewSet:
         assert task.assigned_dev == "123456"
         assert task.assigned_qa == "123456"
 
+    def test_refresh_datasets(self, mocker, client, task):
+        assert not task.currently_refreshing_datasets
+        refresh_datasets_job = mocker.patch(
+            "metecho.api.jobs.refresh_datasets_job", autospec=True
+        )
+
+        response = client.post(reverse("task-refresh-datasets", args=[task.pk]))
+        task.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert task.currently_refreshing_datasets
+        refresh_datasets_job.delay.assert_called_once_with(task, client.user)
+
 
 @pytest.mark.django_db
 class TestEpicViewSet:

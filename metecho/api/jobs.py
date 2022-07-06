@@ -1173,7 +1173,7 @@ def refresh_datasets(task: Task, user: User):
                 datasets = datasets_dir.iterdir()
             else:
                 datasets = ()
-                errors = "Could not find 'datasets/' directory in the Task branch"
+                errors.append("Could not find 'datasets/' directory in the Task branch")
             for obj in datasets:
                 if not obj.is_dir():
                     errors.append(
