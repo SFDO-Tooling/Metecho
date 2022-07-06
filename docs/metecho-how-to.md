@@ -1,22 +1,29 @@
 # Steps to Guide a Team Through Metecho
 
-## What's In a Name
+## Why Metecho?
 
 **Pronunciation:** *“Met” rhymes with “bet.” “Echo” as in the reflection of
 sound waves.*
 
 **Definition:** *[Greek] To share or participate in.*
 
-Metecho makes it easier to view, test, and contribute to Salesforce Projects
+**Metecho makes it easier to collaborate on sharable Saleforce Projects.**
+View, test, and contribute to Projects
 without learning to edit code on GitHub. Collaborate with a team. Create
 temporary Salesforce Orgs. Make changes, retrieve them, and add your work to a
-Project with this interactive tool.
+Project with this interactive tool. 
+
+- **Play**: Make a scratch org to view Projects, play with ideas, or create demos.
+- **Help**: Browse available Tasks and test work that is ready for review. 
+- **Plan**: Create a Task or an Epic and contribute your work to a Project. 
+
+***
 
 ## Step 0 - Log In with GitHub
 
 - Create a [GitHub](https://github.com) account, if you don’t yet have one.
 - Contact an admin for the GitHub repository you want to contribute to (e.g.
-  [Nonprofit Success Pack](https://github.com/SalesforceFoundation/NPSP)) on
+  [Outbound Funds](https://github.com/SalesforceFoundation/OutboundFundsModule)) on
   GitHub and ensure that you and anyone you’d like to work with are
   collaborators.
 
@@ -25,7 +32,7 @@ Project](#create-a-project).
 
 ## Step 1 - Select a Project
 
-**Project** - *Projects (e.g. Nonprofit Success Pack) contain all the work being
+**Project** - *Projects (e.g. Outbound Funds, Snowfakery) contain all the work being
 done. They are equivalent to GitHub repositories.*
 
 - Select the Project you want to contribute to.
@@ -35,9 +42,13 @@ done. They are equivalent to GitHub repositories.*
     collaborator.
   - Select `Re-Sync Projects` in Metecho.
 
-To continue, go to **Step 2 - Create a Task** or, if you have a set of several
-closely related Tasks in mind, skip to [Step 13 - Create an
-Epic](#step-13---create-an-epic)
+### Next steps depend on your goal:
+
+- To contribute to a Project, continue to [Step 2 - Create a Task](#step-2---create-a-task).
+
+- If you have a set of several closely related Tasks in mind, skip to [Step 13 - Create an Epic](#step-13---create-an-epic).
+
+- If you want to view the work on a Project or make changes without affecting the Project, skip to [Create a Scratch Org in Metecho](#create-a-scratch-org-in-metecho).
 
 ## Step 2 - Create a Task
 
@@ -244,6 +255,31 @@ from the Epic branch in GitHub.*
   card or uncheck the box in the list of Collaborators.
 
 To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task)
+
+***
+
+## Create a Scratch Org in Metecho
+
+**Scratch Org** - *A temporary Salesforce org where anyone can view the work on a Project, create a demo, or play with changes without affecting the Project. Scratch Orgs expire after 30 days, and all work is deleted.*
+
+- On the Project detail page, select `Create Scratch Org` under My Project Scratch Org in the right-hand column.
+- Scratch Org creation can take a number of minutes. Feel free to leave the page.
+  Metecho will provide an alert when the Scratch Org is ready.
+- You can also select a specific Epic or Task to create a Scratch Org for specific work in-progress.
+
+## Make Changes in Scratch Org
+
+- **Changes to a Scratch Org must be made in the Salesforce UI, not in Metecho.**
+- Select `View Org` on the Scratch Org card to navigate out of Metecho and make your
+  changes in the temporary Scratch Org in Salesforce.
+  
+## Contribute Work from Scratch Org
+
+- If you decide you want to contribute your Scratch Org changes to the Project, select `check again` in the Scratch Org card.
+- Create a new Task with or without an Epic. (You don't need an Epic unless you plan to create additional, closely-related Tasks before contributing.)
+- If you create a new Task without an Epic, skip to [Step 2 - Create a Task](#step-2---create-a-task).
+- If you create a new Task & Epic, skip to [Step 13 - Create an Epic](#step-13---create-an-epic).
+- Your Scratch Org will become the Dev Org for the newly created Task.
 
 ***
 
