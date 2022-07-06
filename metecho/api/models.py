@@ -915,6 +915,26 @@ class Task(
     assigned_dev = models.CharField(max_length=50, null=True, blank=True)
     assigned_qa = models.CharField(max_length=50, null=True, blank=True)
 
+    currently_refreshing_dataset_schema = models.BooleanField(default=False)
+    dataset_schema = models.JSONField(
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        blank=True,
+        help_text=_("Cache of the ScratchOrg schema related to this Task"),
+    )
+    currently_refreshing_datasets = models.BooleanField(default=False)
+    datasets = models.JSONField(
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        blank=True,
+        help_text=_("Cache of the dataset definitions from the current Task branch"),
+    )
+    datasets_parse_errors = models.JSONField(
+        blank=True,
+        default=list,
+        help_text=_("User-facing errors that occurred during dataset refresh"),
+    )
+
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
 
@@ -1180,6 +1200,19 @@ class Task(
             )
             if delete_org and deletable_org:
                 org.queue_delete(originating_user_id=originating_user_id)
+
+    def queue_refresh_datasets(self, user):
+        from .jobs import refresh_datasets_job
+
+        self.currently_refreshing_datasets = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+        refresh_datasets_job.delay(self, user)
+
+    def finalize_refresh_datasets(self, user):
+        self.currently_refreshing_datasets = False
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
 
 
 class ScratchOrg(

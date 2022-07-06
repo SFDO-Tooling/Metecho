@@ -694,7 +694,11 @@ paths:
       - cookieAuth: []
       responses:
         '202':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
   /api/scratch-orgs/:
     get:
       operationId: scratch_orgs_list
@@ -1266,6 +1270,30 @@ paths:
       - cookieAuth: []
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+  /api/tasks/{id}/refresh_datasets/:
+    post:
+      operationId: tasks_refresh_datasets_create
+      description: Queue a job to refresh the dataset definitions for a Task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
           content:
             application/json:
               schema:
@@ -2335,6 +2363,19 @@ components:
           readOnly: true
         org_config_name:
           type: string
+        datasets:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Cache of the dataset definitions from the current Task branch
+        datasets_parse_errors:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: User-facing errors that occurred during dataset refresh
+        currently_refreshing_datasets:
+          type: boolean
+          readOnly: true
     Project:
       type: object
       properties:
@@ -2769,6 +2810,19 @@ components:
           readOnly: true
         org_config_name:
           type: string
+        datasets:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Cache of the dataset definitions from the current Task branch
+        datasets_parse_errors:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: User-facing errors that occurred during dataset refresh
+        currently_refreshing_datasets:
+          type: boolean
+          readOnly: true
       required:
       - assigned_qa
       - branch_diff_url
@@ -2777,7 +2831,10 @@ components:
       - created_at
       - currently_creating_branch
       - currently_creating_pr
+      - currently_refreshing_datasets
       - currently_submitting_review
+      - datasets
+      - datasets_parse_errors
       - description_rendered
       - has_unmerged_commits
       - id

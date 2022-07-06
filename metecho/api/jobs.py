@@ -9,6 +9,7 @@ from typing import Iterable
 import cumulusci
 import requests
 import sarge
+import yaml
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
@@ -40,7 +41,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import GitHubOrganization, Project, TaskReviewStatus, User
+from .models import GitHubOrganization, Project, Task, TaskReviewStatus, User
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -1156,3 +1157,48 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 
 
 user_reassign_job = job(user_reassign)
+
+
+def refresh_datasets(task: Task, user: User):
+    """
+    Refresh the dataset definition cache on `task` by parsing definitions from the Task branch
+    """
+    try:
+        task.refresh_from_db()
+        with local_github_checkout(user, task.get_repo_id(), task.branch_name):
+            errors = []
+            definitions = {}
+            datasets_dir = Path("datasets")
+            if datasets_dir.exists():
+                datasets = datasets_dir.iterdir()
+            else:
+                datasets = ()
+                errors = "Could not find 'datasets/' directory in the Task branch"
+            for obj in datasets:
+                if not obj.is_dir():
+                    errors.append(
+                        "Expected 'datasets/' to only contain directories but found file "
+                        f"'{obj}'"
+                    )
+                    continue
+                yml_files = list(obj.glob("*.extract.yml"))
+                if len(yml_files) == 1:
+                    definitions[obj.name] = yaml.safe_load(yml_files[0].open())
+                else:
+                    file_names = ", ".join(f"'{f.name}'" for f in yml_files) or "none"
+                    errors.append(
+                        f"Expected a single '*.extract.yml' file inside '{obj}' "
+                        f"but found {file_names}"
+                    )
+        task.datasets = definitions
+        task.datasets_parse_errors = errors
+    except Exception:
+        task.finalize_refresh_datasets(user=user)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        task.finalize_refresh_datasets(user=user)
+
+
+refresh_datasets_job = job(refresh_datasets)
