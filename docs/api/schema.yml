@@ -2327,13 +2327,13 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: string
-          nullable: true
-          maxLength: 50
-        assigned_qa:
-          type: string
+          type: object
+          additionalProperties: {}
           readOnly: true
-          nullable: true
+        assigned_qa:
+          type: object
+          additionalProperties: {}
+          readOnly: true
         dev_org:
           type: string
           format: HashID
@@ -2764,13 +2764,13 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: string
-          nullable: true
-          maxLength: 50
-        assigned_qa:
-          type: string
+          type: object
+          additionalProperties: {}
           readOnly: true
-          nullable: true
+        assigned_qa:
+          type: object
+          additionalProperties: {}
+          readOnly: true
         dev_org:
           type: string
           format: HashID
@@ -2781,6 +2781,7 @@ components:
         org_config_name:
           type: string
       required:
+      - assigned_dev
       - assigned_qa
       - branch_diff_url
       - branch_url

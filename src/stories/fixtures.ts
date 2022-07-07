@@ -107,6 +107,28 @@ export const sampleGitHubUser3 = {
   },
 };
 
+export const sampleGitHubUser4 = {
+  id: '123123',
+  login: 'FourthUser',
+  avatar_url: 'https://randomuser.me/api/portraits/men/3.jpg',
+  permissions: {
+    push: false,
+    pull: true,
+    admin: false,
+  },
+};
+
+export const sampleReadOnlyGitHubUser = {
+  id: '44444',
+  login: 'ReadOnly',
+  avatar_url: 'https://randomuser.me/api/portraits/men/4.jpg',
+  permissions: {
+    push: true,
+    pull: true,
+    admin: false,
+  },
+};
+
 export const sampleCommitAuthor = {
   name: 'Jack Brown',
   email: 'developer@web.com',
@@ -300,7 +322,7 @@ export const sampleTask1 = {
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser1.id,
+  assigned_dev: sampleGitHubUser1,
   assigned_qa: null,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
@@ -383,8 +405,8 @@ export const sampleTask3 = {
   pr_is_open: false,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser3.id,
-  assigned_qa: sampleGitHubUser1.id,
+  assigned_dev: sampleGitHubUser3,
+  assigned_qa: sampleGitHubUser1,
   status: TASK_STATUSES.COMPLETED,
   currently_submitting_review: false,
   review_submitted_at: '2019-03-01T19:47:49Z',
@@ -425,8 +447,8 @@ export const sampleTask4 = {
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2.id,
-  assigned_qa: sampleGitHubUser3.id,
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: '2019-03-01T19:47:49Z',
@@ -466,7 +488,7 @@ export const sampleTask5 = {
   pr_is_open: false,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser1.id,
+  assigned_dev: sampleGitHubUser1,
   assigned_qa: null,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
@@ -507,8 +529,8 @@ export const sampleTask6 = {
   pr_is_open: true,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2.id,
-  assigned_qa: sampleGitHubUser3.id,
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: null,
@@ -552,8 +574,8 @@ export const sampleTask7 = {
   pr_is_open: true,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2.id,
-  assigned_qa: sampleGitHubUser3.id,
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: null,

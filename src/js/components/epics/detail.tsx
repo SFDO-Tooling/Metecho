@@ -144,10 +144,10 @@ const EpicDetail = (
     const users = new Set<string>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
-        users.add(task.assigned_dev);
+        users.add(task.assigned_dev.id);
       }
       if (task.assigned_qa) {
-        users.add(task.assigned_qa);
+        users.add(task.assigned_qa.id);
       }
     });
     return users;

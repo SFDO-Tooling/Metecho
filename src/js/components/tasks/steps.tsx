@@ -1,13 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { OrgTypeTracker } from '@/js/components/orgs/taskOrgCards';
 import Steps from '@/js/components/steps';
 import { Step } from '@/js/components/steps/stepsItem';
-import { AppState } from '@/js/store';
 import { OrgsByParent } from '@/js/store/orgs/reducer';
-import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { Task } from '@/js/store/tasks/reducer';
 import { User } from '@/js/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '@/js/utils/constants';
@@ -27,18 +24,13 @@ const TaskStatusSteps = ({
   task,
   orgs,
   user,
-  projectId,
   hasPermissions,
   isCreatingOrg,
   handleAction,
 }: TaskStatusStepsProps) => {
   const { t } = useTranslation();
-  const devUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, projectId, task.assigned_dev),
-  );
-  const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, projectId, task.assigned_qa),
-  );
+  const devUser = task.assigned_dev;
+  const qaUser = task.assigned_qa;
   const hasDev = Boolean(task.assigned_dev);
   const hasTester = Boolean(task.assigned_qa);
   const hasReviewApproved =
@@ -52,8 +44,10 @@ const TaskStatusSteps = ({
   const testOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg?.is_created);
   const hasTestOrg = Boolean(testOrg?.is_created);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
-  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
+  const userIsAssignedTester = Boolean(
+    user.github_id === task?.assigned_qa?.id,
+  );
   const userIsDevOrgOwner = Boolean(
     userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
   );

@@ -59,7 +59,7 @@ const defaultProject = {
   github_users: [jonny, stacy],
 };
 const taskWithDev = {
-  assigned_dev: jonny.id,
+  assigned_dev: jonny,
   status: TASK_STATUSES.IN_PROGRESS,
 };
 const taskWithChanges = {
@@ -73,7 +73,7 @@ const taskWithPR = {
 };
 const taskWithTester = {
   ...taskWithPR,
-  assigned_qa: stacy.id,
+  assigned_qa: stacy,
 };
 const taskSubmittingReview = {
   ...taskWithTester,

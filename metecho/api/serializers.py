@@ -30,6 +30,14 @@ from .validators import CaseInsensitiveUniqueTogetherValidator, UnattachedIssueV
 User = get_user_model()
 
 
+def get_assigned_github_user(project_id, assigned_id):
+    project = Project.objects.get(id=project_id)
+    assigned_gh_user = list(
+        filter(lambda x: x["id"] == assigned_id, project.github_users)
+    )
+    return assigned_gh_user[0] if assigned_gh_user else ""
+
+
 class FormattableDict:
     """
     Stupid hack to get a dict error message into a
@@ -361,15 +369,6 @@ class ProjectSerializer(HashIdModelSerializer):
         return obj.has_push_permission(self.context["request"].user)
 
 
-class ProjectMinimalSerializer(HashIdModelSerializer):
-    slug = serializers.CharField(read_only=True)
-    github_users = StringListField(read_only=True)
-
-    class Meta:
-        model = Project
-        fields = ("id", "slug", "github_users")
-
-
 class EpicMinimalSerializer(HashIdModelSerializer):
     name = serializers.CharField(read_only=True)
     slug = serializers.CharField(read_only=True)
@@ -594,15 +593,18 @@ class TaskSerializer(HashIdModelSerializer):
         required=False,
         allow_null=True,
     )
-    project = NestedPrimaryKeyRelatedField(
+    project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(),
         pk_field=serializers.CharField(),
-        serializer=ProjectMinimalSerializer,
         required=False,
         allow_null=True,
     )
     root_project = serializers.SerializerMethodField()
-    root_project_slug = serializers.SerializerMethodField()
+    root_project_slug = serializers.CharField(
+        source="root_project.slug", read_only=True
+    )
+    assigned_dev = serializers.SerializerMethodField()
+    assigned_qa = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -673,6 +675,7 @@ class TaskSerializer(HashIdModelSerializer):
             "review_sha": {"read_only": True},
             "status": {"read_only": True},
             "pr_is_open": {"read_only": True},
+            "assigned_dev": {"read_only": True},
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
             "created_at": {"read_only": True},
@@ -682,8 +685,17 @@ class TaskSerializer(HashIdModelSerializer):
     def get_root_project(self, obj) -> str:
         return str(obj.root_project.pk)
 
-    def get_root_project_slug(self, obj) -> str:
-        return str(obj.root_project.slug)
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_assigned_dev(self, obj):
+        return get_assigned_github_user(
+            project_id=obj.root_project.id, assigned_id=obj.assigned_dev
+        )
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_assigned_qa(self, obj):
+        return get_assigned_github_user(
+            project_id=obj.root_project.id, assigned_id=obj.assigned_qa
+        )
 
     @extend_schema_field(OpenApiTypes.URI)
     def get_branch_url(self, obj) -> Optional[str]:

@@ -4,10 +4,7 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import UserTasks from '@/js/components/user/userTasks';
-import {
-  selectProjectById,
-  selectProjectCollaborator,
-} from '@/js/store/projects/selectors';
+import { selectProjectById } from '@/js/store/projects/selectors';
 
 import {
   sampleGitHubUser2,
@@ -21,7 +18,6 @@ import {
 
 jest.mock('@/js/store/projects/selectors');
 selectProjectById.mockReturnValue(sampleTask7.root_project);
-selectProjectCollaborator.mockReturnValue(sampleGitHubUser2);
 
 describe('<UserTasks />', () => {
   const setup = ({ rerender = null, store = null, results } = {}) => {

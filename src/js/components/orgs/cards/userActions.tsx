@@ -14,7 +14,7 @@ const UserActions = ({
   setUser,
 }: {
   type: OrgTypes;
-  assignedUserId: string | null;
+  assignedUserId: string | undefined;
   currentUserId: string | null;
   userHasPermissions: boolean;
   openAssignUserModal: (orgType: OrgTypes) => void;

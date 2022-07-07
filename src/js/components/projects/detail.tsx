@@ -16,7 +16,10 @@ import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TasksTableComponent from '@/js/components/tasks/table';
-import HelpTour, { getDemoTask } from '@/js/components/tour/help';
+import HelpTour, {
+  demoGithubUser,
+  getDemoTask,
+} from '@/js/components/tour/help';
 import LandingModal from '@/js/components/tour/landing';
 import PlanTour, { getDemoEpic } from '@/js/components/tour/plan';
 import PlayTour, { getDemoOrg } from '@/js/components/tour/play';
@@ -518,7 +521,7 @@ const ProjectDetail = (
                     ? [
                         getDemoEpic({
                           project: project.id,
-                          github_id: user.github_id,
+                          demoGithubUser,
                         }),
                       ]
                     : epics?.epics || []
@@ -624,7 +627,6 @@ const ProjectDetail = (
                         getDemoTask({
                           project: project.id,
                           project_slug: project.slug,
-                          github_id: user.github_id,
                         }),
                       ]
                     : tasks || []

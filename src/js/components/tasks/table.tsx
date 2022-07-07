@@ -20,9 +20,7 @@ import {
   useIsMounted,
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
-import { AppState } from '@/js/store';
 import { fetchObjects, ObjectFilters } from '@/js/store/actions';
-import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { Task } from '@/js/store/tasks/reducer';
 import { GitHubUser, User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -145,7 +143,6 @@ const AssigneeTableCell = ({
   assignUserAction,
   item,
   className,
-  children,
   ...props
 }: TableCellProps & {
   type: OrgTypes;
@@ -155,13 +152,9 @@ const AssigneeTableCell = ({
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction?: AssignUserAction | undefined;
-  children?: string | null;
 }) => {
   const { t } = useTranslation();
 
-  const assignedUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, item?.root_project, children),
-  );
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
   const openAssignUserModal = () => {
@@ -200,20 +193,30 @@ const AssigneeTableCell = ({
     return null;
   }
 
-  let contents, title;
-  if (assignedUser) {
-    contents = <GitHubUserAvatar user={assignedUser} />;
-    title = assignedUser.login;
-  } else if (canAssign && assignUserAction && githubUsers) {
-    switch (type) {
-      case ORG_TYPES.DEV:
-        title = t('Assign Developer');
-        break;
-      case ORG_TYPES.QA:
-        title = t('Assign Tester');
-        break;
-    }
+  let contents, title, assignedUser;
 
+  switch (type) {
+    case ORG_TYPES.DEV:
+      if (item?.assigned_dev) {
+        assignedUser = item?.assigned_dev;
+        contents = <GitHubUserAvatar user={item?.assigned_dev} />;
+        title = item?.assigned_dev?.login;
+      } else {
+        title = t('Assign Developer');
+      }
+      break;
+    case ORG_TYPES.QA:
+      if (item?.assigned_qa) {
+        assignedUser = item?.assigned_qa;
+        contents = <GitHubUserAvatar user={item?.assigned_qa} />;
+        title = item?.assigned_qa?.login;
+      } else {
+        title = t('Assign Tester');
+      }
+      break;
+  }
+
+  if (!assignedUser && canAssign && assignUserAction && githubUsers) {
     const epicCollaborators = item.epic
       ? epicUsers ||
         githubUsers?.filter((user) => item.epic?.github_users.includes(user.id))
@@ -248,7 +251,8 @@ const AssigneeTableCell = ({
   } else if (
     type === ORG_TYPES.QA &&
     currentUser?.github_id &&
-    assignUserAction
+    assignUserAction &&
+    !assignedUser
   ) {
     title = t('Self-Assign as Tester');
     contents = (

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
@@ -17,7 +18,15 @@ import {
 import { CREATE_TASK_FROM_ORG, EPIC_STATUSES } from '@/js/utils/constants';
 import routes from '@/js/utils/routes';
 
-import { sampleIssue1, sampleIssue2 } from '../../../../src/stories/fixtures';
+import {
+  sampleGitHubUser1,
+  sampleGitHubUser2,
+  sampleGitHubUser3,
+  sampleGitHubUser4,
+  sampleIssue1,
+  sampleIssue2,
+  sampleReadOnlyGitHubUser,
+} from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/js/store/actions');
@@ -43,9 +52,9 @@ const defaultOrg = {
   id: 'org-id',
   epic: 'epic1',
   org_type: 'Playground',
-  owner: 'user-id',
-  owner_gh_username: 'currentUser',
-  owner_gh_id: 'user-id',
+  owner: sampleGitHubUser1.id,
+  owner_gh_username: sampleGitHubUser1.username,
+  owner_gh_id: sampleGitHubUser1.id,
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -70,7 +79,12 @@ const epic = {
   id: 'epic1',
   slug: 'epic-1',
   name: 'Epic 1',
-  github_users: ['123456', '234567', 'user-id', 'readonly'],
+  github_users: [
+    sampleGitHubUser1.id,
+    sampleGitHubUser2.id,
+    sampleGitHubUser3.id,
+    sampleReadOnlyGitHubUser.id,
+  ],
 };
 
 const defaultState = {
@@ -87,39 +101,11 @@ const defaultState = {
         repo_owner: 'test',
         repo_name: 'test-repo',
         github_users: [
-          {
-            id: '123456',
-            login: 'TestGitHubUser',
-            permissions: {
-              push: true,
-            },
-          },
-          {
-            id: '234567',
-            login: 'OtherUser',
-            permissions: {
-              push: true,
-            },
-          },
-          {
-            id: '345678',
-            login: 'ThirdUser',
-            permissions: {
-              push: true,
-            },
-          },
-          {
-            id: 'user-id',
-            login: 'currentUser',
-            permissions: { push: true },
-          },
-          {
-            id: 'readonly',
-            login: 'readonly-user',
-            permissions: {
-              push: false,
-            },
-          },
+          sampleGitHubUser1,
+          sampleGitHubUser2,
+          sampleGitHubUser3,
+          sampleReadOnlyGitHubUser,
+          sampleGitHubUser4,
         ],
         has_push_permission: true,
       },
@@ -175,7 +161,7 @@ const defaultState = {
           slug: 'task-2',
           epic,
           status: 'In progress',
-          assigned_dev: '123456',
+          assigned_dev: sampleGitHubUser1,
         },
         {
           id: 'task3',
@@ -238,9 +224,9 @@ const defaultState = {
     },
   },
   user: {
-    id: 'user-id',
-    username: 'currentUser',
-    github_id: 'user-id',
+    id: sampleGitHubUser1.id,
+    username: sampleGitHubUser1.username,
+    github_id: sampleGitHubUser1.id,
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -348,7 +334,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toBe('user-id');
+      expect(data.assigned_qa).toBe(sampleGitHubUser1.id);
       expect(data.should_alert_qa).toBe(false);
     });
   });
@@ -656,20 +642,27 @@ describe('<EpicDetail/>', () => {
     test('updates users', () => {
       const { getByText, baseElement } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
+
       fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        baseElement.querySelector(
+          `.collaborator-button[title="${sampleGitHubUser3.login}"]`,
+        ),
       );
       fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="ThirdUser"]'),
+        baseElement.querySelector(
+          `.collaborator-button[title="${sampleGitHubUser4.login}"]`,
+        ),
       );
+
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
+
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-        'user-id',
-        'readonly',
-        '123456',
-        '345678',
+        sampleGitHubUser4.id,
+        sampleGitHubUser2.id,
+        sampleReadOnlyGitHubUser.id,
+        sampleGitHubUser1.id,
       ]);
     });
 
@@ -678,7 +671,7 @@ describe('<EpicDetail/>', () => {
       fireEvent.click(getByText('Add or Remove Collaborators'));
       fireEvent.click(
         baseElement.querySelector(
-          '.collaborator-button[title="TestGitHubUser"]',
+          `.collaborator-button[title="${sampleGitHubUser1.name} (${sampleGitHubUser1.login})"]`,
         ),
       );
       fireEvent.click(getByText('Save'));
@@ -709,7 +702,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.p1.epics[0],
-                  github_users: ['234567'],
+                  github_users: [sampleGitHubUser2.id],
                 },
               ],
             },
@@ -732,7 +725,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.p1.epics[0],
-                  github_users: ['123456'],
+                  github_users: [sampleGitHubUser1.id],
                 },
               ],
             },
@@ -752,7 +745,7 @@ describe('<EpicDetail/>', () => {
     beforeEach(() => {
       const task = {
         ...defaultState.tasks.p1.tasks[0],
-        assigned_qa: '234567',
+        assigned_qa: sampleGitHubUser1,
       };
       result = setup({
         initialState: {
@@ -768,12 +761,12 @@ describe('<EpicDetail/>', () => {
       fireEvent.click(result.getByText('Add or Remove Collaborators'));
       fireEvent.click(
         result.baseElement.querySelector(
-          '.collaborator-button[title="TestGitHubUser"]',
+          `.collaborator-button[title="${sampleGitHubUser1.name} (${sampleGitHubUser1.login})"]`,
         ),
       );
       fireEvent.click(
         result.baseElement.querySelector(
-          '.collaborator-button[title="OtherUser"]',
+          `.collaborator-button[title="${sampleGitHubUser2.name} (${sampleGitHubUser2.login})"]`,
         ),
       );
       fireEvent.click(result.getByText('Save'));
@@ -796,8 +789,8 @@ describe('<EpicDetail/>', () => {
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
         expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-          'user-id',
-          'readonly',
+          sampleReadOnlyGitHubUser.id,
+          sampleGitHubUser3.id,
         ]);
       });
     });
@@ -808,7 +801,9 @@ describe('<EpicDetail/>', () => {
       const { getAllByText, baseElement, getByText } = setup();
       fireEvent.click(getAllByText('Assign Tester')[0]);
       fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="currentUser"]'),
+        baseElement.querySelector(
+          `.collaborator-button[title="${sampleGitHubUser1.name} (${sampleGitHubUser1.login})"]`,
+        ),
       );
       fireEvent.click(getByText('Save'));
 
@@ -816,7 +811,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toBe('user-id');
+      expect(data.assigned_qa).toBe(sampleGitHubUser1.id);
       expect(data.should_alert_qa).toBe(false);
     });
 
@@ -825,7 +820,9 @@ describe('<EpicDetail/>', () => {
         const { getAllByText, baseElement, getByText } = setup();
         fireEvent.click(getAllByText('Assign Tester')[0]);
         fireEvent.click(
-          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+          baseElement.querySelector(
+            `.collaborator-button[title="${sampleGitHubUser2.name} (${sampleGitHubUser2.login})"]`,
+          ),
         );
         fireEvent.click(getByText('Notify Assigned Tester by Email'));
         fireEvent.click(getByText('Save'));
@@ -838,7 +835,9 @@ describe('<EpicDetail/>', () => {
         fireEvent.click(getAllByText('Assign Developer')[0]);
         fireEvent.click(getByText('Notify Assigned Developer by Email'));
         fireEvent.click(
-          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+          baseElement.querySelector(
+            `.collaborator-button[title="${sampleGitHubUser2.name} (${sampleGitHubUser2.login})"]`,
+          ),
         );
         fireEvent.click(getByText('Save'));
 

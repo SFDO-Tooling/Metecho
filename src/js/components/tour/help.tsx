@@ -3,6 +3,7 @@ import { pick } from 'lodash';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
+import { GitHubUser } from 'src/js/store/user/reducer';
 
 import GuidedTour, {
   getFinalStep,
@@ -12,16 +13,26 @@ import { getDemoEpic } from '@/js/components/tour/plan';
 import { Task } from '@/js/store/tasks/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
 
+export const demoGithubUser: GitHubUser = {
+  id: '123',
+  login: 'gh-username',
+  avatar_url: 'gh-avatar-url',
+  name: 'gh-name',
+  permissions: {
+    pull: true,
+    push: false,
+    admin: false,
+  },
+};
+
 export const getDemoTask = ({
   project,
   project_slug,
-  github_id,
 }: {
   project: string;
   project_slug: string;
-  github_id: string | null;
 }): Task => {
-  const epic = getDemoEpic({ project, github_id });
+  const epic = getDemoEpic({ project, demoGithubUser });
 
   return {
     id: 'demo-task',
@@ -50,7 +61,7 @@ export const getDemoTask = ({
     review_sha: '',
     status: TASK_STATUSES.IN_PROGRESS,
     pr_is_open: false,
-    assigned_dev: github_id,
+    assigned_dev: demoGithubUser,
     assigned_qa: null,
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,

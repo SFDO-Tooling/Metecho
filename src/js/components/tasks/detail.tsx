@@ -49,11 +49,10 @@ import {
   useFetchTaskIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
-import { AppState, ThunkDispatch } from '@/js/store';
+import { ThunkDispatch } from '@/js/store';
 import { createObject, updateObject } from '@/js/store/actions';
 import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
 import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
-import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
 import {
@@ -125,9 +124,7 @@ const TaskDetail = (
   );
   const { orgs } = useFetchOrgsIfMissing({ taskId: task?.id }, props);
   const user = useSelector(selectUserState) as User;
-  const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, project?.id, task?.assigned_qa),
-  );
+  const qaUser = task?.assigned_qa;
   const {
     history,
     location: { state },
@@ -138,8 +135,10 @@ const TaskDetail = (
   );
   const taskIsMerged = task?.status === TASK_STATUSES.COMPLETED;
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
-  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
+  const userIsAssignedTester = Boolean(
+    user.github_id === task?.assigned_qa?.id,
+  );
   const hasReviewRejected = Boolean(
     task?.review_valid &&
       task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
