@@ -1559,8 +1559,9 @@ class TestRefreshDatasets:
         file2.write_text("Hello:\n    - world")
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
         mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
-        task = task_factory(currently_refreshing_datasets=True)
-        task.get_repo_id = lambda: 1
+        task = task_factory(
+            currently_refreshing_datasets=True, epic__project__repo_id=123
+        )
 
         refresh_datasets(task, user_factory())
         task.refresh_from_db()
@@ -1583,7 +1584,9 @@ class TestRefreshDatasets:
             autospec=True,
             side_effect=Exception("Oh no!"),
         )
-        task = task_factory(currently_refreshing_datasets=True)
+        task = task_factory(
+            currently_refreshing_datasets=True, epic__project__repo_id=123
+        )
 
         with pytest.raises(Exception, match="Oh no!"):
             refresh_datasets(task, user_factory())
@@ -1603,8 +1606,9 @@ class TestRefreshDatasets:
         (folder2 / "this-is-not-yaml.json").touch()
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
         mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
-        task = task_factory(currently_refreshing_datasets=True)
-        task.get_repo_id = lambda: 1
+        task = task_factory(
+            currently_refreshing_datasets=True, epic__project__repo_id=123
+        )
 
         refresh_datasets(task, user_factory())
         task.refresh_from_db()
@@ -1620,8 +1624,9 @@ class TestRefreshDatasets:
     def test_missing_folder(self, mocker, task_factory, user_factory):
         # By not creating a `datasets/` directory we are on the "missing folder" case by default
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
-        task = task_factory(currently_refreshing_datasets=True)
-        task.get_repo_id = lambda: 1
+        task = task_factory(
+            currently_refreshing_datasets=True, epic__project__repo_id=123
+        )
 
         refresh_datasets(task, user_factory())
         task.refresh_from_db()
