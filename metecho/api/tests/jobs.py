@@ -1610,11 +1610,12 @@ class TestRefreshDatasets:
         task.refresh_from_db()
 
         assert not task.currently_refreshing_datasets
-        assert task.datasets_parse_errors == [
+        errors = [
             f"Expected a single '*.extract.yml' file inside '{tmp_path}/Default' but found 'Another.extract.yml', 'Default.extract.yml'",  # noqa: B950
             f"Expected 'datasets/' to only contain directories but found file '{tmp_path}/invalid-top-level-file.csv'",  # noqa: B950
             f"Expected a single '*.extract.yml' file inside '{tmp_path}/Empty' but found none",
         ]
+        assert set(task.datasets_parse_errors) == set(errors)  # set() ignores order
         assert task.datasets == {}
 
     def test_missing_folder(self, mocker, task_factory, user_factory):
