@@ -1176,10 +1176,6 @@ def refresh_datasets(task: Task, user: User):
                 errors.append("Could not find 'datasets/' directory in the Task branch")
             for obj in datasets:
                 if not obj.is_dir():
-                    errors.append(
-                        "Expected 'datasets/' to only contain directories but found file "
-                        f"'{obj}'"
-                    )
                     continue
                 yml_files = list(obj.glob("*.extract.yml"))
                 if len(yml_files) == 1:

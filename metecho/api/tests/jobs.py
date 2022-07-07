@@ -1612,16 +1612,14 @@ class TestRefreshDatasets:
         assert not task.currently_refreshing_datasets
         errors = [
             f"Expected a single '*.extract.yml' file inside '{tmp_path}/Default' but found 'Another.extract.yml', 'Default.extract.yml'",  # noqa: B950
-            f"Expected 'datasets/' to only contain directories but found file '{tmp_path}/invalid-top-level-file.csv'",  # noqa: B950
             f"Expected a single '*.extract.yml' file inside '{tmp_path}/Empty' but found none",
         ]
         assert set(task.datasets_parse_errors) == set(errors)  # set() ignores order
         assert task.datasets == {}
 
     def test_missing_folder(self, mocker, task_factory, user_factory):
+        # By not creating a `datasets/` directory we are on the "missing folder" case by default
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
-        Path = mocker.patch(f"{PATCH_ROOT}.Path", autospec=True)
-        Path.return_value.exists.return_value = False
         task = task_factory(currently_refreshing_datasets=True)
         task.get_repo_id = lambda: 1
 
