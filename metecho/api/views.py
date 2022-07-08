@@ -560,7 +560,7 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     def refresh_datasets(self, request, pk=None):
         """Queue a job to refresh the dataset definitions for a Task"""
         task = self.get_object()
-        task.queue_refresh_datasets(user=request.user)
+        task.queue_refresh_datasets(originating_user_id=request.user.id)
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
 

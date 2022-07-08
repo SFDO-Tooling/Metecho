@@ -667,6 +667,33 @@ class TestHookView:
             task.refresh_from_db()
             assert len(task.commits) == 1
 
+    @pytest.mark.parametrize("has_dev_org", (True, False))
+    def test_task_datasets_refreshed(
+        self, client, mocker, task_factory, scratch_org_factory, has_dev_org
+    ):
+        mocker.patch(
+            "metecho.api.authentication.validate_gh_hook_signature", return_value=True
+        )
+        refresh_datasets_job = mocker.patch("metecho.api.jobs.refresh_datasets_job")
+        task = task_factory(epic__project__repo_id=123, branch_name="task")
+        scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
+        if has_dev_org:
+            scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
+        data = {
+            "forced": False,
+            "ref": "refs/heads/task",
+            "commits": [],
+            "repository": {"id": 123},
+            "sender": {},
+        }
+
+        response = client.post(
+            reverse("hook"), data, format="json", HTTP_X_GITHUB_EVENT="push"
+        )
+
+        assert response.status_code == 202, response.content
+        assert refresh_datasets_job.delay.called == has_dev_org
+
     def test_202__push_epic_commits(
         self,
         settings,
@@ -1437,7 +1464,9 @@ class TestTaskViewSet:
 
         assert response.status_code == 202, response.data
         assert task.currently_refreshing_datasets
-        refresh_datasets_job.delay.assert_called_once_with(task, client.user)
+        refresh_datasets_job.delay.assert_called_once_with(
+            task, originating_user_id=client.user.id
+        )
 
 
 @pytest.mark.django_db

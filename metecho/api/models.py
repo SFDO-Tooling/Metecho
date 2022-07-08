@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Literal, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -965,6 +965,10 @@ class Task(
             return self.epic.project
         return self.project
 
+    @property
+    def attached_org_types(self) -> set[str]:
+        return set(self.orgs.values_list("org_type", flat=True))
+
     def save(self, *args, force_epic_save=False, **kwargs):
         is_new = self.pk is None
         ret = super().save(*args, **kwargs)
@@ -1154,6 +1158,9 @@ class Task(
         # This comes from the GitHub hook, and so has no originating user:
         self.notify_changed(originating_user_id=None)
 
+        if ScratchOrgType.DEV in self.attached_org_types:
+            self.queue_refresh_datasets()
+
     def add_metecho_git_sha(self, sha):
         self.metecho_commits.append(sha)
 
@@ -1201,18 +1208,18 @@ class Task(
             if delete_org and deletable_org:
                 org.queue_delete(originating_user_id=originating_user_id)
 
-    def queue_refresh_datasets(self, user):
+    def queue_refresh_datasets(self, originating_user_id=None):
         from .jobs import refresh_datasets_job
 
         self.currently_refreshing_datasets = True
         self.save()
-        self.notify_changed(originating_user_id=user.id)
-        refresh_datasets_job.delay(self, user)
+        self.notify_changed(originating_user_id=originating_user_id)
+        refresh_datasets_job.delay(self, originating_user_id=originating_user_id)
 
-    def finalize_refresh_datasets(self, user):
+    def finalize_refresh_datasets(self, originating_user_id=None):
         self.currently_refreshing_datasets = False
         self.save()
-        self.notify_changed(originating_user_id=user.id)
+        self.notify_changed(originating_user_id=originating_user_id)
 
 
 class ScratchOrg(

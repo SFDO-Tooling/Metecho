@@ -41,7 +41,14 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import GitHubOrganization, Project, Task, TaskReviewStatus, User
+from .models import (
+    GitHubOrganization,
+    Project,
+    ScratchOrgType,
+    Task,
+    TaskReviewStatus,
+    User,
+)
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -856,6 +863,8 @@ def refresh_commits(*, project, branch_name, originating_user_id):
         ]
         task.update_has_unmerged_commits()
         task.update_review_valid()
+        if ScratchOrgType.DEV in task.attached_org_types:
+            refresh_datasets(task)
         task.finalize_task_update(originating_user_id=originating_user_id)
 
 
@@ -1159,13 +1168,17 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 user_reassign_job = job(user_reassign)
 
 
-def refresh_datasets(task: Task, user: User):
+def refresh_datasets(task: Task, originating_user_id=None):
     """
     Refresh the dataset definition cache on `task` by parsing definitions from the Task branch
     """
     try:
         task.refresh_from_db()
-        with local_github_checkout(user, task.get_repo_id(), task.branch_name):
+        with local_github_checkout(
+            repo_owner=task.root_project.repo_owner,
+            repo_name=task.root_project.repo_name,
+            commit_ish=task.branch_name,
+        ):
             errors = []
             definitions = {}
             datasets_dir = Path("datasets")
@@ -1189,12 +1202,12 @@ def refresh_datasets(task: Task, user: User):
         task.datasets = definitions
         task.datasets_parse_errors = errors
     except Exception:
-        task.finalize_refresh_datasets(user=user)
+        task.finalize_refresh_datasets(originating_user_id=originating_user_id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        task.finalize_refresh_datasets(user=user)
+        task.finalize_refresh_datasets(originating_user_id=originating_user_id)
 
 
 refresh_datasets_job = job(refresh_datasets)

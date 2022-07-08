@@ -867,6 +867,26 @@ class TestRefreshCommits:
             project.refresh_from_db()
             assert project.latest_sha == "abcd1234"
 
+    @pytest.mark.parametrize("has_dev_org", (True, False))
+    def test_task_refreshes_datasets(
+        self, task_factory, scratch_org_factory, mocker, has_dev_org
+    ):
+        get_repo_info = mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
+        get_repo_info.return_value.commits.return_value = [Commit(sha="123")]
+        refresh_datasets = mocker.patch(f"{PATCH_ROOT}.refresh_datasets", autospec=True)
+        task = task_factory(
+            epic__project__repo_id=123, branch_name="task", origin_sha="123"
+        )
+        scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
+        if has_dev_org:
+            scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
+
+        refresh_commits(
+            project=task.root_project, branch_name="task", originating_user_id=None
+        )
+
+        assert refresh_datasets.called == has_dev_org
+
 
 @pytest.mark.django_db
 def test_create_pr(user_factory, task_factory):
@@ -1548,7 +1568,7 @@ Accounts:
 
 @pytest.mark.django_db
 class TestRefreshDatasets:
-    def test_ok(self, mocker, task_factory, user_factory, tmp_path):
+    def test_ok(self, mocker, task_factory, tmp_path):
         folder1 = tmp_path / "Default"
         folder1.mkdir()
         file1 = folder1 / "Default.extract.yml"
@@ -1559,11 +1579,9 @@ class TestRefreshDatasets:
         file2.write_text("Hello:\n    - world")
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
         mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
-        task = task_factory(
-            currently_refreshing_datasets=True, epic__project__repo_id=123
-        )
+        task = task_factory(currently_refreshing_datasets=True)
 
-        refresh_datasets(task, user_factory())
+        refresh_datasets(task)
         task.refresh_from_db()
 
         assert not task.currently_refreshing_datasets
@@ -1578,24 +1596,22 @@ class TestRefreshDatasets:
             "MyDataset": {"Hello": ["world"]},
         }
 
-    def test_exception(self, mocker, caplog, task_factory, user_factory):
+    def test_exception(self, mocker, caplog, task_factory):
         mocker.patch(
             f"{PATCH_ROOT}.local_github_checkout",
             autospec=True,
             side_effect=Exception("Oh no!"),
         )
-        task = task_factory(
-            currently_refreshing_datasets=True, epic__project__repo_id=123
-        )
+        task = task_factory(currently_refreshing_datasets=True)
 
         with pytest.raises(Exception, match="Oh no!"):
-            refresh_datasets(task, user_factory())
+            refresh_datasets(task)
         task.refresh_from_db()
 
         assert not task.currently_refreshing_datasets
         assert "Oh no!" in caplog.text
 
-    def test_errors(self, mocker, task_factory, user_factory, tmp_path):
+    def test_errors(self, mocker, task_factory, tmp_path):
         (tmp_path / "invalid-top-level-file.csv").touch()
         folder1 = tmp_path / "Default"
         folder1.mkdir()
@@ -1606,11 +1622,9 @@ class TestRefreshDatasets:
         (folder2 / "this-is-not-yaml.json").touch()
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
         mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
-        task = task_factory(
-            currently_refreshing_datasets=True, epic__project__repo_id=123
-        )
+        task = task_factory(currently_refreshing_datasets=True)
 
-        refresh_datasets(task, user_factory())
+        refresh_datasets(task)
         task.refresh_from_db()
 
         assert not task.currently_refreshing_datasets
@@ -1621,14 +1635,12 @@ class TestRefreshDatasets:
         assert set(task.datasets_parse_errors) == set(errors)  # set() ignores order
         assert task.datasets == {}
 
-    def test_missing_folder(self, mocker, task_factory, user_factory):
+    def test_missing_folder(self, mocker, task_factory):
         # By not creating a `datasets/` directory we are on the "missing folder" case by default
         mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
-        task = task_factory(
-            currently_refreshing_datasets=True, epic__project__repo_id=123
-        )
+        task = task_factory(currently_refreshing_datasets=True)
 
-        refresh_datasets(task, user_factory())
+        refresh_datasets(task)
         task.refresh_from_db()
 
         assert not task.currently_refreshing_datasets
