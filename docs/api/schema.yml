@@ -1275,6 +1275,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Task'
           description: ''
+  /api/tasks/{id}/refresh_dataset_schema/:
+    post:
+      operationId: tasks_refresh_dataset_schema_create
+      description: Queue a job to refresh the Dev org schema (if it exists)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this task.
+        required: true
+      tags:
+      - tasks
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
   /api/tasks/{id}/refresh_datasets/:
     post:
       operationId: tasks_refresh_datasets_create
@@ -2376,6 +2400,14 @@ components:
         currently_refreshing_datasets:
           type: boolean
           readOnly: true
+        dataset_schema:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Cache of the Dev org schema related to this Task
+        currently_refreshing_dataset_schema:
+          type: boolean
+          readOnly: true
     Project:
       type: object
       properties:
@@ -2823,6 +2855,14 @@ components:
         currently_refreshing_datasets:
           type: boolean
           readOnly: true
+        dataset_schema:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Cache of the Dev org schema related to this Task
+        currently_refreshing_dataset_schema:
+          type: boolean
+          readOnly: true
       required:
       - assigned_qa
       - branch_diff_url
@@ -2831,8 +2871,10 @@ components:
       - created_at
       - currently_creating_branch
       - currently_creating_pr
+      - currently_refreshing_dataset_schema
       - currently_refreshing_datasets
       - currently_submitting_review
+      - dataset_schema
       - datasets
       - datasets_parse_errors
       - description_rendered

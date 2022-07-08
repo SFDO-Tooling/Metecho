@@ -26,6 +26,7 @@ from ..jobs import (
     get_social_image,
     get_unsaved_changes,
     refresh_commits,
+    refresh_dataset_schema,
     refresh_datasets,
     refresh_github_issues,
     refresh_github_organizations_for_user,
@@ -1648,3 +1649,39 @@ class TestRefreshDatasets:
             "Could not find 'datasets/' directory in the Task branch"
         ]
         assert task.datasets == {}
+
+
+@pytest.mark.django_db
+class TestRefreshDatasetSchema:
+    def test_ok(self, scratch_org_factory):
+        org = scratch_org_factory(
+            org_type=ScratchOrgType.DEV, task__currently_refreshing_dataset_schema=True
+        )
+        task = org.task
+
+        refresh_dataset_schema(task)
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_dataset_schema
+        assert task.dataset_schema  # TODO: actually check contents of schema
+
+    def test_exception(self, caplog, task_factory):
+        task = task_factory(currently_refreshing_dataset_schema=True)
+
+        with pytest.raises(Exception, match="Oh no!"):
+            refresh_dataset_schema(task)
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_dataset_schema
+        assert "Oh no!" in caplog.text
+
+    def test_missing_dev_org(self, task_factory):
+        task = task_factory(currently_refreshing_dataset_schema=True)
+
+        refresh_dataset_schema(task)
+        task.refresh_from_db()
+
+        assert not task.currently_refreshing_dataset_schema
+        assert (
+            task.dataset_schema == {}
+        ), "Expected an empty dataset when Task has no Dev org attached"

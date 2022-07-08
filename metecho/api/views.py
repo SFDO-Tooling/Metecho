@@ -563,6 +563,14 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         task.queue_refresh_datasets(originating_user_id=request.user.id)
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=None, responses={202: TaskSerializer})
+    @action(detail=True, methods=["POST"])
+    def refresh_dataset_schema(self, request, pk=None):
+        """Queue a job to refresh the Dev org schema (if it exists)"""
+        task = self.get_object()
+        task.queue_refresh_dataset_schema(originating_user_id=request.user.id)
+        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
 
 class ScratchOrgViewSet(
     mixins.CreateModelMixin,

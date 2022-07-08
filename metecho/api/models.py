@@ -920,7 +920,7 @@ class Task(
         default=dict,
         encoder=DjangoJSONEncoder,
         blank=True,
-        help_text=_("Cache of the ScratchOrg schema related to this Task"),
+        help_text=_("Cache of the Dev org schema related to this Task"),
     )
     currently_refreshing_datasets = models.BooleanField(default=False)
     datasets = models.JSONField(
@@ -1218,6 +1218,19 @@ class Task(
 
     def finalize_refresh_datasets(self, originating_user_id=None):
         self.currently_refreshing_datasets = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+    def queue_refresh_dataset_schema(self, originating_user_id=None):
+        from .jobs import refresh_dataset_schema_job
+
+        self.currently_refreshing_dataset_schema = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+        refresh_dataset_schema_job.delay(self, originating_user_id=originating_user_id)
+
+    def finalize_refresh_dataset_schema(self, originating_user_id=None):
+        self.currently_refreshing_dataset_schema = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 

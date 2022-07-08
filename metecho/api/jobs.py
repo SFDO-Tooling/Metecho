@@ -1211,3 +1211,27 @@ def refresh_datasets(task: Task, originating_user_id=None):
 
 
 refresh_datasets_job = job(refresh_datasets)
+
+
+def refresh_dataset_schema(task: Task, originating_user_id=None):
+    """
+    Refresh the schema cache on `task` by parsing it from the Dev org
+    """
+    try:
+        task.refresh_from_db()
+        if dev_org := task.orgs.filter(org_type=ScratchOrgType.DEV).first():
+            # TODO: Actually fetch a schema from dev_org
+            schema = {}
+        else:
+            schema = {}
+        task.dataset_schema = schema
+    except Exception:
+        task.finalize_refresh_dataset_schema(originating_user_id=originating_user_id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        task.finalize_refresh_dataset_schema(originating_user_id=originating_user_id)
+
+
+refresh_dataset_schema_job = job(refresh_dataset_schema)

@@ -646,6 +646,8 @@ class TaskSerializer(HashIdModelSerializer):
             "datasets",
             "datasets_parse_errors",
             "currently_refreshing_datasets",
+            "dataset_schema",
+            "currently_refreshing_dataset_schema",
         )
         extra_kwargs = {
             "has_unmerged_commits": {"read_only": True},
@@ -669,6 +671,8 @@ class TaskSerializer(HashIdModelSerializer):
             "datasets": {"read_only": True},
             "datasets_parse_errors": {"read_only": True},
             "currently_refreshing_datasets": {"read_only": True},
+            "dataset_schema": {"read_only": True},
+            "currently_refreshing_dataset_schema": {"read_only": True},
         }
         validators = (UnattachedIssueValidator(),)
 

@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 default=dict,
                 encoder=django.core.serializers.json.DjangoJSONEncoder,
-                help_text="Cache of the ScratchOrg schema related to this Task",
+                help_text="Cache of the Dev org schema related to this Task",
             ),
         ),
         migrations.AddField(

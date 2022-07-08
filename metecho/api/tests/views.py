@@ -1464,7 +1464,24 @@ class TestTaskViewSet:
 
         assert response.status_code == 202, response.data
         assert task.currently_refreshing_datasets
+        assert response.data["currently_refreshing_datasets"]
         refresh_datasets_job.delay.assert_called_once_with(
+            task, originating_user_id=client.user.id
+        )
+
+    def test_refresh_dataset_schema(self, mocker, client, task):
+        assert not task.currently_refreshing_dataset_schema
+        refresh_dataset_schema_job = mocker.patch(
+            "metecho.api.jobs.refresh_dataset_schema_job", autospec=True
+        )
+
+        response = client.post(reverse("task-refresh-dataset-schema", args=[task.pk]))
+        task.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert task.currently_refreshing_dataset_schema
+        assert response.data["currently_refreshing_dataset_schema"]
+        refresh_dataset_schema_job.delay.assert_called_once_with(
             task, originating_user_id=client.user.id
         )
 
