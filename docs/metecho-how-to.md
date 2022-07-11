@@ -1,11 +1,15 @@
-# Steps to Guide a Team Through Metecho
+# Salesforce Contributor Guide to Metecho: Step-by-Step
 
-## Why Metecho?
+## Welcome Metecho
+
+If you or a team you're leading would like to contribute to a Salesforce Project without using GitHub, you've come to the right place.
+
+**Definition:** *[Greek] To share or participate in.*
 
 **Pronunciation:** *“Met” rhymes with “bet.” “Echo” as in the reflection of
 sound waves.*
 
-**Definition:** *[Greek] To share or participate in.*
+## Why We Built Metecho
 
 **Metecho makes it easier to collaborate on sharable Saleforce Projects.**
 View, test, and contribute to Projects
@@ -13,22 +17,28 @@ without learning to edit code on GitHub. Collaborate with a team. Create
 temporary Salesforce Orgs. Make changes, retrieve them, and add your work to a
 Project with this interactive tool. 
 
+## What You'll Learn
+After working through this Guide, you will be able to:
+
 - **Play**: Make a scratch org to view Projects, play with ideas, or create demos.
 - **Help**: Browse available Tasks and test work that is ready for review. 
-- **Plan**: Create a Task or an Epic and contribute your work to a Project. 
+- **Plan**: Create a Task or an Epic and contribute your work to a Project.
+- **Innovate**: Create a brand new Salesforce Project.
+- **Define**: Understand the meaning of essential Metecho (and GitHub) terms.
 
 ***
 
 ## Step 0 - Log In with GitHub
+Metecho works by talking to GitHub for you. So, while you don't need to use GitHub, you do still need a GitHub account.
 
-- Create a [GitHub](https://github.com) account, if you don’t yet have one.
+- Create a [GitHub](https://github.com) account, if you don’t already have one.
 - Contact an admin for the GitHub repository you want to contribute to (e.g.
   [Outbound Funds](https://github.com/SalesforceFoundation/OutboundFundsModule)) on
-  GitHub and ensure that you and anyone you’d like to work with are
+  GitHub and be sure that you and anyone you’d like to work with are
   collaborators.
 
 If you want to create a project, skip down to [Create a
-Project](#create-a-project).
+Project](#create-a-project). Otherwise, once you're logged in with your GitHub account, you can continue to Step 1. Yay!
 
 ## Step 1 - Select a Project
 
@@ -42,7 +52,7 @@ done. They are equivalent to GitHub repositories.*
     collaborator.
   - Select `Re-Sync Projects` in Metecho.
 
-### Next steps depend on your goal:
+### What's your goal?
 
 - To contribute to a Project, continue to [Step 2 - Create a Task](#step-2---create-a-task).
 
@@ -64,8 +74,7 @@ be part of an Epic. Creating a Task creates a branch in GitHub.*
     a different one.
   - If you want to create a single Task, select `Create` to save and navigate to
     your new Task.
-  - If you want to create this Task, plus additional Tasks that are unrelated to
-    each other, select `Create & New`.
+  - If you want to create this Task, plus additional Tasks, select `Create & New`.
 
     ![create tasks modal with create, create & new options](/docs/create-task-modal.jpg?raw=true)
 
@@ -95,7 +104,7 @@ be part of an Epic. Creating a Task creates a branch in GitHub.*
 contributions to a Project. Dev Orgs expire after 30 days, and all unretrieved
 work is deleted.*
 
-- On the Task's detail page, you can review the `Next Steps for This Task` list
+- On the Task's detail page, you can review the `Next Steps for This Task`
   to see progress and who is responsible for the next step.
 
   ![list of next steps for the tasks](/docs/task-next-steps.jpg?raw=true)
@@ -116,6 +125,8 @@ work is deleted.*
 **Retrieve Changes** - *Pull the work you did in your Dev Org (in Salesforce)
 into Metecho so that other people can review it. Developers may retrieve changes
 as many times as they like while they are working.*
+
+**Commit** - *A way to document and describe changes the Developer retrieves from the Dev Org. Each time a Developer makes a commit, it is saved in a Commit History list.*
 
 - When the Developer is ready to pull the Dev Org work from Salesforce into
   Metecho, they need to select `Retrieve Changes from Dev Org`.
@@ -183,7 +194,7 @@ completed.*
 **Test Org** - *A temporary Salesforce org where the Tester can look over the
 Developer’s work on a specific Task. Test Orgs expire after 30 days.*
 
-- Remember, you can review the `Next Steps for This Task` list to see progress
+- Remember, you can review the `Next Steps for This Task` to see progress
   and who is responsible for the next step.
 - To begin testing, a Task Tester will need to select `Create Org` in the Test
   Org card.
@@ -192,7 +203,7 @@ Developer’s work on a specific Task. Test Orgs expire after 30 days.*
 
 ## Step 10 - Test Changes in a Test Org
 
-- **Testing of a Test Org must be done in the Salesforce UI, not in Metecho.**
+- **Testing must be done in the Salesforce UI, not in Metecho.**
 - Select `View Org` on the Test Org card to navigate out of Metecho and test the
   Developer’s changes in the temporary Test Org in Salesforce.
 
@@ -265,7 +276,7 @@ To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task)
 - On the Project detail page, select `Create Scratch Org` under My Project Scratch Org in the right-hand column.
 - Scratch Org creation can take a number of minutes. Feel free to leave the page.
   Metecho will provide an alert when the Scratch Org is ready.
-- You can also select a specific Epic or Task to create a Scratch Org for specific work in-progress.
+- You can also select an Epic or Task to create a Scratch Org for specific work in progress.
 
 ## Make Changes in Scratch Org
 
