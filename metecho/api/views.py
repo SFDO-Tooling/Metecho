@@ -46,6 +46,7 @@ from .models import (
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
+    CaptureDatasetSerializer,
     CheckRepoNameSerializer,
     CommitSerializer,
     CreatePrSerializer,
@@ -569,6 +570,16 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         """Queue a job to refresh the Dev org schema (if it exists)"""
         task = self.get_object()
         task.queue_refresh_dataset_schema(originating_user_id=request.user.id)
+        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=CaptureDatasetSerializer, responses={202: TaskSerializer})
+    @action(detail=True, methods=["POST"])
+    def capture_dataset(self, request, pk=None):
+        """Queue a job that updates and captures a dataset from the Task Dev Org"""
+        task = self.get_object()
+        serializer = CaptureDatasetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        task.queue_capture_dataset(**serializer.validated_data, user=request.user)
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
 

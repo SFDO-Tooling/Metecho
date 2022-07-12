@@ -934,6 +934,7 @@ class Task(
         default=list,
         help_text=_("User-facing errors that occurred during dataset refresh"),
     )
+    currently_capturing_dataset = models.BooleanField(default=False)
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
@@ -1231,6 +1232,32 @@ class Task(
 
     def finalize_refresh_dataset_schema(self, originating_user_id=None):
         self.currently_refreshing_dataset_schema = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+    def queue_capture_dataset(
+        self,
+        *,
+        user: User,
+        commit_message: str,
+        dataset_name: str,
+        dataset_definition: dict,
+    ):
+        from .jobs import capture_dataset_job
+
+        self.currently_capturing_dataset = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+        capture_dataset_job.delay(
+            task=self,
+            user=user,
+            commit_message=commit_message,
+            dataset_name=dataset_name,
+            dataset_definition=dataset_definition,
+        )
+
+    def finalize_capture_dataset(self, originating_user_id=None):
+        self.currently_capturing_dataset = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 

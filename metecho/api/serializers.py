@@ -648,6 +648,7 @@ class TaskSerializer(HashIdModelSerializer):
             "currently_refreshing_datasets",
             "dataset_schema",
             "currently_refreshing_dataset_schema",
+            "currently_capturing_dataset",
         )
         extra_kwargs = {
             "has_unmerged_commits": {"read_only": True},
@@ -673,6 +674,7 @@ class TaskSerializer(HashIdModelSerializer):
             "currently_refreshing_datasets": {"read_only": True},
             "dataset_schema": {"read_only": True},
             "currently_refreshing_dataset_schema": {"read_only": True},
+            "currently_capturing_dataset": {"read_only": True},
         }
         validators = (UnattachedIssueValidator(),)
 
@@ -1071,6 +1073,12 @@ class CommitSerializer(serializers.Serializer):
         child=serializers.ListField(child=serializers.CharField())
     )
     target_directory = serializers.CharField()
+
+
+class CaptureDatasetSerializer(serializers.Serializer):
+    commit_message = serializers.CharField()
+    dataset_name = serializers.CharField()
+    dataset_definition = serializers.DictField()
 
 
 class SiteSerializer(serializers.ModelSerializer):

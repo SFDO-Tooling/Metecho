@@ -1453,8 +1453,8 @@ class TestTaskViewSet:
         assert task.assigned_dev == "123456"
         assert task.assigned_qa == "123456"
 
-    def test_refresh_datasets(self, mocker, client, task):
-        assert not task.currently_refreshing_datasets
+    def test_refresh_datasets(self, mocker, client, task_factory):
+        task = task_factory(currently_refreshing_datasets=False)
         refresh_datasets_job = mocker.patch(
             "metecho.api.jobs.refresh_datasets_job", autospec=True
         )
@@ -1469,8 +1469,8 @@ class TestTaskViewSet:
             task, originating_user_id=client.user.id
         )
 
-    def test_refresh_dataset_schema(self, mocker, client, task):
-        assert not task.currently_refreshing_dataset_schema
+    def test_refresh_dataset_schema(self, mocker, client, task_factory):
+        task = task_factory(currently_refreshing_dataset_schema=False)
         refresh_dataset_schema_job = mocker.patch(
             "metecho.api.jobs.refresh_dataset_schema_job", autospec=True
         )
@@ -1483,6 +1483,34 @@ class TestTaskViewSet:
         assert response.data["currently_refreshing_dataset_schema"]
         refresh_dataset_schema_job.delay.assert_called_once_with(
             task, originating_user_id=client.user.id
+        )
+
+    def test_capture_dataset(self, mocker, client, task_factory):
+        task = task_factory(currently_capturing_dataset=False)
+        capture_dataset_job = mocker.patch(
+            "metecho.api.jobs.capture_dataset_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("task-capture-dataset", args=[task.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "dataset_name": "NewDataset",
+                "dataset_definition": {"foo": "bar"},
+            },
+        )
+        task.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert task.currently_capturing_dataset
+        assert response.data["currently_capturing_dataset"]
+        capture_dataset_job.delay.assert_called_once_with(
+            task=task,
+            user=client.user,
+            commit_message="New commit",
+            dataset_name="NewDataset",
+            dataset_definition={"foo": "bar"},
         )
 
 

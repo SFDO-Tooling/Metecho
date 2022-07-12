@@ -16,6 +16,7 @@ from ..jobs import (
     _create_org_and_run_flow,
     alert_user_about_expiring_org,
     available_org_config_names,
+    capture_dataset,
     commit_changes_from_org,
     convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
@@ -1685,3 +1686,47 @@ class TestRefreshDatasetSchema:
         assert (
             task.dataset_schema == {}
         ), "Expected an empty dataset when Task has no Dev org attached"
+
+
+@pytest.mark.django_db
+class TestCaptureDataset:
+    def test_ok(self, mocker, task_factory, user_factory):
+        mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
+        mocker.patch(f"{PATCH_ROOT}.capture_and_commit_dataset", autospec=True)
+        task = task_factory(
+            currently_capturing_dataset=True, epic__project__repo_id=123
+        )
+
+        capture_dataset(
+            task=task,
+            user=user_factory(),
+            commit_message="Testing dataset",
+            dataset_name="Test",
+            dataset_definition={"foo": "bar"},
+        )
+        task.refresh_from_db()
+
+        assert not task.currently_capturing_dataset
+
+    def test_exception(self, mocker, caplog, task_factory, user_factory):
+        mocker.patch(
+            f"{PATCH_ROOT}.get_repo_info",
+            autospec=True,
+            side_effect=Exception("Oh no!"),
+        )
+        task = task_factory(
+            currently_capturing_dataset=True, epic__project__repo_id=123
+        )
+
+        with pytest.raises(Exception, match="Oh no!"):
+            capture_dataset(
+                task=task,
+                user=user_factory(),
+                commit_message="Testing dataset",
+                dataset_name="Test",
+                dataset_definition={"foo": "bar"},
+            )
+        task.refresh_from_db()
+
+        assert not task.currently_capturing_dataset
+        assert "Oh no!" in caplog.text

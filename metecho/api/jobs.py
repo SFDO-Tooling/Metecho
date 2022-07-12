@@ -51,6 +51,7 @@ from .models import (
 )
 from .push import report_scratch_org_error
 from .sf_org_changes import (
+    capture_and_commit_dataset,
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
@@ -1235,3 +1236,36 @@ def refresh_dataset_schema(task: Task, originating_user_id=None):
 
 
 refresh_dataset_schema_job = job(refresh_dataset_schema)
+
+
+def capture_dataset(
+    *,
+    task: Task,
+    user: User,
+    commit_message: str,
+    dataset_name: str,
+    dataset_definition: dict,
+):
+    """
+    Update and capture a dataset from the `task` Dev Org
+    """
+    try:
+        task.refresh_from_db()
+        capture_and_commit_dataset(
+            repo=get_repo_info(user, repo_id=task.get_repo_id()),
+            branch=task.branch_name,
+            author={"name": user.username, "email": user.email},
+            commit_message=commit_message,
+            dataset_name=dataset_name,
+            dataset_definition=dataset_definition,
+        )
+    except Exception:
+        task.finalize_capture_dataset(originating_user_id=user.id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        task.finalize_capture_dataset(originating_user_id=user.id)
+
+
+capture_dataset_job = job(capture_dataset)
