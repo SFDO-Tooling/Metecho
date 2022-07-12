@@ -1179,10 +1179,10 @@ def refresh_datasets(task: Task, originating_user_id=None):
             repo_owner=task.root_project.repo_owner,
             repo_name=task.root_project.repo_name,
             commit_ish=task.branch_name,
-        ):
+        ) as project_path:
             errors = []
             definitions = {}
-            datasets_dir = Path("datasets")
+            datasets_dir = Path(project_path) / "datasets"
             if datasets_dir.exists():
                 datasets = datasets_dir.iterdir()
             else:
@@ -1197,7 +1197,7 @@ def refresh_datasets(task: Task, originating_user_id=None):
                 else:
                     file_names = ", ".join(f"'{f.name}'" for f in yml_files) or "none"
                     errors.append(
-                        f"Expected a single '*.extract.yml' file inside '{obj}' "
+                        f"Expected a single '*.extract.yml' file inside '{obj.name}/' "
                         f"but found {file_names}"
                     )
         task.datasets = definitions

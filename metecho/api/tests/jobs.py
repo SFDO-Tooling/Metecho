@@ -1571,16 +1571,19 @@ Accounts:
 @pytest.mark.django_db
 class TestRefreshDatasets:
     def test_ok(self, mocker, task_factory, tmp_path):
-        folder1 = tmp_path / "Default"
-        folder1.mkdir()
+        folder1 = tmp_path / "datasets" / "Default"
+        folder1.mkdir(parents=True)
         file1 = folder1 / "Default.extract.yml"
         file1.write_text(DATASET_YAML)
-        folder2 = tmp_path / "MyDataset"
-        folder2.mkdir()
+        folder2 = tmp_path / "datasets" / "MyDataset"
+        folder2.mkdir(parents=True)
         file2 = folder2 / "foobar.extract.yml"
         file2.write_text("Hello:\n    - world")
-        mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
-        mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
+        mocker.patch(
+            f"{PATCH_ROOT}.local_github_checkout",
+            autospec=True,
+            **{"return_value.__enter__.return_value": str(tmp_path)},
+        )
         task = task_factory(currently_refreshing_datasets=True)
 
         refresh_datasets(task)
@@ -1615,15 +1618,18 @@ class TestRefreshDatasets:
 
     def test_errors(self, mocker, task_factory, tmp_path):
         (tmp_path / "invalid-top-level-file.csv").touch()
-        folder1 = tmp_path / "Default"
-        folder1.mkdir()
+        folder1 = tmp_path / "datasets" / "Default"
+        folder1.mkdir(parents=True)
         (folder1 / "Default.extract.yml").touch()
         (folder1 / "Another.extract.yml").touch()
-        folder2 = tmp_path / "Empty"
-        folder2.mkdir()
+        folder2 = tmp_path / "datasets" / "Empty"
+        folder2.mkdir(parents=True)
         (folder2 / "this-is-not-yaml.json").touch()
-        mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
-        mocker.patch(f"{PATCH_ROOT}.Path", autospec=True, return_value=tmp_path)
+        mocker.patch(
+            f"{PATCH_ROOT}.local_github_checkout",
+            autospec=True,
+            **{"return_value.__enter__.return_value": str(tmp_path)},
+        )
         task = task_factory(currently_refreshing_datasets=True)
 
         refresh_datasets(task)
@@ -1631,15 +1637,19 @@ class TestRefreshDatasets:
 
         assert not task.currently_refreshing_datasets
         errors = [
-            f"Expected a single '*.extract.yml' file inside '{tmp_path}/Default' but found 'Another.extract.yml', 'Default.extract.yml'",  # noqa: B950
-            f"Expected a single '*.extract.yml' file inside '{tmp_path}/Empty' but found none",
+            "Expected a single '*.extract.yml' file inside 'Default/' but found 'Another.extract.yml', 'Default.extract.yml'",  # noqa: B950
+            "Expected a single '*.extract.yml' file inside 'Empty/' but found none",
         ]
-        assert set(task.datasets_parse_errors) == set(errors)  # set() ignores order
+        assert sorted(task.datasets_parse_errors) == sorted(errors)
         assert task.datasets == {}
 
-    def test_missing_folder(self, mocker, task_factory):
+    def test_missing_folder(self, mocker, task_factory, tmp_path):
         # By not creating a `datasets/` directory we are on the "missing folder" case by default
-        mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
+        mocker.patch(
+            f"{PATCH_ROOT}.local_github_checkout",
+            autospec=True,
+            **{"return_value.__enter__.return_value": str(tmp_path)},
+        )
         task = task_factory(currently_refreshing_datasets=True)
 
         refresh_datasets(task)
