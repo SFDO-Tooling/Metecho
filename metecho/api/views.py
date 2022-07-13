@@ -34,6 +34,7 @@ from .hook_serializers import (
 from .models import (
     Epic,
     EpicStatus,
+    GitHubCollaboration,
     GitHubIssue,
     GitHubOrganization,
     Project,
@@ -343,8 +344,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         if self.request.user.is_superuser:
             return self.queryset
 
-        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
-        return self.queryset.filter(repo_id__in=repo_ids)
+        return self.queryset.filter(github_users__id=self.request.user.github_id)
 
     @extend_schema(request=ProjectCreateSerializer)
     def create(self, request):

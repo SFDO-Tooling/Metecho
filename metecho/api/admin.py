@@ -14,9 +14,10 @@ from . import gh
 from .models import (
     Epic,
     EpicSlug,
+    GitHubCollaboration,
     GitHubIssue,
     GitHubOrganization,
-    GitHubRepository,
+    GitHubUser,
     Project,
     ProjectDependency,
     ProjectSlug,
@@ -111,11 +112,19 @@ class UserAdmin(admin.ModelAdmin):
     filter_horizontal = ("groups", "user_permissions", "organizations")
 
 
+class GitHubCollaborationInlineAdmin(admin.TabularInline):
+    model = GitHubCollaboration
+
+    nope = lambda *_: False  # noqa: E731
+    has_add_permission = has_delete_permission = has_change_permission = nope
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     form = ProjectForm
     list_display = ("name", "repo_owner", "repo_name", "created_at")
     search_fields = ("name", "repo_owner", "repo_name")
+    inlines = (GitHubCollaborationInlineAdmin,)
 
     def save_model(self, request, obj, form, change):
         if not obj.repo_image_url:
@@ -150,12 +159,11 @@ class GitHubOrganizationAdmin(admin.ModelAdmin):
         return urlize(obj.github_url)
 
 
-@admin.register(GitHubRepository)
-class GitHubRepositoryAdmin(admin.ModelAdmin):
-    list_display = ("repo_url", "user")
-    list_filter = ("user",)
-    list_select_related = ("user",)
-    search_fields = ("repo_url", "repo_id")
+@admin.register(GitHubUser)
+class GitHubUserAdmin(admin.ModelAdmin):
+    list_display = ("login", "name")
+    search_fields = ("login", "name")
+    inlines = (GitHubCollaborationInlineAdmin,)
 
 
 @admin.register(GitHubIssue)
@@ -174,6 +182,7 @@ class EpicAdmin(admin.ModelAdmin):
     list_select_related = ("project",)
     search_fields = ("name", "branch_name")
     raw_id_fields = ("issue",)
+    filter_horizontal = ("github_users",)
 
 
 @admin.register(EpicSlug)

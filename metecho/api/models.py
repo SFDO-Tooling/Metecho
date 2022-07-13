@@ -384,19 +384,9 @@ class Project(
         validators=[validate_unicode_branch],
     )
     branch_prefix = StringField(blank=True)
-    # User data is shaped like this:
-    #   {
-    #     "id": str,
-    #     "login": str,
-    #     "name": str,
-    #     "avatar_url": str,
-    #     "permissions": {
-    #       "push": bool,
-    #       "pull": bool,
-    #       "admin": bool,
-    #     },
-    #   }
-    github_users = models.JSONField(default=list, blank=True)
+    github_users = models.ManyToManyField(
+        "GitHubUser", through="GitHubCollaboration", related_name="projects"
+    )
     # List of {
     #   "key": str,
     #   "label": str,
@@ -454,6 +444,10 @@ class Project(
                 self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
         super().save(*args, **kwargs)
+
+    @property
+    def repo_url(self) -> str:
+        return f"https://github.com/{self.repo_owner}/{self.repo_name}"
 
     def finalize_get_social_image(self):
         self.save()
@@ -580,17 +574,9 @@ class Project(
             task.add_commits(commits, sender)
 
     def has_push_permission(self, user):
-        return GitHubRepository.objects.filter(
-            user=user,
-            repo_id=self.repo_id,
-            permissions__push=True,
+        return self.githubcollaboration_set.filter(
+            user_id=user.github_id, permissions__push=True
         ).exists()
-
-    def get_collaborator(self, gh_uid: str) -> Optional[Dict[str, object]]:
-        try:
-            return [u for u in self.github_users if u["id"] == gh_uid][0]
-        except IndexError:
-            return None
 
 
 class ProjectDependency(HashIdMixin, TimestampsMixin):
@@ -624,20 +610,26 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
         return f"https://github.com/{self.login}"
 
 
-class GitHubRepository(HashIdMixin, models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="repositories"
-    )
-    repo_id = models.IntegerField()
-    repo_url = models.URLField()
-    permissions = models.JSONField(null=True)
+class GitHubUser(models.Model):
+    login = StringField()
+    name = StringField()
+    avatar_url = models.URLField()
 
     class Meta:
-        verbose_name_plural = "GitHub repositories"
-        unique_together = (("user", "repo_id"),)
+        ordering = ("login",)
+        verbose_name = _("GitHub user")
+        verbose_name_plural = _("GitHub users")
 
     def __str__(self):
-        return self.repo_url
+        return self.login
+
+
+class GitHubCollaboration(models.Model):
+    """A record of a GitHubUser participating in a Project"""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(GitHubUser, on_delete=models.CASCADE)
+    permissions = models.JSONField(null=True)
 
 
 class GitHubIssue(HashIdMixin):
@@ -693,7 +685,7 @@ class Epic(
     latest_sha = StringField(blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
-    github_users = models.JSONField(default=list, blank=True)
+    github_users = models.ManyToManyField(GitHubUser, related_name="epics")
     issue = models.OneToOneField(
         GitHubIssue,
         related_name="epic",
@@ -911,9 +903,20 @@ class Task(
         choices=TaskStatus.choices, default=TaskStatus.PLANNED, max_length=16
     )
 
-    # GitHub IDs of task assignees
-    assigned_dev = models.CharField(max_length=50, null=True, blank=True)
-    assigned_qa = models.CharField(max_length=50, null=True, blank=True)
+    assigned_dev = models.ForeignKey(
+        GitHubUser,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="dev_tasks",
+    )
+    assigned_qa = models.ForeignKey(
+        GitHubUser,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="qa_tasks",
+    )
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])

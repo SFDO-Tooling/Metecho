@@ -11,7 +11,6 @@ from .api.models import (
     Epic,
     GitHubIssue,
     GitHubOrganization,
-    GitHubRepository,
     Project,
     ProjectDependency,
     ScratchOrg,
@@ -104,16 +103,6 @@ class GitHubIssueFactory(factory.django.DjangoModelFactory):
     state = "open"
     created_at = factory.LazyFunction(now)
     updated_at = factory.LazyFunction(now)
-
-
-@register
-class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = GitHubRepository
-
-    repo_url = "https://github.com/test/repo.git"
-    repo_id = factory.Sequence(lambda n: n)
-    user = factory.SubFactory(UserFactory)
 
 
 @register
