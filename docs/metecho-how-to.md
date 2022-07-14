@@ -2,7 +2,7 @@
 
 ## Welcome to Metecho
 
-If you or a team you're leading would like to contribute to a Salesforce Project
+If you or your team would like to contribute to a Salesforce Project
 without using GitHub, you've come to the right place.
 
 **Definition:** *[Greek] To share or participate in.*
@@ -36,12 +36,9 @@ Metecho works by talking to GitHub for you. While you don't need to use GitHub
 directly, you do still need a GitHub account.
 
 - Create a [GitHub](https://github.com) account, if you don’t already have one.
-- Contact an admin for the GitHub repository you want to contribute to (e.g.
-  [Outbound Funds](https://github.com/SalesforceFoundation/OutboundFundsModule))
-  on GitHub and be sure that you and anyone you’d like to work with are
-  collaborators.
+- Select `Log In with GitHub`.
 
-If you want to create a project, skip down to [Create a
+If you want to create a Project, skip down to [Create a
 Project](#create-a-project). Otherwise, once you're logged in with your GitHub
 account, you can continue to Step 1. Yay!
 
@@ -51,7 +48,7 @@ account, you can continue to Step 1. Yay!
 being done. They are equivalent to GitHub repositories.*
 
 - Select the Project you want to contribute to.
-- If you do not see the Project you want to work on:
+- If you don't see the Project you want to work on:
   - Confirm that you are logged into the correct Metecho account.
   - Contact an admin for the repository on GitHub and ensure that you are a
     collaborator.
@@ -62,8 +59,11 @@ being done. They are equivalent to GitHub repositories.*
 - To contribute to a Project, continue to [Step 2 - Create a
   Task](#step-2---create-a-task).
 
-- If you have a set of several closely related Tasks in mind, skip to [Step 13 -
+- If you want to create a group of several related Task, skip to [Step 13 -
   Create an Epic](#step-13---create-an-epic).
+
+- If you want to help test a Task that is ready for review, [Step 8 -
+  Assign a Tester](#step-8---assign-a-tester).
 
 - If you want to view the work on a Project or make changes without affecting
   the Project, skip to [Create a Scratch Org in
@@ -100,7 +100,7 @@ be part of an Epic. Creating a Task creates a branch in GitHub.*
 
 - On the Task's detail page, `Assign` yourself or another person to be the
   Developer for each Task you created.
-- If you do not see the person you want to assign, contact an admin for the
+- If you don't see the person you want to assign, contact an admin for the
   repository on GitHub and ensure that the person is a collaborator. Then
   `Re-Sync GitHub Collaborators` in Metecho.
 - If you need to change or remove the Task Developer, use the drop down menu on
@@ -195,7 +195,7 @@ completed.*
 - `Assign` yourself or another person to be the Tester for each Task you
   created.
 - Testers can be assigned at any time.
-- If you do not see the person you want to assign, contact an admin for the
+- If you don't see the person you want to assign, contact an admin for the
   repository on GitHub and ensure that the person is a collaborator. Then
   `Re-Sync GitHub Collaborators` in Metecho.
 - If you need to change or remove the Task Tester, use the drop down menu on the
@@ -249,7 +249,7 @@ Developer’s work on a specific Task. Test Orgs expire after 30 days.*
 ## Step 13 - Create an Epic
 
 **Epic** - *Major contributions to a Project that include more than one related
-Task. Epics are more than containers for multiple Tasks. Like Tasks, creating an
+Task. Epics are more than containers for multiple Tasks. Creating an
 Epic creates a branch in GitHub. Tasks that are part of an Epic create branches
 from the Epic branch in GitHub.*
 
@@ -271,7 +271,7 @@ from the Epic branch in GitHub.*
 
 - On the Epic's detail page, select `Add or Remove Collaborators`.
 - Select one or more Collaborators to do the work on the Tasks in this Epic.
-- If you do not see the people you want to add, contact an admin for the
+- If you don't see the people you want to add, contact an admin for the
   repository on GitHub and ensure that the people are collaborators. Then
   `Re-Sync GitHub Collaborators` in Metecho.
 - If you need to remove a collaborator, select the `x` icon in the Collaborator
@@ -308,8 +308,8 @@ Scratch Orgs expire (and are deleted) after 30 days.*
   - If that option does not appear, select `check again`. You may not
     need to do this step as changes are retrieved automatically when first
     navigating to the page.
-- Create a new Task with or without an Epic. (You don't need an Epic unless you
-  plan to create additional, closely-related Tasks before contributing.)
+- Create a new Task with or without an Epic. (You only need an Epic if you
+want to create a group of related Tasks.)
 - Your Scratch Org will become the Dev Org for the newly created Task.
 
 ***
@@ -317,7 +317,7 @@ Scratch Orgs expire (and are deleted) after 30 days.*
 ## Create a Project
 
 - In the Project list view, select `Create Project`.
-- If you do not see the GitHub Organization you want to work in:
+- If you don't see the GitHub Organization you want to work in:
   - Confirm that you are logged into the correct Metecho account.
   - Contact an admin for the repository on GitHub and ensure that you are a
     collaborator.
@@ -325,7 +325,7 @@ Scratch Orgs expire (and are deleted) after 30 days.*
 - Select a `GitHub Organization`.
 - Enter a Project name.
 - Select people to add as Collaborators on the Project.
-  - If you do not see the people you want to add, contact an admin for the
+  - If you don't see the people you want to add, contact an admin for the
     repository on GitHub and ensure that the people are collaborators. Then
     `Re-Sync GitHub Collaborators` in Metecho.
 - Select any dependencies for your new Project (this step may not appear if
