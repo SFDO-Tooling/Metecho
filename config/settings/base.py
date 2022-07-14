@@ -396,7 +396,7 @@ REST_FRAMEWORK = {
 # API docs settings
 SPECTACULAR_SETTINGS = {
     "TITLE": "Metecho",
-    "DESCRIPTION": "2019–2021, Salesforce.org",
+    "DESCRIPTION": "2019–2022, Salesforce.org",
     "VERSION": "0.1.0",
     "ENUM_NAME_OVERRIDES": {
         "TaskStatusEnum": "metecho.api.models.TaskStatus.choices",

@@ -10,7 +10,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import backpackIcon from '@/img/backpack-sm.svg';
 import mapIcon from '@/img/map-sm.svg';
 import seesawIcon from '@/img/seesaw-sm.svg';
-import { useIsMounted } from '@/js/components/utils';
+import { ExternalLink, useIsMounted } from '@/js/components/utils';
 import { AppState, RouteProps, ThunkDispatch } from '@/js/store';
 import { selectProject } from '@/js/store/projects/selectors';
 import { updateTour } from '@/js/store/user/actions';
@@ -138,11 +138,21 @@ const TourDropdown = ({
           )}
           <Checkbox
             labels={{ label: 'Self-guided Tour' }}
-            className="slds-p-horizontal_small"
+            className="slds-border_bottom
+              slds-p-bottom_x-small
+              slds-p-horizontal_small"
             checked={user?.self_guided_tour_enabled}
             disabled={isSaving}
             onChange={handleToggle}
           />
+          <div className="slds-p-horizontal_small slds-p-top_x-small">
+            <ExternalLink
+              url="https://github.com/SFDO-Tooling/Metecho/blob/main/docs/metecho-how-to.md"
+              showButtonIcon
+            >
+              {t('Contributor Guide')}
+            </ExternalLink>
+          </div>
         </>
       }
     >
