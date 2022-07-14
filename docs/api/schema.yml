@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Metecho
   version: 0.1.0
-  description: 2019–2021, Salesforce.org
+  description: 2019–2022, Salesforce.org
 paths:
   /api/dependencies/:
     get:
