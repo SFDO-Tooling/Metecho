@@ -2,8 +2,8 @@
 
 ## Welcome to Metecho
 
-If you or your team would like to contribute to a Salesforce Project
-without using GitHub, you've come to the right place.
+If you or your team would like to contribute to a Salesforce Project without
+using GitHub, you've come to the right place.
 
 **Definition:** *[Greek] To share or participate in.*
 
@@ -30,13 +30,13 @@ After working through this Guide, you will be able to:
 
 ***
 
-## Step 0 - Log In with GitHub
+## Step 0 - Log In With GitHub
 
 Metecho works by talking to GitHub for you. While you don't need to use GitHub
 directly, you do still need a GitHub account.
 
 - Create a [GitHub](https://github.com) account, if you don’t already have one.
-- Select `Log In with GitHub`.
+- Select `Log In With GitHub`.
 
 If you want to create a Project, skip down to [Create a
 Project](#create-a-project). Otherwise, once you're logged in with your GitHub
@@ -59,10 +59,10 @@ being done. They are equivalent to GitHub repositories.*
 - To contribute to a Project, continue to [Step 2 - Create a
   Task](#step-2---create-a-task).
 
-- If you want to create a group of several related Task, skip to [Step 13 -
+- If you want to create a group of several related Tasks, skip to [Step 13 -
   Create an Epic](#step-13---create-an-epic).
 
-- If you want to help test a Task that is ready for review, [Step 8 -
+- If you want to help test a Task that is ready for review, skip to [Step 8 -
   Assign a Tester](#step-8---assign-a-tester).
 
 - If you want to view the work on a Project or make changes without affecting
@@ -249,9 +249,9 @@ Developer’s work on a specific Task. Test Orgs expire after 30 days.*
 ## Step 13 - Create an Epic
 
 **Epic** - *Major contributions to a Project that include more than one related
-Task. Epics are more than containers for multiple Tasks. Creating an
-Epic creates a branch in GitHub. Tasks that are part of an Epic create branches
-from the Epic branch in GitHub.*
+Task. Epics are more than containers for multiple Tasks. Creating an Epic
+creates a branch in GitHub. Tasks that are part of an Epic create branches from
+the Epic branch in GitHub.*
 
 - On a Project's detail page, select the `Epics` tab.
 - Create a new Epic of your own (or from an existing GitHub Issue).
@@ -308,8 +308,8 @@ Scratch Orgs expire (and are deleted) after 30 days.*
   - If that option does not appear, select `check again`. You may not
     need to do this step as changes are retrieved automatically when first
     navigating to the page.
-- Create a new Task with or without an Epic. (You only need an Epic if you
-want to create a group of related Tasks.)
+- Create a new Task with or without an Epic. (You only need an Epic if you want
+  to create a group of related Tasks.)
 - Your Scratch Org will become the Dev Org for the newly created Task.
 
 ***
@@ -338,18 +338,15 @@ To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task) or
 
 ***
 
-## Delete Account
+## Delete Your Account
 
 - Select your avatar in the upper right-hand corner.
 - Select `Manage Account`.
-- If you are assigned to a Task that has unretrieved changes, you will see a 
-list of those Tasks.
-  - Navigate to those Tasks and retrieve or delete the Orgs.
 - Select `Delete Account`.
-  - Your Dev Orgs will be deleted, and any unretrieved changes will be lost. 
-  - This action cannot be undone. 
-  - Deleting your Metecho account will not remove you as a Project collaborator 
-  on the GitHub repository.
+  - Your Dev Orgs will be deleted, and any unretrieved changes will be lost.
+  - This action cannot be undone.
+  - Deleting your Metecho account will not remove your access to the GitHub
+    repository.
 
 ***
 
