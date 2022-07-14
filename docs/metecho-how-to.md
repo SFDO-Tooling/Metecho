@@ -338,6 +338,21 @@ To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task) or
 
 ***
 
+## Delete Account
+
+- Select your avatar in the upper right-hand corner.
+- Select `Manage Account`.
+- If you are assigned to a Task that has unretrieved changes, you will see a 
+list of those Tasks.
+  - Navigate to those Tasks and retrieve or delete the Orgs.
+- Select `Delete Account`.
+  - Your Dev Orgs will be deleted, and any unretrieved changes will be lost. 
+  - This action cannot be undone. 
+  - Deleting your Metecho account will not remove you as a Project collaborator 
+  on the GitHub repository.
+
+***
+
 ## Additional Help
 
 **Select the `?` menu** in the top right corner of Metecho at any time to:
