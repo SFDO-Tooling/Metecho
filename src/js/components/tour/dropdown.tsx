@@ -150,7 +150,7 @@ const TourDropdown = ({
               url="https://github.com/SFDO-Tooling/Metecho/blob/main/docs/metecho-how-to.md"
               showButtonIcon
             >
-              {t('Getting Started Guide')}
+              {t('Contributor Guide')}
             </ExternalLink>
           </div>
         </>
