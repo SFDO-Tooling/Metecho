@@ -16,8 +16,8 @@ from ..jobs import (
     _create_org_and_run_flow,
     alert_user_about_expiring_org,
     available_org_config_names,
-    capture_dataset,
     commit_changes_from_org,
+    commit_dataset_from_org,
     convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
@@ -1666,77 +1666,65 @@ class TestRefreshDatasets:
 class TestRefreshDatasetSchema:
     def test_ok(self, scratch_org_factory):
         org = scratch_org_factory(
-            org_type=ScratchOrgType.DEV, task__currently_refreshing_dataset_schema=True
+            org_type=ScratchOrgType.DEV, currently_refreshing_dataset_schema=True
         )
-        task = org.task
 
-        refresh_dataset_schema(task)
-        task.refresh_from_db()
+        refresh_dataset_schema(org)
+        org.refresh_from_db()
 
-        assert not task.currently_refreshing_dataset_schema
-        assert task.dataset_schema  # TODO: actually check contents of schema
+        assert not org.currently_refreshing_dataset_schema
+        assert org.dataset_schema  # TODO: actually check contents of schema
 
-    def test_exception(self, caplog, task_factory):
-        task = task_factory(currently_refreshing_dataset_schema=True)
+    def test_exception(self, caplog, scratch_org_factory):
+        org = scratch_org_factory(currently_refreshing_dataset_schema=True)
 
         with pytest.raises(Exception, match="Oh no!"):
-            refresh_dataset_schema(task)
-        task.refresh_from_db()
+            refresh_dataset_schema(org)
+        org.refresh_from_db()
 
-        assert not task.currently_refreshing_dataset_schema
+        assert not org.currently_refreshing_dataset_schema
         assert "Oh no!" in caplog.text
-
-    def test_missing_dev_org(self, task_factory):
-        task = task_factory(currently_refreshing_dataset_schema=True)
-
-        refresh_dataset_schema(task)
-        task.refresh_from_db()
-
-        assert not task.currently_refreshing_dataset_schema
-        assert (
-            task.dataset_schema == {}
-        ), "Expected an empty dataset when Task has no Dev org attached"
 
 
 @pytest.mark.django_db
-class TestCaptureDataset:
-    def test_ok(self, mocker, task_factory, user_factory):
+class TestRetrieveDataset:
+    def test_ok(self, mocker, scratch_org_factory, user_factory):
         mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
-        mocker.patch(f"{PATCH_ROOT}.capture_and_commit_dataset", autospec=True)
-        task = task_factory(
-            currently_capturing_dataset=True, epic__project__repo_id=123
+        mocker.patch(f"{PATCH_ROOT}.retrieve_and_commit_dataset", autospec=True)
+        scratch_org = scratch_org_factory(
+            currently_retrieving_dataset=True, task__epic__project__repo_id=123
         )
 
-        capture_dataset(
-            task=task,
+        commit_dataset_from_org(
+            scratch_org=scratch_org,
             user=user_factory(),
             commit_message="Testing dataset",
             dataset_name="Test",
             dataset_definition={"foo": "bar"},
         )
-        task.refresh_from_db()
+        scratch_org.refresh_from_db()
 
-        assert not task.currently_capturing_dataset
+        assert not scratch_org.currently_retrieving_dataset
 
-    def test_exception(self, mocker, caplog, task_factory, user_factory):
+    def test_exception(self, mocker, caplog, scratch_org_factory, user_factory):
         mocker.patch(
             f"{PATCH_ROOT}.get_repo_info",
             autospec=True,
             side_effect=Exception("Oh no!"),
         )
-        task = task_factory(
-            currently_capturing_dataset=True, epic__project__repo_id=123
+        scratch_org = scratch_org_factory(
+            currently_retrieving_dataset=True, task__epic__project__repo_id=123
         )
 
         with pytest.raises(Exception, match="Oh no!"):
-            capture_dataset(
-                task=task,
+            commit_dataset_from_org(
+                scratch_org=scratch_org,
                 user=user_factory(),
                 commit_message="Testing dataset",
                 dataset_name="Test",
                 dataset_definition={"foo": "bar"},
             )
-        task.refresh_from_db()
+        scratch_org.refresh_from_db()
 
-        assert not task.currently_capturing_dataset
+        assert not scratch_org.currently_retrieving_dataset
         assert "Oh no!" in caplog.text

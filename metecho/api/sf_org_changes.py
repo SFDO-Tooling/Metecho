@@ -177,7 +177,7 @@ def commit_changes_to_github(
         )
 
 
-def capture_and_commit_dataset(
+def retrieve_and_commit_dataset(
     *,
     repo: Repository,
     branch: str,
@@ -190,7 +190,7 @@ def capture_and_commit_dataset(
     Given a JSON dataset definition:
 
     1. Write a YAML definition to the `datasets/` folder
-    2. Capture and dump the corresponding SQL data on the same folder
+    2. Retrieve and dump the corresponding SQL data on the same folder
     3. Commit the new files
     """
     with local_github_checkout(
@@ -205,9 +205,9 @@ def capture_and_commit_dataset(
             file = folder / f"{dataset_name}.extract.yml"
         file.write_text(yaml.safe_dump(dataset_definition))
 
-        # TODO: talk to the Dev org and capture the dataset
+        # TODO: talk to the Dev org and retrieve the dataset
 
-        # Commit the new dataset definition and captured data
+        # Commit the new dataset definition and retrieved data
         commit = CommitDir(repo, author=author)
         commit(project_path, branch=branch, commit_message=commit_message)
 

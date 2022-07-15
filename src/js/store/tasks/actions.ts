@@ -166,7 +166,6 @@ export const refreshDatasets =
       payload: { project, task },
     });
     try {
-      // @@@
       await apiFetch({
         url: window.api_urls.task_refresh_datasets(task),
         dispatch,
@@ -174,12 +173,6 @@ export const refreshDatasets =
           method: 'POST',
         },
       });
-      // setTimeout(() => {
-      //   dispatch({
-      //     type: 'REFRESH_DATASETS_REJECTED',
-      //     payload: { project, task },
-      //   });
-      // }, 2000);
       return dispatch({
         type: 'REFRESH_DATASETS_ACCEPTED' as const,
         payload: { project, task },

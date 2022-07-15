@@ -648,7 +648,7 @@ describe('<TaskDetail/>', () => {
             orgs: {
               [defaultOrg.id]: {
                 ...defaultOrg,
-                currently_capturing_changes: true,
+                currently_retrieving_metadata: true,
               },
             },
           },

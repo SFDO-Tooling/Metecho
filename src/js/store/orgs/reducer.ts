@@ -2,6 +2,7 @@ import { omit } from 'lodash';
 
 import { ObjectsAction } from '@/js/store/actions';
 import { OrgsAction } from '@/js/store/orgs/actions';
+import { DatasetObject } from '@/js/store/tasks/reducer';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
 import {
   OBJECT_TYPES,
@@ -38,7 +39,9 @@ export interface Org extends MinimalOrg {
   has_ignored_changes: boolean;
   total_ignored_changes: number;
   currently_refreshing_changes: boolean;
-  currently_capturing_changes: boolean;
+  currently_retrieving_metadata: boolean;
+  currently_retrieving_dataset: boolean;
+  currently_retrieving_dataset_schema: boolean;
   currently_refreshing_org: boolean;
   currently_reassigning_user: boolean;
   is_created: boolean;
@@ -46,6 +49,7 @@ export interface Org extends MinimalOrg {
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;
   last_checked_unsaved_changes_at: string | null;
+  dataset_schema: DatasetObject[];
 }
 
 export interface TargetDirectories {
@@ -132,14 +136,21 @@ const reducer = (
           }
           return orgs;
         }
-        case OBJECT_TYPES.COMMIT: {
+        case OBJECT_TYPES.COMMIT_METADATA:
+        case OBJECT_TYPES.COMMIT_DATASET: {
           const { object }: { object: Org } = action.payload;
           if (object) {
             return {
               ...orgs,
               orgs: {
                 ...orgs.orgs,
-                [object.id]: { ...object, currently_capturing_changes: true },
+                [object.id]: {
+                  ...object,
+                  currently_retrieving_metadata:
+                    action.payload.objectType === OBJECT_TYPES.COMMIT_METADATA,
+                  currently_retrieving_dataset:
+                    action.payload.objectType === OBJECT_TYPES.COMMIT_DATASET,
+                },
               },
             };
           }

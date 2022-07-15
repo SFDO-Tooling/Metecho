@@ -44,6 +44,7 @@ from .gh import (
 from .models import (
     GitHubOrganization,
     Project,
+    ScratchOrg,
     ScratchOrgType,
     Task,
     TaskReviewStatus,
@@ -51,11 +52,11 @@ from .models import (
 )
 from .push import report_scratch_org_error
 from .sf_org_changes import (
-    capture_and_commit_dataset,
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
     get_valid_target_directories,
+    retrieve_and_commit_dataset,
 )
 from .sf_run_flow import create_org, delete_org, run_flow
 
@@ -1214,44 +1215,47 @@ def refresh_datasets(task: Task, originating_user_id=None):
 refresh_datasets_job = job(refresh_datasets)
 
 
-def refresh_dataset_schema(task: Task, originating_user_id=None):
+def refresh_dataset_schema(scratch_org: ScratchOrg, originating_user_id=None):
     """
-    Refresh the schema cache on `task` by parsing it from the Dev org
+    Refresh the schema cache on `ScratchOrg`
     """
     try:
-        task.refresh_from_db()
-        if dev_org := task.orgs.filter(org_type=ScratchOrgType.DEV).first():
-            # TODO: Actually fetch a schema from dev_org
-            schema = {}
-        else:
-            schema = {}
-        task.dataset_schema = schema
-    except Exception:
-        task.finalize_refresh_dataset_schema(originating_user_id=originating_user_id)
+        scratch_org.refresh_from_db()
+        # TODO: Actually fetch a schema from dev_org
+        schema = {}
+        scratch_org.dataset_schema = schema
+    except Exception as e:
+        scratch_org.finalize_refresh_dataset_schema(
+            error=e, originating_user_id=originating_user_id
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        task.finalize_refresh_dataset_schema(originating_user_id=originating_user_id)
+        scratch_org.finalize_refresh_dataset_schema(
+            originating_user_id=originating_user_id
+        )
 
 
 refresh_dataset_schema_job = job(refresh_dataset_schema)
 
 
-def capture_dataset(
+def commit_dataset_from_org(
     *,
-    task: Task,
+    scratch_org: ScratchOrg,
     user: User,
     commit_message: str,
     dataset_name: str,
     dataset_definition: dict,
 ):
     """
-    Update and capture a dataset from the `task` Dev Org
+    Update and retrieve a dataset from the Dev Org
     """
     try:
+        scratch_org.refresh_from_db()
+        task = scratch_org.task
         task.refresh_from_db()
-        capture_and_commit_dataset(
+        retrieve_and_commit_dataset(
             repo=get_repo_info(user, repo_id=task.get_repo_id()),
             branch=task.branch_name,
             author={"name": user.username, "email": user.email},
@@ -1259,13 +1263,14 @@ def capture_dataset(
             dataset_name=dataset_name,
             dataset_definition=dataset_definition,
         )
-    except Exception:
-        task.finalize_capture_dataset(originating_user_id=user.id)
+    except Exception as e:
+        scratch_org.refresh_from_db()
+        scratch_org.finalize_commit_dataset(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        task.finalize_capture_dataset(originating_user_id=user.id)
+        scratch_org.finalize_commit_dataset(originating_user_id=user.id)
 
 
-capture_dataset_job = job(capture_dataset)
+commit_dataset_from_org_job = job(commit_dataset_from_org)

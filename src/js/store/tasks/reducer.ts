@@ -59,7 +59,7 @@ export interface Task {
   has_unmerged_commits: boolean;
   currently_creating_branch: boolean;
   currently_creating_pr: boolean;
-  currently_fetching_datasets: boolean;
+  currently_refreshing_datasets: boolean;
   branch_name: string;
   branch_url: string | null;
   branch_diff_url: string | null;
@@ -78,6 +78,7 @@ export interface Task {
   org_config_name: string;
   issue: string | null;
   datasets: Datasets;
+  datasets_parse_errors: string[];
 }
 
 export interface TaskByProjectState {
@@ -399,7 +400,7 @@ const reducer = (
               if (t.id === task) {
                 return {
                   ...existingTask,
-                  currently_fetching_datasets:
+                  currently_refreshing_datasets:
                     action.type === 'REFRESH_DATASETS_REQUESTED',
                 };
               }

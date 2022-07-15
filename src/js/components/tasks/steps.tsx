@@ -62,7 +62,7 @@ const TaskStatusSteps = ({
   );
   const taskIsSubmitting = Boolean(task?.currently_creating_pr);
   const devOrgFetching = Boolean(devOrg?.currently_refreshing_changes);
-  const devOrgCommitting = Boolean(devOrg?.currently_capturing_changes);
+  const devOrgCommitting = Boolean(devOrg?.currently_retrieving_metadata);
   const devOrgIsCreating = Boolean(
     isCreatingOrg[ORG_TYPES.DEV] || (devOrg && !devOrg.is_created),
   );

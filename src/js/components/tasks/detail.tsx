@@ -187,7 +187,7 @@ const TaskDetail = (
       userIsAssignedTester && testOrg?.is_created && testOrg?.owner === user.id,
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
-    currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    currentlyCommitting = Boolean(devOrg?.currently_retrieving_metadata);
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
     devOrgIsCreating = Boolean(
@@ -1139,8 +1139,9 @@ const TaskDetail = (
                 projectId={project.id}
                 taskId={task.id}
                 orgId={(devOrg as Org).id}
-                datasets={{ Default: [], 'Another Dataset': [] }}
-                fetchingDatasets={task.currently_fetching_datasets}
+                datasets={task.datasets}
+                datasetErrors={task.datasets_parse_errors}
+                fetchingDatasets={task.currently_refreshing_datasets}
                 isOpen={retrieveDatasetModalOpen}
                 closeModal={closeRetrieveDatasetModal}
               />

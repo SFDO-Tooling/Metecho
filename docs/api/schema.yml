@@ -908,6 +908,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
+  /api/scratch-orgs/{id}/commit_dataset/:
+    post:
+      operationId: scratch_orgs_commit_dataset_create
+      description: Queue a job that updates and commits a dataset from the Dev Org
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommitDataset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommitDataset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommitDataset'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
   /api/scratch-orgs/{id}/redirect/:
     get:
       operationId: scratch_orgs_redirect_retrieve
@@ -932,6 +968,30 @@ paths:
     post:
       operationId: scratch_orgs_refresh_create
       description: Queue a job that retrieves the latest changes from a ScratchOrg.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/scratch-orgs/{id}/refresh_dataset_schema/:
+    post:
+      operationId: scratch_orgs_refresh_dataset_schema_create
+      description: Queue a job to refresh the Dev org schema
       parameters:
       - in: path
         name: id
@@ -1239,43 +1299,6 @@ paths:
                   can_reassign:
                     type: boolean
           description: ''
-  /api/tasks/{id}/capture_dataset/:
-    post:
-      operationId: tasks_capture_dataset_create
-      description: Queue a job that updates and captures a dataset from the Task Dev
-        Org
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: HashID
-        description: A unique integer value identifying this task.
-        required: true
-      tags:
-      - tasks
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CaptureDataset'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CaptureDataset'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CaptureDataset'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
-          description: ''
   /api/tasks/{id}/create_pr/:
     post:
       operationId: tasks_create_pr_create
@@ -1307,30 +1330,6 @@ paths:
       - cookieAuth: []
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
-          description: ''
-  /api/tasks/{id}/refresh_dataset_schema/:
-    post:
-      operationId: tasks_refresh_dataset_schema_create
-      description: Queue a job to refresh the Dev org schema (if it exists)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: HashID
-        description: A unique integer value identifying this task.
-        required: true
-      tags:
-      - tasks
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '202':
           content:
             application/json:
               schema:
@@ -1590,20 +1589,6 @@ components:
       required:
       - gh_uid
       - role
-    CaptureDataset:
-      type: object
-      properties:
-        commit_message:
-          type: string
-        dataset_name:
-          type: string
-        dataset_definition:
-          type: object
-          additionalProperties: {}
-      required:
-      - commit_message
-      - dataset_definition
-      - dataset_name
     CheckRepoName:
       type: object
       properties:
@@ -1628,6 +1613,20 @@ components:
       - changes
       - commit_message
       - target_directory
+    CommitDataset:
+      type: object
+      properties:
+        commit_message:
+          type: string
+        dataset_name:
+          type: string
+        dataset_definition:
+          type: object
+          additionalProperties: {}
+      required:
+      - commit_message
+      - dataset_definition
+      - dataset_name
     CreatePr:
       type: object
       properties:
@@ -2294,7 +2293,7 @@ components:
         currently_refreshing_changes:
           type: boolean
           readOnly: true
-        currently_capturing_changes:
+        currently_retrieving_metadata:
           type: boolean
           readOnly: true
         currently_refreshing_org:
@@ -2327,6 +2326,17 @@ components:
           readOnly: true
         org_config_name:
           type: string
+        dataset_schema:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Cache of the Dev org schema related to this Task
+        currently_refreshing_dataset_schema:
+          type: boolean
+          readOnly: true
+        currently_retrieving_dataset:
+          type: boolean
+          readOnly: true
     PatchedTask:
       type: object
       properties:
@@ -2449,17 +2459,6 @@ components:
           readOnly: true
           description: User-facing errors that occurred during dataset refresh
         currently_refreshing_datasets:
-          type: boolean
-          readOnly: true
-        dataset_schema:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: Cache of the Dev org schema related to this Task
-        currently_refreshing_dataset_schema:
-          type: boolean
-          readOnly: true
-        currently_capturing_dataset:
           type: boolean
           readOnly: true
     Project:
@@ -2710,7 +2709,7 @@ components:
         currently_refreshing_changes:
           type: boolean
           readOnly: true
-        currently_capturing_changes:
+        currently_retrieving_metadata:
           type: boolean
           readOnly: true
         currently_refreshing_org:
@@ -2743,11 +2742,25 @@ components:
           readOnly: true
         org_config_name:
           type: string
+        dataset_schema:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Cache of the Dev org schema related to this Task
+        currently_refreshing_dataset_schema:
+          type: boolean
+          readOnly: true
+        currently_retrieving_dataset:
+          type: boolean
+          readOnly: true
       required:
-      - currently_capturing_changes
       - currently_reassigning_user
       - currently_refreshing_changes
+      - currently_refreshing_dataset_schema
       - currently_refreshing_org
+      - currently_retrieving_dataset
+      - currently_retrieving_metadata
+      - dataset_schema
       - delete_queued_at
       - description_rendered
       - expires_at
@@ -2909,30 +2922,16 @@ components:
         currently_refreshing_datasets:
           type: boolean
           readOnly: true
-        dataset_schema:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: Cache of the Dev org schema related to this Task
-        currently_refreshing_dataset_schema:
-          type: boolean
-          readOnly: true
-        currently_capturing_dataset:
-          type: boolean
-          readOnly: true
       required:
       - assigned_qa
       - branch_diff_url
       - branch_url
       - commits
       - created_at
-      - currently_capturing_dataset
       - currently_creating_branch
       - currently_creating_pr
-      - currently_refreshing_dataset_schema
       - currently_refreshing_datasets
       - currently_submitting_review
-      - dataset_schema
       - datasets
       - datasets_parse_errors
       - description_rendered

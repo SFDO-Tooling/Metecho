@@ -129,7 +129,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
       commit_message: '',
       target_directory: defaultDir,
     } as MetadataCommit,
-    objectType: OBJECT_TYPES.COMMIT,
+    objectType: OBJECT_TYPES.COMMIT_METADATA,
     url: window.api_urls.scratch_org_commit(org.id),
     onSuccess: handleSuccess,
     onError: handleError,

@@ -915,13 +915,6 @@ class Task(
     assigned_dev = models.CharField(max_length=50, null=True, blank=True)
     assigned_qa = models.CharField(max_length=50, null=True, blank=True)
 
-    currently_refreshing_dataset_schema = models.BooleanField(default=False)
-    dataset_schema = models.JSONField(
-        default=dict,
-        encoder=DjangoJSONEncoder,
-        blank=True,
-        help_text=_("Cache of the Dev org schema related to this Task"),
-    )
     currently_refreshing_datasets = models.BooleanField(default=False)
     datasets = models.JSONField(
         default=dict,
@@ -934,7 +927,6 @@ class Task(
         default=list,
         help_text=_("User-facing errors that occurred during dataset refresh"),
     )
-    currently_capturing_dataset = models.BooleanField(default=False)
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
@@ -1222,45 +1214,6 @@ class Task(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def queue_refresh_dataset_schema(self, originating_user_id=None):
-        from .jobs import refresh_dataset_schema_job
-
-        self.currently_refreshing_dataset_schema = True
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
-        refresh_dataset_schema_job.delay(self, originating_user_id=originating_user_id)
-
-    def finalize_refresh_dataset_schema(self, originating_user_id=None):
-        self.currently_refreshing_dataset_schema = False
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
-
-    def queue_capture_dataset(
-        self,
-        *,
-        user: User,
-        commit_message: str,
-        dataset_name: str,
-        dataset_definition: dict,
-    ):
-        from .jobs import capture_dataset_job
-
-        self.currently_capturing_dataset = True
-        self.save()
-        self.notify_changed(originating_user_id=user.id)
-        capture_dataset_job.delay(
-            task=self,
-            user=user,
-            commit_message=commit_message,
-            dataset_name=dataset_name,
-            dataset_definition=dataset_definition,
-        )
-
-    def finalize_capture_dataset(self, originating_user_id=None):
-        self.currently_capturing_dataset = False
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
-
 
 class ScratchOrg(
     SoftDeleteMixin, PushMixin, HashIdMixin, TimestampsMixin, models.Model
@@ -1307,7 +1260,8 @@ class ScratchOrg(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     currently_refreshing_changes = models.BooleanField(default=False)
-    currently_capturing_changes = models.BooleanField(default=False)
+    currently_retrieving_metadata = models.BooleanField(default=False)
+    currently_retrieving_dataset = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
     currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)
@@ -1322,6 +1276,14 @@ class ScratchOrg(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     cci_log = models.TextField(blank=True)
+
+    currently_refreshing_dataset_schema = models.BooleanField(default=False)
+    dataset_schema = models.JSONField(
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        blank=True,
+        help_text=_("Cache of the Dev org schema related to this Task"),
+    )
 
     def _build_message_extras(self):
         return {
@@ -1529,6 +1491,28 @@ class ScratchOrg(
                 originating_user_id=originating_user_id,
             )
 
+    def queue_refresh_dataset_schema(self, originating_user_id=None):
+        from .jobs import refresh_dataset_schema_job
+
+        self.currently_refreshing_dataset_schema = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+        refresh_dataset_schema_job.delay(self, originating_user_id=originating_user_id)
+
+    def finalize_refresh_dataset_schema(self, *, error=None, originating_user_id=None):
+        self.currently_refreshing_dataset_schema = False
+        if error is None:
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
+            self.dataset_schema = {}
+            self.save()
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_FETCH_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
     def queue_commit_changes(
         self,
         *,
@@ -1540,7 +1524,7 @@ class ScratchOrg(
     ):
         from .jobs import commit_changes_from_org_job
 
-        self.currently_capturing_changes = True
+        self.currently_retrieving_metadata = True
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -1554,7 +1538,7 @@ class ScratchOrg(
         )
 
     def finalize_commit_changes(self, *, error=None, originating_user_id):
-        self.currently_capturing_changes = False
+        self.currently_retrieving_metadata = False
         self.save()
         if error is None:
             self.notify_changed(
@@ -1569,6 +1553,47 @@ class ScratchOrg(
             self.notify_scratch_org_error(
                 error=error,
                 type_="SCRATCH_ORG_COMMIT_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
+    def queue_commit_dataset(
+        self,
+        *,
+        user: User,
+        commit_message: str,
+        dataset_name: str,
+        dataset_definition: dict,
+    ):
+        from .jobs import commit_dataset_from_org_job
+
+        self.currently_retrieving_dataset = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+
+        commit_dataset_from_org_job.delay(
+            scratch_org=self,
+            user=user,
+            commit_message=commit_message,
+            dataset_name=dataset_name,
+            dataset_definition=dataset_definition,
+        )
+
+    def finalize_commit_dataset(self, *, error=None, originating_user_id):
+        self.currently_retrieving_dataset = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="SCRATCH_ORG_COMMIT_DATASET",
+                originating_user_id=originating_user_id,
+            )
+            if self.task:
+                self.task.finalize_commit_changes(
+                    originating_user_id=originating_user_id
+                )
+        else:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_COMMIT_DATASET_FAILED",
                 originating_user_id=originating_user_id,
             )
 

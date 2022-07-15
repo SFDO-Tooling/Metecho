@@ -26,6 +26,8 @@ export const api_urls = {
   scratch_org_list: () => '/api/scratch_orgs/',
   scratch_org_detail: (id: string) => `/api/scratch_orgs/${id}/`,
   scratch_org_commit: (id: string) => `/api/scratch_orgs/${id}/commit/`,
+  scratch_org_commit_dataset: (id: string) =>
+    `/api/scratch_orgs/${id}/commit_dataset/`,
   scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
@@ -310,7 +312,7 @@ export const sampleTask1 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
-  currently_fetching_datasets: false,
+  currently_refreshing_datasets: false,
   datasets: {},
 };
 
@@ -352,7 +354,7 @@ export const sampleTask2 = {
   review_sha: '',
   org_config_name: 'dev',
   issue: null,
-  currently_fetching_datasets: false,
+  currently_refreshing_datasets: false,
   datasets: {},
 };
 
@@ -395,7 +397,7 @@ export const sampleTask3 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
-  currently_fetching_datasets: false,
+  currently_refreshing_datasets: false,
   datasets: {},
 };
 
@@ -438,7 +440,7 @@ export const sampleTask4 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
-  currently_fetching_datasets: false,
+  currently_refreshing_datasets: false,
   datasets: {},
 };
 
@@ -480,7 +482,7 @@ export const sampleTask5 = {
   review_sha: '',
   org_config_name: 'dev',
   issue: null,
-  currently_fetching_datasets: false,
+  currently_refreshing_datasets: false,
   datasets: {},
 };
 
@@ -522,7 +524,7 @@ export const sampleTask6 = {
   review_sha: '',
   org_config_name: 'dev',
   issue: null,
-  currently_fetching_datasets: false,
+  currently_refreshing_datasets: false,
   datasets: {},
 };
 
@@ -778,7 +780,7 @@ export const sampleDevOrg = {
   has_ignored_changes: false,
   is_created: true,
   currently_refreshing_changes: false,
-  currently_capturing_changes: false,
+  currently_retrieving_metadata: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
@@ -813,7 +815,7 @@ export const sampleScratchOrg = {
   has_ignored_changes: false,
   is_created: true,
   currently_refreshing_changes: false,
-  currently_capturing_changes: false,
+  currently_retrieving_metadata: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,

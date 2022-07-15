@@ -646,9 +646,6 @@ class TaskSerializer(HashIdModelSerializer):
             "datasets",
             "datasets_parse_errors",
             "currently_refreshing_datasets",
-            "dataset_schema",
-            "currently_refreshing_dataset_schema",
-            "currently_capturing_dataset",
         )
         extra_kwargs = {
             "has_unmerged_commits": {"read_only": True},
@@ -672,9 +669,6 @@ class TaskSerializer(HashIdModelSerializer):
             "datasets": {"read_only": True},
             "datasets_parse_errors": {"read_only": True},
             "currently_refreshing_datasets": {"read_only": True},
-            "dataset_schema": {"read_only": True},
-            "currently_refreshing_dataset_schema": {"read_only": True},
-            "currently_capturing_dataset": {"read_only": True},
         }
         validators = (UnattachedIssueValidator(),)
 
@@ -974,7 +968,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "total_ignored_changes",
             "has_ignored_changes",
             "currently_refreshing_changes",
-            "currently_capturing_changes",
+            "currently_retrieving_metadata",
             "currently_refreshing_org",
             "currently_reassigning_user",
             "is_created",
@@ -984,6 +978,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "has_been_visited",
             "valid_target_directories",
             "org_config_name",
+            "dataset_schema",
+            "currently_refreshing_dataset_schema",
+            "currently_retrieving_dataset",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -994,7 +991,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "last_checked_unsaved_changes_at": {"read_only": True},
             "url": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
-            "currently_capturing_changes": {"read_only": True},
+            "currently_retrieving_metadata": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
             "currently_reassigning_user": {"read_only": True},
             "is_created": {"read_only": True},
@@ -1002,6 +999,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "owner_gh_username": {"read_only": True},
             "owner_gh_id": {"read_only": True},
             "has_been_visited": {"read_only": True},
+            "dataset_schema": {"read_only": True},
+            "currently_refreshing_dataset_schema": {"read_only": True},
+            "currently_retrieving_dataset": {"read_only": True},
         }
 
     def _X_changes(self, obj, kind):
@@ -1075,7 +1075,7 @@ class CommitSerializer(serializers.Serializer):
     target_directory = serializers.CharField()
 
 
-class CaptureDatasetSerializer(serializers.Serializer):
+class CommitDatasetSerializer(serializers.Serializer):
     commit_message = serializers.CharField()
     dataset_name = serializers.CharField()
     dataset_definition = serializers.DictField()

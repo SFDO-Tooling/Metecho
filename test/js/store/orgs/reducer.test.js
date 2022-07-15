@@ -251,13 +251,13 @@ describe('reducer', () => {
       });
     });
 
-    describe('OBJECT_TYPES.COMMIT', () => {
-      test('sets currently_capturing_changes: true', () => {
+    describe('OBJECT_TYPES.COMMIT_METADATA', () => {
+      test('sets currently_retrieving_metadata: true', () => {
         const org = {
           id: 'org-id',
           task: 'task-1',
           org_type: 'Dev',
-          currently_capturing_changes: true,
+          currently_retrieving_metadata: true,
         };
         const expected = {
           ...defaultState,
@@ -564,7 +564,7 @@ describe('reducer', () => {
         id: 'org-id',
         task: 'task-1',
         org_type: 'Dev',
-        currently_capturing_changes: false,
+        currently_retrieving_metadata: false,
       };
       const expected = {
         ...defaultState,

@@ -866,13 +866,13 @@ describe('reducer', () => {
       id: 't1',
       slug: 'task-1',
       name: 'Task 1',
-      currently_fetching_datasets: false,
+      currently_refreshing_datasets: false,
     };
     const task2 = {
       id: 't2',
       slug: 'task-2',
       name: 'Task 2',
-      currently_fetching_datasets: false,
+      currently_refreshing_datasets: false,
     };
     const initial = {
       p1: {
@@ -884,12 +884,12 @@ describe('reducer', () => {
       },
     };
 
-    test('sets currently_fetching_datasets: true', () => {
+    test('sets currently_refreshing_datasets: true', () => {
       const expected = {
         ...initial,
         p1: {
           ...initial.p1,
-          tasks: [{ ...task1, currently_fetching_datasets: true }, task2],
+          tasks: [{ ...task1, currently_refreshing_datasets: true }, task2],
         },
       };
       const actual = reducer(initial, {
@@ -915,13 +915,13 @@ describe('reducer', () => {
       id: 't1',
       slug: 'task-1',
       name: 'Task 1',
-      currently_fetching_datasets: true,
+      currently_refreshing_datasets: true,
     };
     const task2 = {
       id: 't2',
       slug: 'task-2',
       name: 'Task 2',
-      currently_fetching_datasets: false,
+      currently_refreshing_datasets: false,
     };
     const initial = {
       p1: {
@@ -933,12 +933,12 @@ describe('reducer', () => {
       },
     };
 
-    test('sets currently_fetching_datasets: false', () => {
+    test('sets currently_refreshing_datasets: false', () => {
       const expected = {
         ...initial,
         p1: {
           ...initial.p1,
-          tasks: [{ ...task1, currently_fetching_datasets: false }, task2],
+          tasks: [{ ...task1, currently_refreshing_datasets: false }, task2],
         },
       };
       const actual = reducer(initial, {

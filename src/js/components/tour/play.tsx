@@ -52,7 +52,7 @@ export const getDemoOrg = ({
     total_ignored_changes: 0,
     has_ignored_changes: false,
     currently_refreshing_changes: false,
-    currently_capturing_changes: false,
+    currently_retrieving_metadata: false,
     currently_refreshing_org: false,
     currently_reassigning_user: false,
     is_created: true,

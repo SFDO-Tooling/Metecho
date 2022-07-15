@@ -1000,7 +1000,7 @@ class TestScratchOrgViewSet:
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
-            currently_capturing_changes=False,
+            currently_retrieving_metadata=False,
             currently_refreshing_changes=False,
             owner=other_user,
         )
@@ -1020,7 +1020,7 @@ class TestScratchOrgViewSet:
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
-            currently_capturing_changes=False,
+            currently_retrieving_metadata=False,
             currently_refreshing_changes=False,
             owner=other_user,
         )
@@ -1037,7 +1037,7 @@ class TestScratchOrgViewSet:
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
-                currently_capturing_changes=False,
+                currently_retrieving_metadata=False,
                 currently_refreshing_changes=False,
                 owner=client.user,
             )
@@ -1058,7 +1058,7 @@ class TestScratchOrgViewSet:
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
-                currently_capturing_changes=False,
+                currently_retrieving_metadata=False,
                 currently_refreshing_changes=False,
                 owner=client.user,
             )
@@ -1202,6 +1202,52 @@ class TestScratchOrgViewSet:
 
             assert response.status_code == 403
             assert not refresh_scratch_org_job.delay.called
+
+    def test_refresh_dataset_schema(self, mocker, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(currently_refreshing_dataset_schema=False)
+        refresh_dataset_schema_job = mocker.patch(
+            "metecho.api.jobs.refresh_dataset_schema_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-refresh-dataset-schema", args=[scratch_org.pk])
+        )
+        scratch_org.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert scratch_org.currently_refreshing_dataset_schema
+        assert response.data["currently_refreshing_dataset_schema"]
+        refresh_dataset_schema_job.delay.assert_called_once_with(
+            scratch_org, originating_user_id=client.user.id
+        )
+
+    def test_commit_dataset_from_org(self, mocker, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(currently_retrieving_dataset=False)
+        commit_dataset_from_org_job = mocker.patch(
+            "metecho.api.jobs.commit_dataset_from_org_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-commit-dataset", args=[scratch_org.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "dataset_name": "NewDataset",
+                "dataset_definition": {"foo": "bar"},
+            },
+        )
+        scratch_org.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert scratch_org.currently_retrieving_dataset
+        assert response.data["currently_retrieving_dataset"]
+        commit_dataset_from_org_job.delay.assert_called_once_with(
+            scratch_org=scratch_org,
+            user=client.user,
+            commit_message="New commit",
+            dataset_name="NewDataset",
+            dataset_definition={"foo": "bar"},
+        )
 
 
 @pytest.mark.django_db
@@ -1467,50 +1513,6 @@ class TestTaskViewSet:
         assert response.data["currently_refreshing_datasets"]
         refresh_datasets_job.delay.assert_called_once_with(
             task, originating_user_id=client.user.id
-        )
-
-    def test_refresh_dataset_schema(self, mocker, client, task_factory):
-        task = task_factory(currently_refreshing_dataset_schema=False)
-        refresh_dataset_schema_job = mocker.patch(
-            "metecho.api.jobs.refresh_dataset_schema_job", autospec=True
-        )
-
-        response = client.post(reverse("task-refresh-dataset-schema", args=[task.pk]))
-        task.refresh_from_db()
-
-        assert response.status_code == 202, response.data
-        assert task.currently_refreshing_dataset_schema
-        assert response.data["currently_refreshing_dataset_schema"]
-        refresh_dataset_schema_job.delay.assert_called_once_with(
-            task, originating_user_id=client.user.id
-        )
-
-    def test_capture_dataset(self, mocker, client, task_factory):
-        task = task_factory(currently_capturing_dataset=False)
-        capture_dataset_job = mocker.patch(
-            "metecho.api.jobs.capture_dataset_job", autospec=True
-        )
-
-        response = client.post(
-            reverse("task-capture-dataset", args=[task.pk]),
-            format="json",
-            data={
-                "commit_message": "New commit",
-                "dataset_name": "NewDataset",
-                "dataset_definition": {"foo": "bar"},
-            },
-        )
-        task.refresh_from_db()
-
-        assert response.status_code == 202, response.data
-        assert task.currently_capturing_dataset
-        assert response.data["currently_capturing_dataset"]
-        capture_dataset_job.delay.assert_called_once_with(
-            task=task,
-            user=client.user,
-            commit_message="New commit",
-            dataset_name="NewDataset",
-            dataset_definition={"foo": "bar"},
         )
 
 

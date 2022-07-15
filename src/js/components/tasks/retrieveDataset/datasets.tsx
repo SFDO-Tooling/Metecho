@@ -7,13 +7,11 @@ import React, {
   ChangeEvent,
   Dispatch,
   SetStateAction,
-  useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import uuid from 'uuid-random';
 
 import { DatasetCommit } from '@/js/components/tasks/retrieveDataset';
@@ -22,57 +20,40 @@ import {
   SpinnerWrapper,
   UseFormProps,
 } from '@/js/components/utils';
-import { ThunkDispatch } from '@/js/store';
-import { refreshDatasets } from '@/js/store/tasks/actions';
 
 interface Props {
-  projectId: string;
-  taskId: string;
   datasets: string[];
+  datasetErrors: string[];
   fetchingDatasets: boolean;
   inputs: DatasetCommit;
   setInputs: UseFormProps['setInputs'];
   errors: UseFormProps['errors'];
   handleInputChange: UseFormProps['handleInputChange'];
   setHasError: Dispatch<SetStateAction<boolean>>;
+  doRefreshDatasets: () => void;
 }
 
 const SelectDatasetForm = ({
-  projectId,
-  taskId,
   datasets,
+  datasetErrors,
   fetchingDatasets,
   inputs,
   errors,
   setInputs,
   handleInputChange,
   setHasError,
+  doRefreshDatasets,
 }: Props) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<ThunkDispatch>();
   const existingDatasetSelected = Boolean(
-    inputs.dataset &&
-      map(datasets, lowerCase).includes(inputs.dataset.toLowerCase()),
+    inputs.dataset_name &&
+      map(datasets, lowerCase).includes(inputs.dataset_name.toLowerCase()),
   );
   const [creatingDataset, setCreatingDataset] = useState(
-    Boolean(inputs.dataset && !existingDatasetSelected),
+    Boolean(inputs.dataset_name && !existingDatasetSelected),
   );
   const CREATE_DATASET = useRef(`create-dataset-${uuid()}`);
   const inputEl = useRef<HTMLInputElement | null>(null);
-
-  const doRefreshDatasets = useCallback(() => {
-    /* istanbul ignore else */
-    if (taskId) {
-      dispatch(refreshDatasets({ project: projectId, task: taskId }));
-    }
-  }, [dispatch, projectId, taskId]);
-
-  // If there are no known datasets, check again once...
-  useEffect(() => {
-    if (!datasets.length) {
-      doRefreshDatasets();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // If custom name matches existing dataset, disable "Save & Next" action
   useEffect(() => {
@@ -89,7 +70,7 @@ const SelectDatasetForm = ({
   const handleDatasetChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value === CREATE_DATASET.current) {
       setCreatingDataset(true);
-      setInputs({ ...inputs, dataset: '' });
+      setInputs({ ...inputs, dataset_name: '' });
     } else {
       setCreatingDataset(false);
       handleInputChange(event);
@@ -110,6 +91,13 @@ const SelectDatasetForm = ({
               create a new dataset.
             </Trans>
           </p>
+          {fetchingDatasets
+            ? null
+            : datasetErrors.map((err, idx) => (
+                <p key={idx} className="slds-text-color_error">
+                  {err}
+                </p>
+              ))}
         </div>
         <div
           className="slds-grid
@@ -144,7 +132,7 @@ const SelectDatasetForm = ({
           assistiveText={{
             required: t('Required'),
           }}
-          name="dataset"
+          name="dataset_name"
           required
           onChange={handleDatasetChange}
         >
@@ -152,16 +140,16 @@ const SelectDatasetForm = ({
             <Radio
               key={`${idx}`}
               labels={{ label: dataset }}
-              checked={inputs.dataset === dataset}
+              checked={inputs.dataset_name === dataset}
               value={dataset}
-              name="dataset"
+              name="dataset_name"
             />
           ))}
           <Radio
             labels={{ label: t('Create New Dataset') }}
             checked={creatingDataset}
             value={CREATE_DATASET.current}
-            name="dataset"
+            name="dataset_name"
           />
         </RadioGroup>
         {creatingDataset && (
@@ -169,14 +157,14 @@ const SelectDatasetForm = ({
             inputRef={(ref: HTMLInputElement) => (inputEl.current = ref)}
             placeholder={t('Dataset name')}
             className="slds-m-left_large slds-m-top_xx-small"
-            name="dataset"
-            value={inputs.dataset}
+            name="dataset_name"
+            value={inputs.dataset_name}
             required
             aria-required
             errorText={
               existingDatasetSelected
                 ? t('Dataset name cannot match existing dataset.')
-                : errors.dataset
+                : undefined
             }
             onChange={handleInputChange}
           />

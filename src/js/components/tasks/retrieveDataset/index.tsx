@@ -1,12 +1,15 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 // import ChangesForm from '@/js/components/tasks/retrieveDataset/changes';
 import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
 // import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { refreshDatasets } from '@/js/store/tasks/actions';
 import { DatasetObject, Datasets } from '@/js/store/tasks/reducer';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
@@ -16,14 +19,15 @@ interface Props {
   taskId: string;
   orgId: string;
   datasets: Datasets;
+  datasetErrors: string[];
   fetchingDatasets: boolean;
   isOpen: boolean;
   closeModal: () => void;
 }
 
 export interface DatasetCommit {
-  dataset: string;
-  changes: DatasetObject[];
+  dataset_name: string;
+  dataset_definition: DatasetObject[];
   commit_message: string;
 }
 
@@ -36,11 +40,13 @@ const RetrieveDatasetModal = ({
   taskId,
   orgId,
   datasets,
+  datasetErrors,
   fetchingDatasets,
   isOpen,
   closeModal,
 }: Props) => {
   const { t } = useTranslation();
+  const dispatch = useDispatch<ThunkDispatch>();
   const [retrievingDataset, setRetrievingDataset] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [hasError, setHasError] = useState(false);
@@ -90,19 +96,19 @@ const RetrieveDatasetModal = ({
     resetForm,
   } = useForm({
     fields: {
-      dataset: '',
-      changes: {},
+      dataset_name: '',
+      dataset_definition: {},
       commit_message: '',
     } as DatasetCommit,
-    objectType: OBJECT_TYPES.COMMIT,
-    url: window.api_urls.scratch_org_commit(orgId),
+    objectType: OBJECT_TYPES.COMMIT_DATASET,
+    url: window.api_urls.scratch_org_commit_dataset(orgId),
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: false,
   });
 
   // const hasCommitMessage = Boolean(inputs.commit_message);
-  const datasetSelected = Boolean(inputs.dataset);
+  const datasetSelected = Boolean(inputs.dataset_name);
 
   const handleClose = () => {
     closeModal();
@@ -115,20 +121,34 @@ const RetrieveDatasetModal = ({
     handleSubmit(e);
   };
 
+  const doRefreshDatasets = useCallback(() => {
+    /* istanbul ignore else */
+    if (projectId && taskId) {
+      dispatch(refreshDatasets({ project: projectId, task: taskId }));
+    }
+  }, [dispatch, projectId, taskId]);
+
+  // If there are no known datasets, check again once...
+  useEffect(() => {
+    if (isOpen && !fetchingDatasets && !Object.keys(datasets).length) {
+      doRefreshDatasets();
+    }
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const pages = [
     {
       heading: t('Select the dataset to create or modify'),
       contents: (
         <SelectDatasetForm
-          projectId={projectId}
-          taskId={taskId}
           datasets={Object.keys(datasets)}
+          datasetErrors={datasetErrors}
           fetchingDatasets={fetchingDatasets}
           inputs={inputs as DatasetCommit}
           errors={errors}
           setInputs={setInputs}
           handleInputChange={handleInputChange}
           setHasError={setHasError}
+          doRefreshDatasets={doRefreshDatasets}
         />
       ),
       footer: [
