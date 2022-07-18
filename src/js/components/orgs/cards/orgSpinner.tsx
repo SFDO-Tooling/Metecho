@@ -23,7 +23,8 @@ const OrgSpinner = ({
     isRefreshingChanges ||
     isReassigningOrg ||
     isConvertingOrg ||
-    (ownedByCurrentUser && org?.currently_retrieving_metadata)
+    (ownedByCurrentUser &&
+      (org?.currently_retrieving_metadata || org?.currently_retrieving_dataset))
   ) {
     return <SpinnerWrapper size="small" />;
   }

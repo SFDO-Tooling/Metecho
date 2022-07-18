@@ -54,6 +54,7 @@ export const getDemoTask = ({
     issue: null,
     currently_refreshing_datasets: false,
     datasets: {},
+    datasets_parse_errors: [],
   };
 };
 

@@ -149,7 +149,8 @@ const TaskDetail = (
       task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
   );
   let currentlyFetching = false;
-  let currentlyCommitting = false;
+  let currentlyCommittingMetadata = false;
+  let currentlyCommittingDataset = false;
   let currentlyReassigning = false;
   let orgHasChanges = false;
   let userIsDevOwner = false;
@@ -187,7 +188,10 @@ const TaskDetail = (
       userIsAssignedTester && testOrg?.is_created && testOrg?.owner === user.id,
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
-    currentlyCommitting = Boolean(devOrg?.currently_retrieving_metadata);
+    currentlyCommittingMetadata = Boolean(
+      devOrg?.currently_retrieving_metadata,
+    );
+    currentlyCommittingDataset = Boolean(devOrg?.currently_retrieving_dataset);
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
     devOrgIsCreating = Boolean(
@@ -221,7 +225,8 @@ const TaskDetail = (
     devOrgIsDeleting ||
     currentlyFetching ||
     currentlyReassigning ||
-    currentlyCommitting;
+    currentlyCommittingMetadata ||
+    currentlyCommittingDataset;
   const testOrgLoading =
     testOrgIsCreating ||
     testOrgIsDeleting ||
@@ -793,7 +798,7 @@ const TaskDetail = (
     const isPrimary =
       (orgHasChanges || !readyToSubmit) &&
       (!task.pr_is_open || hasReviewRejected);
-    if (currentlyCommitting) {
+    if (currentlyCommittingMetadata) {
       /* istanbul ignore next */
       retrieveMetadataText = (
         <LabelWithSpinner
@@ -820,14 +825,24 @@ const TaskDetail = (
     } else if (orgHasChanges) {
       retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
-    if (!(currentlyReassigning || currentlyCommitting)) {
+    if (!(currentlyReassigning || currentlyCommittingMetadata)) {
       retrieveDatasetButton = (
         <div className="inline-container slds-m-left_small">
           <Button
-            label={t('Retrieve Dataset')}
+            label={
+              currentlyCommittingDataset ? (
+                <LabelWithSpinner
+                  label={t('Retrieving Selected Dataset…')}
+                  variant="base"
+                />
+              ) : (
+                t('Retrieve Dataset')
+              )
+            }
             variant="outline-brand"
             className="slds-align-middle"
             onClick={openRetrieveDatasetModal}
+            disabled={currentlyCommittingDataset}
           />
         </div>
       );
@@ -847,7 +862,8 @@ const TaskDetail = (
           disabled={
             fetchingChanges ||
             currentlyFetching ||
-            currentlyCommitting ||
+            currentlyCommittingMetadata ||
+            currentlyCommittingDataset ||
             currentlyReassigning
           }
         />

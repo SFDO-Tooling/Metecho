@@ -314,6 +314,7 @@ export const sampleTask1 = {
   issue: null,
   currently_refreshing_datasets: false,
   datasets: {},
+  datasets_parse_errors: [],
 };
 
 export const sampleTask2 = {
@@ -356,6 +357,7 @@ export const sampleTask2 = {
   issue: null,
   currently_refreshing_datasets: false,
   datasets: {},
+  datasets_parse_errors: [],
 };
 
 export const sampleTask3 = {
@@ -399,6 +401,7 @@ export const sampleTask3 = {
   issue: null,
   currently_refreshing_datasets: false,
   datasets: {},
+  datasets_parse_errors: [],
 };
 
 export const sampleTask4 = {
@@ -442,6 +445,7 @@ export const sampleTask4 = {
   issue: null,
   currently_refreshing_datasets: false,
   datasets: {},
+  datasets_parse_errors: [],
 };
 
 export const sampleTask5 = {
@@ -484,6 +488,7 @@ export const sampleTask5 = {
   issue: null,
   currently_refreshing_datasets: false,
   datasets: {},
+  datasets_parse_errors: [],
 };
 
 export const sampleTask6 = {
@@ -526,6 +531,7 @@ export const sampleTask6 = {
   issue: null,
   currently_refreshing_datasets: false,
   datasets: {},
+  datasets_parse_errors: [],
 };
 
 export const sampleProject1 = {
@@ -781,12 +787,15 @@ export const sampleDevOrg = {
   is_created: true,
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
+  currently_retrieving_dataset: false,
+  currently_retrieving_dataset_schema: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  dataset_schema: [],
 };
 
 export const sampleScratchOrg = {
@@ -816,12 +825,15 @@ export const sampleScratchOrg = {
   is_created: true,
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
+  currently_retrieving_dataset: false,
+  currently_retrieving_dataset_schema: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  dataset_schema: [],
 };
 
 export const sampleIssue1 = {

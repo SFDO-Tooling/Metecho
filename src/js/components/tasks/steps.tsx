@@ -62,7 +62,10 @@ const TaskStatusSteps = ({
   );
   const taskIsSubmitting = Boolean(task?.currently_creating_pr);
   const devOrgFetching = Boolean(devOrg?.currently_refreshing_changes);
-  const devOrgCommitting = Boolean(devOrg?.currently_retrieving_metadata);
+  const devOrgCommittingMetadata = Boolean(
+    devOrg?.currently_retrieving_metadata,
+  );
+  const devOrgCommittingDataset = Boolean(devOrg?.currently_retrieving_dataset);
   const devOrgIsCreating = Boolean(
     isCreatingOrg[ORG_TYPES.DEV] || (devOrg && !devOrg.is_created),
   );
@@ -83,7 +86,8 @@ const TaskStatusSteps = ({
     devOrgIsDeleting ||
     devOrgFetching ||
     devOrgIsReassigning ||
-    devOrgCommitting;
+    devOrgCommittingMetadata ||
+    devOrgCommittingDataset;
   const testOrgLoading =
     testOrgIsCreating ||
     testOrgIsDeleting ||
@@ -93,9 +97,10 @@ const TaskStatusSteps = ({
   let retrieveChangesLabel = t('Retrieve changes from Dev Org');
   if (devOrgFetching) {
     retrieveChangesLabel = t('Checking for Unretrieved Changes…');
-  }
-  if (devOrgCommitting) {
+  } else if (devOrgCommittingMetadata) {
     retrieveChangesLabel = t('Retrieving changes from Dev Org…');
+  } else if (devOrgCommittingDataset) {
+    retrieveChangesLabel = t('Retrieving dataset from Dev Org…');
   }
 
   const steps: Step[] = [
