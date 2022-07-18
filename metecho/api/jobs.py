@@ -9,11 +9,14 @@ from typing import Iterable
 import cumulusci
 import requests
 import sarge
-import yaml
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
+from cumulusci.core.config.org_config import OrgConfig
+from cumulusci.core.datasets import Dataset
+from cumulusci.core.runtime import BaseCumulusCI
+from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
@@ -26,6 +29,7 @@ from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.github import GitHub
 from github3.repos.repo import Repository
+from simple_salesforce.api import Salesforce
 
 from .email_utils import get_user_facing_url
 from .gh import (
@@ -58,7 +62,7 @@ from .sf_org_changes import (
     get_valid_target_directories,
     retrieve_and_commit_dataset,
 )
-from .sf_run_flow import create_org, delete_org, run_flow
+from .sf_run_flow import create_org, delete_org, get_devhub_api, run_flow
 
 logger = logging.getLogger(__name__)
 
@@ -833,7 +837,7 @@ def refresh_commits(*, project, branch_name, originating_user_id):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import Epic, Task
+    from .models import Epic
 
     repo = get_repo_info(
         None, repo_owner=project.repo_owner, repo_name=project.repo_name
@@ -1170,71 +1174,122 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 user_reassign_job = job(user_reassign)
 
 
-def refresh_datasets(task: Task, originating_user_id=None):
+@contextlib.contextmanager
+def dataset_env(org: ScratchOrg, user: User):
     """
-    Refresh the dataset definition cache on `task` by parsing definitions from the Task branch
+    Yields all configuration objects required by the CumulusCI `Dataset` class
+    """
+    task = org.task
+    repo = get_repo_info(
+        None,
+        repo_owner=task.root_project.repo_owner,
+        repo_name=task.root_project.repo_name,
+    )
+    sf = get_devhub_api(devhub_username=user.sf_username, scratch_org=org)
+    with local_github_checkout(
+        repo_owner=repo.owner.login,
+        repo_name=repo.name,
+        commit_ish=task.branch_name,
+    ) as project_path:
+        project_config = get_project_config(
+            repo_root=project_path,
+            repo_name=repo.name,
+            repo_url=repo.html_url,
+            repo_owner=repo.owner.login,
+            repo_branch=task.branch_name,
+            repo_commit=repo.branch(task.branch_name).latest_sha(),
+        )
+        cci = BaseCumulusCI(
+            repo_info={
+                "root": project_path,
+                "url": repo.html_url,
+                "name": repo.name,
+                "owner": repo.owner.login,
+                "commit": task.branch_name,
+            }
+        )
+        org_config = OrgConfig(
+            config=org.config, name=org.org_config_name, keychain=cci.keychain
+        )
+        yield project_config, org_config, sf
+
+
+def refresh_datasets(*, org: ScratchOrg, user: User):
+    """
+    Refresh the dataset definition cache on `org` by parsing definitions from the Task branch
     """
     try:
-        task.refresh_from_db()
-        with local_github_checkout(
-            repo_owner=task.root_project.repo_owner,
-            repo_name=task.root_project.repo_name,
-            commit_ish=task.branch_name,
-        ) as project_path:
-            errors = []
-            definitions = {}
+        errors = []
+        definitions = {}
+        org.refresh_from_db()
+        with dataset_env(org, user) as (project_config, org_config, sf):
+            project_path = project_config.repo_root
             datasets_dir = Path(project_path) / "datasets"
-            if datasets_dir.exists():
-                datasets = datasets_dir.iterdir()
-            else:
-                datasets = ()
-                errors.append("Could not find 'datasets/' directory in the Task branch")
-            for obj in datasets:
-                if not obj.is_dir():
+            entries = list(datasets_dir.iterdir()) if datasets_dir.is_dir() else ()
+            if not entries:
+                errors.append(_("Found empty 'datasets/' directory in the Task branch"))
+
+            for entry in entries:
+                if not entry.is_dir():
                     continue
-                yml_files = list(obj.glob("*.extract.yml"))
-                if len(yml_files) == 1:
-                    definitions[obj.name] = yaml.safe_load(yml_files[0].open())
-                else:
-                    file_names = ", ".join(f"'{f.name}'" for f in yml_files) or "none"
-                    errors.append(
-                        f"Expected a single '*.extract.yml' file inside '{obj.name}/' "
-                        f"but found {file_names}"
-                    )
-        task.datasets = definitions
-        task.datasets_parse_errors = errors
+                with Dataset(entry.name, project_config, org_config, sf) as dataset:
+                    rel_file = dataset.extract_file.relative_to(project_path)
+                    if not dataset.extract_file.exists():
+                        errors.append(
+                            _("Missing dataset definition file: {}").format(rel_file)
+                        )
+                        continue
+                    try:
+                        definitions[entry.name] = dataset.read_schema_subset()
+                    except Exception:
+                        logger.exception(
+                            f"Failed to parse {dataset.extract_file}. Task: {org.task}. "
+                            f"Contents: \n{dataset.extract_file.read_text()}"
+                        )
+                        errors.append(_("Failed to parse file: {}").format(rel_file))
+
+        org.datasets = definitions
+        org.datasets_parse_errors = errors
     except Exception as e:
-        task.finalize_refresh_datasets(error=e, originating_user_id=originating_user_id)
+        org.finalize_refresh_datasets(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        task.finalize_refresh_datasets(originating_user_id=originating_user_id)
+        org.finalize_refresh_datasets(originating_user_id=user.id)
 
 
 refresh_datasets_job = job(refresh_datasets)
 
 
-def refresh_dataset_schema(scratch_org: ScratchOrg, originating_user_id=None):
+def refresh_dataset_schema(
+    org: ScratchOrg,
+    *,
+    user: User,
+    org_config: OrgConfig = None,
+    sf: Salesforce = None,
+):
     """
     Refresh the schema cache on `ScratchOrg`
     """
+    filters = [Filters.extractable, Filters.createable]
     try:
-        scratch_org.refresh_from_db()
-        # TODO: Actually fetch a schema from dev_org
-        schema = {}
-        scratch_org.dataset_schema = schema
+        org.refresh_from_db()
+        with contextlib.ExitStack() as stack:
+            if not (org_config and sf):
+                _, org_config, sf = stack.enter_context(dataset_env(org, user=user))
+
+            schema = stack.enter_context(
+                get_org_schema(sf, org_config, include_counts=True, filters=filters)
+            )
+            org.dataset_schema = schema  # TODO: figure out how to serialize `schema`
     except Exception as e:
-        scratch_org.finalize_refresh_dataset_schema(
-            error=e, originating_user_id=originating_user_id
-        )
+        org.finalize_refresh_dataset_schema(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.finalize_refresh_dataset_schema(
-            originating_user_id=originating_user_id
-        )
+        org.finalize_refresh_dataset_schema(originating_user_id=user.id)
 
 
 refresh_dataset_schema_job = job(refresh_dataset_schema)

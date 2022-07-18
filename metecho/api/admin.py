@@ -206,8 +206,6 @@ class TaskAdmin(admin.ModelAdmin):
         ("reviewers"),
         "status",
         ("assigned_dev", "assigned_qa"),
-        "currently_refreshing_datasets",
-        ("datasets", "datasets_parse_errors"),
     )
     readonly_fields = (
         "commits",

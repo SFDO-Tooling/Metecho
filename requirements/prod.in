@@ -8,7 +8,7 @@ beautifulsoup4
 bleach
 channels
 channels-redis
-cumulusci
+cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/20bd4b30bfa90f3470fd0810f101edfefaaacf45.tar.gz
 dj-database-url
 django-allauth
 django-anymail[mailgun]
@@ -26,7 +26,6 @@ github3-py
 honcho
 logfmt
 markdown
-pyyaml
 
 # psycopg2 is used as the database driver for Django to connect to PostgreSQL.
 # It is LGPL-licensed and we must follow these rules for compliance with Salesforce 3rd-party software policy:

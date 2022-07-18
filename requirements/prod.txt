@@ -86,7 +86,7 @@ cryptography==37.0.4
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.61.1
+cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/20bd4b30bfa90f3470fd0810f101edfefaaacf45.tar.gz
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -276,7 +276,6 @@ pytz==2022.1
     #   djangorestframework
 pyyaml==6.0
     # via
-    #   -r requirements/prod.in
     #   cumulusci
     #   drf-spectacular
     #   snowfakery

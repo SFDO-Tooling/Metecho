@@ -643,9 +643,6 @@ class TaskSerializer(HashIdModelSerializer):
             "dev_org",
             "currently_submitting_review",
             "org_config_name",
-            "datasets",
-            "datasets_parse_errors",
-            "currently_refreshing_datasets",
         )
         extra_kwargs = {
             "has_unmerged_commits": {"read_only": True},
@@ -666,9 +663,6 @@ class TaskSerializer(HashIdModelSerializer):
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
             "created_at": {"read_only": True},
-            "datasets": {"read_only": True},
-            "datasets_parse_errors": {"read_only": True},
-            "currently_refreshing_datasets": {"read_only": True},
         }
         validators = (UnattachedIssueValidator(),)
 
@@ -978,6 +972,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "has_been_visited",
             "valid_target_directories",
             "org_config_name",
+            "datasets",
+            "datasets_parse_errors",
+            "currently_refreshing_datasets",
             "dataset_schema",
             "currently_refreshing_dataset_schema",
             "currently_retrieving_dataset",
@@ -999,6 +996,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "owner_gh_username": {"read_only": True},
             "owner_gh_id": {"read_only": True},
             "has_been_visited": {"read_only": True},
+            "datasets": {"read_only": True},
+            "datasets_parse_errors": {"read_only": True},
+            "currently_refreshing_datasets": {"read_only": True},
             "dataset_schema": {"read_only": True},
             "currently_refreshing_dataset_schema": {"read_only": True},
             "currently_retrieving_dataset": {"read_only": True},

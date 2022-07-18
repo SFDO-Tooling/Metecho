@@ -556,14 +556,6 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         serializer.update(task, serializer.validated_data)
         return Response(self.get_serializer(task).data)
 
-    @extend_schema(request=None, responses={202: TaskSerializer})
-    @action(detail=True, methods=["POST"])
-    def refresh_datasets(self, request, pk=None):
-        """Queue a job to refresh the dataset definitions for a Task"""
-        task = self.get_object()
-        task.queue_refresh_datasets(originating_user_id=request.user.id)
-        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
-
 
 class ScratchOrgViewSet(
     mixins.CreateModelMixin,
@@ -699,6 +691,14 @@ class ScratchOrgViewSet(
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
+
+    @extend_schema(request=None, responses={202: ScratchOrgSerializer})
+    @action(detail=True, methods=["POST"])
+    def refresh_datasets(self, request, pk=None):
+        """Queue a job to refresh the dataset definitions for this Org's Task"""
+        org = self.get_object()
+        org.queue_refresh_datasets(user=request.user)
+        return Response(self.get_serializer(org).data, status=status.HTTP_202_ACCEPTED)
 
     @extend_schema(request=None, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
