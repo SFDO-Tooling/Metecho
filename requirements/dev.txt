@@ -171,7 +171,7 @@ pytest==7.1.2
     #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
-pytest-asyncio==0.18.3
+pytest-asyncio==0.19.0
     # via -r requirements/dev.in
 pytest-cov==3.0.0
     # via -r requirements/dev.in
