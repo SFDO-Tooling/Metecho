@@ -1882,10 +1882,10 @@
     regenerator-runtime "^0.13.7"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-postcss@^3.0.0-alpha.1":
-  version "3.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-postcss/-/addon-postcss-3.0.0-alpha.1.tgz#aa69bbeeb778fe184f9880da44b0a7883fc86ba3"
-  integrity sha512-j3DB//h89ctz0Orh1N4AHuzdzYhbL5XhUdh1V5rJ6tPOhHZ57v60tS4owukY4nE5gqM345lbuXK6MjbSZPqZdQ==
+"@storybook/addon-postcss@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-postcss/-/addon-postcss-2.0.0.tgz#ec61cb9bb2662f408072b35c466c7df801c28498"
+  integrity sha512-Nt82A7e9zJH4+A+VzLKKswUfru+T6FJTakj4dccP0i8DSn7a0CkzRPrLuZBq8tg4voV6gD74bcDf3gViCVBGtA==
   dependencies:
     "@storybook/node-logger" "^6.1.14"
     css-loader "^3.6.0"
