@@ -1157,7 +1157,11 @@ const TaskDetail = (
                 orgId={(devOrg as Org).id}
                 datasets={task.datasets}
                 datasetErrors={task.datasets_parse_errors}
+                schema={(devOrg as Org).dataset_schema}
                 fetchingDatasets={task.currently_refreshing_datasets}
+                fetchingSchema={
+                  (devOrg as Org).currently_retrieving_dataset_schema
+                }
                 isOpen={retrieveDatasetModalOpen}
                 closeModal={closeRetrieveDatasetModal}
               />

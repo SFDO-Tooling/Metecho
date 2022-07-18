@@ -9,6 +9,7 @@ import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
 // import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
+import { refreshDatasetSchema } from '@/js/store/orgs/actions';
 import { refreshDatasets } from '@/js/store/tasks/actions';
 import { DatasetObject, Datasets } from '@/js/store/tasks/reducer';
 import { ApiError } from '@/js/utils/api';
@@ -20,7 +21,9 @@ interface Props {
   orgId: string;
   datasets: Datasets;
   datasetErrors: string[];
+  schema: DatasetObject[];
   fetchingDatasets: boolean;
+  fetchingSchema: boolean;
   isOpen: boolean;
   closeModal: () => void;
 }
@@ -41,7 +44,9 @@ const RetrieveDatasetModal = ({
   orgId,
   datasets,
   datasetErrors,
+  schema,
   fetchingDatasets,
+  fetchingSchema,
   isOpen,
   closeModal,
 }: Props) => {
@@ -128,8 +133,19 @@ const RetrieveDatasetModal = ({
     }
   }, [dispatch, projectId, taskId]);
 
-  // If there are no known datasets, check again once...
+  const doRefreshDatasetSchema = useCallback(() => {
+    /* istanbul ignore else */
+    if (orgId) {
+      dispatch(refreshDatasetSchema({ org: orgId }));
+    }
+  }, [dispatch, orgId]);
+
   useEffect(() => {
+    // Always refresh dataset schema when modal opens:
+    if (isOpen && !fetchingSchema) {
+      doRefreshDatasetSchema();
+    }
+    // If there are no known datasets, check again once:
     if (isOpen && !fetchingDatasets && !Object.keys(datasets).length) {
       doRefreshDatasets();
     }

@@ -159,7 +159,6 @@ export const refreshDatasets =
     project: string;
     task: string;
   }): ThunkResult<Promise<RefreshDatasetsAction>> =>
-  // eslint-disable-next-line require-await
   async (dispatch) => {
     dispatch({
       type: 'REFRESH_DATASETS_REQUESTED',

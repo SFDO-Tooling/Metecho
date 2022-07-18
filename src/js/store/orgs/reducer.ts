@@ -217,6 +217,22 @@ const reducer = (
         },
       };
     }
+    case 'REFRESH_DATASET_SCHEMA_REQUESTED':
+    case 'REFRESH_DATASET_SCHEMA_REJECTED': {
+      const orgId = action.payload;
+      const existingOrg = orgs.orgs[orgId] ?? {};
+      return {
+        ...orgs,
+        orgs: {
+          ...orgs.orgs,
+          [orgId]: {
+            ...existingOrg,
+            currently_retrieving_dataset_schema:
+              action.type === 'REFRESH_DATASET_SCHEMA_REQUESTED',
+          },
+        },
+      };
+    }
     case 'DELETE_OBJECT_SUCCEEDED': {
       const { objectType, object }: { objectType?: ObjectTypes; object: Org } =
         action.payload;

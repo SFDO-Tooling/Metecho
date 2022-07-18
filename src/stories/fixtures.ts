@@ -23,13 +23,15 @@ export const api_urls = {
   project_refresh_github_users: (id: string) =>
     `/api/projects/${id}/refresh_github_users/`,
   epic_list: () => '/api/epics/',
-  scratch_org_list: () => '/api/scratch_orgs/',
-  scratch_org_detail: (id: string) => `/api/scratch_orgs/${id}/`,
+  scratch_org_list: () => '/api/scratch-orgs/',
+  scratch_org_detail: (id: string) => `/api/scratch-orgs/${id}/`,
   scratch_org_commit: (id: string) => `/api/scratch_orgs/${id}/commit/`,
   scratch_org_commit_dataset: (id: string) =>
-    `/api/scratch_orgs/${id}/commit_dataset/`,
-  scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
-  scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
+    `/api/scratch-orgs/${id}/commit_dataset/`,
+  scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
+  scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
+  scratch_org_refresh_dataset_schema: (id: string) =>
+    `/api/scratch-orgs/${id}/refresh_dataset_schema/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
   task_list: () => 'api/tasks/',
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
