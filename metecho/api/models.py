@@ -1209,10 +1209,17 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
         refresh_datasets_job.delay(self, originating_user_id=originating_user_id)
 
-    def finalize_refresh_datasets(self, originating_user_id=None):
+    def finalize_refresh_datasets(self, *, error=None, originating_user_id=None):
         self.currently_refreshing_datasets = False
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
+
+        if error is None:
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
+            self.datasets = {}
+            self.datasets_parse_errors = [_("Unable to parse existing datasets.")]
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
 
 
 class ScratchOrg(
@@ -1509,7 +1516,7 @@ class ScratchOrg(
             self.save()
             self.notify_scratch_org_error(
                 error=error,
-                type_="SCRATCH_ORG_FETCH_CHANGES_FAILED",
+                type_="SCRATCH_ORG_FETCH_DATASETS_FAILED",
                 originating_user_id=originating_user_id,
             )
 

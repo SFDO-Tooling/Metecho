@@ -15,6 +15,7 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  fetchFailed,
   orgConvertFailed,
   orgProvisioning,
   orgReassigned,
@@ -24,7 +25,6 @@ import {
   provisionOrg,
   recreateOrg,
   refreshError,
-  updateFailed,
   updateOrg,
 } from '@/js/store/orgs/actions';
 import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
@@ -214,8 +214,10 @@ interface OrgUpdatedEvent {
     originating_user_id: string | null;
   };
 }
-interface OrgUpdateFailedEvent {
-  type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
+interface OrgFetchFailedEvent {
+  type:
+    | 'SCRATCH_ORG_FETCH_CHANGES_FAILED'
+    | 'SCRATCH_ORG_FETCH_DATASETS_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -283,14 +285,16 @@ interface OrgReassignFailedEvent {
   };
 }
 interface CommitSucceededEvent {
-  type: 'SCRATCH_ORG_COMMIT_CHANGES';
+  type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_DATASET';
   payload: {
     model: Org;
     originating_user_id: string | null;
   };
 }
 interface CommitFailedEvent {
-  type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  type:
+    | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED'
+    | 'SCRATCH_ORG_COMMIT_DATASET_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -329,7 +333,7 @@ type ModelEvent =
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
-  | OrgUpdateFailedEvent
+  | OrgFetchFailedEvent
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
   | OrgRemovedEvent
@@ -430,7 +434,8 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_UPDATE':
       return hasModel(event) && updateOrg(event.payload.model);
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
-      return hasModel(event) && updateFailed(event.payload);
+    case 'SCRATCH_ORG_FETCH_DATASETS_FAILED':
+      return hasModel(event) && fetchFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
       return hasModel(event) && deleteOrg(event.payload);
     case 'SCRATCH_ORG_REMOVE':
@@ -442,9 +447,22 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_REFRESH_FAILED':
       return hasModel(event) && refreshError(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES':
-      return hasModel(event) && commitSucceeded(event.payload);
+      return (
+        hasModel(event) && commitSucceeded(event.payload, { is_metadata: true })
+      );
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-      return hasModel(event) && commitFailed(event.payload);
+      return (
+        hasModel(event) && commitFailed(event.payload, { is_metadata: true })
+      );
+    case 'SCRATCH_ORG_COMMIT_DATASET':
+      return (
+        hasModel(event) &&
+        commitSucceeded(event.payload, { is_metadata: false })
+      );
+    case 'SCRATCH_ORG_COMMIT_DATASET_FAILED':
+      return (
+        hasModel(event) && commitFailed(event.payload, { is_metadata: false })
+      );
     case 'SCRATCH_ORG_RECREATE':
       return hasModel(event) && recreateOrg(event.payload.model);
     case 'SCRATCH_ORG_REASSIGN':

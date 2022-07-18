@@ -1203,8 +1203,8 @@ def refresh_datasets(task: Task, originating_user_id=None):
                     )
         task.datasets = definitions
         task.datasets_parse_errors = errors
-    except Exception:
-        task.finalize_refresh_datasets(originating_user_id=originating_user_id)
+    except Exception as e:
+        task.finalize_refresh_datasets(error=e, originating_user_id=originating_user_id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise

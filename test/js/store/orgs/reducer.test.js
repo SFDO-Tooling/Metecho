@@ -558,7 +558,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED/SCRATCH_ORG_COMMIT_CHANGES', () => {
+  describe('SCRATCH_ORG_COMMIT_FAILED/SCRATCH_ORG_COMMIT', () => {
     test('updates org', () => {
       const org = {
         id: 'org-id',
@@ -573,7 +573,7 @@ describe('reducer', () => {
         },
       };
       const actual = reducer(defaultState, {
-        type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
+        type: 'SCRATCH_ORG_COMMIT_FAILED',
         payload: org,
       });
 

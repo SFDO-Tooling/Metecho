@@ -21,7 +21,7 @@ import {
   provisionOrg,
   recreateOrg,
   refreshError,
-  updateFailed,
+  fetchFailed,
   updateOrg,
 } from '@/js/store/orgs/actions';
 import {
@@ -82,7 +82,7 @@ const actions = {
   submitReview,
   submitReviewFailed,
   updateEpic,
-  updateFailed,
+  fetchFailed,
   updateOrg,
   updateProject,
   updateTask,
@@ -135,7 +135,7 @@ describe('getAction', () => {
     ['SCRATCH_ORG_PROVISION', 'provisionOrg', false],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed', false],
     ['SCRATCH_ORG_UPDATE', 'updateOrg', true],
-    ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed', false],
+    ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'fetchFailed', false],
     ['SCRATCH_ORG_DELETE', 'deleteOrg', false],
     ['SCRATCH_ORG_REMOVE', 'deleteOrg', false],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed', false],

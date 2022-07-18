@@ -348,7 +348,7 @@ describe('updateOrg', () => {
   });
 });
 
-describe('updateFailed', () => {
+describe('fetchFailed', () => {
   test('adds error message', () => {
     const store = storeWithThunk(defaultState);
     const org = {
@@ -362,7 +362,7 @@ describe('updateFailed', () => {
       payload: org,
     };
     store.dispatch(
-      actions.updateFailed({
+      actions.fetchFailed({
         model: org,
         message: 'error msg',
         originating_user_id: 'user-id',
@@ -391,7 +391,7 @@ describe('updateFailed', () => {
       payload: org,
     };
     store.dispatch(
-      actions.updateFailed({
+      actions.fetchFailed({
         model: org,
         originating_user_id: 'user-id',
       }),

@@ -39,7 +39,7 @@ interface OrgDeleteFailed {
   payload: Org;
 }
 interface CommitEvent {
-  type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  type: 'SCRATCH_ORG_COMMIT' | 'SCRATCH_ORG_COMMIT_FAILED';
   payload: Org;
 }
 interface OrgRefresh {
@@ -228,7 +228,7 @@ export const updateOrg = (payload: Org): OrgUpdated => ({
   payload,
 });
 
-export const updateFailed =
+export const fetchFailed =
   ({
     model,
     message,
@@ -244,14 +244,14 @@ export const updateFailed =
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
       let msg = t(
-        'Uh oh. There was an error checking for changes on your {{orgType}}.',
+        'Uh oh. There was an error communicating with your {{orgType}}.',
         { orgType },
       );
 
       /* istanbul ignore else */
       if (name && parent) {
         msg = t(
-          'Uh oh. There was an error checking for changes on your {{orgType}} for {{parent}} “{{name}}.”',
+          'Uh oh. There was an error communicating with your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -367,27 +367,35 @@ export const deleteFailed =
   };
 
 export const commitSucceeded =
-  ({
-    model,
-    originating_user_id,
-  }: {
-    model: Org;
-    originating_user_id: string | null;
-  }): ThunkResult<CommitEvent> =>
+  (
+    {
+      model,
+      originating_user_id,
+    }: {
+      model: Org;
+      originating_user_id: string | null;
+    },
+    { is_metadata }: { is_metadata: boolean },
+  ): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
-      let msg = t('Successfully retrieved changes from your {{orgType}}.', {
-        orgType,
-      });
+      const dataType = is_metadata ? t('changes') : t('data');
+      let msg = t(
+        'Successfully retrieved {{dataType}} from your {{orgType}}.',
+        {
+          orgType,
+          dataType,
+        },
+      );
 
       /* istanbul ignore else */
       if (name && parent) {
         msg = t(
-          'Successfully retrieved changes from your {{orgType}} for {{parent}} “{{name}}.”',
-          { parent, name, orgType },
+          'Successfully retrieved {{dataType}} from your {{orgType}} for {{parent}} “{{name}}.”',
+          { parent, name, orgType, dataType },
         );
       }
       dispatch(
@@ -397,36 +405,40 @@ export const commitSucceeded =
       );
     }
     return dispatch({
-      type: 'SCRATCH_ORG_COMMIT_CHANGES' as const,
+      type: 'SCRATCH_ORG_COMMIT' as const,
       payload: model,
     });
   };
 
 export const commitFailed =
-  ({
-    model,
-    message,
-    originating_user_id,
-  }: {
-    model: Org;
-    message?: string;
-    originating_user_id: string | null;
-  }): ThunkResult<CommitEvent> =>
+  (
+    {
+      model,
+      message,
+      originating_user_id,
+    }: {
+      model: Org;
+      message?: string;
+      originating_user_id: string | null;
+    },
+    { is_metadata }: { is_metadata: boolean },
+  ): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       const { name, parent, orgType } = getOrgParent(model, state);
+      const dataType = is_metadata ? t('changes') : t('data');
       let msg = t(
-        'Uh oh. There was an error retrieving changes from your {{orgType}}.',
-        { orgType },
+        'Uh oh. There was an error retrieving {{dataType}} from your {{orgType}}.',
+        { orgType, dataType },
       );
 
       /* istanbul ignore else */
       if (name && parent) {
         msg = t(
-          'Uh oh. There was an error retrieving changes from your {{orgType}} for {{parent}} “{{name}}.”',
-          { parent, name, orgType },
+          'Uh oh. There was an error retrieving {{dataType}} from your {{orgType}} for {{parent}} “{{name}}.”',
+          { parent, name, orgType, dataType },
         );
       }
       dispatch(
@@ -438,7 +450,7 @@ export const commitFailed =
       );
     }
     return dispatch({
-      type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED' as const,
+      type: 'SCRATCH_ORG_COMMIT_FAILED' as const,
       payload: model,
     });
   };
