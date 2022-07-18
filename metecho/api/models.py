@@ -1217,7 +1217,9 @@ class Task(
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.datasets = {}
-            self.datasets_parse_errors = [_("Unable to parse existing datasets.")]
+            self.datasets_parse_errors = [
+                str(_("Unable to parse existing datasets: {}")).format(str(error))
+            ]
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)
 
