@@ -86,7 +86,7 @@ cryptography==37.0.4
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/20bd4b30bfa90f3470fd0810f101edfefaaacf45.tar.gz
+cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/67a426763e11c6838c9fa2d518b3da7349ff6a5a.tar.gz
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels

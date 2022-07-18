@@ -9,15 +9,12 @@ import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
 // import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
-import { refreshDatasetSchema } from '@/js/store/orgs/actions';
-import { refreshDatasets } from '@/js/store/tasks/actions';
-import { DatasetObject, Datasets } from '@/js/store/tasks/reducer';
+import { refreshDatasets, refreshDatasetSchema } from '@/js/store/orgs/actions';
+import { DatasetObject, Datasets } from '@/js/store/orgs/reducer';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
 interface Props {
-  projectId: string;
-  taskId: string;
   orgId: string;
   datasets: Datasets;
   datasetErrors: string[];
@@ -39,8 +36,6 @@ export interface BooleanObject {
 }
 
 const RetrieveDatasetModal = ({
-  projectId,
-  taskId,
   orgId,
   datasets,
   datasetErrors,
@@ -128,10 +123,10 @@ const RetrieveDatasetModal = ({
 
   const doRefreshDatasets = useCallback(() => {
     /* istanbul ignore else */
-    if (projectId && taskId) {
-      dispatch(refreshDatasets({ project: projectId, task: taskId }));
+    if (orgId) {
+      dispatch(refreshDatasets(orgId));
     }
-  }, [dispatch, projectId, taskId]);
+  }, [dispatch, orgId]);
 
   const doRefreshDatasetSchema = useCallback(() => {
     /* istanbul ignore else */

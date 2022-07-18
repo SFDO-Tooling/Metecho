@@ -61,6 +61,9 @@ export const getDemoOrg = ({
     delete_queued_at: null,
     has_been_visited: true,
     valid_target_directories: {},
+    currently_refreshing_datasets: false,
+    datasets: {},
+    datasets_parse_errors: [],
     dataset_schema: [],
   };
 };

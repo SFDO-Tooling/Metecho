@@ -1517,7 +1517,7 @@ class ScratchOrg(
             self.save()
             self.notify_scratch_org_error(
                 error=error,
-                type_="SCRATCH_ORG_FETCH_DATASETS_FAILED",
+                type_="SCRATCH_ORG_FETCH_DATASET_SCHEMA_FAILED",
                 originating_user_id=originating_user_id,
             )
 

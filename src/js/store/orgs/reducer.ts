@@ -2,7 +2,6 @@ import { omit } from 'lodash';
 
 import { ObjectsAction } from '@/js/store/actions';
 import { OrgsAction } from '@/js/store/orgs/actions';
-import { DatasetObject } from '@/js/store/tasks/reducer';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
 import {
   OBJECT_TYPES,
@@ -10,6 +9,21 @@ import {
   ORG_TYPES,
   OrgTypes,
 } from '@/js/utils/constants';
+
+interface DatasetField {
+  label: string;
+  api_name: string;
+}
+
+export interface DatasetObject extends DatasetField {
+  fields: DatasetField[];
+  number_of_records: number;
+}
+
+export interface Datasets {
+  // `key` is the name of the Dataset
+  [key: string]: DatasetObject[];
+}
 
 export interface MinimalOrg {
   id: string;
@@ -49,6 +63,9 @@ export interface Org extends MinimalOrg {
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;
   last_checked_unsaved_changes_at: string | null;
+  currently_refreshing_datasets: boolean;
+  datasets: Datasets;
+  datasets_parse_errors: string[];
   dataset_schema: DatasetObject[];
 }
 
@@ -213,6 +230,22 @@ const reducer = (
               action.type === 'REFETCH_ORG_SUCCEEDED'
                 ? org.currently_refreshing_changes
                 : action.type !== 'REFETCH_ORG_FAILED',
+          },
+        },
+      };
+    }
+    case 'REFRESH_DATASETS_REQUESTED':
+    case 'REFRESH_DATASETS_REJECTED': {
+      const orgId = action.payload;
+      const existingOrg = orgs.orgs[orgId] ?? {};
+      return {
+        ...orgs,
+        orgs: {
+          ...orgs.orgs,
+          [orgId]: {
+            ...existingOrg,
+            currently_refreshing_datasets:
+              action.type === 'REFRESH_DATASETS_REQUESTED',
           },
         },
       };

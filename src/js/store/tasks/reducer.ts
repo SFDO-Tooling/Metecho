@@ -25,21 +25,6 @@ export interface Commit {
   url: string;
 }
 
-interface DatasetField {
-  label: string;
-  api_name: string;
-}
-
-export interface DatasetObject extends DatasetField {
-  fields: DatasetField[];
-  number_of_records: number;
-}
-
-export interface Datasets {
-  // `key` is the name of the Dataset
-  [key: string]: DatasetObject[];
-}
-
 export interface Task {
   id: string;
   name: string;
@@ -59,7 +44,6 @@ export interface Task {
   has_unmerged_commits: boolean;
   currently_creating_branch: boolean;
   currently_creating_pr: boolean;
-  currently_refreshing_datasets: boolean;
   branch_name: string;
   branch_url: string | null;
   branch_diff_url: string | null;
@@ -77,8 +61,6 @@ export interface Task {
   review_sha: string;
   org_config_name: string;
   issue: string | null;
-  datasets: Datasets;
-  datasets_parse_errors: string[];
 }
 
 export interface TaskByProjectState {
@@ -383,33 +365,6 @@ const reducer = (
           tasks: reject(projectTasks.tasks, ['id', task.id]),
         },
       };
-    }
-    case 'REFRESH_DATASETS_REQUESTED':
-    case 'REFRESH_DATASETS_REJECTED': {
-      const { project, task } = action.payload;
-      const projectTasks = tasks[project] || {
-        ...defaultProjectTasks,
-      };
-      const existingTask = find(projectTasks.tasks, ['id', task]);
-      if (existingTask) {
-        return {
-          ...tasks,
-          [project]: {
-            ...projectTasks,
-            tasks: projectTasks.tasks.map((t) => {
-              if (t.id === task) {
-                return {
-                  ...existingTask,
-                  currently_refreshing_datasets:
-                    action.type === 'REFRESH_DATASETS_REQUESTED',
-                };
-              }
-              return t;
-            }),
-          },
-        };
-      }
-      return tasks;
     }
   }
   return tasks;

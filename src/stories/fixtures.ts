@@ -30,6 +30,8 @@ export const api_urls = {
     `/api/scratch-orgs/${id}/commit_dataset/`,
   scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
+  scratch_org_refresh_datasets: (id: string) =>
+    `/api/scratch-orgs/${id}/refresh_datasets/`,
   scratch_org_refresh_dataset_schema: (id: string) =>
     `/api/scratch-orgs/${id}/refresh_dataset_schema/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
@@ -38,7 +40,6 @@ export const api_urls = {
   task_review: (id: string) => `/api/tasks/${id}/review/`,
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
   task_assignees: (id: string) => `/api/tasks/${id}/assignees/`,
-  task_refresh_datasets: (id: string) => `/api/tasks/${id}/refresh_datasets/`,
   epic_detail: (id: string) => `/api/epics/${id}/`,
   epic_create_pr: (id: string) => `/api/epics/${id}/create_pr/`,
   epic_collaborators: (id: string) => `/api/epics/${id}/collaborators/`,
@@ -314,9 +315,6 @@ export const sampleTask1 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
 };
 
 export const sampleTask2 = {
@@ -357,9 +355,6 @@ export const sampleTask2 = {
   review_sha: '',
   org_config_name: 'dev',
   issue: null,
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
 };
 
 export const sampleTask3 = {
@@ -401,9 +396,6 @@ export const sampleTask3 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
 };
 
 export const sampleTask4 = {
@@ -445,9 +437,6 @@ export const sampleTask4 = {
   review_sha: '617a512',
   org_config_name: 'dev',
   issue: null,
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
 };
 
 export const sampleTask5 = {
@@ -488,9 +477,6 @@ export const sampleTask5 = {
   review_sha: '',
   org_config_name: 'dev',
   issue: null,
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
 };
 
 export const sampleTask6 = {
@@ -531,9 +517,6 @@ export const sampleTask6 = {
   review_sha: '',
   org_config_name: 'dev',
   issue: null,
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
 };
 
 export const sampleProject1 = {
@@ -797,6 +780,9 @@ export const sampleDevOrg = {
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  currently_refreshing_datasets: false,
+  datasets: {},
+  datasets_parse_errors: [],
   dataset_schema: [],
 };
 
@@ -835,6 +821,9 @@ export const sampleScratchOrg = {
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  currently_refreshing_datasets: false,
+  datasets: {},
+  datasets_parse_errors: [],
   dataset_schema: [],
 };
 

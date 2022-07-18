@@ -62,6 +62,13 @@ interface OrgReassignFailed {
   type: 'SCRATCH_ORG_REASSIGN_FAILED';
   payload: Org | MinimalOrg;
 }
+interface RefreshDatasetsAction {
+  type:
+    | 'REFRESH_DATASETS_REQUESTED'
+    | 'REFRESH_DATASETS_ACCEPTED'
+    | 'REFRESH_DATASETS_REJECTED';
+  payload: string;
+}
 interface RefreshDatasetSchemaAction {
   type:
     | 'REFRESH_DATASET_SCHEMA_REQUESTED'
@@ -84,6 +91,7 @@ export type OrgsAction =
   | OrgRecreated
   | OrgReassigned
   | OrgReassignFailed
+  | RefreshDatasetsAction
   | RefreshDatasetSchemaAction;
 
 const getOrgParent = (
@@ -678,6 +686,34 @@ export const orgConvertFailed =
       );
     }
     history.replace({ state: {} });
+  };
+
+export const refreshDatasets =
+  (org: string): ThunkResult<Promise<RefreshDatasetsAction>> =>
+  async (dispatch) => {
+    dispatch({
+      type: 'REFRESH_DATASETS_REQUESTED',
+      payload: org,
+    });
+    try {
+      await apiFetch({
+        url: window.api_urls.scratch_org_refresh_datasets(org),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESH_DATASETS_ACCEPTED' as const,
+        payload: org,
+      });
+    } catch (err) {
+      dispatch({
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: org,
+      });
+      throw err;
+    }
   };
 
 export const refreshDatasetSchema =

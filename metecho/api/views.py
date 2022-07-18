@@ -705,7 +705,7 @@ class ScratchOrgViewSet(
     def refresh_dataset_schema(self, request, pk=None):
         """Queue a job to refresh the Dev org schema"""
         scratch_org = self.get_object()
-        scratch_org.queue_refresh_dataset_schema(originating_user_id=request.user.id)
+        scratch_org.queue_refresh_dataset_schema(user=request.user)
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )

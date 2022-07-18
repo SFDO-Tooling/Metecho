@@ -217,7 +217,7 @@ interface OrgUpdatedEvent {
 interface OrgFetchFailedEvent {
   type:
     | 'SCRATCH_ORG_FETCH_CHANGES_FAILED'
-    | 'SCRATCH_ORG_FETCH_DATASETS_FAILED';
+    | 'SCRATCH_ORG_FETCH_DATASET_SCHEMA_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -434,7 +434,7 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_UPDATE':
       return hasModel(event) && updateOrg(event.payload.model);
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
-    case 'SCRATCH_ORG_FETCH_DATASETS_FAILED':
+    case 'SCRATCH_ORG_FETCH_DATASET_SCHEMA_FAILED':
       return hasModel(event) && fetchFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
       return hasModel(event) && deleteOrg(event.payload);
