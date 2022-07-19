@@ -1229,11 +1229,23 @@ def refresh_datasets(*, org: ScratchOrg, user: User):
             entries = list(datasets_dir.iterdir()) if datasets_dir.is_dir() else ()
             if not entries:
                 errors.append(_("Found empty 'datasets/' directory in the Task branch"))
+            if not org.dataset_schema:
+                refresh_dataset_schema(org=org, user=user, org_config=org_config, sf=sf)
+            if not org.dataset_schema:
+                raise Exception(
+                    _("Could not refresh datasets because Org schema is empty")
+                )
 
             for entry in entries:
                 if not entry.is_dir():
                     continue
-                with Dataset(entry.name, project_config, org_config, sf) as dataset:
+                with Dataset(
+                    entry.name,
+                    project_config,
+                    org_config,
+                    sf,
+                    schema=org.dataset_schema,
+                ) as dataset:
                     rel_file = dataset.extract_file.relative_to(project_path)
                     if not dataset.extract_file.exists():
                         errors.append(
@@ -1283,7 +1295,9 @@ def refresh_dataset_schema(
             schema = stack.enter_context(
                 get_org_schema(sf, org_config, include_counts=True, filters=filters)
             )
-            org.dataset_schema = schema  # TODO: figure out how to serialize `schema`
+            org.dataset_schema = {
+                name: list(obj.fields.keys()) for name, obj in schema.items()
+            }
     except Exception as e:
         org.finalize_refresh_dataset_schema(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
