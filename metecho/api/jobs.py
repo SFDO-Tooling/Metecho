@@ -1275,7 +1275,6 @@ def parse_datasets(*, org: ScratchOrg, user: User):
         logger.error(tb)
         raise
     else:
-        logger.error(f"{datasets=}, {org_schema=}")
         org.finalize_parse_datasets(
             datasets=datasets,
             schema=org_schema,
