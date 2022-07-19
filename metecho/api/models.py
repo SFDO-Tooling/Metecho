@@ -216,6 +216,17 @@ class User(PushMixin, HashIdMixin, AbstractUser):
         except (AttributeError, KeyError, TypeError):
             return None
 
+    def delete(self, *args, **kwargs):
+        for scratch_org_to_delete in self.scratchorg_set.all():
+            scratch_org_to_delete.owner = None
+            scratch_org_to_delete.owner_sf_username = ""
+            scratch_org_to_delete.owner_gh_username = ""
+            scratch_org_to_delete.owner_gh_id = ""
+            scratch_org_to_delete.save()
+            scratch_org_to_delete.queue_delete(originating_user_id=self.id)
+
+        super().delete(*args, **kwargs)
+
     @property
     def github_id(self) -> Optional[str]:
         try:
@@ -1198,7 +1209,7 @@ class ScratchOrg(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = StringField(choices=ScratchOrgType.choices)
     org_config_name = StringField()
-    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     last_modified_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     latest_commit = StringField(blank=True)
@@ -1265,7 +1276,7 @@ class ScratchOrg(
         self.clean_config()
         ret = super().save(*args, **kwargs)
 
-        if is_new:
+        if is_new and self.owner:
             self.queue_provision(originating_user_id=str(self.owner.id))
             self.notify_org_provisioning(originating_user_id=str(self.owner.id))
 

@@ -206,6 +206,12 @@ class CurrentUserViewSet(GenericViewSet):
         request.user.queue_refresh_organizations()
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @extend_schema(request=None)
+    @action(methods=["delete"], detail=True)
+    def delete(self, request, *args, **kwargs):
+        request.user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """Read-only information about all users."""

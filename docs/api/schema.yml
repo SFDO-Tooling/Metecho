@@ -1323,6 +1323,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/FullUser'
           description: ''
+  /api/user/{id}/delete/:
+    delete:
+      operationId: user_delete_destroy
+      description: Actions related to the current user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/user/agree_to_tos/:
     put:
       operationId: user_agree_to_tos_update
