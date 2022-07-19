@@ -29,7 +29,6 @@ from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.github import GitHub
 from github3.repos.repo import Repository
-from simple_salesforce.api import Salesforce
 
 from .email_utils import get_user_facing_url
 from .gh import (
@@ -869,9 +868,6 @@ def refresh_commits(*, project, branch_name, originating_user_id):
         ]
         task.update_has_unmerged_commits()
         task.update_review_valid()
-        for org in task.orgs.filter(org_type=ScratchOrgType.DEV, owner__isnull=False):
-            # TODO: handle orgs with no attached owner
-            refresh_datasets(org=org, user=org.owner)
         task.finalize_task_update(originating_user_id=originating_user_id)
 
 
@@ -1212,102 +1208,84 @@ def dataset_env(org: ScratchOrg, user: User):
         org_config = OrgConfig(
             config=org.config, name=org.org_config_name, keychain=cci.keychain
         )
-        yield project_config, org_config, sf
+        with get_org_schema(
+            sf,
+            org_config,
+            include_counts=True,
+            filters=[Filters.extractable, Filters.createable],
+        ) as schema:
+            yield project_config, org_config, sf, schema
 
 
-def refresh_datasets(*, org: ScratchOrg, user: User):
+def parse_datasets(*, org: ScratchOrg, user: User):
     """
-    Refresh the dataset definition cache on `org` by parsing definitions from the Task branch
+    Parse dataset definitions from the `datasets/` folder in the Task branch
     """
+    datasets = {}
+    org_schema = {}
+    dataset_errors = []
     try:
-        errors = []
-        definitions = {}
         org.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf):
+        with dataset_env(org, user) as (project_config, org_config, sf, schema):
+            # JSON-friendly version of `schema`
+            org_schema = {
+                obj_name: {
+                    "label": obj.label,
+                    "count": obj.count,
+                    "fields": {
+                        field_name: {"label": field.label}
+                        for field_name, field in obj.fields.items()
+                    },
+                }
+                for obj_name, obj in schema.items()
+            }
+
             project_path = project_config.repo_root
             datasets_dir = Path(project_path) / "datasets"
             entries = list(datasets_dir.iterdir()) if datasets_dir.is_dir() else ()
             if not entries:
-                errors.append(_("Found empty 'datasets/' directory in the Task branch"))
-            if not org.dataset_schema:
-                refresh_dataset_schema(org=org, user=user, org_config=org_config, sf=sf)
-            if not org.dataset_schema:
-                raise Exception(
-                    _("Could not refresh datasets because Org schema is empty")
+                dataset_errors.append(
+                    _("Found empty 'datasets/' directory in the Task branch")
                 )
-
             for entry in entries:
                 if not entry.is_dir():
                     continue
                 with Dataset(
-                    entry.name,
-                    project_config,
-                    org_config,
-                    sf,
-                    schema=org.dataset_schema,
+                    entry.name, project_config, org_config, sf, schema=schema
                 ) as dataset:
                     rel_file = dataset.extract_file.relative_to(project_path)
                     if not dataset.extract_file.exists():
-                        errors.append(
+                        dataset_errors.append(
                             _("Missing dataset definition file: {}").format(rel_file)
                         )
                         continue
                     try:
-                        definitions[entry.name] = dataset.read_schema_subset()
+                        datasets[entry.name] = dataset.read_schema_subset()
                     except Exception:
                         logger.exception(
                             f"Failed to parse {dataset.extract_file}. Task: {org.task}. "
                             f"Contents: \n{dataset.extract_file.read_text()}"
                         )
-                        errors.append(_("Failed to parse file: {}").format(rel_file))
-
-        org.datasets = definitions
-        org.datasets_parse_errors = list(map(str, errors))
+                        dataset_errors.append(
+                            _("Failed to parse file: {}").format(rel_file)
+                        )
+            dataset_errors = list(map(str, dataset_errors))
     except Exception as e:
-        org.finalize_refresh_datasets(error=e, originating_user_id=user.id)
+        org.finalize_parse_datasets(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        org.finalize_refresh_datasets(originating_user_id=user.id)
+        logger.error(f"{datasets=}, {org_schema=}")
+        org.finalize_parse_datasets(
+            datasets=datasets,
+            schema=org_schema,
+            dataset_errors=dataset_errors,
+            originating_user_id=user.id,
+        )
 
 
-refresh_datasets_job = job(refresh_datasets)
-
-
-def refresh_dataset_schema(
-    *,
-    org: ScratchOrg,
-    user: User,
-    org_config: OrgConfig = None,
-    sf: Salesforce = None,
-):
-    """
-    Refresh the schema cache on `ScratchOrg`
-    """
-    filters = [Filters.extractable, Filters.createable]
-    try:
-        org.refresh_from_db()
-        with contextlib.ExitStack() as stack:
-            if not (org_config and sf):
-                _, org_config, sf = stack.enter_context(dataset_env(org, user=user))
-
-            schema = stack.enter_context(
-                get_org_schema(sf, org_config, include_counts=True, filters=filters)
-            )
-            org.dataset_schema = {
-                name: list(obj.fields.keys()) for name, obj in schema.items()
-            }
-    except Exception as e:
-        org.finalize_refresh_dataset_schema(error=e, originating_user_id=user.id)
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
-    else:
-        org.finalize_refresh_dataset_schema(originating_user_id=user.id)
-
-
-refresh_dataset_schema_job = job(refresh_dataset_schema)
+parse_datasets_job = job(parse_datasets)
 
 
 def commit_dataset_from_org(

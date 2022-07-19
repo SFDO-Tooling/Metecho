@@ -972,11 +972,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "has_been_visited",
             "valid_target_directories",
             "org_config_name",
-            "datasets",
-            "datasets_parse_errors",
-            "currently_refreshing_datasets",
-            "dataset_schema",
-            "currently_refreshing_dataset_schema",
+            "currently_parsing_datasets",
             "currently_retrieving_dataset",
         )
         extra_kwargs = {
@@ -996,11 +992,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "owner_gh_username": {"read_only": True},
             "owner_gh_id": {"read_only": True},
             "has_been_visited": {"read_only": True},
-            "datasets": {"read_only": True},
-            "datasets_parse_errors": {"read_only": True},
-            "currently_refreshing_datasets": {"read_only": True},
-            "dataset_schema": {"read_only": True},
-            "currently_refreshing_dataset_schema": {"read_only": True},
+            "currently_parsing_datasets": {"read_only": True},
             "currently_retrieving_dataset": {"read_only": True},
         }
 

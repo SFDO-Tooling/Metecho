@@ -694,21 +694,11 @@ class ScratchOrgViewSet(
 
     @extend_schema(request=None, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
-    def refresh_datasets(self, request, pk=None):
-        """Queue a job to refresh the dataset definitions for this Org's Task"""
+    def parse_datasets(self, request, pk=None):
+        """Queue a job to parse the dataset definitions for this Org's Task"""
         org = self.get_object()
-        org.queue_refresh_datasets(user=request.user)
+        org.queue_parse_datasets(user=request.user)
         return Response(self.get_serializer(org).data, status=status.HTTP_202_ACCEPTED)
-
-    @extend_schema(request=None, responses={202: ScratchOrgSerializer})
-    @action(detail=True, methods=["POST"])
-    def refresh_dataset_schema(self, request, pk=None):
-        """Queue a job to refresh the Dev org schema"""
-        scratch_org = self.get_object()
-        scratch_org.queue_refresh_dataset_schema(user=request.user)
-        return Response(
-            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
-        )
 
     @extend_schema(
         request=CommitDatasetSerializer, responses={202: ScratchOrgSerializer}

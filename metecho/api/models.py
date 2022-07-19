@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -1134,10 +1134,6 @@ class Task(
         # This comes from the GitHub hook, and so has no originating user:
         self.notify_changed(originating_user_id=None)
 
-        for org in self.orgs.filter(org_type=ScratchOrgType.DEV, owner__isnull=False):
-            # TODO: do something with orgs without owners
-            org.queue_refresh_datasets(user=org.owner)
-
     def add_metecho_git_sha(self, sha):
         self.metecho_commits.append(sha)
 
@@ -1232,6 +1228,7 @@ class ScratchOrg(
     )
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_retrieving_metadata = models.BooleanField(default=False)
+    currently_parsing_datasets = models.BooleanField(default=False)
     currently_retrieving_dataset = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
     currently_reassigning_user = models.BooleanField(default=False)
@@ -1247,26 +1244,6 @@ class ScratchOrg(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     cci_log = models.TextField(blank=True)
-
-    currently_refreshing_datasets = models.BooleanField(default=False)
-    datasets = models.JSONField(
-        default=dict,
-        encoder=DjangoJSONEncoder,
-        blank=True,
-        help_text=_("Cache of the dataset definitions from the current Task branch"),
-    )
-    datasets_parse_errors = models.JSONField(
-        blank=True,
-        default=list,
-        help_text=_("User-facing errors that occurred during dataset refresh"),
-    )
-    currently_refreshing_dataset_schema = models.BooleanField(default=False)
-    dataset_schema = models.JSONField(
-        default=dict,
-        encoder=DjangoJSONEncoder,
-        blank=True,
-        help_text=_("Cache of the Dev org schema related to this Task"),
-    )
 
     def _build_message_extras(self):
         return {
@@ -1474,49 +1451,41 @@ class ScratchOrg(
                 originating_user_id=originating_user_id,
             )
 
-    def queue_refresh_datasets(self, *, user: User):
-        from .jobs import refresh_datasets_job
+    def queue_parse_datasets(self, *, user: User):
+        from .jobs import parse_datasets_job
 
-        self.currently_refreshing_datasets = True
+        self.currently_parsing_datasets = True
         self.save()
         self.notify_changed(originating_user_id=user.id)
-        refresh_datasets_job.delay(org=self, user=user)
+        parse_datasets_job.delay(org=self, user=user)
 
-    def finalize_refresh_datasets(self, *, error=None, originating_user_id=None):
-        self.currently_refreshing_datasets = False
-
-        if error is None:
-            self.save()
-            self.notify_changed(originating_user_id=originating_user_id)
-        else:
-            self.datasets = {}
-            self.datasets_parse_errors = [
-                str(_("Unable to parse existing datasets: {}").format(str(error)))
-            ]
-            self.save()
-            self.notify_changed(originating_user_id=originating_user_id)
-
-    def queue_refresh_dataset_schema(self, user):
-        from .jobs import refresh_dataset_schema_job
-
-        self.currently_refreshing_dataset_schema = True
+    def finalize_parse_datasets(
+        self,
+        *,
+        error: Exception | None = None,
+        schema: dict[str, Any] | None = None,
+        dataset_errors: list[str] | None = None,
+        datasets: dict[str, Any] | None = None,
+        originating_user_id=None,
+    ):
+        # Notify about the boolean flag changing
+        self.currently_parsing_datasets = False
         self.save()
-        self.notify_changed(originating_user_id=user.id)
-        refresh_dataset_schema_job.delay(org=self, user=user)
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_refresh_dataset_schema(self, *, error=None, originating_user_id=None):
-        self.currently_refreshing_dataset_schema = False
-        if error is None:
-            self.save()
-            self.notify_changed(originating_user_id=originating_user_id)
-        else:
-            self.dataset_schema = {}
-            self.save()
-            self.notify_scratch_org_error(
-                error=error,
-                type_="SCRATCH_ORG_FETCH_DATASET_SCHEMA_FAILED",
-                originating_user_id=originating_user_id,
-            )
+        # The dataset information is not stored in the model, it's only pushed via WS
+        type_ = "SCRATCH_ORG_PARSE_DATASETS"
+        message = {
+            "schema": schema,
+            "dataset_errors": dataset_errors,
+            "datasets": datasets,
+        }
+        if error is not None:
+            type_ = "SCRATCH_ORG_PARSE_DATASETS_FAILED"
+            message = {"error": str(error)}
+        self.notify_changed(
+            type_=type_, message=message, originating_user_id=originating_user_id
+        )
 
     def queue_commit_changes(
         self,
