@@ -48,7 +48,6 @@ from .models import (
     GitHubOrganization,
     Project,
     ScratchOrg,
-    ScratchOrgType,
     Task,
     TaskReviewStatus,
     User,
