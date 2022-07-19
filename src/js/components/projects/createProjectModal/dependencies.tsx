@@ -44,9 +44,9 @@ const SelectProjectDependenciesForm = ({
           Select any dependencies for your new Project.
         </Trans>
       </p>
-      <h3 className="slds-text-heading_small slds-m-bottom_x-small">
+      <h2 className="slds-text-heading_small slds-m-bottom_x-small">
         {t('Project Dependencies')}
-      </h3>
+      </h2>
       {dependencies.length ? (
         dependencies.map((dep, idx) => (
           <Checkbox

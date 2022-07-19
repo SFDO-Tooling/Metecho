@@ -281,9 +281,9 @@ const SubmitModal = ({
               </ExternalLink>
             )}
             <div className="submit-guide">
-              <h3 className="slds-m-bottom_medium slds-text-heading_small">
+              <h2 className="slds-m-bottom_medium slds-text-heading_small">
                 {t('Markdown Guide')}
-              </h3>
+              </h2>
               <div className="markdown-block slds-m-vertical_medium">
                 <pre>## {t('Heading')}</pre>
                 <pre>### {t('Subheading')}</pre>
