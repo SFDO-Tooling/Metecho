@@ -1070,7 +1070,7 @@ class CommitSerializer(serializers.Serializer):
 class CommitDatasetSerializer(serializers.Serializer):
     commit_message = serializers.CharField()
     dataset_name = serializers.CharField()
-    dataset_definition = serializers.DictField()
+    dataset_definition = serializers.DictField(child=StringListField())
 
 
 class SiteSerializer(serializers.ModelSerializer):

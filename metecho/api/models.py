@@ -1451,6 +1451,49 @@ class ScratchOrg(
                 originating_user_id=originating_user_id,
             )
 
+    def queue_commit_changes(
+        self,
+        *,
+        user,
+        desired_changes,
+        commit_message,
+        target_directory,
+        originating_user_id,
+    ):
+        from .jobs import commit_changes_from_org_job
+
+        self.currently_retrieving_metadata = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+        commit_changes_from_org_job.delay(
+            scratch_org=self,
+            user=user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+            originating_user_id=originating_user_id,
+        )
+
+    def finalize_commit_changes(self, *, error=None, originating_user_id):
+        self.currently_retrieving_metadata = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="SCRATCH_ORG_COMMIT_CHANGES",
+                originating_user_id=originating_user_id,
+            )
+            if self.task:
+                self.task.finalize_commit_changes(
+                    originating_user_id=originating_user_id
+                )
+        else:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_COMMIT_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
     def queue_parse_datasets(self, *, user: User):
         from .jobs import parse_datasets_job
 
@@ -1495,49 +1538,6 @@ class ScratchOrg(
             type_=type_, message=message, originating_user_id=originating_user_id
         )
 
-    def queue_commit_changes(
-        self,
-        *,
-        user,
-        desired_changes,
-        commit_message,
-        target_directory,
-        originating_user_id,
-    ):
-        from .jobs import commit_changes_from_org_job
-
-        self.currently_retrieving_metadata = True
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
-
-        commit_changes_from_org_job.delay(
-            scratch_org=self,
-            user=user,
-            desired_changes=desired_changes,
-            commit_message=commit_message,
-            target_directory=target_directory,
-            originating_user_id=originating_user_id,
-        )
-
-    def finalize_commit_changes(self, *, error=None, originating_user_id):
-        self.currently_retrieving_metadata = False
-        self.save()
-        if error is None:
-            self.notify_changed(
-                type_="SCRATCH_ORG_COMMIT_CHANGES",
-                originating_user_id=originating_user_id,
-            )
-            if self.task:
-                self.task.finalize_commit_changes(
-                    originating_user_id=originating_user_id
-                )
-        else:
-            self.notify_scratch_org_error(
-                error=error,
-                type_="SCRATCH_ORG_COMMIT_CHANGES_FAILED",
-                originating_user_id=originating_user_id,
-            )
-
     def queue_commit_dataset(
         self,
         *,
@@ -1553,7 +1553,7 @@ class ScratchOrg(
         self.notify_changed(originating_user_id=user.id)
 
         commit_dataset_from_org_job.delay(
-            scratch_org=self,
+            org=self,
             user=user,
             commit_message=commit_message,
             dataset_name=dataset_name,

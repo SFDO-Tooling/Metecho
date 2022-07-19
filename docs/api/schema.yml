@@ -944,6 +944,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
+  /api/scratch-orgs/{id}/parse_datasets/:
+    post:
+      operationId: scratch_orgs_parse_datasets_create
+      description: Queue a job to parse the dataset definitions for this Org's Task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
   /api/scratch-orgs/{id}/redirect/:
     get:
       operationId: scratch_orgs_redirect_retrieve
@@ -968,54 +992,6 @@ paths:
     post:
       operationId: scratch_orgs_refresh_create
       description: Queue a job that retrieves the latest changes from a ScratchOrg.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: HashID
-        description: A unique integer value identifying this scratch org.
-        required: true
-      tags:
-      - scratch-orgs
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScratchOrg'
-          description: ''
-  /api/scratch-orgs/{id}/refresh_dataset_schema/:
-    post:
-      operationId: scratch_orgs_refresh_dataset_schema_create
-      description: Queue a job to refresh the Dev org schema
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: HashID
-        description: A unique integer value identifying this scratch org.
-        required: true
-      tags:
-      - scratch-orgs
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScratchOrg'
-          description: ''
-  /api/scratch-orgs/{id}/refresh_datasets/:
-    post:
-      operationId: scratch_orgs_refresh_datasets_create
-      description: Queue a job to refresh the dataset definitions for this Org's Task
       parameters:
       - in: path
         name: id
@@ -1622,7 +1598,10 @@ components:
           type: string
         dataset_definition:
           type: object
-          additionalProperties: {}
+          additionalProperties:
+            type: array
+            items:
+              type: string
       required:
       - commit_message
       - dataset_definition
@@ -2326,25 +2305,7 @@ components:
           readOnly: true
         org_config_name:
           type: string
-        datasets:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: Cache of the dataset definitions from the current Task branch
-        datasets_parse_errors:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: User-facing errors that occurred during dataset refresh
-        currently_refreshing_datasets:
-          type: boolean
-          readOnly: true
-        dataset_schema:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: Cache of the Dev org schema related to this Task
-        currently_refreshing_dataset_schema:
+        currently_parsing_datasets:
           type: boolean
           readOnly: true
         currently_retrieving_dataset:
@@ -2742,41 +2703,19 @@ components:
           readOnly: true
         org_config_name:
           type: string
-        datasets:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: Cache of the dataset definitions from the current Task branch
-        datasets_parse_errors:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: User-facing errors that occurred during dataset refresh
-        currently_refreshing_datasets:
-          type: boolean
-          readOnly: true
-        dataset_schema:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          description: Cache of the Dev org schema related to this Task
-        currently_refreshing_dataset_schema:
+        currently_parsing_datasets:
           type: boolean
           readOnly: true
         currently_retrieving_dataset:
           type: boolean
           readOnly: true
       required:
+      - currently_parsing_datasets
       - currently_reassigning_user
       - currently_refreshing_changes
-      - currently_refreshing_dataset_schema
-      - currently_refreshing_datasets
       - currently_refreshing_org
       - currently_retrieving_dataset
       - currently_retrieving_metadata
-      - dataset_schema
-      - datasets
-      - datasets_parse_errors
       - delete_queued_at
       - description_rendered
       - expires_at

@@ -177,41 +177,6 @@ def commit_changes_to_github(
         )
 
 
-def retrieve_and_commit_dataset(
-    *,
-    repo: Repository,
-    branch: str,
-    author: dict[str, str],
-    commit_message: str,
-    dataset_name: str,
-    dataset_definition: dict,
-):
-    """
-    Given a JSON dataset definition:
-
-    1. Write a YAML definition to the `datasets/` folder
-    2. Retrieve and dump the corresponding SQL data on the same folder
-    3. Commit the new files
-    """
-    with local_github_checkout(
-        repo_owner=repo.owner.login, repo_name=repo.name, commit_ish=branch
-    ) as project_path:
-        # Write the dataset definition file
-        folder = Path(project_path) / "datasets" / dataset_name
-        folder.mkdir(parents=True, exist_ok=True)
-        try:
-            file = next(folder.glob("*.extract.yml"))
-        except StopIteration:
-            file = folder / f"{dataset_name}.extract.yml"
-        file.write_text(yaml.safe_dump(dataset_definition))
-
-        # TODO: talk to the Dev org and retrieve the dataset
-
-        # Commit the new dataset definition and retrieved data
-        commit = CommitDir(repo, author=author)
-        commit(project_path, branch=branch, commit_message=commit_message)
-
-
 def get_salesforce_connection(*, scratch_org, originating_user_id, base_url=""):
     org_name = "dev"
     org_config = refresh_access_token(

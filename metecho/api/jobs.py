@@ -17,6 +17,7 @@ from cumulusci.core.config.org_config import OrgConfig
 from cumulusci.core.datasets import Dataset
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
+from cumulusci.tasks.github.util import CommitDir
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
@@ -58,7 +59,6 @@ from .sf_org_changes import (
     compare_revisions,
     get_latest_revision_numbers,
     get_valid_target_directories,
-    retrieve_and_commit_dataset,
 )
 from .sf_run_flow import create_org, delete_org, get_devhub_api, run_flow
 
@@ -1213,7 +1213,7 @@ def dataset_env(org: ScratchOrg, user: User):
             include_counts=True,
             filters=[Filters.extractable, Filters.createable],
         ) as schema:
-            yield project_config, org_config, sf, schema
+            yield project_config, org_config, sf, schema, repo
 
 
 def parse_datasets(*, org: ScratchOrg, user: User):
@@ -1225,7 +1225,7 @@ def parse_datasets(*, org: ScratchOrg, user: User):
     dataset_errors = []
     try:
         org.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf, schema):
+        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
             # JSON-friendly version of `schema`
             org_schema = {
                 obj_name: {
@@ -1250,7 +1250,7 @@ def parse_datasets(*, org: ScratchOrg, user: User):
                 if not entry.is_dir():
                     continue
                 with Dataset(
-                    entry.name, project_config, org_config, sf, schema=schema
+                    entry.name, project_config, org_config, sf, schema
                 ) as dataset:
                     rel_file = dataset.extract_file.relative_to(project_path)
                     if not dataset.extract_file.exists():
@@ -1289,35 +1289,46 @@ parse_datasets_job = job(parse_datasets)
 
 def commit_dataset_from_org(
     *,
-    scratch_org: ScratchOrg,
+    org: ScratchOrg,
     user: User,
     commit_message: str,
     dataset_name: str,
     dataset_definition: dict,
 ):
     """
-    Update and retrieve a dataset from the Dev Org
+    Given a JSON dataset definition:
+
+    1. Write a YAML definition to the `datasets/` folder
+    2. Retrieve and dump the corresponding SQL data from `org` on the same folder
+    3. Commit the new files to the parent Task branch
     """
     try:
-        scratch_org.refresh_from_db()
-        task = scratch_org.task
+        org.refresh_from_db()
+        task = org.task
         task.refresh_from_db()
-        retrieve_and_commit_dataset(
-            repo=get_repo_info(user, repo_id=task.get_repo_id()),
-            branch=task.branch_name,
-            author={"name": user.username, "email": user.email},
-            commit_message=commit_message,
-            dataset_name=dataset_name,
-            dataset_definition=dataset_definition,
-        )
+        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+            with Dataset(
+                dataset_name, project_config, org_config, sf, schema
+            ) as dataset:
+                dataset.path.mkdir(parents=True, exist_ok=True)
+                dataset.update_schema_subset(dataset_definition)
+                dataset.extract()
+                commit = CommitDir(
+                    repo, author={"name": user.username, "email": user.email}
+                )
+                commit(
+                    project_config.repo_root,
+                    branch=task.branch_name,
+                    commit_message=commit_message,
+                )
     except Exception as e:
-        scratch_org.refresh_from_db()
-        scratch_org.finalize_commit_dataset(error=e, originating_user_id=user.id)
+        org.refresh_from_db()
+        org.finalize_commit_dataset(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.finalize_commit_dataset(originating_user_id=user.id)
+        org.finalize_commit_dataset(originating_user_id=user.id)
 
 
 commit_dataset_from_org_job = job(commit_dataset_from_org)
