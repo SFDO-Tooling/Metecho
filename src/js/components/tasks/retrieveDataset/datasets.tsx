@@ -25,6 +25,7 @@ interface Props {
   datasets: string[];
   datasetErrors: string[];
   fetchingDatasets: boolean;
+  missingSchema: boolean;
   inputs: DatasetCommit;
   setInputs: UseFormProps['setInputs'];
   errors: UseFormProps['errors'];
@@ -37,6 +38,7 @@ const SelectDatasetForm = ({
   datasets,
   datasetErrors,
   fetchingDatasets,
+  missingSchema,
   inputs,
   errors,
   setInputs,
@@ -123,54 +125,56 @@ const SelectDatasetForm = ({
           )}
         </div>
       </div>
-      <div className="slds-is-relative">
-        <RadioGroup
-          labels={{
-            label: t('Datasets'),
-            error: errors.dataset,
-          }}
-          assistiveText={{
-            required: t('Required'),
-          }}
-          name="dataset_name"
-          required
-          onChange={handleDatasetChange}
-        >
-          {datasets.map((dataset, idx) => (
+      {missingSchema && !fetchingDatasets ? null : (
+        <div className="slds-is-relative">
+          <RadioGroup
+            labels={{
+              label: t('Datasets'),
+              error: errors.dataset,
+            }}
+            assistiveText={{
+              required: t('Required'),
+            }}
+            name="dataset_name"
+            required
+            onChange={handleDatasetChange}
+          >
+            {datasets.map((dataset, idx) => (
+              <Radio
+                key={`${idx}`}
+                labels={{ label: dataset }}
+                checked={inputs.dataset_name === dataset}
+                value={dataset}
+                name="dataset_name"
+              />
+            ))}
             <Radio
-              key={`${idx}`}
-              labels={{ label: dataset }}
-              checked={inputs.dataset_name === dataset}
-              value={dataset}
+              labels={{ label: t('Create New Dataset') }}
+              checked={creatingDataset}
+              value={CREATE_DATASET.current}
               name="dataset_name"
             />
-          ))}
-          <Radio
-            labels={{ label: t('Create New Dataset') }}
-            checked={creatingDataset}
-            value={CREATE_DATASET.current}
-            name="dataset_name"
-          />
-        </RadioGroup>
-        {creatingDataset && (
-          <Input
-            inputRef={(ref: HTMLInputElement) => (inputEl.current = ref)}
-            placeholder={t('Dataset name')}
-            className="slds-m-left_large slds-m-top_xx-small"
-            name="dataset_name"
-            value={inputs.dataset_name}
-            required
-            aria-required
-            errorText={
-              existingDatasetSelected
-                ? t('Dataset name cannot match existing dataset.')
-                : undefined
-            }
-            onChange={handleInputChange}
-          />
-        )}
-        {fetchingDatasets && <SpinnerWrapper />}
-      </div>
+          </RadioGroup>
+          {creatingDataset && (
+            <Input
+              inputRef={(ref: HTMLInputElement) => (inputEl.current = ref)}
+              placeholder={t('Dataset name')}
+              className="slds-m-left_large slds-m-top_xx-small"
+              name="dataset_name"
+              value={inputs.dataset_name}
+              required
+              aria-required
+              errorText={
+                existingDatasetSelected
+                  ? t('Dataset name cannot match existing dataset.')
+                  : undefined
+              }
+              onChange={handleInputChange}
+            />
+          )}
+          {fetchingDatasets && <SpinnerWrapper />}
+        </div>
+      )}
     </form>
   );
 };

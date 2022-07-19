@@ -9,6 +9,7 @@ import { selectTaskById } from '@/js/store/tasks/selectors';
 import { addToast } from '@/js/store/toasts/actions';
 import apiFetch, { addUrlParams } from '@/js/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/js/utils/constants';
+import { OrgDatasetRefreshedEvent } from '@/js/utils/websockets';
 
 interface OrgProvisioning {
   type: 'SCRATCH_ORG_PROVISIONING';
@@ -69,13 +70,6 @@ interface RefreshDatasetsAction {
     | 'REFRESH_DATASETS_REJECTED';
   payload: string;
 }
-interface RefreshDatasetSchemaAction {
-  type:
-    | 'REFRESH_DATASET_SCHEMA_REQUESTED'
-    | 'REFRESH_DATASET_SCHEMA_ACCEPTED'
-    | 'REFRESH_DATASET_SCHEMA_REJECTED';
-  payload: string;
-}
 
 export type OrgsAction =
   | OrgProvisioning
@@ -91,8 +85,7 @@ export type OrgsAction =
   | OrgRecreated
   | OrgReassigned
   | OrgReassignFailed
-  | RefreshDatasetsAction
-  | RefreshDatasetSchemaAction;
+  | RefreshDatasetsAction;
 
 const getOrgParent = (
   org: Org | MinimalOrg,
@@ -697,7 +690,7 @@ export const refreshDatasets =
     });
     try {
       await apiFetch({
-        url: window.api_urls.scratch_org_refresh_datasets(org),
+        url: window.api_urls.scratch_org_parse_datasets(org),
         dispatch,
         opts: {
           method: 'POST',
@@ -716,34 +709,14 @@ export const refreshDatasets =
     }
   };
 
-export const refreshDatasetSchema =
+export const datasetsRefreshed =
   ({
-    org,
-  }: {
-    org: string;
-  }): ThunkResult<Promise<RefreshDatasetSchemaAction>> =>
-  async (dispatch) => {
-    dispatch({
-      type: 'REFRESH_DATASET_SCHEMA_REQUESTED',
-      payload: org,
-    });
-    try {
-      await apiFetch({
-        url: window.api_urls.scratch_org_refresh_dataset_schema(org),
-        dispatch,
-        opts: {
-          method: 'POST',
-        },
-      });
-      return dispatch({
-        type: 'REFRESH_DATASET_SCHEMA_ACCEPTED' as const,
-        payload: org,
-      });
-    } catch (err) {
-      dispatch({
-        type: 'REFRESH_DATASET_SCHEMA_REJECTED',
-        payload: org,
-      });
-      throw err;
-    }
-  };
+    model,
+    datasets,
+    dataset_errors,
+    schema,
+  }: OrgDatasetRefreshedEvent['payload']): ThunkResult<OrgUpdated> =>
+  (dispatch) =>
+    dispatch(
+      updateOrg({ ...model, datasets, dataset_errors, dataset_schema: schema }),
+    );

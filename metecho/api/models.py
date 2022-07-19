@@ -1482,7 +1482,15 @@ class ScratchOrg(
         }
         if error is not None:
             type_ = "SCRATCH_ORG_PARSE_DATASETS_FAILED"
-            message = {"error": str(error)}
+            message = {
+                "dataset_errors": [
+                    str(
+                        _("Unable to parse dataset schema from Org: {}").format(
+                            str(error)
+                        )
+                    )
+                ],
+            }
         self.notify_changed(
             type_=type_, message=message, originating_user_id=originating_user_id
         )

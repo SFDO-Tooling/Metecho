@@ -13,6 +13,7 @@ import { Epic } from '@/js/store/epics/reducer';
 import {
   commitFailed,
   commitSucceeded,
+  datasetsRefreshed,
   deleteFailed,
   deleteOrg,
   fetchFailed,
@@ -27,7 +28,12 @@ import {
   refreshError,
   updateOrg,
 } from '@/js/store/orgs/actions';
-import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
+import {
+  Datasets,
+  DatasetSchema,
+  MinimalOrg,
+  Org,
+} from '@/js/store/orgs/reducer';
 import {
   projectCreated,
   projectCreateError,
@@ -215,9 +221,7 @@ interface OrgUpdatedEvent {
   };
 }
 interface OrgFetchFailedEvent {
-  type:
-    | 'SCRATCH_ORG_FETCH_CHANGES_FAILED'
-    | 'SCRATCH_ORG_FETCH_DATASET_SCHEMA_FAILED';
+  type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -316,6 +320,16 @@ interface SoftDeletedEvent {
     originating_user_id: null;
   };
 }
+export interface OrgDatasetRefreshedEvent {
+  type: 'SCRATCH_ORG_PARSE_DATASETS' | 'SCRATCH_ORG_PARSE_DATASETS_FAILED';
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+    datasets?: Datasets;
+    dataset_errors: string[];
+    schema?: DatasetSchema;
+  };
+}
 type ModelEvent =
   | ProjectUpdatedEvent
   | ProjectUpdateErrorEvent
@@ -345,7 +359,8 @@ type ModelEvent =
   | CommitSucceededEvent
   | CommitFailedEvent
   | OrgConvertFailedEvent
-  | SoftDeletedEvent;
+  | SoftDeletedEvent
+  | OrgDatasetRefreshedEvent;
 type EventType =
   | SubscriptionEvent
   | ModelEvent
@@ -434,7 +449,6 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_UPDATE':
       return hasModel(event) && updateOrg(event.payload.model);
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
-    case 'SCRATCH_ORG_FETCH_DATASET_SCHEMA_FAILED':
       return hasModel(event) && fetchFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
       return hasModel(event) && deleteOrg(event.payload);
@@ -473,6 +487,9 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && orgConvertFailed(event.payload);
     case 'SOFT_DELETE':
       return hasModel(event) && removeObject(event.payload.model);
+    case 'SCRATCH_ORG_PARSE_DATASETS':
+    case 'SCRATCH_ORG_PARSE_DATASETS_FAILED':
+      return hasModel(event) && datasetsRefreshed(event.payload);
   }
   return null;
 };

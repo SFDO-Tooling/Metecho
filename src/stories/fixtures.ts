@@ -30,10 +30,8 @@ export const api_urls = {
     `/api/scratch-orgs/${id}/commit_dataset/`,
   scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
-  scratch_org_refresh_datasets: (id: string) =>
-    `/api/scratch-orgs/${id}/refresh_datasets/`,
-  scratch_org_refresh_dataset_schema: (id: string) =>
-    `/api/scratch-orgs/${id}/refresh_dataset_schema/`,
+  scratch_org_parse_datasets: (id: string) =>
+    `/api/scratch-orgs/${id}/parse_datasets/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
   task_list: () => 'api/tasks/',
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
@@ -773,17 +771,13 @@ export const sampleDevOrg = {
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
   currently_retrieving_dataset: false,
-  currently_retrieving_dataset_schema: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
-  dataset_schema: [],
+  currently_parsing_datasets: false,
 };
 
 export const sampleScratchOrg = {
@@ -814,17 +808,13 @@ export const sampleScratchOrg = {
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
   currently_retrieving_dataset: false,
-  currently_retrieving_dataset_schema: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
-  currently_refreshing_datasets: false,
-  datasets: {},
-  datasets_parse_errors: [],
-  dataset_schema: [],
+  currently_parsing_datasets: false,
 };
 
 export const sampleIssue1 = {

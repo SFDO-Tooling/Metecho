@@ -4,13 +4,13 @@ import React, { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-// import ChangesForm from '@/js/components/tasks/retrieveDataset/changes';
+// import DataForm from '@/js/components/tasks/retrieveDataset/data';
 import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
 // import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
-import { refreshDatasets, refreshDatasetSchema } from '@/js/store/orgs/actions';
-import { DatasetObject, Datasets } from '@/js/store/orgs/reducer';
+import { refreshDatasets } from '@/js/store/orgs/actions';
+import { Datasets, DatasetSchema } from '@/js/store/orgs/reducer';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
@@ -18,16 +18,15 @@ interface Props {
   orgId: string;
   datasets: Datasets;
   datasetErrors: string[];
-  schema: DatasetObject[];
+  schema?: DatasetSchema;
   fetchingDatasets: boolean;
-  fetchingSchema: boolean;
   isOpen: boolean;
   closeModal: () => void;
 }
 
 export interface DatasetCommit {
   dataset_name: string;
-  dataset_definition: DatasetObject[];
+  dataset_definition: any;
   commit_message: string;
 }
 
@@ -41,7 +40,6 @@ const RetrieveDatasetModal = ({
   datasetErrors,
   schema,
   fetchingDatasets,
-  fetchingSchema,
   isOpen,
   closeModal,
 }: Props) => {
@@ -128,20 +126,9 @@ const RetrieveDatasetModal = ({
     }
   }, [dispatch, orgId]);
 
-  const doRefreshDatasetSchema = useCallback(() => {
-    /* istanbul ignore else */
-    if (orgId) {
-      dispatch(refreshDatasetSchema({ org: orgId }));
-    }
-  }, [dispatch, orgId]);
-
   useEffect(() => {
-    // Always refresh dataset schema when modal opens:
-    if (isOpen && !fetchingSchema) {
-      doRefreshDatasetSchema();
-    }
-    // If there are no known datasets, check again once:
-    if (isOpen && !fetchingDatasets && !Object.keys(datasets).length) {
+    // Always refresh datasets and schema when modal opens:
+    if (isOpen && !fetchingDatasets) {
       doRefreshDatasets();
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -154,6 +141,7 @@ const RetrieveDatasetModal = ({
           datasets={Object.keys(datasets)}
           datasetErrors={datasetErrors}
           fetchingDatasets={fetchingDatasets}
+          missingSchema={!schema}
           inputs={inputs as DatasetCommit}
           errors={errors}
           setInputs={setInputs}
@@ -180,15 +168,12 @@ const RetrieveDatasetModal = ({
     {
       heading: t('Select data to retrieve'),
       contents: (
-        // <ChangesForm
-        //   changeset={org.unsaved_changes}
-        //   ignoredChanges={org.ignored_changes}
+        // <DataForm
+        //   schema={schema}
+        //   dataset={datasets[inputs.dataset_name] || []}
         //   inputs={inputs as DatasetCommit}
-        //   changesChecked={changesChecked}
-        //   ignoredChecked={ignoredChecked}
         //   errors={errors}
         //   setInputs={setInputs}
-        //   ignoredSuccess={isShowingTransientMessage}
         // />
         <div>This is placeholder content.</div>
       ),

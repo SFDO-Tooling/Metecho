@@ -54,17 +54,13 @@ export const getDemoOrg = ({
     currently_refreshing_changes: false,
     currently_retrieving_metadata: false,
     currently_retrieving_dataset: false,
-    currently_retrieving_dataset_schema: false,
     currently_refreshing_org: false,
     currently_reassigning_user: false,
     is_created: true,
     delete_queued_at: null,
     has_been_visited: true,
     valid_target_directories: {},
-    currently_refreshing_datasets: false,
-    datasets: {},
-    datasets_parse_errors: [],
-    dataset_schema: [],
+    currently_parsing_datasets: false,
   };
 };
 
