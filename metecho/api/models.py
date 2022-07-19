@@ -945,10 +945,6 @@ class Task(
             return self.epic.project
         return self.project
 
-    @property
-    def attached_org_types(self) -> set[str]:
-        return set(self.orgs.values_list("org_type", flat=True))
-
     def save(self, *args, force_epic_save=False, **kwargs):
         is_new = self.pk is None
         ret = super().save(*args, **kwargs)
@@ -1138,8 +1134,9 @@ class Task(
         # This comes from the GitHub hook, and so has no originating user:
         self.notify_changed(originating_user_id=None)
 
-        if ScratchOrgType.DEV in self.attached_org_types:
-            self.queue_refresh_datasets()
+        for org in self.orgs.filter(org_type=ScratchOrgType.DEV, owner__isnull=False):
+            # TODO: do something with orgs without owners
+            org.queue_refresh_datasets(user=org.owner)
 
     def add_metecho_git_sha(self, sha):
         self.metecho_commits.append(sha)
@@ -1505,7 +1502,7 @@ class ScratchOrg(
         self.currently_refreshing_dataset_schema = True
         self.save()
         self.notify_changed(originating_user_id=user.id)
-        refresh_dataset_schema_job.delay(self, user=user)
+        refresh_dataset_schema_job.delay(org=self, user=user)
 
     def finalize_refresh_dataset_schema(self, *, error=None, originating_user_id=None):
         self.currently_refreshing_dataset_schema = False

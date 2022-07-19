@@ -869,8 +869,9 @@ def refresh_commits(*, project, branch_name, originating_user_id):
         ]
         task.update_has_unmerged_commits()
         task.update_review_valid()
-        if ScratchOrgType.DEV in task.attached_org_types:
-            refresh_datasets(task)
+        for org in task.orgs.filter(org_type=ScratchOrgType.DEV, owner__isnull=False):
+            # TODO: handle orgs with no attached owner
+            refresh_datasets(org=org, user=org.owner)
         task.finalize_task_update(originating_user_id=originating_user_id)
 
 
@@ -1249,7 +1250,7 @@ def refresh_datasets(*, org: ScratchOrg, user: User):
                         errors.append(_("Failed to parse file: {}").format(rel_file))
 
         org.datasets = definitions
-        org.datasets_parse_errors = errors
+        org.datasets_parse_errors = list(map(str, errors))
     except Exception as e:
         org.finalize_refresh_datasets(error=e, originating_user_id=user.id)
         tb = traceback.format_exc()
@@ -1263,8 +1264,8 @@ refresh_datasets_job = job(refresh_datasets)
 
 
 def refresh_dataset_schema(
-    org: ScratchOrg,
     *,
+    org: ScratchOrg,
     user: User,
     org_config: OrgConfig = None,
     sf: Salesforce = None,

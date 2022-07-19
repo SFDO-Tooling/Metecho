@@ -1559,107 +1559,120 @@ class TestCreateRepository:
 
 
 DATASET_YAML = """
-Accounts:
-    sf_object: Account
-    fields:
-        - Name
-        - Description
-        - RecordTypeId
+extract:
+    OBJECTS(ALL):
+        fields: FIELDS(ALL)
 """
 
 
 @pytest.mark.django_db
 class TestRefreshDatasets:
-    def test_ok(self, mocker, task_factory, tmp_path):
+    @pytest.fixture
+    def patch_dataset_env(self, mocker, tmp_path):
+        mocker.patch(
+            f"{PATCH_ROOT}.dataset_env",
+            autospec=True,
+            **{
+                "return_value.__enter__.return_value": (
+                    # Mock the tuple returned by the context manager
+                    mocker.MagicMock(repo_root=str(tmp_path)),
+                    mocker.MagicMock(),
+                    mocker.MagicMock(),
+                )
+            },
+        )
+        yield tmp_path
+
+    def test_ok(self, scratch_org_factory, patch_dataset_env):
+        tmp_path = patch_dataset_env
         folder1 = tmp_path / "datasets" / "Default"
         folder1.mkdir(parents=True)
         file1 = folder1 / "Default.extract.yml"
         file1.write_text(DATASET_YAML)
         folder2 = tmp_path / "datasets" / "MyDataset"
         folder2.mkdir(parents=True)
-        file2 = folder2 / "foobar.extract.yml"
-        file2.write_text("Hello:\n    - world")
+        file2 = folder2 / "MyDataset.extract.yml"
+        file2.write_text(DATASET_YAML)
+        org = scratch_org_factory(currently_refreshing_datasets=True)
+
+        refresh_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
+
+        assert not org.currently_refreshing_datasets
+        assert org.datasets_parse_errors == []
+        assert org.datasets == {"Default": {}, "MyDataset": {}}
+
+    def test_exception(self, mocker, caplog, scratch_org_factory):
         mocker.patch(
-            f"{PATCH_ROOT}.local_github_checkout",
-            autospec=True,
-            **{"return_value.__enter__.return_value": str(tmp_path)},
-        )
-        task = task_factory(currently_refreshing_datasets=True)
-
-        refresh_datasets(task)
-        task.refresh_from_db()
-
-        assert not task.currently_refreshing_datasets
-        assert task.datasets_parse_errors == []
-        assert task.datasets == {
-            "Default": {
-                "Accounts": {
-                    "sf_object": "Account",
-                    "fields": ["Name", "Description", "RecordTypeId"],
-                },
-            },
-            "MyDataset": {"Hello": ["world"]},
-        }
-
-    def test_exception(self, mocker, caplog, task_factory):
-        mocker.patch(
-            f"{PATCH_ROOT}.local_github_checkout",
+            f"{PATCH_ROOT}.dataset_env",
             autospec=True,
             side_effect=Exception("Oh no!"),
         )
-        task = task_factory(currently_refreshing_datasets=True)
+        org = scratch_org_factory(currently_refreshing_datasets=True)
 
         with pytest.raises(Exception, match="Oh no!"):
-            refresh_datasets(task)
-        task.refresh_from_db()
+            refresh_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
 
-        assert not task.currently_refreshing_datasets
+        assert not org.currently_refreshing_datasets
+        assert org.datasets_parse_errors == [
+            "Unable to parse existing datasets: Oh no!"
+        ]
         assert "Oh no!" in caplog.text
 
-    def test_errors(self, mocker, task_factory, tmp_path):
-        (tmp_path / "invalid-top-level-file.csv").touch()
+    def test_errors(self, caplog, scratch_org_factory, patch_dataset_env):
+        tmp_path = patch_dataset_env
         folder1 = tmp_path / "datasets" / "Default"
         folder1.mkdir(parents=True)
-        (folder1 / "Default.extract.yml").touch()
-        (folder1 / "Another.extract.yml").touch()
+        file1 = folder1 / "Default.extract.yml"
+        file1.write_text("INVALID CONTENT")
+
+        org = scratch_org_factory(currently_refreshing_datasets=True)
+
+        refresh_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
+
+        assert not org.currently_refreshing_datasets
+        assert org.datasets_parse_errors == [
+            "Failed to parse file: datasets/Default/Default.extract.yml"
+        ]
+        assert "Failed to parse" in caplog.text
+
+    def test_missing_files(self, scratch_org_factory, patch_dataset_env):
+        tmp_path = patch_dataset_env
+        (tmp_path / "datasets" / "invalid-top-level-file.csv").touch()
+        folder1 = tmp_path / "datasets" / "Default"
+        folder1.mkdir(parents=True)
+        (folder1 / "WrongName.extract.yml").touch()
         folder2 = tmp_path / "datasets" / "Empty"
         folder2.mkdir(parents=True)
         (folder2 / "this-is-not-yaml.json").touch()
-        mocker.patch(
-            f"{PATCH_ROOT}.local_github_checkout",
-            autospec=True,
-            **{"return_value.__enter__.return_value": str(tmp_path)},
-        )
-        task = task_factory(currently_refreshing_datasets=True)
+        org = scratch_org_factory(currently_refreshing_datasets=True)
 
-        refresh_datasets(task)
-        task.refresh_from_db()
+        refresh_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
 
-        assert not task.currently_refreshing_datasets
+        assert not org.currently_refreshing_datasets
         errors = [
-            "Expected a single '*.extract.yml' file inside 'Default/' but found 'Another.extract.yml', 'Default.extract.yml'",  # noqa: B950
-            "Expected a single '*.extract.yml' file inside 'Empty/' but found none",
+            "Missing dataset definition file: datasets/Default/Default.extract.yml",
+            "Missing dataset definition file: datasets/Empty/Empty.extract.yml",
         ]
-        assert sorted(task.datasets_parse_errors) == sorted(errors)
-        assert task.datasets == {}
+        assert sorted(org.datasets_parse_errors) == sorted(errors)
+        assert org.datasets == {}
 
-    def test_missing_folder(self, mocker, task_factory, tmp_path):
-        # By not creating a `datasets/` directory we are on the "missing folder" case by default
-        mocker.patch(
-            f"{PATCH_ROOT}.local_github_checkout",
-            autospec=True,
-            **{"return_value.__enter__.return_value": str(tmp_path)},
-        )
-        task = task_factory(currently_refreshing_datasets=True)
+    def test_missing_folder(self, scratch_org_factory, patch_dataset_env):
+        # By not creating a `datasets/` directory inside `patch_dataset_env` we are on
+        # the "missing folder" case by default
+        org = scratch_org_factory(currently_refreshing_datasets=True)
 
-        refresh_datasets(task)
-        task.refresh_from_db()
+        refresh_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
 
-        assert not task.currently_refreshing_datasets
-        assert task.datasets_parse_errors == [
-            "Could not find 'datasets/' directory in the Task branch"
+        assert not org.currently_refreshing_datasets
+        assert org.datasets_parse_errors == [
+            "Found empty 'datasets/' directory in the Task branch"
         ]
-        assert task.datasets == {}
+        assert org.datasets == {}
 
 
 @pytest.mark.django_db
@@ -1669,17 +1682,22 @@ class TestRefreshDatasetSchema:
             org_type=ScratchOrgType.DEV, currently_refreshing_dataset_schema=True
         )
 
-        refresh_dataset_schema(org)
+        refresh_dataset_schema(org=org, user=org.owner)
         org.refresh_from_db()
 
         assert not org.currently_refreshing_dataset_schema
         assert org.dataset_schema  # TODO: actually check contents of schema
 
-    def test_exception(self, caplog, scratch_org_factory):
+    def test_exception(self, mocker, caplog, scratch_org_factory):
         org = scratch_org_factory(currently_refreshing_dataset_schema=True)
+        mocker.patch(
+            f"{PATCH_ROOT}.dataset_env",
+            autospec=True,
+            side_effect=Exception("Oh no!"),
+        )
 
         with pytest.raises(Exception, match="Oh no!"):
-            refresh_dataset_schema(org)
+            refresh_dataset_schema(org=org, user=org.owner)
         org.refresh_from_db()
 
         assert not org.currently_refreshing_dataset_schema

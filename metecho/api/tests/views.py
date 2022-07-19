@@ -674,7 +674,9 @@ class TestHookView:
         mocker.patch(
             "metecho.api.authentication.validate_gh_hook_signature", return_value=True
         )
-        refresh_datasets_job = mocker.patch("metecho.api.jobs.refresh_datasets_job")
+        refresh_datasets_job = mocker.patch(
+            "metecho.api.jobs.refresh_datasets_job", autospec=True
+        )
         task = task_factory(epic__project__repo_id=123, branch_name="task")
         scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
         if has_dev_org:
@@ -1203,6 +1205,20 @@ class TestScratchOrgViewSet:
             assert response.status_code == 403
             assert not refresh_scratch_org_job.delay.called
 
+    def test_refresh_datasets(self, mocker, client, scratch_org_factory):
+        org = scratch_org_factory(currently_refreshing_datasets=False)
+        refresh_datasets_job = mocker.patch(
+            "metecho.api.jobs.refresh_datasets_job", autospec=True
+        )
+
+        response = client.post(reverse("scratch-org-refresh-datasets", args=[org.pk]))
+        org.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert org.currently_refreshing_datasets
+        assert response.data["currently_refreshing_datasets"]
+        refresh_datasets_job.delay.assert_called_once_with(org=org, user=client.user)
+
     def test_refresh_dataset_schema(self, mocker, client, scratch_org_factory):
         scratch_org = scratch_org_factory(currently_refreshing_dataset_schema=False)
         refresh_dataset_schema_job = mocker.patch(
@@ -1218,11 +1234,13 @@ class TestScratchOrgViewSet:
         assert scratch_org.currently_refreshing_dataset_schema
         assert response.data["currently_refreshing_dataset_schema"]
         refresh_dataset_schema_job.delay.assert_called_once_with(
-            scratch_org, originating_user_id=client.user.id
+            org=scratch_org, user=client.user
         )
 
     def test_commit_dataset_from_org(self, mocker, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(currently_retrieving_dataset=False)
+        scratch_org = scratch_org_factory(
+            currently_retrieving_dataset=False, owner=client.user
+        )
         commit_dataset_from_org_job = mocker.patch(
             "metecho.api.jobs.commit_dataset_from_org_job", autospec=True
         )
@@ -1248,6 +1266,31 @@ class TestScratchOrgViewSet:
             dataset_name="NewDataset",
             dataset_definition={"foo": "bar"},
         )
+
+    def test_commit_dataset_from_org__bad_user(
+        self, mocker, client, scratch_org_factory
+    ):
+        scratch_org = scratch_org_factory(currently_retrieving_dataset=False)
+        commit_dataset_from_org_job = mocker.patch(
+            "metecho.api.jobs.commit_dataset_from_org_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-commit-dataset", args=[scratch_org.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "dataset_name": "NewDataset",
+                "dataset_definition": {"foo": "bar"},
+            },
+        )
+        scratch_org.refresh_from_db()
+
+        assert (
+            response.status_code == 403
+        ), "Expected a 403 when the user is not the Org owner"
+        assert not scratch_org.currently_retrieving_dataset
+        assert not commit_dataset_from_org_job.delay.called
 
 
 @pytest.mark.django_db
@@ -1498,22 +1541,6 @@ class TestTaskViewSet:
         task.refresh_from_db()
         assert task.assigned_dev == "123456"
         assert task.assigned_qa == "123456"
-
-    def test_refresh_datasets(self, mocker, client, task_factory):
-        task = task_factory(currently_refreshing_datasets=False)
-        refresh_datasets_job = mocker.patch(
-            "metecho.api.jobs.refresh_datasets_job", autospec=True
-        )
-
-        response = client.post(reverse("task-refresh-datasets", args=[task.pk]))
-        task.refresh_from_db()
-
-        assert response.status_code == 202, response.data
-        assert task.currently_refreshing_datasets
-        assert response.data["currently_refreshing_datasets"]
-        refresh_datasets_job.delay.assert_called_once_with(
-            task, originating_user_id=client.user.id
-        )
 
 
 @pytest.mark.django_db
