@@ -2,15 +2,12 @@ import json
 import os
 import pathlib
 from collections import defaultdict
-from pathlib import Path
 
 import simple_salesforce
-import yaml
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.salesforce.sourcetracking import retrieve_components
 from django.conf import settings
-from github3.repos import Repository
 
 from .custom_cci_configs import MetechoUniversalConfig
 from .gh import get_repo_info, get_source_format, local_github_checkout
