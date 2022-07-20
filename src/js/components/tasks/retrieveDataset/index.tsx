@@ -1,16 +1,23 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import React, { FormEvent, useCallback, useEffect, useState } from 'react';
+import { sortBy, toLower } from 'lodash';
+import React, {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-// import DataForm from '@/js/components/tasks/retrieveDataset/data';
+import DataForm from '@/js/components/tasks/retrieveDataset/data';
 import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
 // import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { refreshDatasets } from '@/js/store/orgs/actions';
-import { Datasets, DatasetSchema } from '@/js/store/orgs/reducer';
+import { Changeset, Datasets, DatasetSchema } from '@/js/store/orgs/reducer';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
@@ -26,7 +33,7 @@ interface Props {
 
 export interface DatasetCommit {
   dataset_name: string;
-  dataset_definition: any;
+  dataset_definition: Changeset;
   commit_message: string;
 }
 
@@ -49,6 +56,15 @@ const RetrieveDatasetModal = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [hasError, setHasError] = useState(false);
   const isMounted = useIsMounted();
+
+  const datasetNames = Object.keys(datasets);
+  const orderedDatasetNames = [
+    ...datasetNames.filter((name) => name.toLowerCase() === 'default'),
+    ...sortBy(
+      datasetNames.filter((name) => name.toLowerCase() !== 'default'),
+      toLower,
+    ),
+  ];
 
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
@@ -105,7 +121,25 @@ const RetrieveDatasetModal = ({
     shouldSubscribeToObject: false,
   });
 
-  // const hasCommitMessage = Boolean(inputs.commit_message);
+  // When datasets change, update default selection
+  const selectedDatasetRef = useRef(inputs.dataset_name);
+  useEffect(() => {
+    const selectedDataset = inputs.dataset_name;
+    const prevValue = selectedDatasetRef.current;
+    if (selectedDataset !== prevValue) {
+      // @@@ Adding fake outdated fields
+      const def = datasets[inputs.dataset_name] ?? {};
+      def.foo = ['bar', 'buz'];
+      def.ActiveScratchOrg.push('this-is-new');
+      setInputs({
+        ...inputs,
+        dataset_definition: def,
+      });
+      selectedDatasetRef.current = selectedDataset;
+    }
+  }, [inputs, setInputs, datasets]);
+
+  const hasCommitMessage = Boolean(inputs.commit_message);
   const datasetSelected = Boolean(inputs.dataset_name);
 
   const handleClose = () => {
@@ -138,7 +172,7 @@ const RetrieveDatasetModal = ({
       heading: t('Select the dataset to create or modify'),
       contents: (
         <SelectDatasetForm
-          datasets={Object.keys(datasets)}
+          datasets={orderedDatasetNames}
           datasetErrors={datasetErrors}
           fetchingDatasets={fetchingDatasets}
           missingSchema={!schema}
@@ -166,16 +200,15 @@ const RetrieveDatasetModal = ({
       ],
     },
     {
+      size: 'large',
       heading: t('Select data to retrieve'),
       contents: (
-        // <DataForm
-        //   schema={schema}
-        //   dataset={datasets[inputs.dataset_name] || []}
-        //   inputs={inputs as DatasetCommit}
-        //   errors={errors}
-        //   setInputs={setInputs}
-        // />
-        <div>This is placeholder content.</div>
+        <DataForm
+          schema={schema ?? {}}
+          inputs={inputs as DatasetCommit}
+          errors={errors}
+          setInputs={setInputs}
+        />
       ),
       footer: [
         <Button
@@ -228,7 +261,7 @@ const RetrieveDatasetModal = ({
           }
           variant="brand"
           onClick={submitChanges}
-          // disabled={retrievingDataset || !hasCommitMessage || hasError}
+          disabled={retrievingDataset || !hasCommitMessage || hasError}
         />,
       ],
     },
@@ -237,7 +270,7 @@ const RetrieveDatasetModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      size="small"
+      size={pages[pageIndex].size || 'small'}
       disableClose={retrievingDataset}
       dismissOnClickOutside={false}
       heading={pages[pageIndex].heading}

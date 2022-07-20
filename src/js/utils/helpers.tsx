@@ -1,11 +1,18 @@
 import { t } from 'i18next';
-import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
+import {
+  cloneDeep,
+  intersection,
+  mergeWith,
+  pick,
+  union,
+  without,
+} from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
 import TourPopover from '@/js/components/tour/popover';
 import { Epic } from '@/js/store/epics/reducer';
-import { Changeset, Org } from '@/js/store/orgs/reducer';
+import { Changeset, DatasetSchema, Org } from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import {
   EPIC_STATUSES,
@@ -184,6 +191,7 @@ export const getPercentage = (complete: number, total: number) =>
 export const getCompletedTasks = (tasks: Task[]) =>
   tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);
 
+// Removes `comparison` items from `changes`
 export const splitChangeset = (changes: Changeset, comparison: Changeset) => {
   const remaining: Changeset = {};
   const removed: Changeset = {};
@@ -208,3 +216,26 @@ export const mergeChangesets = (original: Changeset, adding: Changeset) =>
   mergeWith(cloneDeep(original), adding, (objVal, srcVal) =>
     union(objVal, srcVal),
   );
+
+export const getSchemaForChangeset = (
+  schema: DatasetSchema,
+  changes: Changeset,
+) => {
+  const matchedSchema: DatasetSchema = {};
+  const unmatched: Changeset = {};
+
+  for (const [objectName, fieldNames] of Object.entries(changes)) {
+    if (schema[objectName]) {
+      const fields = pick(schema[objectName].fields, fieldNames);
+      const unmatchedFields = without(fieldNames, ...Object.keys(fields));
+      if (unmatchedFields.length) {
+        unmatched[objectName] = unmatchedFields;
+      }
+      matchedSchema[objectName] = { ...schema[objectName], fields };
+    } else {
+      unmatched[objectName] = fieldNames;
+    }
+  }
+
+  return { matchedSchema, unmatched };
+};

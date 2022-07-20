@@ -77,11 +77,45 @@ const OrgInfo = ({
   const expiresAt = org?.expires_at && new Date(org.expires_at);
   const reviewSubmittedAt =
     task && task.review_submitted_at && new Date(task.review_submitted_at);
+  let outOfDateMsg = null;
   let commitStatus = null;
   let compareChangesUrl = null;
   let orgStatus = null;
 
   if (org?.latest_commit) {
+    if (orgOutOfDate) {
+      // synced status for orgs
+      if (baseCommit) {
+        // eslint-disable-next-line max-len
+        compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${baseCommit}`;
+      }
+      outOfDateMsg = (
+        <li>
+          <Icon
+            category="utility"
+            name="warning"
+            colorVariant="warning"
+            size="x-small"
+            className="slds-m-bottom_xx-small"
+            containerClassName="slds-m-right_xx-small"
+          />
+          <strong>
+            {missingCommits > 0 ? t('Behind Latest:') : t('Behind Latest')}
+          </strong>{' '}
+          {getOrgBehindLatestMsg(missingCommits)}
+          {compareChangesUrl ? (
+            <>
+              {' '}
+              (
+              <ExternalLink url={compareChangesUrl}>
+                {t('view changes')}
+              </ExternalLink>
+              )
+            </>
+          ) : null}
+        </li>
+      );
+    }
     switch (type) {
       case ORG_TYPES.DEV: {
         // last commit status for dev org
@@ -99,41 +133,8 @@ const OrgInfo = ({
         );
         break;
       }
-      case ORG_TYPES.QA:
-      case ORG_TYPES.PLAYGROUND: {
-        // synced status for orgs
-        if (orgOutOfDate && baseCommit) {
-          // eslint-disable-next-line max-len
-          compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${baseCommit}`;
-        }
-        if (orgOutOfDate) {
-          commitStatus = (
-            <li>
-              <Icon
-                category="utility"
-                name="warning"
-                colorVariant="warning"
-                size="x-small"
-                className="slds-m-bottom_xx-small"
-                containerClassName="slds-m-right_xx-small"
-              />
-              <strong>
-                {missingCommits > 0 ? t('Behind Latest:') : t('Behind Latest')}
-              </strong>{' '}
-              {getOrgBehindLatestMsg(missingCommits)}
-              {compareChangesUrl ? (
-                <>
-                  {' '}
-                  (
-                  <ExternalLink url={compareChangesUrl}>
-                    {t('view changes')}
-                  </ExternalLink>
-                  )
-                </>
-              ) : null}
-            </li>
-          );
-        } else if (type === ORG_TYPES.QA) {
+      case ORG_TYPES.QA: {
+        if (!orgOutOfDate) {
           commitStatus = (
             <li>
               <strong>{t('Up to Date')}</strong>
@@ -246,6 +247,7 @@ const OrgInfo = ({
           />
         </li>
       ) : null}
+      {outOfDateMsg}
       {commitStatus}
       {/* expiration date for each org */}
       {expiresAt && (

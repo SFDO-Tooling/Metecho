@@ -842,7 +842,9 @@ const TaskDetail = (
             variant="outline-brand"
             className="slds-align-middle"
             onClick={openRetrieveDatasetModal}
-            disabled={currentlyCommittingDataset}
+            disabled={
+              fetchingChanges || currentlyFetching || currentlyCommittingDataset
+            }
           />
         </div>
       );

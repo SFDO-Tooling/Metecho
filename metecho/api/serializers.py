@@ -192,7 +192,7 @@ class GitHubOrganizationSerializer(HashIdModelSerializer):
 
 class GitHubAppInstallationCheckSerializer(serializers.Serializer):
     success = serializers.BooleanField()
-    messages = serializers.ListField(child=serializers.CharField())
+    messages = StringListField()
 
 
 class OrgConfigNameSerializer(serializers.Serializer):
@@ -1061,9 +1061,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
 class CommitSerializer(serializers.Serializer):
     commit_message = serializers.CharField()
     # Expect this to be Dict<str, List<str>>
-    changes = serializers.DictField(
-        child=serializers.ListField(child=serializers.CharField())
-    )
+    changes = serializers.DictField(child=StringListField())
     target_directory = serializers.CharField()
 
 

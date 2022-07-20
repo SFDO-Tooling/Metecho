@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import { lowerCase, map } from 'lodash';
+import { map, toLower } from 'lodash';
 import React, {
   ChangeEvent,
   Dispatch,
@@ -49,7 +49,7 @@ const SelectDatasetForm = ({
   const { t } = useTranslation();
   const existingDatasetSelected = Boolean(
     inputs.dataset_name &&
-      map(datasets, lowerCase).includes(inputs.dataset_name.toLowerCase()),
+      map(datasets, toLower).includes(inputs.dataset_name.toLowerCase()),
   );
   const [creatingDataset, setCreatingDataset] = useState(
     Boolean(inputs.dataset_name && !existingDatasetSelected),

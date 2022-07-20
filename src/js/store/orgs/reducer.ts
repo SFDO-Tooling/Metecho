@@ -10,6 +10,17 @@ import {
   OrgTypes,
 } from '@/js/utils/constants';
 
+export interface TargetDirectories {
+  source?: string[];
+  pre?: string[];
+  post?: string[];
+  config?: string[];
+}
+
+export interface Changeset {
+  [key: string]: string[];
+}
+
 interface DatasetField {
   label: string;
 }
@@ -23,18 +34,16 @@ export interface DatasetObject {
   };
 }
 
-export interface Datasets {
-  // `key` is the name of a Dataset
-  [key: string]: {
-    // `key` is the API name of a DatasetObject
-    // `value` is a list of API names of DatasetFields
-    [key: string]: string[];
-  };
-}
-
 export interface DatasetSchema {
   // `key` is the API name of a DatasetObject
   [key: string]: DatasetObject;
+}
+
+export interface Datasets {
+  // `key` is the name of a Dataset
+  [key: string]: Changeset;
+  // Changeset `key` is the API name of a DatasetObject
+  // Changeset `value` is a list of API names of DatasetFields
 }
 
 export interface MinimalOrg {
@@ -78,17 +87,6 @@ export interface Org extends MinimalOrg {
   dataset_schema?: DatasetSchema;
   datasets?: Datasets;
   dataset_errors?: string[];
-}
-
-export interface TargetDirectories {
-  source?: string[];
-  pre?: string[];
-  post?: string[];
-  config?: string[];
-}
-
-export interface Changeset {
-  [key: string]: string[];
 }
 
 export interface OrgsByParent {
@@ -168,11 +166,13 @@ const reducer = (
         case OBJECT_TYPES.COMMIT_DATASET: {
           const { object }: { object: Org } = action.payload;
           if (object) {
+            const existingOrg = orgs.orgs[object.id] ?? {};
             return {
               ...orgs,
               orgs: {
                 ...orgs.orgs,
                 [object.id]: {
+                  ...existingOrg,
                   ...object,
                   currently_retrieving_metadata:
                     action.payload.objectType === OBJECT_TYPES.COMMIT_METADATA,

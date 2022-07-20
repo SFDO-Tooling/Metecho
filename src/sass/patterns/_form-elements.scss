@@ -10,6 +10,12 @@
   grid-template-columns: 1fr auto;
 }
 
+// @@@
+.form-grid-three {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+}
+
 [data-form='task-retrieve-changes'] {
   display: grid;
   height: 100%;
