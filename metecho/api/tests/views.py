@@ -667,35 +667,6 @@ class TestHookView:
             task.refresh_from_db()
             assert len(task.commits) == 1
 
-    @pytest.mark.parametrize("has_dev_org", (True, False))
-    def test_task_datasets_refreshed(
-        self, client, mocker, task_factory, scratch_org_factory, has_dev_org
-    ):
-        mocker.patch(
-            "metecho.api.authentication.validate_gh_hook_signature", return_value=True
-        )
-        refresh_datasets_job = mocker.patch(
-            "metecho.api.jobs.refresh_datasets_job", autospec=True
-        )
-        task = task_factory(epic__project__repo_id=123, branch_name="task")
-        scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
-        if has_dev_org:
-            scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
-        data = {
-            "forced": False,
-            "ref": "refs/heads/task",
-            "commits": [],
-            "repository": {"id": 123},
-            "sender": {},
-        }
-
-        response = client.post(
-            reverse("hook"), data, format="json", HTTP_X_GITHUB_EVENT="push"
-        )
-
-        assert response.status_code == 202, response.content
-        assert refresh_datasets_job.delay.called == has_dev_org
-
     def test_202__push_epic_commits(
         self,
         settings,
@@ -1205,37 +1176,19 @@ class TestScratchOrgViewSet:
             assert response.status_code == 403
             assert not refresh_scratch_org_job.delay.called
 
-    def test_refresh_datasets(self, mocker, client, scratch_org_factory):
-        org = scratch_org_factory(currently_refreshing_datasets=False)
-        refresh_datasets_job = mocker.patch(
-            "metecho.api.jobs.refresh_datasets_job", autospec=True
+    def test_parse_datasets(self, mocker, client, scratch_org_factory):
+        org = scratch_org_factory(currently_parsing_datasets=False)
+        parse_datasets_job = mocker.patch(
+            "metecho.api.jobs.parse_datasets_job", autospec=True
         )
 
-        response = client.post(reverse("scratch-org-refresh-datasets", args=[org.pk]))
+        response = client.post(reverse("scratch-org-parse-datasets", args=[org.pk]))
         org.refresh_from_db()
 
         assert response.status_code == 202, response.data
-        assert org.currently_refreshing_datasets
-        assert response.data["currently_refreshing_datasets"]
-        refresh_datasets_job.delay.assert_called_once_with(org=org, user=client.user)
-
-    def test_refresh_dataset_schema(self, mocker, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(currently_refreshing_dataset_schema=False)
-        refresh_dataset_schema_job = mocker.patch(
-            "metecho.api.jobs.refresh_dataset_schema_job", autospec=True
-        )
-
-        response = client.post(
-            reverse("scratch-org-refresh-dataset-schema", args=[scratch_org.pk])
-        )
-        scratch_org.refresh_from_db()
-
-        assert response.status_code == 202, response.data
-        assert scratch_org.currently_refreshing_dataset_schema
-        assert response.data["currently_refreshing_dataset_schema"]
-        refresh_dataset_schema_job.delay.assert_called_once_with(
-            org=scratch_org, user=client.user
-        )
+        assert org.currently_parsing_datasets
+        assert response.data["currently_parsing_datasets"]
+        parse_datasets_job.delay.assert_called_once_with(org=org, user=client.user)
 
     def test_commit_dataset_from_org(self, mocker, client, scratch_org_factory):
         scratch_org = scratch_org_factory(
@@ -1251,7 +1204,7 @@ class TestScratchOrgViewSet:
             data={
                 "commit_message": "New commit",
                 "dataset_name": "NewDataset",
-                "dataset_definition": {"foo": "bar"},
+                "dataset_definition": {"foo": ["bar"]},
             },
         )
         scratch_org.refresh_from_db()
@@ -1260,11 +1213,11 @@ class TestScratchOrgViewSet:
         assert scratch_org.currently_retrieving_dataset
         assert response.data["currently_retrieving_dataset"]
         commit_dataset_from_org_job.delay.assert_called_once_with(
-            scratch_org=scratch_org,
+            org=scratch_org,
             user=client.user,
             commit_message="New commit",
             dataset_name="NewDataset",
-            dataset_definition={"foo": "bar"},
+            dataset_definition={"foo": ["bar"]},
         )
 
     def test_commit_dataset_from_org__bad_user(
@@ -1281,7 +1234,7 @@ class TestScratchOrgViewSet:
             data={
                 "commit_message": "New commit",
                 "dataset_name": "NewDataset",
-                "dataset_definition": {"foo": "bar"},
+                "dataset_definition": {"foo": ["bar"]},
             },
         )
         scratch_org.refresh_from_db()

@@ -8,7 +8,6 @@ from ..sf_org_changes import (
     compare_revisions,
     get_latest_revision_numbers,
     get_valid_target_directories,
-    retrieve_and_commit_dataset,
     run_retrieve_task,
 )
 
@@ -119,59 +118,6 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
         )
 
         assert CommitDir.called
-
-
-@pytest.mark.django_db
-class TestRetrieveAndCommitDataset:
-    def test_ok__existing_dataset(self, mocker, tmp_path):
-        folder = tmp_path / "datasets" / "Test"
-        folder.mkdir(parents=True)
-        file = folder / "Test.extract.yml"
-        file.write_text("OLD CONTENT")
-        mocker.patch(
-            f"{PATCH_ROOT}.local_github_checkout",
-            autospec=True,
-            **{"return_value.__enter__.return_value": str(tmp_path)},
-        )
-        CommitDir = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True)
-
-        retrieve_and_commit_dataset(
-            repo=mocker.MagicMock(),
-            branch="some-branch",
-            author={"email": "test@test.com"},
-            commit_message="Testing",
-            dataset_name="Test",
-            dataset_definition={"foo": "bar"},
-        )
-
-        CommitDir.return_value.assert_called_once_with(
-            str(tmp_path), branch="some-branch", commit_message="Testing"
-        )
-        assert file.read_text() == "foo: bar\n"
-
-    def test_ok__new_dataset(self, mocker, tmp_path):
-        mocker.patch(
-            f"{PATCH_ROOT}.local_github_checkout",
-            autospec=True,
-            **{"return_value.__enter__.return_value": str(tmp_path)},
-        )
-        CommitDir = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True)
-
-        retrieve_and_commit_dataset(
-            repo=mocker.MagicMock(),
-            branch="some-branch",
-            author={"email": "test@test.com"},
-            commit_message="Testing",
-            dataset_name="Test",
-            dataset_definition={"foo": "bar"},
-        )
-
-        CommitDir.return_value.assert_called_once_with(
-            str(tmp_path), branch="some-branch", commit_message="Testing"
-        )
-        assert (
-            tmp_path / "datasets" / "Test" / "Test.extract.yml"
-        ).read_text() == "foo: bar\n"
 
 
 def test_get_latest_revision_numbers():

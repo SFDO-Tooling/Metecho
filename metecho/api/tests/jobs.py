@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -26,9 +27,8 @@ from ..jobs import (
     delete_scratch_org,
     get_social_image,
     get_unsaved_changes,
+    parse_datasets,
     refresh_commits,
-    refresh_dataset_schema,
-    refresh_datasets,
     refresh_github_issues,
     refresh_github_organizations_for_user,
     refresh_github_repositories_for_user,
@@ -869,26 +869,6 @@ class TestRefreshCommits:
             project.refresh_from_db()
             assert project.latest_sha == "abcd1234"
 
-    @pytest.mark.parametrize("has_dev_org", (True, False))
-    def test_task_refreshes_datasets(
-        self, task_factory, scratch_org_factory, mocker, has_dev_org
-    ):
-        get_repo_info = mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
-        get_repo_info.return_value.commits.return_value = [Commit(sha="123")]
-        refresh_datasets = mocker.patch(f"{PATCH_ROOT}.refresh_datasets", autospec=True)
-        task = task_factory(
-            epic__project__repo_id=123, branch_name="task", origin_sha="123"
-        )
-        scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
-        if has_dev_org:
-            scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
-
-        refresh_commits(
-            project=task.root_project, branch_name="task", originating_user_id=None
-        )
-
-        assert refresh_datasets.called == has_dev_org
-
 
 @pytest.mark.django_db
 def test_create_pr(user_factory, task_factory):
@@ -1565,168 +1545,202 @@ extract:
 """
 
 
-@pytest.mark.django_db
-class TestRefreshDatasets:
-    @pytest.fixture
-    def patch_dataset_env(self, mocker, tmp_path):
-        mocker.patch(
-            f"{PATCH_ROOT}.dataset_env",
-            autospec=True,
-            **{
-                "return_value.__enter__.return_value": (
-                    # Mock the tuple returned by the context manager
-                    mocker.MagicMock(repo_root=str(tmp_path)),
-                    mocker.MagicMock(),
-                    mocker.MagicMock(),
-                )
-            },
-        )
-        yield tmp_path
+@pytest.fixture
+def patch_dataset_env(mocker, tmp_path):
+    """Mock all values returned by SF and GH APIs in the `dataset_env` context manager"""
+    repo = mocker.MagicMock()
+    project_config = mocker.MagicMock(repo_root=str(tmp_path))
+    org_config = mocker.MagicMock()
+    sf = mocker.MagicMock()
+    schema = mocker.MagicMock()
 
-    def test_ok(self, scratch_org_factory, patch_dataset_env):
-        tmp_path = patch_dataset_env
+    mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
+    mocker.patch(f"{PATCH_ROOT}.get_devhub_api", return_value=sf)
+    mocker.patch(f"{PATCH_ROOT}.local_github_checkout")
+    mocker.patch(f"{PATCH_ROOT}.get_project_config", return_value=project_config)
+    mocker.patch(f"{PATCH_ROOT}.BaseCumulusCI")
+    mocker.patch(f"{PATCH_ROOT}.OrgConfig", return_value=org_config)
+    mocker.patch(
+        f"{PATCH_ROOT}.get_org_schema",
+        **{"return_value.__enter__.return_value": schema},
+    )
+    yield (project_config, org_config, sf, schema, repo)
+
+
+@pytest.mark.django_db
+class TestParseDatasets:
+    def test_ok(self, mocker, scratch_org_factory, patch_dataset_env):
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
+
+        project_config, *_ = patch_dataset_env
+        tmp_path = Path(project_config.repo_root)
         folder1 = tmp_path / "datasets" / "Default"
         folder1.mkdir(parents=True)
-        file1 = folder1 / "Default.extract.yml"
-        file1.write_text(DATASET_YAML)
+        (folder1 / "Default.extract.yml").write_text(DATASET_YAML)
         folder2 = tmp_path / "datasets" / "MyDataset"
         folder2.mkdir(parents=True)
-        file2 = folder2 / "MyDataset.extract.yml"
-        file2.write_text(DATASET_YAML)
-        org = scratch_org_factory(currently_refreshing_datasets=True)
+        (folder2 / "MyDataset.extract.yml").write_text(DATASET_YAML)
+        org = scratch_org_factory(currently_parsing_datasets=True)
 
-        refresh_datasets(org=org, user=org.owner)
+        parse_datasets(org=org, user=org.owner)
         org.refresh_from_db()
 
-        assert not org.currently_refreshing_datasets
-        assert org.datasets_parse_errors == []
-        assert org.datasets == {"Default": {}, "MyDataset": {}}
-
-    def test_exception(self, mocker, caplog, scratch_org_factory):
-        mocker.patch(
-            f"{PATCH_ROOT}.dataset_env",
-            autospec=True,
-            side_effect=Exception("Oh no!"),
+        assert not org.currently_parsing_datasets
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "schema": {},
+                    "dataset_errors": [],
+                    "datasets": {"Default": {}, "MyDataset": {}},
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
         )
-        org = scratch_org_factory(currently_refreshing_datasets=True)
 
-        with pytest.raises(Exception, match="Oh no!"):
-            refresh_datasets(org=org, user=org.owner)
-        org.refresh_from_db()
+    def test_errors(self, mocker, caplog, scratch_org_factory, patch_dataset_env):
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
 
-        assert not org.currently_refreshing_datasets
-        assert org.datasets_parse_errors == [
-            "Unable to parse existing datasets: Oh no!"
-        ]
-        assert "Oh no!" in caplog.text
-
-    def test_errors(self, caplog, scratch_org_factory, patch_dataset_env):
-        tmp_path = patch_dataset_env
+        project_config, *_ = patch_dataset_env
+        tmp_path = Path(project_config.repo_root)
         folder1 = tmp_path / "datasets" / "Default"
         folder1.mkdir(parents=True)
-        file1 = folder1 / "Default.extract.yml"
-        file1.write_text("INVALID CONTENT")
-
-        org = scratch_org_factory(currently_refreshing_datasets=True)
-
-        refresh_datasets(org=org, user=org.owner)
-        org.refresh_from_db()
-
-        assert not org.currently_refreshing_datasets
-        assert org.datasets_parse_errors == [
-            "Failed to parse file: datasets/Default/Default.extract.yml"
-        ]
-        assert "Failed to parse" in caplog.text
-
-    def test_missing_files(self, scratch_org_factory, patch_dataset_env):
-        tmp_path = patch_dataset_env
-        (tmp_path / "datasets" / "invalid-top-level-file.csv").touch()
-        folder1 = tmp_path / "datasets" / "Default"
-        folder1.mkdir(parents=True)
-        (folder1 / "WrongName.extract.yml").touch()
+        (folder1 / "Default.extract.yml").write_text("INVALID CONTENT")
         folder2 = tmp_path / "datasets" / "Empty"
         folder2.mkdir(parents=True)
-        (folder2 / "this-is-not-yaml.json").touch()
-        org = scratch_org_factory(currently_refreshing_datasets=True)
+        (folder2 / "this-is-not-yaml.json").write_text("")
+        folder3 = tmp_path / "datasets" / "FooBar"
+        folder3.mkdir(parents=True)
+        (folder3 / "WrongName.extract.yml").write_text("")
+        (tmp_path / "datasets" / "invalid-top-level-file.csv").write_text("")
+        org = scratch_org_factory(currently_parsing_datasets=True)
 
-        refresh_datasets(org=org, user=org.owner)
+        parse_datasets(org=org, user=org.owner)
         org.refresh_from_db()
 
-        assert not org.currently_refreshing_datasets
+        assert not org.currently_parsing_datasets
+        assert "Failed to parse" in caplog.text
         errors = [
-            "Missing dataset definition file: datasets/Default/Default.extract.yml",
+            "Missing dataset definition file: datasets/FooBar/FooBar.extract.yml",
+            "Failed to parse file: datasets/Default/Default.extract.yml",
             "Missing dataset definition file: datasets/Empty/Empty.extract.yml",
         ]
-        assert sorted(org.datasets_parse_errors) == sorted(errors)
-        assert org.datasets == {}
-
-    def test_missing_folder(self, scratch_org_factory, patch_dataset_env):
-        # By not creating a `datasets/` directory inside `patch_dataset_env` we are on
-        # the "missing folder" case by default
-        org = scratch_org_factory(currently_refreshing_datasets=True)
-
-        refresh_datasets(org=org, user=org.owner)
-        org.refresh_from_db()
-
-        assert not org.currently_refreshing_datasets
-        assert org.datasets_parse_errors == [
-            "Found empty 'datasets/' directory in the Task branch"
-        ]
-        assert org.datasets == {}
-
-
-@pytest.mark.django_db
-class TestRefreshDatasetSchema:
-    def test_ok(self, scratch_org_factory):
-        org = scratch_org_factory(
-            org_type=ScratchOrgType.DEV, currently_refreshing_dataset_schema=True
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "schema": {},
+                    "dataset_errors": errors,
+                    "datasets": {},
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
         )
 
-        refresh_dataset_schema(org=org, user=org.owner)
+    def test_missing_folder(self, mocker, scratch_org_factory, patch_dataset_env):
+        # By not creating a `datasets/` directory inside `patch_dataset_env` we are on
+        # the "missing folder" case by default
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
+        org = scratch_org_factory(currently_parsing_datasets=True)
+
+        parse_datasets(org=org, user=org.owner)
         org.refresh_from_db()
 
-        assert not org.currently_refreshing_dataset_schema
-        assert org.dataset_schema  # TODO: actually check contents of schema
+        assert not org.currently_parsing_datasets
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "schema": {},
+                    "dataset_errors": [
+                        "Found empty 'datasets/' directory in the Task branch"
+                    ],
+                    "datasets": {},
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
 
     def test_exception(self, mocker, caplog, scratch_org_factory):
-        org = scratch_org_factory(currently_refreshing_dataset_schema=True)
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
         mocker.patch(
             f"{PATCH_ROOT}.dataset_env",
             autospec=True,
             side_effect=Exception("Oh no!"),
         )
+        org = scratch_org_factory(currently_parsing_datasets=True)
 
         with pytest.raises(Exception, match="Oh no!"):
-            refresh_dataset_schema(org=org, user=org.owner)
+            parse_datasets(org=org, user=org.owner)
         org.refresh_from_db()
 
-        assert not org.currently_refreshing_dataset_schema
+        assert not org.currently_parsing_datasets
         assert "Oh no!" in caplog.text
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS_FAILED",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "dataset_errors": [
+                        "Unable to parse dataset schema from Org: Oh no!"
+                    ],
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
 
 
 @pytest.mark.django_db
-class TestRetrieveDataset:
-    def test_ok(self, mocker, scratch_org_factory, user_factory):
-        mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True)
-        mocker.patch(f"{PATCH_ROOT}.retrieve_and_commit_dataset", autospec=True)
+class TestCommitDatasetFromOrg:
+    def test_ok(self, mocker, scratch_org_factory, patch_dataset_env):
         scratch_org = scratch_org_factory(
             currently_retrieving_dataset=True, task__epic__project__repo_id=123
         )
+        mocker.patch(f"{PATCH_ROOT}.Dataset", autospec=True)
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
 
         commit_dataset_from_org(
-            scratch_org=scratch_org,
-            user=user_factory(),
+            org=scratch_org,
+            user=scratch_org.owner,
             commit_message="Testing dataset",
             dataset_name="Test",
-            dataset_definition={"foo": "bar"},
+            dataset_definition={"foo": ["bar"]},
         )
         scratch_org.refresh_from_db()
 
         assert not scratch_org.currently_retrieving_dataset
+        assert commit.called
 
-    def test_exception(self, mocker, caplog, scratch_org_factory, user_factory):
+    def test_exception(self, mocker, caplog, scratch_org_factory):
         mocker.patch(
-            f"{PATCH_ROOT}.get_repo_info",
+            f"{PATCH_ROOT}.dataset_env",
             autospec=True,
             side_effect=Exception("Oh no!"),
         )
@@ -1736,8 +1750,8 @@ class TestRetrieveDataset:
 
         with pytest.raises(Exception, match="Oh no!"):
             commit_dataset_from_org(
-                scratch_org=scratch_org,
-                user=user_factory(),
+                org=scratch_org,
+                user=scratch_org.owner,
                 commit_message="Testing dataset",
                 dataset_name="Test",
                 dataset_definition={"foo": "bar"},
