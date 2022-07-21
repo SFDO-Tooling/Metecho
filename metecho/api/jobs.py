@@ -13,7 +13,6 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
-from cumulusci.core.config.org_config import OrgConfig
 from cumulusci.core.datasets import Dataset
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
@@ -60,7 +59,7 @@ from .sf_org_changes import (
     get_latest_revision_numbers,
     get_valid_target_directories,
 )
-from .sf_run_flow import create_org, delete_org, get_devhub_api, run_flow
+from .sf_run_flow import create_org, delete_org, run_flow
 
 logger = logging.getLogger(__name__)
 
@@ -1181,7 +1180,6 @@ def dataset_env(org: ScratchOrg, user: User):
         repo_owner=task.root_project.repo_owner,
         repo_name=task.root_project.repo_name,
     )
-    sf = get_devhub_api(devhub_username=user.sf_username, scratch_org=org)
     with local_github_checkout(
         repo_owner=repo.owner.login,
         repo_name=repo.name,
@@ -1204,9 +1202,9 @@ def dataset_env(org: ScratchOrg, user: User):
                 "commit": task.branch_name,
             }
         )
-        org_config = OrgConfig(
-            config=org.config, name=org.org_config_name, keychain=cci.keychain
-        )
+        org_config = org.get_refreshed_org_config(keychain=cci.keychain)
+        project_config.keychain = org_config.keychain
+        sf = org_config.salesforce_client
         with get_org_schema(
             sf,
             org_config,
