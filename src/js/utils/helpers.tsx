@@ -222,20 +222,41 @@ export const getSchemaForChangeset = (
   changes: Changeset,
 ) => {
   const matchedSchema: DatasetSchema = {};
-  const unmatched: Changeset = {};
 
   for (const [objectName, fieldNames] of Object.entries(changes)) {
     if (schema[objectName]) {
       const fields = pick(schema[objectName].fields, fieldNames);
-      const unmatchedFields = without(fieldNames, ...Object.keys(fields));
-      if (unmatchedFields.length) {
-        unmatched[objectName] = unmatchedFields;
-      }
       matchedSchema[objectName] = { ...schema[objectName], fields };
-    } else {
-      unmatched[objectName] = fieldNames;
     }
   }
 
-  return { matchedSchema, unmatched };
+  return matchedSchema;
+};
+
+export const filterChangesetBySchema = (
+  schema: DatasetSchema,
+  changes: Changeset,
+) => {
+  const matchedChangeset: Changeset = {};
+  const unmatchedChangeset: Changeset = {};
+
+  for (const [objectName, fieldNames] of Object.entries(changes)) {
+    if (schema[objectName]) {
+      const matchedFields = intersection(
+        fieldNames,
+        Object.keys(schema[objectName].fields),
+      );
+      if (matchedFields.length) {
+        matchedChangeset[objectName] = matchedFields;
+      }
+      const unmatchedFields = without(fieldNames, ...matchedFields);
+      if (unmatchedFields.length) {
+        unmatchedChangeset[objectName] = unmatchedFields;
+      }
+    } else {
+      unmatchedChangeset[objectName] = fieldNames;
+    }
+  }
+
+  return { matchedChangeset, unmatchedChangeset };
 };

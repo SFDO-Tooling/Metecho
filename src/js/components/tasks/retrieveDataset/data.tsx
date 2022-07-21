@@ -6,6 +6,7 @@ import { chain, isEmpty, sortBy, toLower } from 'lodash';
 import React, { ChangeEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { EmptyIllustration } from '@/js/components/404';
 import { DatasetCommit } from '@/js/components/tasks/retrieveDataset';
 import {
   BooleanObject,
@@ -13,20 +14,19 @@ import {
 } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 import { Changeset, DatasetSchema } from '@/js/store/orgs/reducer';
-import {
-  getSchemaForChangeset,
-  mergeChangesets,
-  splitChangeset,
-} from '@/js/utils/helpers';
+import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 
 interface Props {
   schema: DatasetSchema;
+  selectedSchema: DatasetSchema;
+  outdatedChangeset: Changeset;
+  noChanges: boolean;
   inputs: DatasetCommit;
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
 }
 
-const SchemaList = ({
+export const SchemaList = ({
   type,
   heading,
   schema,
@@ -61,6 +61,7 @@ const SchemaList = ({
     .toPairs()
     .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
     .value();
+  const noSchema = isEmpty(schema);
 
   const handlePanelToggle = (groupName: string) => {
     setExpandedPanels({
@@ -70,151 +71,173 @@ const SchemaList = ({
   };
 
   return (
-    <form
-      className={classNames(
-        'slds-form',
-        'slds-size_1-of-1',
-        'slds-large-size_1-of-2',
-        'slds-p-horizontal_small',
-        'has-checkboxes',
-        className,
-      )}
+    <div
+      className={classNames('has-checkboxes', className)}
       data-form="task-retrieve-changes"
       {...props}
     >
-      <ModalCard noBodyPadding>
-        <div
-          className="slds-m-left_xx-small
-            slds-p-left_x-large
-            slds-p-right_medium"
-        >
-          <h2 className="slds-text-heading_medium slds-p-vertical_medium">
-            {heading}
-          </h2>
-          {errors ? (
-            <p className="slds-text-color_error slds-p-bottom_x-small">
-              {errors}
-            </p>
-          ) : null}
-          <div className="form-grid-three slds-p-bottom_x-small">
-            <span>
-              <strong>{t('Label')}</strong>
-            </span>
-            <span>
-              <strong>{t('Developer Name')}</strong>
-            </span>
-            <span>
-              <strong>{t('# of Records')}</strong>
-            </span>
-          </div>
-        </div>
-        {schemaPairs.map(([groupName, groupSchema], index) => {
-          const uniqueGroupName = `${type}-${groupName}`;
-          const fields = Object.keys(groupSchema.fields);
-          const fieldSchemaPairs = chain(groupSchema.fields)
-            .toPairs()
-            .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
-            .value();
-          const handleSelectThisGroup = (
-            event: ChangeEvent<HTMLInputElement>,
-            { checked }: { checked: boolean },
-          ) => handleSelectGroup?.({ [groupName]: fields }, checked);
-          let checkedChildren = 0;
-          for (const field of fields) {
-            if (checkedChanges?.[groupName]?.includes(field)) {
-              checkedChildren = checkedChildren + 1;
+      <ModalCard
+        heading={<span className="slds-m-left_xx-small">{heading}</span>}
+        noBodyPadding
+      >
+        {errors ? (
+          <p
+            className="slds-text-color_error
+              slds-m-left_xx-small
+              slds-p-left_x-large
+              slds-p-right_medium
+              slds-p-top_x-small"
+          >
+            {errors}
+          </p>
+        ) : null}
+        {noSchema ? (
+          <EmptyIllustration
+            heading={
+              type === 'all' ? t('No data found') : t('No data selected')
             }
-          }
-
-          return (
-            <Accordion key={uniqueGroupName} className="light-bordered-row">
-              <AccordionPanel
-                expanded={Boolean(expandedPanels[uniqueGroupName])}
-                key={`${uniqueGroupName}-panel`}
-                id={`${type}-group-${index}`}
-                onTogglePanel={() => handlePanelToggle(uniqueGroupName)}
-                title={groupSchema.label}
-                panelContentActions={
-                  <div className="form-grid-three">
-                    {type === 'all' ? (
-                      <Checkbox
-                        labels={{ label: groupSchema.label }}
-                        checked={checkedChildren === fields.length}
-                        indeterminate={Boolean(
-                          checkedChildren && checkedChildren !== fields.length,
-                        )}
-                        onChange={handleSelectThisGroup}
-                      />
-                    ) : (
-                      <span
-                        className="slds-text-body_regular
-                          slds-p-top_xxx-small"
-                      >
-                        {groupSchema.label}
-                      </span>
-                    )}
-                    <span
-                      className="slds-text-body_regular
-                        slds-p-top_xxx-small"
-                    >
-                      {groupName}
-                    </span>
-                    <span
-                      className="slds-text-body_regular
-                        slds-p-top_xxx-small"
-                    >
-                      {groupSchema.count}
-                    </span>
-                  </div>
+            message={
+              type === 'all'
+                ? t(
+                    'Change or remove your search term above to view additional data.',
+                  )
+                : t(
+                    'Choose Objects or Fields from the left panel to add them to this dataset.',
+                  )
+            }
+          />
+        ) : (
+          <>
+            <div
+              className="form-grid-three
+                slds-m-left_xx-small
+                slds-p-left_x-large
+                slds-p-right_medium
+                slds-p-vertical_x-small"
+            >
+              <span>
+                <strong>{t('Label')}</strong>
+              </span>
+              <span>
+                <strong>{t('Developer Name')}</strong>
+              </span>
+              <span>
+                <strong>{t('# of Records')}</strong>
+              </span>
+            </div>
+            {schemaPairs.map(([groupName, groupSchema], index) => {
+              const uniqueGroupName = `${type}-${groupName}`;
+              const fields = Object.keys(groupSchema.fields);
+              const fieldSchemaPairs = chain(groupSchema.fields)
+                .toPairs()
+                .sortBy([
+                  (pair) => pair[1].label.toLowerCase(),
+                  (pair) => pair[0],
+                ])
+                .value();
+              const handleSelectThisGroup = (
+                event: ChangeEvent<HTMLInputElement>,
+                { checked }: { checked: boolean },
+              ) => handleSelectGroup?.({ [groupName]: fields }, checked);
+              let checkedChildren = 0;
+              for (const field of fields) {
+                if (checkedChanges?.[groupName]?.includes(field)) {
+                  checkedChildren = checkedChildren + 1;
                 }
-                summary=""
-              >
-                {fieldSchemaPairs.map(([fieldName, fieldSchema]) => (
-                  <div
-                    key={`${uniqueGroupName}-${fieldName}`}
-                    className="form-grid-three"
-                  >
-                    {type === 'all' ? (
-                      <Checkbox
-                        labels={{ label: fieldSchema.label }}
-                        className="metecho-nested-checkboxes"
-                        checked={Boolean(
-                          checkedChanges?.[groupName]?.includes(fieldName),
+              }
+
+              return (
+                <Accordion key={uniqueGroupName} className="light-bordered-row">
+                  <AccordionPanel
+                    expanded={Boolean(expandedPanels[uniqueGroupName])}
+                    key={`${uniqueGroupName}-panel`}
+                    id={`${type}-group-${index}`}
+                    onTogglePanel={() => handlePanelToggle(uniqueGroupName)}
+                    title={groupSchema.label}
+                    panelContentActions={
+                      <div className="form-grid-three">
+                        {type === 'all' ? (
+                          <Checkbox
+                            labels={{ label: groupSchema.label }}
+                            checked={checkedChildren === fields.length}
+                            indeterminate={Boolean(
+                              checkedChildren &&
+                                checkedChildren !== fields.length,
+                            )}
+                            onChange={handleSelectThisGroup}
+                          />
+                        ) : (
+                          <span
+                            className="slds-text-body_regular
+                              slds-p-top_xxx-small"
+                          >
+                            {groupSchema.label}
+                          </span>
                         )}
-                        onChange={(
-                          event: ChangeEvent<HTMLInputElement>,
-                          { checked }: { checked: boolean },
-                        ) =>
-                          handleChange?.({
-                            groupName,
-                            change: fieldName,
-                            checked,
-                          })
-                        }
-                      />
-                    ) : (
-                      <span
-                        className="slds-text-body_regular
-                          slds-p-top_xxx-small
-                          metecho-nested-checkboxes"
+                        <span
+                          className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                        >
+                          {groupName}
+                        </span>
+                        <span
+                          className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                        >
+                          {groupSchema.count}
+                        </span>
+                      </div>
+                    }
+                    summary=""
+                  >
+                    {fieldSchemaPairs.map(([fieldName, fieldSchema]) => (
+                      <div
+                        key={`${uniqueGroupName}-${fieldName}`}
+                        className="form-grid-three"
                       >
-                        {fieldSchema.label}
-                      </span>
-                    )}
-                    <span
-                      className="slds-text-body_regular
-                        slds-p-top_xxx-small"
-                    >
-                      {fieldName}
-                    </span>
-                  </div>
-                ))}
-              </AccordionPanel>
-            </Accordion>
-          );
-        })}
+                        {type === 'all' ? (
+                          <Checkbox
+                            labels={{ label: fieldSchema.label }}
+                            className="metecho-nested-checkboxes"
+                            checked={Boolean(
+                              checkedChanges?.[groupName]?.includes(fieldName),
+                            )}
+                            onChange={(
+                              event: ChangeEvent<HTMLInputElement>,
+                              { checked }: { checked: boolean },
+                            ) =>
+                              handleChange?.({
+                                groupName,
+                                change: fieldName,
+                                checked,
+                              })
+                            }
+                          />
+                        ) : (
+                          <span
+                            className="slds-text-body_regular
+                              slds-p-top_xxx-small
+                              metecho-nested-checkboxes"
+                          >
+                            {fieldSchema.label}
+                          </span>
+                        )}
+                        <span
+                          className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                        >
+                          {fieldName}
+                        </span>
+                      </div>
+                    ))}
+                  </AccordionPanel>
+                </Accordion>
+              );
+            })}
+          </>
+        )}
       </ModalCard>
-    </form>
+    </div>
   );
 };
 
@@ -239,7 +262,7 @@ const RemovingList = ({
   };
 
   return (
-    <form
+    <div
       className={classNames(
         'slds-form',
         'slds-size_1-of-1',
@@ -260,7 +283,7 @@ const RemovingList = ({
             slds-p-right_medium"
         >
           <h2 className="slds-text-heading_medium slds-p-vertical_medium">
-            {t('Outdated Data To Remove')}
+            {t('Existing Data To Remove')}
           </h2>
           <p className="slds-text-color_error slds-p-bottom_x-small">
             <Trans i18nKey="outdatedSchemaWarning">
@@ -316,17 +339,20 @@ const RemovingList = ({
           })
           .value()}
       </ModalCard>
-    </form>
+    </div>
   );
 };
 
-const DataForm = ({ schema, inputs, errors, setInputs }: Props) => {
+const DataForm = ({
+  schema,
+  selectedSchema,
+  outdatedChangeset,
+  noChanges,
+  inputs,
+  errors,
+  setInputs,
+}: Props) => {
   const { t } = useTranslation();
-
-  const { matchedSchema, unmatched } = getSchemaForChangeset(
-    schema,
-    inputs.dataset_definition,
-  );
 
   const setChanges = (dataset_definition: Changeset) => {
     setInputs({ ...inputs, dataset_definition });
@@ -363,11 +389,17 @@ const DataForm = ({ schema, inputs, errors, setInputs }: Props) => {
     updateChecked(thisChange, checked);
   };
 
+  const classes =
+    'slds-form slds-size_1-of-1 slds-large-size_1-of-2 slds-p-horizontal_small';
+
   return (
     <>
-      {!isEmpty(unmatched) && <RemovingList changes={unmatched} />}
+      {!isEmpty(outdatedChangeset) && (
+        <RemovingList changes={outdatedChangeset} />
+      )}
       <div className="slds-p-around_large slds-grid slds-grid_pull-padded-small">
         <SchemaList
+          className={classes}
           type="all"
           heading={t('Data Options')}
           schema={schema}
@@ -377,9 +409,15 @@ const DataForm = ({ schema, inputs, errors, setInputs }: Props) => {
           handleChange={handleChange}
         />
         <SchemaList
+          className={classes}
           type="selected"
           heading={t('Selected Data')}
-          schema={matchedSchema}
+          schema={selectedSchema}
+          errors={
+            noChanges && !isEmpty(selectedSchema)
+              ? t('Selected data matches existing dataset.')
+              : undefined
+          }
         />
       </div>
     </>

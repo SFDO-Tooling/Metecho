@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { sortBy, toLower } from 'lodash';
+import { isEmpty, isEqual, sortBy, toLower } from 'lodash';
 import React, {
   FormEvent,
   useCallback,
@@ -13,13 +13,17 @@ import { useDispatch } from 'react-redux';
 
 import DataForm from '@/js/components/tasks/retrieveDataset/data';
 import SelectDatasetForm from '@/js/components/tasks/retrieveDataset/datasets';
-// import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
+import CommitMessageForm from '@/js/components/tasks/retrieveDataset/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
 import { refreshDatasets } from '@/js/store/orgs/actions';
 import { Changeset, Datasets, DatasetSchema } from '@/js/store/orgs/reducer';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
+import {
+  filterChangesetBySchema,
+  getSchemaForChangeset,
+} from '@/js/utils/helpers';
 
 interface Props {
   orgId: string;
@@ -55,6 +59,7 @@ const RetrieveDatasetModal = ({
   const [retrievingDataset, setRetrievingDataset] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [hasError, setHasError] = useState(false);
+  const [outdatedChangeset, setOutdatedChangeset] = useState<Changeset>({});
   const isMounted = useIsMounted();
 
   const datasetNames = Object.keys(datasets);
@@ -127,20 +132,36 @@ const RetrieveDatasetModal = ({
     const selectedDataset = inputs.dataset_name;
     const prevValue = selectedDatasetRef.current;
     if (selectedDataset !== prevValue) {
+      const def = Object.assign({}, datasets[inputs.dataset_name] ?? {});
       // @@@ Adding fake outdated fields
-      const def = datasets[inputs.dataset_name] ?? {};
-      def.foo = ['bar', 'buz'];
-      def.ActiveScratchOrg.push('this-is-new');
+      if (datasets[inputs.dataset_name]) {
+        def.foo = ['bar', 'buz'];
+        def.ActiveScratchOrg = [...def.ActiveScratchOrg, 'this-is-new'];
+      }
+      const { matchedChangeset, unmatchedChangeset } = filterChangesetBySchema(
+        schema ?? {},
+        def,
+      );
       setInputs({
         ...inputs,
-        dataset_definition: def,
+        dataset_definition: matchedChangeset,
       });
+      setOutdatedChangeset(unmatchedChangeset);
       selectedDatasetRef.current = selectedDataset;
     }
-  }, [inputs, setInputs, datasets]);
+  }, [inputs, setInputs, datasets, schema]);
 
   const hasCommitMessage = Boolean(inputs.commit_message);
   const datasetSelected = Boolean(inputs.dataset_name);
+  const hasDataSelected = !isEmpty(inputs.dataset_definition);
+  const selectedSchema = getSchemaForChangeset(
+    schema ?? {},
+    inputs.dataset_definition,
+  );
+  const noChanges = isEqual(
+    datasets[inputs.dataset_name] ?? {},
+    inputs.dataset_definition,
+  );
 
   const handleClose = () => {
     closeModal();
@@ -195,7 +216,7 @@ const RetrieveDatasetModal = ({
           label={t('Save & Next')}
           variant="brand"
           onClick={nextPage}
-          disabled={!datasetSelected || hasError}
+          disabled={!datasetSelected || !schema || hasError}
         />,
       ],
     },
@@ -205,6 +226,9 @@ const RetrieveDatasetModal = ({
       contents: (
         <DataForm
           schema={schema ?? {}}
+          selectedSchema={selectedSchema}
+          outdatedChangeset={outdatedChangeset}
+          noChanges={noChanges}
           inputs={inputs as DatasetCommit}
           errors={errors}
           setInputs={setInputs}
@@ -222,21 +246,19 @@ const RetrieveDatasetModal = ({
           label={t('Save & Next')}
           variant="brand"
           onClick={nextPage}
-          // disabled={
-          //   !(numberChangesChecked || numberIgnoredChecked) || ignoringChanges || hasError
-          // }
+          disabled={noChanges || !hasDataSelected || hasError}
         />,
       ],
     },
     {
       heading: t('Describe the dataset you are retrieving'),
       contents: (
-        // <CommitMessageForm
-        //   inputs={inputs as DatasetCommit}
-        //   errors={errors}
-        //   handleInputChange={handleInputChange}
-        // />
-        <div>This is placeholder content.</div>
+        <CommitMessageForm
+          selectedSchema={selectedSchema}
+          inputs={inputs as DatasetCommit}
+          errors={errors}
+          handleInputChange={handleInputChange}
+        />
       ),
       footer: [
         <Button

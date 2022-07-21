@@ -87,7 +87,7 @@ const SelectDatasetForm = ({
           slds-m-bottom_small"
       >
         <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
-          <p>
+          <p className="slds-m-bottom_xx-small">
             <Trans i18nKey="retrieveDatasetHelp">
               Select an existing dataset to modify, or enter a custom name to
               create a new dataset.
