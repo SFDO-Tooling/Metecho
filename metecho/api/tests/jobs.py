@@ -1574,13 +1574,12 @@ class TestParseDatasets:
             "metecho.api.model_mixins.async_to_sync",
             autospec=True,
         ).return_value
-
         project_config, *_ = patch_dataset_env
-        tmp_path = Path(project_config.repo_root)
-        folder1 = tmp_path / "datasets" / "Default"
+        repo_root = Path(project_config.repo_root)
+        folder1 = repo_root / "datasets" / "Default"
         folder1.mkdir(parents=True)
         (folder1 / "Default.extract.yml").write_text(DATASET_YAML)
-        folder2 = tmp_path / "datasets" / "MyDataset"
+        folder2 = repo_root / "datasets" / "MyDataset"
         folder2.mkdir(parents=True)
         (folder2 / "MyDataset.extract.yml").write_text(DATASET_YAML)
         org = scratch_org_factory(currently_parsing_datasets=True)
@@ -1610,19 +1609,18 @@ class TestParseDatasets:
             "metecho.api.model_mixins.async_to_sync",
             autospec=True,
         ).return_value
-
         project_config, *_ = patch_dataset_env
-        tmp_path = Path(project_config.repo_root)
-        folder1 = tmp_path / "datasets" / "Default"
+        repo_root = Path(project_config.repo_root)
+        folder1 = repo_root / "datasets" / "Default"
         folder1.mkdir(parents=True)
         (folder1 / "Default.extract.yml").write_text("INVALID CONTENT")
-        folder2 = tmp_path / "datasets" / "Empty"
+        folder2 = repo_root / "datasets" / "Empty"
         folder2.mkdir(parents=True)
-        (folder2 / "this-is-not-yaml.json").write_text("")
-        folder3 = tmp_path / "datasets" / "FooBar"
+        (folder2 / "this-is-not-yaml.json").touch()
+        folder3 = repo_root / "datasets" / "FooBar"
         folder3.mkdir(parents=True)
-        (folder3 / "WrongName.extract.yml").write_text("")
-        (tmp_path / "datasets" / "invalid-top-level-file.csv").write_text("")
+        (folder3 / "WrongName.extract.yml").touch()
+        (repo_root / "datasets" / "invalid-top-level-file.csv").touch()
         org = scratch_org_factory(currently_parsing_datasets=True)
 
         parse_datasets(org=org, user=org.owner)
