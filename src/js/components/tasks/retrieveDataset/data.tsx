@@ -1,6 +1,7 @@
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
+import Search from '@salesforce/design-system-react/components/input/search';
 import classNames from 'classnames';
 import { chain, isEmpty, sortBy, toLower } from 'lodash';
 import React, { ChangeEvent, useState } from 'react';
@@ -14,7 +15,11 @@ import {
 } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 import { Changeset, DatasetSchema } from '@/js/store/orgs/reducer';
-import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
+import {
+  filterSchema,
+  mergeChangesets,
+  splitChangeset,
+} from '@/js/utils/helpers';
 
 interface Props {
   schema: DatasetSchema;
@@ -56,8 +61,13 @@ export const SchemaList = ({
 }) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
+  const [search, setSearch] = useState<string>('');
 
-  const schemaPairs = chain(schema)
+  const hasSearch = Boolean(search);
+
+  const schemaPairs = chain(
+    hasSearch ? filterSchema(schema, search.toLowerCase()) : schema,
+  )
     .toPairs()
     .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
     .value();
@@ -70,6 +80,33 @@ export const SchemaList = ({
     });
   };
 
+  const handleSearch = (
+    event: ChangeEvent<HTMLInputElement>,
+    { value }: { value: string },
+  ) => {
+    setSearch(value.trim());
+  };
+
+  const clearSearch = () => {
+    setSearch('');
+  };
+
+  const searchLabel = t('Search for products or fields');
+  let emptyHeading =
+    type === 'all' ? t('No data available to retrieve') : t('No data selected');
+  let emptyMsg =
+    type === 'all'
+      ? null
+      : t(
+          'Choose objects or fields from the left panel to add them to this dataset.',
+        );
+  if (hasSearch) {
+    emptyHeading = t('No data found');
+    emptyMsg = t(
+      'Change or remove your search term above to view additional data.',
+    );
+  }
+
   return (
     <div
       className={classNames('has-checkboxes', className)}
@@ -77,7 +114,20 @@ export const SchemaList = ({
       {...props}
     >
       <ModalCard
-        heading={<span className="slds-m-left_xx-small">{heading}</span>}
+        heading={
+          <div className="slds-m-left_xx-small">
+            <Search
+              className="slds-text-body_regular slds-m-bottom_small"
+              assistiveText={{ label: searchLabel }}
+              placeholder={searchLabel}
+              value={search}
+              clearable={hasSearch}
+              onChange={handleSearch}
+              onClear={clearSearch}
+            />
+            <p>{heading}</p>
+          </div>
+        }
         noBodyPadding
       >
         {errors ? (
@@ -92,20 +142,7 @@ export const SchemaList = ({
           </p>
         ) : null}
         {noSchema ? (
-          <EmptyIllustration
-            heading={
-              type === 'all' ? t('No data found') : t('No data selected')
-            }
-            message={
-              type === 'all'
-                ? t(
-                    'Change or remove your search term above to view additional data.',
-                  )
-                : t(
-                    'Choose Objects or Fields from the left panel to add them to this dataset.',
-                  )
-            }
-          />
+          <EmptyIllustration heading={emptyHeading} message={emptyMsg} />
         ) : (
           <>
             <div
@@ -292,9 +329,9 @@ const RemovingList = ({
             slds-p-vertical_x-small"
         >
           <Trans i18nKey="outdatedSchemaWarning">
-            The Dataset you selected contains Fields that no longer exist in
-            this Dev Org. If you continue, the following Data will be removed
-            from this Dataset.
+            The dataset you selected contains fields that no longer exist in
+            this Dev Org. If you continue, the following data will be removed
+            from this dataset.
           </Trans>
         </p>
         {chain(Object.keys(changes))

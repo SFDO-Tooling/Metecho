@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import ResyncIssuesButton from '@/js/components/githubIssues/resyncIssuesButton';
-import Search from '@/js/components/githubIssues/search';
+import SearchIssues from '@/js/components/githubIssues/search';
 import {
   ExternalLink,
   getEpicStatus,
@@ -278,7 +278,7 @@ const SelectIssueModal = ({
             slds-p-right_medium
             slds-p-bottom_large"
         >
-          <Search
+          <SearchIssues
             searchIssues={searchIssues}
             count={count + countAttached}
             total={issueCount}

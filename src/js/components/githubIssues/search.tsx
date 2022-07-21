@@ -54,7 +54,6 @@ const SearchIssues = ({
         assistiveText={{ label }}
         placeholder={label}
         inlineHelpText={hasSearch ? `${countMsg} ${totalMsg}` : totalMsg}
-        name="search"
         value={searchterm}
         clearable
         onChange={handleSearchterm}
