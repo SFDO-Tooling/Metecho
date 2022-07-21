@@ -31,6 +31,7 @@ const CreateOrgForm = ({
 
   return (
     <form className="slds-form slds-p-around_large">
+      <button type="submit" style={{ display: 'none' }} disabled aria-hidden />
       <Textarea
         id="create-org-description"
         label={t('Description')}

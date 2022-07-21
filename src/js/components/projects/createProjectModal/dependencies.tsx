@@ -39,6 +39,7 @@ const SelectProjectDependenciesForm = ({
 
   return (
     <form className="slds-form slds-p-around_large slds-is-relative">
+      <button type="submit" style={{ display: 'none' }} disabled aria-hidden />
       <p className="slds-m-bottom_medium">
         <Trans i18nKey="projectDependenciesHelp">
           Select any dependencies for your new Project.

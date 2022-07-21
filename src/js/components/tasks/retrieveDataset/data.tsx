@@ -3,8 +3,8 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Search from '@salesforce/design-system-react/components/input/search';
 import classNames from 'classnames';
-import { chain, isEmpty, sortBy, toLower } from 'lodash';
-import React, { ChangeEvent, useState } from 'react';
+import { chain, debounce, isEmpty, sortBy, toLower } from 'lodash';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
@@ -30,6 +30,8 @@ interface Props {
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
 }
+
+const SCHEMA_SIZE_LIMIT = 50;
 
 export const SchemaList = ({
   type,
@@ -61,17 +63,22 @@ export const SchemaList = ({
 }) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
+  const [filteredSchema, setFilteredSchema] = useState(schema);
   const [search, setSearch] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
 
   const hasSearch = Boolean(search);
 
-  const schemaPairs = chain(
-    hasSearch ? filterSchema(schema, search.toLowerCase()) : schema,
-  )
+  let truncated = false;
+  let schemaPairs = chain(filteredSchema)
     .toPairs()
     .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
     .value();
-  const noSchema = isEmpty(schema);
+  const noSchema = isEmpty(filteredSchema);
+  if (schemaPairs.length > SCHEMA_SIZE_LIMIT) {
+    schemaPairs = schemaPairs.slice(0, SCHEMA_SIZE_LIMIT);
+    truncated = true;
+  }
 
   const handlePanelToggle = (groupName: string) => {
     setExpandedPanels({
@@ -80,15 +87,29 @@ export const SchemaList = ({
     });
   };
 
+  // Update schema when search term changes
+  useEffect(() => {
+    setFilteredSchema(
+      search ? filterSchema(schema, search.toLowerCase()) : schema,
+    );
+  }, [schema, search]);
+
+  const debouncedSearch = useMemo(() => debounce(setSearch, 150), [setSearch]);
+
+  // Debounce actual filtering
+  useEffect(() => {
+    debouncedSearch(searchValue);
+  }, [debouncedSearch, searchValue]);
+
   const handleSearch = (
     event: ChangeEvent<HTMLInputElement>,
     { value }: { value: string },
   ) => {
-    setSearch(value.trim());
+    setSearchValue(value);
   };
 
   const clearSearch = () => {
-    setSearch('');
+    setSearchValue('');
   };
 
   const searchLabel = t('Search for products or fields');
@@ -107,6 +128,9 @@ export const SchemaList = ({
     );
   }
 
+  const paddingClasses =
+    'slds-m-left_xx-small slds-p-horizontal_medium slds-p-right_medium';
+
   return (
     <div
       className={classNames('has-checkboxes', className)}
@@ -120,7 +144,7 @@ export const SchemaList = ({
               className="slds-text-body_regular slds-m-bottom_small"
               assistiveText={{ label: searchLabel }}
               placeholder={searchLabel}
-              value={search}
+              value={searchValue}
               clearable={hasSearch}
               onChange={handleSearch}
               onClear={clearSearch}
@@ -132,11 +156,11 @@ export const SchemaList = ({
       >
         {errors ? (
           <p
-            className="slds-text-color_error
-              slds-m-left_xx-small
-              slds-p-left_x-large
-              slds-p-right_medium
-              slds-p-top_x-small"
+            className={classNames(
+              'slds-text-color_error',
+              'slds-p-top_x-small',
+              paddingClasses,
+            )}
           >
             {errors}
           </p>
@@ -271,6 +295,21 @@ export const SchemaList = ({
                 </Accordion>
               );
             })}
+            {truncated ? (
+              <>
+                <hr className="slds-m-vertical_none" />
+                <p
+                  className={classNames(
+                    'slds-p-vertical_x-small',
+                    paddingClasses,
+                  )}
+                >
+                  {t(
+                    'Only the first 50 objects are displayed. To narrow the list, enter a search term above.',
+                  )}
+                </p>
+              </>
+            ) : null}
           </>
         )}
       </ModalCard>
@@ -324,8 +363,7 @@ const RemovingList = ({
         <p
           className="slds-text-color_error
             slds-m-left_xx-small
-            slds-p-left_x-large
-            slds-p-right_medium
+            slds-p-horizontal_medium
             slds-p-vertical_x-small"
         >
           <Trans i18nKey="outdatedSchemaWarning">

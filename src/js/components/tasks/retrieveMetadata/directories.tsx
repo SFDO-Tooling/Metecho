@@ -77,6 +77,7 @@ const TargetDirectoriesForm = ({
 
   return (
     <form className="slds-form slds-p-around_large">
+      <button type="submit" style={{ display: 'none' }} disabled aria-hidden />
       <ModalCard>
         {Array.from(orderedDirectories, ([key, dirs], idx) => {
           const hasErrors = Boolean(errors.target_directory);
