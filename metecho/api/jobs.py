@@ -1314,7 +1314,8 @@ def commit_dataset_from_org(
                     repo, author={"name": user.username, "email": user.email}
                 )
                 commit(
-                    project_config.repo_root,
+                    str(dataset.path),
+                    repo_dir=str(dataset.path.relative_to(project_config.repo_root)),
                     branch=task.branch_name,
                     commit_message=commit_message,
                 )
