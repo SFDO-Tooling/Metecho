@@ -276,23 +276,27 @@ const RemovingList = ({
       style={{ height: 'unset' }}
       {...props}
     >
-      <ModalCard noBodyPadding>
-        <div
-          className="slds-m-left_xx-small
-            slds-p-left_x-large
-            slds-p-right_medium"
-        >
-          <h2 className="slds-text-heading_medium slds-p-vertical_medium">
+      <ModalCard
+        heading={
+          <span className="slds-m-left_xx-small">
             {t('Existing Data To Remove')}
-          </h2>
-          <p className="slds-text-color_error slds-p-bottom_x-small">
-            <Trans i18nKey="outdatedSchemaWarning">
-              The Dataset you selected contains Fields that no longer exist in
-              this Dev Org. If you continue, the following Data will be removed
-              from this Dataset.
-            </Trans>
-          </p>
-        </div>
+          </span>
+        }
+        noBodyPadding
+      >
+        <p
+          className="slds-text-color_error
+            slds-m-left_xx-small
+            slds-p-left_x-large
+            slds-p-right_medium
+            slds-p-vertical_x-small"
+        >
+          <Trans i18nKey="outdatedSchemaWarning">
+            The Dataset you selected contains Fields that no longer exist in
+            this Dev Org. If you continue, the following Data will be removed
+            from this Dataset.
+          </Trans>
+        </p>
         {chain(Object.keys(changes))
           .sortBy(toLower)
           .map((groupName, index) => {
