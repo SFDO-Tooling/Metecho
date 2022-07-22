@@ -1,6 +1,6 @@
 {
   "404": "404",
-  "# of Records": "# of Records",
+  "Records": "Records",
   "A Task was successfully created.": "A Task was successfully created.",
   "About {{title}}": "About {{title}}",
   "Account & connection info": "Account & connection info",
@@ -235,7 +235,7 @@
   "Notify Assigned Developer by Email": "Notify Assigned Developer by Email",
   "Notify Assigned Tester by Email": "Notify Assigned Tester by Email",
   "Notify {{username}} by email": "Notify {{username}} by email",
-  "Only the first 50 objects are displayed. To narrow the list, enter a search term above.": "Only the first 50 objects are displayed. To narrow the list, enter a search term above.",
+  "Only the first {{limit}} objects are displayed. To narrow the list, enter a search term above.": "Only the first {{limit}} objects are displayed. To narrow the list, enter a search term above.",
   "Optional Configuration Directories": "Optional Configuration Directories",
   "Optional description of this Project": "Optional description of this Project",
   "Optional notes about this Scratch Org": "Optional notes about this Scratch Org",

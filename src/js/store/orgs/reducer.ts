@@ -46,6 +46,12 @@ export interface Datasets {
   // Changeset `value` is a list of API names of DatasetFields
 }
 
+export interface DatasetPairsObject extends Omit<DatasetObject, 'fields'> {
+  fields: [string, DatasetField][];
+}
+
+export type DatasetPairs = [string, DatasetPairsObject][];
+
 export interface MinimalOrg {
   id: string;
   task: string | null;
