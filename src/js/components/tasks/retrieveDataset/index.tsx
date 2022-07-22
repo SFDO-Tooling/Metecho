@@ -23,6 +23,7 @@ import { OBJECT_TYPES } from '@/js/utils/constants';
 import {
   filterChangesetBySchema,
   getSchemaForChangeset,
+  sortChangesetFields,
 } from '@/js/utils/helpers';
 
 interface Props {
@@ -158,8 +159,8 @@ const RetrieveDatasetModal = ({
     inputs.dataset_definition,
   );
   const noChanges = isEqual(
-    datasets[inputs.dataset_name] ?? {},
-    inputs.dataset_definition,
+    sortChangesetFields(datasets[inputs.dataset_name] ?? {}),
+    sortChangesetFields(inputs.dataset_definition),
   );
 
   const handleClose = () => {

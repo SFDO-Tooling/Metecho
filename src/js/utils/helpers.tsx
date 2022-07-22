@@ -4,9 +4,11 @@ import {
   cloneDeep,
   intersection,
   isEmpty,
+  mapValues,
   mergeWith,
   pick,
   pickBy,
+  sortBy,
   union,
   without,
 } from 'lodash';
@@ -321,3 +323,6 @@ export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
         ] as [string, DatasetPairsObject],
     )
     .value();
+
+export const sortChangesetFields = (changes: Changeset): Changeset =>
+  mapValues(changes, (fields) => sortBy(fields));

@@ -42,8 +42,10 @@ interface Props {
 const SCHEMA_SIZE_LIMIT = 50;
 
 const SearchForm = ({
+  truncatedMsg,
   setSearch,
 }: {
+  truncatedMsg: string | null;
   setSearch: Dispatch<SetStateAction<string>>;
 }) => {
   const { t } = useTranslation();
@@ -64,13 +66,14 @@ const SearchForm = ({
     setSearch('');
   };
 
-  const searchLabel = t('Search for products or fields');
+  const searchLabel = t('Search for objects or fields');
 
   return (
     <Search
       className="slds-text-body_regular slds-m-bottom_small"
       assistiveText={{ label: searchLabel }}
       placeholder={searchLabel}
+      inlineHelpText={truncatedMsg}
       value={searchValue}
       clearable={Boolean(searchValue)}
       onChange={handleSearch}
@@ -112,12 +115,15 @@ export const SchemaList = ({
   const [filteredSchema, setFilteredSchema] = useState(schema);
   const [search, setSearch] = useState<string>('');
 
-  let truncated = false;
+  let truncatedMsg = null;
   let sortedSchema = sortSchema(filteredSchema);
   const noSchema = isEmpty(filteredSchema);
   if (sortedSchema.length > SCHEMA_SIZE_LIMIT) {
     sortedSchema = sortedSchema.slice(0, SCHEMA_SIZE_LIMIT);
-    truncated = true;
+    truncatedMsg = t(
+      'Only displaying the first {{limit}} objects. Enter a term above to search the full list.',
+      { limit: SCHEMA_SIZE_LIMIT },
+    );
   }
 
   const handlePanelToggle = (groupName: string) => {
@@ -161,7 +167,7 @@ export const SchemaList = ({
       <ModalCard
         heading={
           <div className="slds-m-left_xx-small">
-            <SearchForm setSearch={setSearch} />
+            <SearchForm truncatedMsg={truncatedMsg} setSearch={setSearch} />
             <p>{heading}</p>
           </div>
         }
@@ -307,7 +313,7 @@ export const SchemaList = ({
                   </Accordion>
                 );
               })}
-              {truncated ? (
+              {truncatedMsg ? (
                 <>
                   <hr className="slds-m-vertical_none" />
                   <p
@@ -316,10 +322,7 @@ export const SchemaList = ({
                       paddingClasses,
                     )}
                   >
-                    {t(
-                      'Only the first {{limit}} objects are displayed. To narrow the list, enter a search term above.',
-                      { limit: SCHEMA_SIZE_LIMIT },
-                    )}
+                    {truncatedMsg}
                   </p>
                 </>
               ) : null}
