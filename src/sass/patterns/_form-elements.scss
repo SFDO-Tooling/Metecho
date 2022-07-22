@@ -13,7 +13,27 @@
 // @@@
 .form-grid-three {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  gap: $spacing-x-small;
+  grid-template-columns: 43% 43% 1fr;
+
+  .slds-accordion__content & {
+    margin-left: $square-icon-x-small-boundary;
+  }
+}
+
+.metecho-nested-checkboxes-2 {
+  padding-left: $spacing-large;
+
+  // allow multi-line checkbox labels to line up on left
+  .slds-checkbox__label {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+  }
+
+  // vertically align faux checkbox with with label
+  .slds-checkbox_faux {
+    margin-top: 0.35rem;
+  }
 }
 
 [data-form='task-retrieve-changes'] {

@@ -198,7 +198,7 @@ export const SchemaList = ({
                         {type === 'all' ? (
                           <Checkbox
                             labels={{ label: fieldSchema.label }}
-                            className="metecho-nested-checkboxes"
+                            className="metecho-nested-checkboxes-2"
                             checked={Boolean(
                               checkedChanges?.[groupName]?.includes(fieldName),
                             )}
@@ -217,7 +217,7 @@ export const SchemaList = ({
                           <span
                             className="slds-text-body_regular
                               slds-p-top_xxx-small
-                              metecho-nested-checkboxes"
+                              metecho-nested-items"
                           >
                             {fieldSchema.label}
                           </span>
