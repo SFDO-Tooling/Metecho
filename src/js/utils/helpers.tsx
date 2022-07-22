@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import {
+  chain,
   cloneDeep,
   intersection,
   isEmpty,
@@ -14,7 +15,13 @@ import { Trans } from 'react-i18next';
 
 import TourPopover from '@/js/components/tour/popover';
 import { Epic } from '@/js/store/epics/reducer';
-import { Changeset, DatasetSchema, Org } from '@/js/store/orgs/reducer';
+import {
+  Changeset,
+  DatasetPairs,
+  DatasetPairsObject,
+  DatasetSchema,
+  Org,
+} from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import {
   EPIC_STATUSES,
@@ -292,3 +299,25 @@ export const filterSchema = (schema: DatasetSchema, search: string) => {
 
   return filteredSchema;
 };
+
+export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
+  chain(schema)
+    .toPairs()
+    .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
+    .map(
+      ([key, value]) =>
+        [
+          key,
+          {
+            ...value,
+            fields: chain(value.fields)
+              .toPairs()
+              .sortBy([
+                (pair) => pair[1].label.toLowerCase(),
+                (pair) => pair[0],
+              ])
+              .value(),
+          },
+        ] as [string, DatasetPairsObject],
+    )
+    .value();
