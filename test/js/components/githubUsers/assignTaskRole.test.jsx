@@ -108,6 +108,10 @@ describe('AssignTaskRole', () => {
     fireEvent.change(input, { target: { value: 'nope' } });
 
     expect(getAllByText('No users found.')).toHaveLength(2);
+
+    fireEvent.click(getByText('Clear'));
+
+    expect(queryByText('No users found.')).toBeNull();
   });
 
   test('closes on Cancel click', () => {

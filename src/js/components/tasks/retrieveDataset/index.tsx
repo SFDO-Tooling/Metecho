@@ -97,9 +97,9 @@ const RetrieveDatasetModal = ({
     /* istanbul ignore else */
     if (isMounted.current) {
       setRetrievingDataset(false);
-      if (fieldErrors.dataset) {
+      if (fieldErrors.dataset_name) {
         setPageIndex(0);
-      } else if (fieldErrors.changes) {
+      } else if (fieldErrors.dataset_definition) {
         setPageIndex(1);
       } else if (fieldErrors.commit_message) {
         setPageIndex(2);
@@ -139,7 +139,7 @@ const RetrieveDatasetModal = ({
         def.foo = ['bar', 'buz'];
       }
       const { matchedChangeset, unmatchedChangeset } = filterChangesetBySchema(
-        schema ?? {},
+        schema ?? /* istanbul ignore next */ {},
         def,
       );
       setInputs({

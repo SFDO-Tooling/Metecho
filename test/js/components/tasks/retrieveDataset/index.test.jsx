@@ -4,12 +4,16 @@ import { MemoryRouter } from 'react-router-dom';
 
 import RetrieveDatasetModal from '@/js/components/tasks/retrieveDataset';
 import { createObject } from '@/js/store/actions';
-import { refreshDatasets } from '@/js/store/tasks/actions';
+import { refreshDatasets } from '@/js/store/orgs/actions';
 
+import {
+  sampleDatasets,
+  sampleDatasetSchema,
+} from '../../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from '../../../utils';
 
 jest.mock('@/js/store/actions');
-jest.mock('@/js/store/tasks/actions');
+jest.mock('@/js/store/orgs/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
@@ -23,18 +27,11 @@ afterEach(() => {
   refreshDatasets.mockClear();
 });
 
-// const defaultChangeset = {
-//   Foo: ['Bar'],
-//   Buz: ['Baz', 'Bing'],
-// };
-
-const defaultDatasets = { Default: [], 'Another Dataset': [] };
-
 const defaultProps = {
-  projectId: 'project-id',
-  taskId: 'task-id',
   orgId: 'org-id',
-  datasets: defaultDatasets,
+  datasets: sampleDatasets,
+  datasetErrors: [],
+  schema: sampleDatasetSchema,
   fetchingDatasets: false,
 };
 
@@ -76,6 +73,7 @@ describe('<RetrieveDatasetModal/>', () => {
     beforeEach(() => {
       setup({
         datasets: {},
+        schema: undefined,
       });
     });
 
@@ -91,6 +89,17 @@ describe('<RetrieveDatasetModal/>', () => {
       });
 
       expect(getByText('Syncing Datasets…')).toBeVisible();
+    });
+  });
+
+  describe('has errors', () => {
+    test('displays errors', () => {
+      const { getByText } = setup({
+        datasetErrors: ['this error', 'that error'],
+      });
+
+      expect(getByText('this error')).toBeVisible();
+      expect(getByText('that error')).toBeVisible();
     });
   });
 
@@ -118,13 +127,13 @@ describe('<RetrieveDatasetModal/>', () => {
       fireEvent.click(getByLabelText('Default'));
       fireEvent.click(getByText('Save & Next'));
 
-      // const selectAll = getByLabelText('All Changes');
-      // fireEvent.click(selectAll);
+      const checkbox = getByLabelText('Apex Class');
+      fireEvent.click(checkbox);
       // Click forward to the commit-message modal:
       fireEvent.click(getByText('Save & Next'));
 
-      // const commitInput = getByLabelText('*Commit Message', { exact: false });
-      // fireEvent.change(commitInput, { target: { value: 'My Commit' } });
+      const commitInput = getByLabelText('*Commit Message', { exact: false });
+      fireEvent.change(commitInput, { target: { value: 'My Commit' } });
       const submit = getByText('Retrieve Selected Data');
       fireEvent.click(submit);
 
@@ -133,12 +142,15 @@ describe('<RetrieveDatasetModal/>', () => {
 
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
-        objectType: 'scratch_org_commit',
-        url: window.api_urls.scratch_org_commit('org-id'),
+        objectType: 'scratch_org_commit_dataset',
+        url: window.api_urls.scratch_org_commit_dataset('org-id'),
         data: {
-          dataset: 'Default',
-          commit_message: '',
-          changes: {},
+          dataset_name: 'Default',
+          commit_message: 'My Commit',
+          dataset_definition: {
+            ...sampleDatasets.Default,
+            ApexClass: ['ApiVersion'],
+          },
         },
         hasForm: true,
         shouldSubscribeToObject: false,
@@ -148,9 +160,9 @@ describe('<RetrieveDatasetModal/>', () => {
 
   describe('form error', () => {
     test.each([
-      ['dataset', 'Select the dataset to create or modify', true],
-      ['changes', 'Select data to retrieve', false],
-      ['commit_message', 'Describe the dataset you are retrieving', false],
+      ['dataset_name', 'Select the dataset to create or modify', true],
+      ['dataset_definition', 'Select data to retrieve', true],
+      ['commit_message', 'Describe the dataset you are retrieving', true],
       ['foobar', 'Describe the dataset you are retrieving', false],
     ])(
       'navigates to correct page to show error: %s',
@@ -170,12 +182,12 @@ describe('<RetrieveDatasetModal/>', () => {
         // Click forward to the select-changes modal:
         fireEvent.click(getByLabelText('Default'));
         fireEvent.click(getByText('Save & Next'));
-        // const selectAll = getByLabelText('All Changes');
-        // fireEvent.click(selectAll);
+        const checkbox = getByLabelText('Apex Class');
+        fireEvent.click(checkbox);
         // Click forward to the commit-message modal:
         fireEvent.click(getByText('Save & Next'));
-        // const commitInput = getByLabelText('*Commit Message', { exact: false });
-        // fireEvent.change(commitInput, { target: { value: 'My Commit' } });
+        const commitInput = getByLabelText('*Commit Message', { exact: false });
+        fireEvent.change(commitInput, { target: { value: 'My Commit' } });
         const submit = getByText('Retrieve Selected Data');
         fireEvent.click(submit);
 
@@ -193,184 +205,121 @@ describe('<RetrieveDatasetModal/>', () => {
     );
   });
 
-  // describe('select changes', () => {
-  //   let getters, selectAll, selectAllIgnored, group1, group2, inputs;
+  describe('select changes', () => {
+    let getters, group1, group2, inputs;
 
-  //   beforeEach(() => {
-  //     getters = setup();
-  //     const { getByLabelText, getByText } = getters;
-  //     fireEvent.click(getByText('Save & Next'));
-  //     selectAll = getByLabelText('All Changes');
-  //     selectAllIgnored = getByLabelText('All Ignored Changes');
-  //     group1 = getByLabelText('Buz');
-  //     group2 = getByLabelText('Bang');
-  //     inputs = [
-  //       getByLabelText('Bar'),
-  //       getByLabelText('Baz'),
-  //       getByLabelText('Bing'),
-  //       getByLabelText('Bazinga'),
-  //     ];
-  //   });
+    beforeEach(() => {
+      getters = setup();
+      const { getByLabelText, getByText } = getters;
+      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByText('Save & Next'));
+      group1 = getByLabelText('Account');
+      group2 = getByLabelText('Apex Class');
+      inputs = [
+        getByLabelText('Foo Bar'),
+        getByLabelText('Buz Baz'),
+        getByLabelText('Api Version'),
+      ];
+    });
 
-  //   describe('select-all/none', () => {
-  //     test('selects/deselects all items', () => {
-  //       fireEvent.click(selectAll);
+    describe('no selected items', () => {
+      it('displays empty message', () => {
+        fireEvent.click(group1);
 
-  //       expect(inputs[0].checked).toBe(true);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(true);
-  //       expect(inputs[3].checked).toBe(false);
+        expect(getters.getByText('No data selected')).toBeVisible();
+      });
+    });
 
-  //       fireEvent.click(selectAllIgnored);
+    describe('select/deselect-group', () => {
+      test('selects/deselects all items in group', () => {
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(false);
 
-  //       expect(inputs[0].checked).toBe(true);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(true);
-  //       expect(inputs[3].checked).toBe(true);
+        fireEvent.click(group1);
 
-  //       fireEvent.click(selectAll);
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(false);
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(false);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(true);
+        fireEvent.click(group2);
 
-  //       fireEvent.click(selectAllIgnored);
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(true);
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(false);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(false);
-  //     });
-  //   });
+        fireEvent.click(group1);
 
-  //   describe('select/deselect-group', () => {
-  //     test('selects/deselects all items in group', () => {
-  //       fireEvent.click(group1);
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(true);
+      });
+    });
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(true);
-  //       expect(inputs[3].checked).toBe(false);
+    describe('select/deselect-item', () => {
+      test('selects/deselects item', () => {
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(false);
 
-  //       fireEvent.click(group2);
+        fireEvent.click(inputs[1]);
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(true);
-  //       expect(inputs[3].checked).toBe(true);
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(false);
 
-  //       fireEvent.click(group1);
+        fireEvent.click(inputs[2]);
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(false);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(true);
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(true);
+      });
+    });
 
-  //       fireEvent.click(group2);
+    describe('accordion panel click', () => {
+      test('expands/collapses', () => {
+        const { baseElement, getByTitle } = getters;
+        const panels = baseElement.querySelectorAll('.slds-accordion__content');
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(false);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(false);
-  //     });
-  //   });
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
 
-  //   describe('select/deselect-item', () => {
-  //     test('selects/deselects item', () => {
-  //       fireEvent.click(inputs[1]);
+        fireEvent.click(getByTitle('Apex Class'));
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(false);
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'false');
 
-  //       fireEvent.click(inputs[2]);
+        fireEvent.click(getByTitle('Apex Class'));
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(true);
-  //       expect(inputs[3].checked).toBe(false);
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+      });
+    });
+  });
 
-  //       fireEvent.click(inputs[3]);
+  describe('commit message', () => {
+    let getters;
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(true);
-  //       expect(inputs[3].checked).toBe(true);
+    beforeEach(() => {
+      getters = setup();
+      const { getByLabelText, getByText } = getters;
+      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByText('Save & Next'));
+      fireEvent.click(getByLabelText('Apex Class'));
+      fireEvent.click(getByText('Save & Next'));
+    });
 
-  //       fireEvent.click(inputs[2]);
+    describe('accordion panel click', () => {
+      test('expands/collapses', () => {
+        const { baseElement, getByTitle } = getters;
+        const content = baseElement.querySelector('.slds-accordion__content');
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(true);
+        expect(content).toHaveAttribute('aria-hidden', 'true');
 
-  //       fireEvent.click(inputs[3]);
+        fireEvent.click(getByTitle('Account'));
 
-  //       expect(inputs[0].checked).toBe(false);
-  //       expect(inputs[1].checked).toBe(true);
-  //       expect(inputs[2].checked).toBe(false);
-  //       expect(inputs[3].checked).toBe(false);
-  //     });
-  //   });
-
-  //   describe('accordion panel click', () => {
-  //     test('expands/collapses', () => {
-  //       const { baseElement, getByTitle } = getters;
-  //       const panels = baseElement.querySelectorAll('.slds-accordion__content');
-
-  //       expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[3]).toHaveAttribute('aria-hidden', 'true');
-
-  //       fireEvent.click(getByTitle('Buz'));
-
-  //       expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
-  //       expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[3]).toHaveAttribute('aria-hidden', 'true');
-
-  //       fireEvent.click(getByTitle('Bang'));
-
-  //       expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
-  //       expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
-
-  //       fireEvent.click(getByTitle('All Ignored Changes'));
-
-  //       expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
-  //       expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
-  //       expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
-  //       expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
-  //     });
-  //   });
-  // });
-
-  // describe('commit message', () => {
-  //   let getters;
-
-  //   beforeEach(() => {
-  //     getters = setup();
-  //     const { getByLabelText, getByText } = getters;
-  //     fireEvent.click(getByText('Save & Next'));
-  //     fireEvent.click(getByLabelText('All Changes'));
-  //     fireEvent.click(getByText('Save & Next'));
-  //   });
-
-  //   describe('accordion panel click', () => {
-  //     test('expands/collapses', () => {
-  //       const { baseElement, getByTitle } = getters;
-  //       const content = baseElement.querySelector('.slds-accordion__content');
-
-  //       expect(content).toHaveAttribute('aria-hidden', 'true');
-
-  //       fireEvent.click(getByTitle('Buz'));
-
-  //       expect(content).toHaveAttribute('aria-hidden', 'false');
-  //     });
-  //   });
-  // });
+        expect(content).toHaveAttribute('aria-hidden', 'false');
+      });
+    });
+  });
 });

@@ -257,18 +257,21 @@ const reducer = (
     case 'REFRESH_DATASETS_REQUESTED':
     case 'REFRESH_DATASETS_REJECTED': {
       const orgId = action.payload;
-      const existingOrg = orgs.orgs[orgId] ?? {};
-      return {
-        ...orgs,
-        orgs: {
-          ...orgs.orgs,
-          [orgId]: {
-            ...existingOrg,
-            currently_parsing_datasets:
-              action.type === 'REFRESH_DATASETS_REQUESTED',
+      const existingOrg = orgs.orgs[orgId];
+      if (existingOrg) {
+        return {
+          ...orgs,
+          orgs: {
+            ...orgs.orgs,
+            [orgId]: {
+              ...existingOrg,
+              currently_parsing_datasets:
+                action.type === 'REFRESH_DATASETS_REQUESTED',
+            },
           },
-        },
-      };
+        };
+      }
+      return orgs;
     }
     case 'DELETE_OBJECT_SUCCEEDED': {
       const { objectType, object }: { objectType?: ObjectTypes; object: Org } =

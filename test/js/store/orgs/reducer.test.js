@@ -257,7 +257,54 @@ describe('reducer', () => {
           id: 'org-id',
           task: 'task-1',
           org_type: 'Dev',
-          currently_retrieving_metadata: true,
+          currently_retrieving_metadata: false,
+          currently_retrieving_dataset: false,
+        };
+        const expected = {
+          ...defaultState,
+          orgs: {
+            [org.id]: { ...org, currently_retrieving_metadata: true },
+          },
+        };
+        const actual = reducer(
+          {
+            ...defaultState,
+            orgs: {
+              [org.id]: org,
+            },
+          },
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              object: org,
+              objectType: 'scratch_org_commit_metadata',
+            },
+          },
+        );
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('ignores if no object', () => {
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'scratch_org_commit_metadata',
+          },
+        });
+
+        expect(actual).toEqual(defaultState);
+      });
+    });
+
+    describe('OBJECT_TYPES.COMMIT_DATASET', () => {
+      test('sets currently_retrieving_dataset: true', () => {
+        const org = {
+          id: 'org-id',
+          task: 'task-1',
+          org_type: 'Dev',
+          currently_retrieving_metadata: false,
+          currently_retrieving_dataset: true,
         };
         const expected = {
           ...defaultState,
@@ -269,35 +316,24 @@ describe('reducer', () => {
           type: 'CREATE_OBJECT_SUCCEEDED',
           payload: {
             object: org,
-            objectType: 'scratch_org_commit',
+            objectType: 'scratch_org_commit_dataset',
           },
         });
 
         expect(actual).toEqual(expected);
       });
 
-      test('ignores if no object', () => {
+      test('ignores if unknown objectType', () => {
         const actual = reducer(defaultState, {
           type: 'CREATE_OBJECT_SUCCEEDED',
           payload: {
-            objectType: 'scratch_org_commit',
+            object: { id: 'org-id' },
+            objectType: 'foobar',
           },
         });
 
         expect(actual).toEqual(defaultState);
       });
-    });
-
-    test('ignores if objectType unknown', () => {
-      const actual = reducer(defaultState, {
-        type: 'CREATE_OBJECT_SUCCEEDED',
-        payload: {
-          object: {},
-          objectType: 'other-object',
-        },
-      });
-
-      expect(actual).toEqual(defaultState);
     });
   });
 
@@ -638,6 +674,75 @@ describe('reducer', () => {
       });
 
       expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_DATASETS_REQUESTED', () => {
+    test('sets currently_parsing_datasets: true', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+        currently_parsing_datasets: false,
+      };
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
+        },
+      };
+      const changedOrg = { ...org, currently_parsing_datasets: true };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [changedOrg.id]: changedOrg,
+        },
+      };
+      const actual = reducer(initial, {
+        type: 'REFRESH_DATASETS_REQUESTED',
+        payload: org.id,
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_DATASETS_REJECTED', () => {
+    test('sets currently_parsing_datasets: false', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+        currently_parsing_datasets: true,
+      };
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
+        },
+      };
+      const changedOrg = { ...org, currently_parsing_datasets: false };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [changedOrg.id]: changedOrg,
+        },
+      };
+      const actual = reducer(initial, {
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: org.id,
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if no existing org found', () => {
+      const actual = reducer(defaultState, {
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: 'org-id',
+      });
+
+      expect(actual).toEqual(defaultState);
     });
   });
 });

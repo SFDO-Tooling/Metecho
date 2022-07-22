@@ -1155,8 +1155,8 @@ const TaskDetail = (
             {orgHasBeenVisited && (
               <RetrieveDatasetModal
                 orgId={(devOrg as Org).id}
-                datasets={(devOrg as Org).datasets || {}}
-                datasetErrors={(devOrg as Org).dataset_errors || []}
+                datasets={(devOrg as Org).datasets ?? {}}
+                datasetErrors={(devOrg as Org).dataset_errors ?? []}
                 schema={(devOrg as Org).dataset_schema}
                 fetchingDatasets={(devOrg as Org).currently_parsing_datasets}
                 isOpen={retrieveDatasetModalOpen}
