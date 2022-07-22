@@ -130,7 +130,7 @@ work is deleted.*
 - Select `View Org` on the Dev Org card to navigate out of Metecho and make your
   changes in the temporary Dev Org in Salesforce.
 
-## Step 6 - Retrieve Changes from Dev Org
+## Step 6a - Retrieve Changes from Dev Org
 
 **Retrieve Changes** - *Pull the work you did in your Dev Org (in Salesforce)
 into Metecho so that other people can review it. Developers may retrieve changes
@@ -167,6 +167,19 @@ History list.*
   History list in the Task detail view.
 
   ![list of commits](/docs/commit-history.jpg?raw=true)
+
+## Step 6b - Retrieve a Dataset
+- The Developer can also retrieve datasets anytime after they have visited the Dev Org within Salesforce.
+- Select the default dataset, an existing dataset, or enter a custom name to create a new dataset.
+- Begin typing to search for objects and fields to include or remove from the dataset. 
+  - Only 50 objects are being displayed, but you can enter a term in the search box to search the full list.
+- Check objects and fields from the left panel to include in the dataset. A summary of the selected options appears in the right panel.
+- Uncheck objects and fields to remove them from the dataset. 
+- If the Developer is retrieving an existing dataset, a list may appear at the top of the page with fields that no longer exist in the Dev Org. When the existing dataset is retrieved, those items will be removed.
+- Enter a commit message that briefly describes the dataset.
+- Select `Retrieve Selected Data`.
+- Retrieving a dataset can take a number of minutes. Feel free to leave the page. Metecho will provide an alert when the changes have been retrieved.
+
 
 ## Step 7 - Submit Task Changes for Testing
 
