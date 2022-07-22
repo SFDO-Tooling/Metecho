@@ -196,7 +196,7 @@ export const SchemaList = ({
                 <strong>{t('Developer Name')}</strong>
               </span>
               <span>
-                <strong>{t('# of Records')}</strong>
+                <strong>{t('Records')}</strong>
               </span>
             </div>
             <div className="this-could-scroll">
