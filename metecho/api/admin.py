@@ -32,7 +32,7 @@ from .models import (
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        exclude = ()
+        exclude = ("github_users",)
 
     def clean(self):
         cleaned_data = super().clean()

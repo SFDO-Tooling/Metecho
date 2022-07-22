@@ -10,6 +10,7 @@ from simple_salesforce.exceptions import SalesforceError
 from ..models import (
     Epic,
     EpicStatus,
+    GitHubUser,
     ScratchOrgType,
     SiteProfile,
     Task,
@@ -64,20 +65,15 @@ class TestProject:
             project.queue_refresh_commits(ref="some branch", originating_user_id=None)
             assert refresh_commits_job.delay.called
 
-    def test_save__no_branch_name(self, project_factory, git_hub_repository_factory):
+    def test_save__no_branch_name(self, mocker, project_factory):
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
             repo_branch = MagicMock()
             repo_branch.latest_sha.return_value = "abcd1234"
             repo_info = MagicMock(default_branch="main-branch")
             repo_info.branch.return_value = repo_branch
             get_repo_info.return_value = repo_info
-            git_hub_repository_factory(repo_id=123)
             project = project_factory(
-                branch_name="",
-                latest_sha="",
-                repo_id=123,
-                github_users=[{}],
-                repo_image_url="/foo",
+                branch_name="", latest_sha="", repo_image_url="/foo"
             )
             project.save()
             assert get_repo_info.called
@@ -85,20 +81,15 @@ class TestProject:
             assert project.branch_name == "main-branch"
             assert project.latest_sha == "abcd1234"
 
-    def test_save__no_latest_sha(self, project_factory, git_hub_repository_factory):
+    def test_save__no_latest_sha(self, project_factory):
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
             repo_branch = MagicMock()
             repo_branch.latest_sha.return_value = "abcd1234"
             repo_info = MagicMock(default_branch="main-branch")
             repo_info.branch.return_value = repo_branch
             get_repo_info.return_value = repo_info
-            git_hub_repository_factory(repo_id=123)
             project = project_factory(
-                branch_name="main",
-                latest_sha="",
-                repo_id=123,
-                github_users=[{}],
-                repo_image_url="/foo",
+                branch_name="main", latest_sha="", repo_image_url="/foo"
             )
             project.save()
             assert get_repo_info.called
@@ -118,9 +109,7 @@ class TestProject:
             assert available_org_config_names_job.delay.called
 
     def test_finalize_available_org_config_names(self, project_factory):
-        project = project_factory(
-            github_users=[{}], repo_image_url="/foo", branch_name="main"
-        )
+        project = project_factory(repo_image_url="/foo", branch_name="main")
         project.notify_changed = MagicMock()
         project.finalize_available_org_config_names()
         assert project.notify_changed.called
@@ -971,11 +960,10 @@ class TestGitHubOrganization:
         assert str(org) == "Foo Org"
 
 
-@pytest.mark.django_db
-class TestGitHubRepository:
-    def test_str(self, git_hub_repository_factory):
-        gh_repo = git_hub_repository_factory.build()
-        assert str(gh_repo) == "https://github.com/test/repo.git"
+class TestGitHubUser:
+    def test_str(self):
+        gh_user = GitHubUser(login="hello-world")
+        assert str(gh_user) == "hello-world"
 
 
 class TestGitHubIssue:

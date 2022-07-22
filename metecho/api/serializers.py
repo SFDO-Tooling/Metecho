@@ -744,7 +744,7 @@ class TaskSerializer(HashIdModelSerializer):
         user = self.context["request"].user
 
         if dev_org and not validated_data.get("assigned_dev"):
-            validated_data["assigned_dev"] = user.github_id
+            validated_data["assigned_dev"] = GitHubUser.objects.get(id=user.github_id)
 
         task = super().create(validated_data)
         task.notify_created(originating_user_id=str(user.id))
@@ -792,10 +792,13 @@ class TaskAssigneeSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 _("User is not a valid GitHub collaborator: {}").format(new_dev)
             )
-        if new_dev and not getattr(collaboration, "permissions", {}).get("push"):
-            raise serializers.ValidationError(
-                _("User does not have push permissions: {}").format(new_dev)
-            )
+        if new_dev:
+            try:
+                assert collaboration.permissions["push"]
+            except Exception:
+                raise serializers.ValidationError(
+                    _("User does not have push permissions: {}").format(new_dev)
+                )
         return new_dev
 
     def validate_assigned_qa(self, new_qa):
@@ -803,7 +806,6 @@ class TaskAssigneeSerializer(serializers.Serializer):
         task: Task = self.instance
 
         if not task.has_push_permission(user):
-            breakpoint()
             is_removing_self = new_qa is None and task.assigned_qa_id == user.github_id
             is_assigning_self = (
                 new_qa and new_qa.id == int(user.github_id) and task.assigned_qa is None
@@ -914,7 +916,9 @@ class TaskAssigneeSerializer(serializers.Serializer):
 
     def get_matching_assigned_user(self, type_, validated_data):
         gh_user = validated_data.get(f"assigned_{type_}")
-        sa = SocialAccount.objects.filter(provider="github", uid=gh_user.id).first()
+        sa = SocialAccount.objects.filter(
+            provider="github", uid=str(gh_user.id)
+        ).first()
         return getattr(sa, "user", None)  # Optional[User]
 
 

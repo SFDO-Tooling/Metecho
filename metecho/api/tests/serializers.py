@@ -6,7 +6,6 @@ from django.utils import timezone
 
 from ..models import ScratchOrgType, Task
 from ..serializers import (
-    EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
     GitHubIssueSerializer,
@@ -64,15 +63,15 @@ class TestEpicSerializer:
             {"push": True},  # Read-write
         ),
     )
-    def test_create(self, rf, user_factory, project_factory, user_perms):
-        project = project_factory(
-            github_users=[{"id": "123456", "permissions": user_perms}]
-        )
+    def test_create(
+        self, rf, user_factory, project, git_hub_collaboration_factory, user_perms
+    ):
+        git_hub_collaboration_factory(project=project, permissions=user_perms)
         data = {
             "name": "Test epic",
             "description": "Test `epic`",
             "project": str(project.id),
-            "github_users": [project.github_users[0]["id"]],
+            "github_users": [project.github_users.get().id],
         }
         r = rf.get("/")
         r.user = user_factory()
@@ -310,63 +309,6 @@ class TestEpicSerializer:
 
 
 @pytest.mark.django_db
-class TestEpicCollaboratorsSerializer:
-    @pytest.mark.parametrize(
-        "value, success",
-        (
-            pytest.param(["123", "456"], True, id="Valid input"),
-            pytest.param(["567890"], False, id="User not in project"),
-            pytest.param([{"id": "123456"}], False, id="Invalid format"),
-            pytest.param(["123", "123"], False, id="Duplicate"),
-        ),
-    )
-    def test_value(self, rf, git_hub_repository_factory, epic_factory, value, success):
-        repo = git_hub_repository_factory(permissions={"push": True})
-        epic = epic_factory(
-            project__repo_id=repo.repo_id,
-            project__github_users=[{"id": "123"}, {"id": "456"}],
-            github_users=["123"],
-        )
-        r = rf.get("/")
-        r.user = repo.user
-        serializer = EpicCollaboratorsSerializer(
-            epic, data={"github_users": value}, context={"request": r}
-        )
-        assert serializer.is_valid() == success, serializer.errors
-        if not success:
-            assert "github_users" in serializer.errors
-
-    @pytest.mark.parametrize(
-        "github_users, value, success",
-        (
-            pytest.param(["123"], ["123"], True, id="No change"),
-            pytest.param(["123"], ["123", "self"], True, id="Add self"),
-            pytest.param(["123"], ["123", "456"], False, id="Add other"),
-            pytest.param(["123"], [], False, id="Remove other"),
-            pytest.param(["123", "self"], ["123"], True, id="Remove self"),
-        ),
-    )
-    def test_readonly_user(
-        self, rf, user_factory, epic_factory, github_users, value, success
-    ):
-        # We don't associate `user` with any GitHubRepository instances, which means
-        # they are read-only
-        user = user_factory(socialaccount_set__uid="self")
-        epic = epic_factory(
-            github_users=github_users,
-            project__github_users=[{"id": "123"}, {"id": "456"}, {"id": "self"}],
-        )
-        r = rf.get("/")
-        r.user = user
-        serializer = EpicCollaboratorsSerializer(
-            epic, data={"github_users": value}, context={"request": r}
-        )
-        assert serializer.is_valid() == success, serializer.errors
-        if not success:
-            assert "github_users" in serializer.errors
-
-
-@pytest.mark.django_db
 class TestTaskSerializer:
     @pytest.mark.parametrize(
         "attach_epic, attach_project, success",
@@ -406,8 +348,8 @@ class TestTaskSerializer:
     @pytest.mark.parametrize(
         "dev_id, assigned_dev",
         (
-            pytest.param(None, "123", id="No assignee (assign to self)"),
-            pytest.param("456", "456", id="Assign to other"),
+            pytest.param(None, 123, id="No assignee (assign to self)"),
+            pytest.param(456, 456, id="Assign to other"),
         ),
     )
     def test_create__dev_org(
@@ -419,10 +361,13 @@ class TestTaskSerializer:
         epic_factory,
         dev_id,
         assigned_dev,
+        git_hub_collaboration_factory,
     ):
         convert_to_dev_org_job = mocker.patch("metecho.api.jobs.convert_to_dev_org_job")
         user = user_factory(socialaccount_set__uid="123")
         epic = epic_factory()
+        git_hub_collaboration_factory(project=epic.project, user__id=user.github_id)
+        git_hub_collaboration_factory(project=epic.project, user__id=456)
         scratch_org = scratch_org_factory(epic=epic, task=None)
         data = {
             "name": "Test Task with Org",
@@ -440,7 +385,7 @@ class TestTaskSerializer:
         assert serializer.is_valid(), serializer.errors
         serializer.save()
         task = Task.objects.get()
-        assert task.assigned_dev == assigned_dev
+        assert task.assigned_dev_id == assigned_dev
         assert convert_to_dev_org_job.delay.called
 
     def test_branch_url__present(self, task_factory):
@@ -564,25 +509,31 @@ class TestTaskAssigneeSerializer:
         ),
     )
     def test_assign(
-        self, rf, git_hub_repository_factory, scratch_org_factory, _task_factory
+        self,
+        auth_request,
+        git_hub_collaboration_factory,
+        scratch_org_factory,
+        _task_factory,
     ):
         task = _task_factory()
-        project = task.root_project
-        project.github_users = [
-            {"id": "123456", "permissions": {"push": True}},
-            {"id": "456789", "permissions": {"push": True}},
-        ]
-        project.save()
-        repo = git_hub_repository_factory(
-            repo_id=project.repo_id, permissions={"push": True}
+        git_hub_collaboration_factory(
+            user__id=auth_request.user.github_id,
+            project=task.root_project,
+            permissions={"push": True},
         )
+        dev = git_hub_collaboration_factory(
+            project=task.root_project, permissions={"push": True}
+        ).user
+        qa = git_hub_collaboration_factory(
+            project=task.root_project, permissions={"push": True}
+        ).user
         so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
         so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
 
-        data = {"assigned_dev": "123456", "assigned_qa": "456789"}
-        r = rf.get("/")
-        r.user = repo.user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        data = {"assigned_dev": dev.id, "assigned_qa": qa.id}
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
         assert serializer.is_valid(), serializer.errors
 
         with ExitStack() as stack:
@@ -596,23 +547,27 @@ class TestTaskAssigneeSerializer:
         assert so2.deleted_at is not None
 
     def test_unassign(
-        self, rf, git_hub_repository_factory, task_factory, scratch_org_factory
+        self,
+        auth_request,
+        task_factory,
+        git_hub_user_factory,
+        git_hub_collaboration_factory,
+        scratch_org_factory,
     ):
-        repo = git_hub_repository_factory(permissions={"push": True})
         task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            assigned_dev="123",
-            assigned_qa="123",
+            assigned_dev=git_hub_user_factory(), assigned_qa=git_hub_user_factory()
+        )
+        git_hub_collaboration_factory(
+            user__id=auth_request.user.github_id,
+            project=task.root_project,
+            permissions={"push": True},
         )
         so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
         so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
-        data = {
-            "assigned_dev": None,
-            "assigned_qa": None,
-        }
-        r = rf.get("/")
-        r.user = repo.user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        data = {"assigned_dev": None, "assigned_qa": None}
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
         assert serializer.is_valid(), serializer.errors
         serializer.update(task, serializer.validated_data)
         so1.refresh_from_db()
@@ -620,194 +575,212 @@ class TestTaskAssigneeSerializer:
         assert so1.deleted_at is not None
         assert so2.deleted_at is not None
 
-    @pytest.mark.parametrize(
-        "epic_collaborators",
-        (
-            [],  # No collaborators
-            ["dev_id", "qa_id", "123"],  # Assigness already present
-            ["123", "456"],  # Other users present
-        ),
-    )
     def test_assign__add_epic_collaborators(
-        self, rf, git_hub_repository_factory, task_factory, epic_collaborators
+        self, auth_request, git_hub_collaboration_factory, task_factory
     ):
-        # Task assigness should be added as epic collaborators as well
-        repo = git_hub_repository_factory(permissions={"push": True})
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": "dev_id", "permissions": {"push": True}},
-                {"id": "qa_id", "permissions": {"push": True}},
-            ],
-            epic__github_users=epic_collaborators,
+        # Task assignees should be added as epic collaborators as well
+        task = task_factory()
+        dev = git_hub_collaboration_factory(
+            project=task.root_project, permissions={"push": True}
+        ).user
+        qa = git_hub_collaboration_factory(project=task.root_project).user
+        current = git_hub_collaboration_factory(
+            project=task.root_project,
+            user__id=auth_request.user.github_id,
+            permissions={"push": True},
+        ).user
+        task.epic.github_users.add(current)
+        data = {"assigned_dev": dev.id, "assigned_qa": qa.id}
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
         )
-        data = {
-            "assigned_dev": "dev_id",
-            "assigned_qa": "qa_id",
-        }
-        r = rf.get("/")
-        r.user = repo.user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
         assert serializer.is_valid(), serializer.errors
 
         serializer.update(task, serializer.validated_data)
-        task.epic.refresh_from_db()
-        collaborators = task.epic.github_users
-        assert len(set(collaborators)) == len(
-            collaborators
-        ), "Duplicate Epic collaborators detected"
-        assert "dev_id" in collaborators
-        assert "qa_id" in collaborators
+        epic_collaborators = list(task.epic.github_users.all())
+        assert current in epic_collaborators
+        assert dev in epic_collaborators
+        assert qa in epic_collaborators
 
     @pytest.mark.parametrize(
-        "collaborator, data, success",
+        "assignee_perms, data, success",
         (
             pytest.param(
-                {"id": "123", "permissions": {"push": True}},
-                {"assigned_dev": "456"},
-                False,
-                id="Dev ID not in collaborator list",
-            ),
-            pytest.param(
-                {"id": "123"},
-                {"assigned_dev": "123"},
+                {},
+                {"assigned_dev": 123},
                 False,
                 id="Dev has unknown permissions",
             ),
             pytest.param(
-                {"id": "123", "permissions": {"push": False}},
-                {"assigned_dev": "123"},
+                {"push": False},
+                {"assigned_dev": 123},
                 False,
                 id="Dev can't push",
             ),
             pytest.param(
-                {"id": "123", "permissions": {"push": True}},
-                {"assigned_dev": "123"},
+                {"push": True},
+                {"assigned_dev": 123},
                 True,
                 id="Dev can push",
             ),
             pytest.param(
-                {"id": "123", "permissions": {"push": True}},
-                {"assigned_qa": "456"},
-                False,
-                id="Tester ID not in collaborator list",
-            ),
-            pytest.param(
-                {"id": "123"},
-                {"assigned_qa": "123"},
+                {},
+                {"assigned_qa": 123},
                 True,
                 id="Tester has unknown permissions",
             ),
             pytest.param(
-                {"id": "123", "permissions": {"push": False}},
-                {"assigned_qa": "123"},
+                {"push": False},
+                {"assigned_qa": 123},
                 True,
                 id="Tester can't push",
             ),
             pytest.param(
-                {"id": "123", "permissions": {"push": True}},
-                {"assigned_qa": "123"},
+                {"push": True},
+                {"assigned_qa": 123},
                 True,
                 id="Tester can push",
             ),
         ),
     )
     def test_assign__assignee_permissions(
-        self, rf, git_hub_repository_factory, task_factory, collaborator, data, success
+        self,
+        auth_request,
+        git_hub_collaboration_factory,
+        task,
+        assignee_perms,
+        data,
+        success,
     ):
-        repo = git_hub_repository_factory(permissions={"push": True})
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[collaborator],
+        git_hub_collaboration_factory(
+            project=task.root_project, user__id=123, permissions=assignee_perms
         )
-        r = rf.get("/")
-        r.user = repo.user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        git_hub_collaboration_factory(
+            project=task.root_project,
+            user__id=auth_request.user.github_id,
+            permissions={"push": True},
+        )
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
         assert serializer.is_valid() == success, serializer.errors
         if not success:
             assert data.keys() == serializer.errors.keys()
 
     @pytest.mark.parametrize(
-        "repo_perms, data, success",
+        "assigner_perms, data, success",
         (
+            # Assigns self as dev
             pytest.param(
                 {},
-                {"assigned_dev": "123"},
+                {"assigned_dev": 123},
                 False,
-                id="Dev assigner has unknown permissions",
+                id="Assigner has unknown permissions, assigns self as dev",
             ),
             pytest.param(
                 {"push": False},
-                {"assigned_dev": "123"},
+                {"assigned_dev": 123},
                 False,
-                id="Dev assigner can't push",
+                id="Assigner can't push, assigns self as dev",
             ),
             pytest.param(
                 {"push": True},
-                {"assigned_dev": "123"},
+                {"assigned_dev": 123},
                 True,
-                id="Dev assigner can push",
+                id="Assigner can push, assigns self as dev",
             ),
+            # Assigns self as tester
             pytest.param(
                 {},
-                {"assigned_qa": "123"},
+                {"assigned_qa": 123},
                 True,
-                id="Tester assigner has unknown permissions, assigns self",
+                id="Assigner has unknown permissions, assigns self as tester",
             ),
             pytest.param(
                 {"push": False},
-                {"assigned_qa": "123"},
+                {"assigned_qa": 123},
                 True,
-                id="Tester assigner can't push, assigns self",
+                id="Assigner can't push, assigns self as tester",
             ),
             pytest.param(
                 {"push": True},
-                {"assigned_qa": "123"},
+                {"assigned_qa": 123},
                 True,
-                id="Tester can push, assigns self",
+                id="Assigner can push, assigns self as tester",
             ),
+            # Assigns other as dev
             pytest.param(
                 {},
-                {"assigned_qa": "456"},
+                {"assigned_dev": 456},
                 False,
-                id="Tester assigner has unknown permissions, assigns other",
+                id="Assigner has unknown permissions, assigns other as dev",
             ),
             pytest.param(
                 {"push": False},
-                {"assigned_qa": "456"},
+                {"assigned_dev": 456},
                 False,
-                id="Tester assigner can't push, assigns other",
+                id="Assigner can't push, assigns other as dev",
             ),
             pytest.param(
                 {"push": True},
-                {"assigned_qa": "456"},
+                {"assigned_dev": 456},
                 True,
-                id="Tester assigner can push, assigns other",
+                id="Assigner can push, assigns other as dev",
+            ),
+            # Assigns other as tester
+            pytest.param(
+                {},
+                {"assigned_qa": 456},
+                False,
+                id="Assigner has unknown permissions, assigns other as tester",
+            ),
+            pytest.param(
+                {"push": False},
+                {"assigned_qa": 456},
+                False,
+                id="Assigner can't push, assigns other as tester",
+            ),
+            pytest.param(
+                {"push": True},
+                {"assigned_qa": 456},
+                True,
+                id="Assigner can push, assigns other as tester",
+            ),
+            # Assigns non-collaborator
+            pytest.param(
+                {"push": True},
+                {"assigned_dev": 789},
+                False,
+                id="Assigner can push, assigns non-collaborator as dev",
+            ),
+            pytest.param(
+                {"push": True},
+                {"assigned_qa": 789},
+                False,
+                id="Assigner can push, assigns non-collaborator as tester",
             ),
         ),
     )
     def test_assign__assigner_permissions(
         self,
-        rf,
-        git_hub_repository_factory,
-        user_factory,
-        task_factory,
-        repo_perms,
+        auth_request,
+        git_hub_collaboration_factory,
+        task,
+        assigner_perms,
         data,
         success,
     ):
-        user = user_factory(socialaccount_set__uid="123")
-        repo = git_hub_repository_factory(permissions=repo_perms, user=user)
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": "123", "permissions": {"push": True}},
-                {"id": "456", "permissions": {"push": True}},
-            ],
+        auth_request.user.socialaccount_set.update(uid="123")
+        git_hub_collaboration_factory(
+            project=task.root_project, user__id=123, permissions=assigner_perms
         )
-        r = rf.get("/")
-        r.user = user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        git_hub_collaboration_factory(
+            project=task.root_project, user__id=456, permissions={"push": True}
+        )
+        git_hub_collaboration_factory(user__id=789)  # Collaborator in other project
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
         assert serializer.is_valid() == success, serializer.errors
         if not success:
             assert data.keys() == serializer.errors.keys()
@@ -815,23 +788,27 @@ class TestTaskAssigneeSerializer:
     def test_queues_reassign(
         self,
         rf,
-        git_hub_repository_factory,
+        git_hub_collaboration_factory,
         user_factory,
         task_factory,
         scratch_org_factory,
     ):
         user = user_factory()
         new_user = user_factory(devhub_username="test")
-        repo = git_hub_repository_factory(permissions={"push": True}, user=new_user)
         task = task_factory(
-            assigned_dev=user.github_id,
-            assigned_qa=user.github_id,
+            assigned_dev_id=user.github_id,
+            assigned_qa_id=user.github_id,
             commits=["abc123"],
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": user.github_id, "permissions": {"push": True}},
-                {"id": new_user.github_id, "permissions": {"push": True}},
-            ],
+        )
+        git_hub_collaboration_factory(
+            permissions={"push": True},
+            user__id=new_user.github_id,
+            project=task.root_project,
+        )
+        git_hub_collaboration_factory(
+            permissions={"push": True},
+            user__id=user.github_id,
+            project=task.root_project,
         )
         scratch_org_factory(
             owner_sf_username="test",
@@ -864,25 +841,22 @@ class TestTaskAssigneeSerializer:
             assert user_reassign_job.delay.called
 
     def test_try_send_assignment_emails(
-        self, rf, mailoutbox, git_hub_repository_factory, task_factory
+        self, auth_request, mailoutbox, git_hub_collaboration_factory, task
     ):
-        repo = git_hub_repository_factory(permissions={"push": True})
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": repo.user.github_id, "permissions": {"push": True}}
-            ],
+        git_hub_collaboration_factory(
+            permissions={"push": True},
+            project=task.root_project,
+            user__id=auth_request.user.github_id,
         )
-
         data = {
-            "assigned_dev": repo.user.github_id,
-            "assigned_qa": repo.user.github_id,
+            "assigned_dev": auth_request.user.github_id,
+            "assigned_qa": auth_request.user.github_id,
             "should_alert_dev": True,
             "should_alert_qa": True,
         }
-        r = rf.get("/")
-        r.user = repo.user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
         assert serializer.is_valid(), serializer.errors
         serializer.save()
 

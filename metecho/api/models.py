@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -1029,7 +1029,7 @@ class Task(
     def try_to_notify_assigned_user(self):
         # This takes the tester (a.k.a. assigned_qa) and sends them an
         # email when a PR has been made.
-        id_ = getattr(self, "assigned_qa", None)
+        id_ = getattr(self, "assigned_qa_id", None)
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:

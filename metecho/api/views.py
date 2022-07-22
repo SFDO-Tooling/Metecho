@@ -34,7 +34,6 @@ from .hook_serializers import (
 from .models import (
     Epic,
     EpicStatus,
-    GitHubCollaboration,
     GitHubIssue,
     GitHubOrganization,
     Project,

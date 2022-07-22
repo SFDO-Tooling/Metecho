@@ -2660,6 +2660,7 @@ components:
           type: string
           format: uri
       required:
+      - id
       - login
     Task:
       type: object
