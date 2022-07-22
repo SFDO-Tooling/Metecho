@@ -1,7 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
-import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
-import Input from '@salesforce/design-system-react/components/input';
+import Search from '@salesforce/design-system-react/components/input/search';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { orderBy } from 'lodash';
 import React, { ChangeEvent, FormEvent, useState } from 'react';
@@ -113,6 +112,10 @@ const AssignTaskRoleModal = ({
     handleClose();
   };
 
+  const handleClearFindText = () => {
+    setFindText('');
+  };
+
   const handleFindTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
   };
@@ -207,11 +210,13 @@ const AssignTaskRoleModal = ({
             slds-p-horizontal_medium
             slds-p-bottom_medium"
         >
-          <Input
+          <Search
             value={findText}
-            onChange={handleFindTextChange}
-            iconRight={<InputIcon name="search" category="utility" />}
+            assistiveText={{ label: t('Search for user') }}
             placeholder={t('Search for user')}
+            onChange={handleFindTextChange}
+            clearable
+            onClear={handleClearFindText}
           />
         </div>
         {epicUsers && taskHasEpic ? (

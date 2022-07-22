@@ -364,6 +364,7 @@ const CreateEpicModal = ({
             type="submit"
             style={{ display: 'none' }}
             disabled={isSaving}
+            aria-hidden
           />
         </form>
       </div>

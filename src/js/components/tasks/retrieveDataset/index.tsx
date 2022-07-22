@@ -136,7 +136,6 @@ const RetrieveDatasetModal = ({
       // @@@ Adding fake outdated fields
       if (datasets[inputs.dataset_name]) {
         def.foo = ['bar', 'buz'];
-        def.ActiveScratchOrg = [...def.ActiveScratchOrg, 'this-is-new'];
       }
       const { matchedChangeset, unmatchedChangeset } = filterChangesetBySchema(
         schema ?? {},

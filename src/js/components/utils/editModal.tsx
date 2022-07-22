@@ -221,6 +221,7 @@ const EditModal = ({
           type="submit"
           style={{ display: 'none' }}
           disabled={isSaving}
+          aria-hidden
         />
       </form>
     </Modal>

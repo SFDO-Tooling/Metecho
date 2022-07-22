@@ -1554,15 +1554,21 @@ def patch_dataset_env(mocker, tmp_path):
     sf = mocker.MagicMock()
     schema = mocker.MagicMock()
 
-    mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
-    mocker.patch(f"{PATCH_ROOT}.get_devhub_api", return_value=sf)
-    mocker.patch(f"{PATCH_ROOT}.local_github_checkout")
-    mocker.patch(f"{PATCH_ROOT}.get_project_config", return_value=project_config)
+    mocker.patch(
+        "metecho.api.models.refresh_access_token",
+        autospec=True,
+        return_value=org_config,
+    )
+    mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True, return_value=repo)
+    mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
+    mocker.patch(
+        f"{PATCH_ROOT}.get_project_config", autospec=True, return_value=project_config
+    )
     mocker.patch(f"{PATCH_ROOT}.BaseCumulusCI")
-    mocker.patch(f"{PATCH_ROOT}.OrgConfig", return_value=org_config)
     mocker.patch(
         f"{PATCH_ROOT}.get_org_schema",
         **{"return_value.__enter__.return_value": schema},
+        autospec=True,
     )
     yield (project_config, org_config, sf, schema, repo)
 

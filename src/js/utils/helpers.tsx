@@ -2,8 +2,10 @@ import { t } from 'i18next';
 import {
   cloneDeep,
   intersection,
+  isEmpty,
   mergeWith,
   pick,
+  pickBy,
   union,
   without,
 } from 'lodash';
@@ -259,4 +261,34 @@ export const filterChangesetBySchema = (
   }
 
   return { matchedChangeset, unmatchedChangeset };
+};
+
+export const filterSchema = (schema: DatasetSchema, search: string) => {
+  if (!search) {
+    return schema;
+  }
+
+  const term = search.toLowerCase();
+  const filteredSchema: DatasetSchema = {};
+
+  for (const [name, value] of Object.entries(schema)) {
+    if (
+      name.toLowerCase().includes(term) ||
+      value.label.toLowerCase().includes(term)
+    ) {
+      filteredSchema[name] = value;
+    } else {
+      const fields = pickBy(
+        value.fields,
+        (field, fieldName) =>
+          fieldName.toLowerCase().includes(search) ||
+          field.label.toLowerCase().includes(search),
+      );
+      if (!isEmpty(fields)) {
+        filteredSchema[name] = { ...value, fields };
+      }
+    }
+  }
+
+  return filteredSchema;
 };

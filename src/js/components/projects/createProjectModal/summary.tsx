@@ -24,6 +24,7 @@ const CreateProjectSummary = ({
 
   return (
     <form className="slds-form slds-p-around_large">
+      <button type="submit" style={{ display: 'none' }} disabled aria-hidden />
       <h2 className="slds-text-heading_small slds-m-bottom_medium">
         {t('Project Name: “{{project_name}}”', {
           project_name: name,

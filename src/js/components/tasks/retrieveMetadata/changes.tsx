@@ -213,6 +213,7 @@ const ChangesForm = ({
       className="slds-form slds-p-around_large has-checkboxes"
       data-form="task-retrieve-changes"
     >
+      <button type="submit" style={{ display: 'none' }} disabled aria-hidden />
       <ModalCard>
         <Icon category="utility" name="open_folder" size="small" />
         <code className="slds-p-left_x-small v-align-center">

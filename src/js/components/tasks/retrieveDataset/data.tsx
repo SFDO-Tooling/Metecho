@@ -1,9 +1,10 @@
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
+import Search from '@salesforce/design-system-react/components/input/search';
 import classNames from 'classnames';
-import { chain, isEmpty, sortBy, toLower } from 'lodash';
-import React, { ChangeEvent, useState } from 'react';
+import { chain, debounce, isEmpty, sortBy, toLower } from 'lodash';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
@@ -14,7 +15,11 @@ import {
 } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 import { Changeset, DatasetSchema } from '@/js/store/orgs/reducer';
-import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
+import {
+  filterSchema,
+  mergeChangesets,
+  splitChangeset,
+} from '@/js/utils/helpers';
 
 interface Props {
   schema: DatasetSchema;
@@ -25,6 +30,8 @@ interface Props {
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
 }
+
+const SCHEMA_SIZE_LIMIT = 50;
 
 export const SchemaList = ({
   type,
@@ -56,12 +63,22 @@ export const SchemaList = ({
 }) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
+  const [filteredSchema, setFilteredSchema] = useState(schema);
+  const [search, setSearch] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
 
-  const schemaPairs = chain(schema)
+  const hasSearch = Boolean(search);
+
+  let truncated = false;
+  let schemaPairs = chain(filteredSchema)
     .toPairs()
     .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
     .value();
-  const noSchema = isEmpty(schema);
+  const noSchema = isEmpty(filteredSchema);
+  if (schemaPairs.length > SCHEMA_SIZE_LIMIT) {
+    schemaPairs = schemaPairs.slice(0, SCHEMA_SIZE_LIMIT);
+    truncated = true;
+  }
 
   const handlePanelToggle = (groupName: string) => {
     setExpandedPanels({
@@ -70,6 +87,50 @@ export const SchemaList = ({
     });
   };
 
+  // Update schema when search term changes
+  useEffect(() => {
+    setFilteredSchema(
+      search ? filterSchema(schema, search.toLowerCase()) : schema,
+    );
+  }, [schema, search]);
+
+  const debouncedSearch = useMemo(() => debounce(setSearch, 150), [setSearch]);
+
+  // Debounce actual filtering
+  useEffect(() => {
+    debouncedSearch(searchValue);
+  }, [debouncedSearch, searchValue]);
+
+  const handleSearch = (
+    event: ChangeEvent<HTMLInputElement>,
+    { value }: { value: string },
+  ) => {
+    setSearchValue(value);
+  };
+
+  const clearSearch = () => {
+    setSearchValue('');
+  };
+
+  const searchLabel = t('Search for products or fields');
+  let emptyHeading =
+    type === 'all' ? t('No data available to retrieve') : t('No data selected');
+  let emptyMsg =
+    type === 'all'
+      ? null
+      : t(
+          'Choose objects or fields from the left panel to add them to this dataset.',
+        );
+  if (hasSearch) {
+    emptyHeading = t('No data found');
+    emptyMsg = t(
+      'Change or remove your search term above to view additional data.',
+    );
+  }
+
+  const paddingClasses =
+    'slds-m-left_xx-small slds-p-horizontal_medium slds-p-right_medium';
+
   return (
     <div
       className={classNames('has-checkboxes', className)}
@@ -77,35 +138,35 @@ export const SchemaList = ({
       {...props}
     >
       <ModalCard
-        heading={<span className="slds-m-left_xx-small">{heading}</span>}
+        heading={
+          <div className="slds-m-left_xx-small">
+            <Search
+              className="slds-text-body_regular slds-m-bottom_small"
+              assistiveText={{ label: searchLabel }}
+              placeholder={searchLabel}
+              value={searchValue}
+              clearable={hasSearch}
+              onChange={handleSearch}
+              onClear={clearSearch}
+            />
+            <p>{heading}</p>
+          </div>
+        }
         noBodyPadding
       >
         {errors ? (
           <p
-            className="slds-text-color_error
-              slds-m-left_xx-small
-              slds-p-left_x-large
-              slds-p-right_medium
-              slds-p-top_x-small"
+            className={classNames(
+              'slds-text-color_error',
+              'slds-p-top_x-small',
+              paddingClasses,
+            )}
           >
             {errors}
           </p>
         ) : null}
         {noSchema ? (
-          <EmptyIllustration
-            heading={
-              type === 'all' ? t('No data found') : t('No data selected')
-            }
-            message={
-              type === 'all'
-                ? t(
-                    'Change or remove your search term above to view additional data.',
-                  )
-                : t(
-                    'Choose Objects or Fields from the left panel to add them to this dataset.',
-                  )
-            }
-          />
+          <EmptyIllustration heading={emptyHeading} message={emptyMsg} />
         ) : (
           <>
             <div
@@ -234,6 +295,21 @@ export const SchemaList = ({
                 </Accordion>
               );
             })}
+            {truncated ? (
+              <>
+                <hr className="slds-m-vertical_none" />
+                <p
+                  className={classNames(
+                    'slds-p-vertical_x-small',
+                    paddingClasses,
+                  )}
+                >
+                  {t(
+                    'Only the first 50 objects are displayed. To narrow the list, enter a search term above.',
+                  )}
+                </p>
+              </>
+            ) : null}
           </>
         )}
       </ModalCard>
@@ -287,14 +363,13 @@ const RemovingList = ({
         <p
           className="slds-text-color_error
             slds-m-left_xx-small
-            slds-p-left_x-large
-            slds-p-right_medium
+            slds-p-horizontal_medium
             slds-p-vertical_x-small"
         >
           <Trans i18nKey="outdatedSchemaWarning">
-            The Dataset you selected contains Fields that no longer exist in
-            this Dev Org. If you continue, the following Data will be removed
-            from this Dataset.
+            The dataset you selected contains fields that no longer exist in
+            this Dev Org. If you continue, the following data will be removed
+            from this dataset.
           </Trans>
         </p>
         {chain(Object.keys(changes))
