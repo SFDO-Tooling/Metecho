@@ -39,7 +39,7 @@ interface Props {
   setInputs: UseFormProps['setInputs'];
 }
 
-const SCHEMA_SIZE_LIMIT = 100;
+const SCHEMA_SIZE_LIMIT = 50;
 
 const SearchForm = ({
   setSearch,
@@ -199,124 +199,131 @@ export const SchemaList = ({
                 <strong>{t('# of Records')}</strong>
               </span>
             </div>
-            {sortedSchema.map(([groupName, groupSchema], index) => {
-              const uniqueGroupName = `${type}-${groupName}`;
-              const fields = map(groupSchema.fields, (pair) => pair[0]);
-              const handleSelectThisGroup = (
-                event: ChangeEvent<HTMLInputElement>,
-                { checked }: { checked: boolean },
-              ) => handleSelectGroup?.({ [groupName]: fields }, checked);
-              let checkedChildren = 0;
-              for (const field of fields) {
-                if (checkedChanges?.[groupName]?.includes(field)) {
-                  checkedChildren = checkedChildren + 1;
+            <div className="this-could-scroll">
+              {sortedSchema.map(([groupName, groupSchema], index) => {
+                const uniqueGroupName = `${type}-${groupName}`;
+                const fields = map(groupSchema.fields, (pair) => pair[0]);
+                const handleSelectThisGroup = (
+                  event: ChangeEvent<HTMLInputElement>,
+                  { checked }: { checked: boolean },
+                ) => handleSelectGroup?.({ [groupName]: fields }, checked);
+                let checkedChildren = 0;
+                for (const field of fields) {
+                  if (checkedChanges?.[groupName]?.includes(field)) {
+                    checkedChildren = checkedChildren + 1;
+                  }
                 }
-              }
 
-              return (
-                <Accordion key={uniqueGroupName} className="light-bordered-row">
-                  <AccordionPanel
-                    expanded={Boolean(expandedPanels[uniqueGroupName])}
-                    key={`${uniqueGroupName}-panel`}
-                    id={`${type}-group-${index}`}
-                    onTogglePanel={() => handlePanelToggle(uniqueGroupName)}
-                    title={groupSchema.label}
-                    panelContentActions={
-                      <div className="form-grid-three">
-                        {type === 'all' ? (
-                          <Checkbox
-                            labels={{ label: groupSchema.label }}
-                            checked={checkedChildren === fields.length}
-                            indeterminate={Boolean(
-                              checkedChildren &&
-                                checkedChildren !== fields.length,
-                            )}
-                            onChange={handleSelectThisGroup}
-                          />
-                        ) : (
+                return (
+                  <Accordion
+                    key={uniqueGroupName}
+                    className="light-bordered-row"
+                  >
+                    <AccordionPanel
+                      expanded={Boolean(expandedPanels[uniqueGroupName])}
+                      key={`${uniqueGroupName}-panel`}
+                      id={`${type}-group-${index}`}
+                      onTogglePanel={() => handlePanelToggle(uniqueGroupName)}
+                      title={groupSchema.label}
+                      panelContentActions={
+                        <div className="form-grid-three">
+                          {type === 'all' ? (
+                            <Checkbox
+                              labels={{ label: groupSchema.label }}
+                              checked={checkedChildren === fields.length}
+                              indeterminate={Boolean(
+                                checkedChildren &&
+                                  checkedChildren !== fields.length,
+                              )}
+                              onChange={handleSelectThisGroup}
+                            />
+                          ) : (
+                            <span
+                              className="slds-text-body_regular
+                                slds-p-top_xxx-small"
+                            >
+                              {groupSchema.label}
+                            </span>
+                          )}
                           <span
                             className="slds-text-body_regular
                               slds-p-top_xxx-small"
                           >
-                            {groupSchema.label}
+                            {groupName}
                           </span>
-                        )}
-                        <span
-                          className="slds-text-body_regular
-                            slds-p-top_xxx-small"
-                        >
-                          {groupName}
-                        </span>
-                        <span
-                          className="slds-text-body_regular
-                            slds-p-top_xxx-small"
-                        >
-                          {groupSchema.count}
-                        </span>
-                      </div>
-                    }
-                    summary=""
-                  >
-                    {groupSchema.fields.map(([fieldName, fieldSchema]) => (
-                      <div
-                        key={`${uniqueGroupName}-${fieldName}`}
-                        className="form-grid-three"
-                      >
-                        {type === 'all' ? (
-                          <Checkbox
-                            labels={{ label: fieldSchema.label }}
-                            className="metecho-nested-checkboxes-2"
-                            checked={Boolean(
-                              checkedChanges?.[groupName]?.includes(fieldName),
-                            )}
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>,
-                              { checked }: { checked: boolean },
-                            ) =>
-                              handleChange?.({
-                                groupName,
-                                change: fieldName,
-                                checked,
-                              })
-                            }
-                          />
-                        ) : (
                           <span
                             className="slds-text-body_regular
-                              slds-p-top_xxx-small
-                              metecho-nested-items"
+                              slds-p-top_xxx-small"
                           >
-                            {fieldSchema.label}
+                            {groupSchema.count}
                           </span>
-                        )}
-                        <span
-                          className="slds-text-body_regular
-                            slds-p-top_xxx-small"
+                        </div>
+                      }
+                      summary=""
+                    >
+                      {groupSchema.fields.map(([fieldName, fieldSchema]) => (
+                        <div
+                          key={`${uniqueGroupName}-${fieldName}`}
+                          className="form-grid-three"
                         >
-                          {fieldName}
-                        </span>
-                      </div>
-                    ))}
-                  </AccordionPanel>
-                </Accordion>
-              );
-            })}
-            {truncated ? (
-              <>
-                <hr className="slds-m-vertical_none" />
-                <p
-                  className={classNames(
-                    'slds-p-vertical_x-small',
-                    paddingClasses,
-                  )}
-                >
-                  {t(
-                    'Only the first {{limit}} objects are displayed. To narrow the list, enter a search term above.',
-                    { limit: SCHEMA_SIZE_LIMIT },
-                  )}
-                </p>
-              </>
-            ) : null}
+                          {type === 'all' ? (
+                            <Checkbox
+                              labels={{ label: fieldSchema.label }}
+                              className="metecho-nested-checkboxes-2"
+                              checked={Boolean(
+                                checkedChanges?.[groupName]?.includes(
+                                  fieldName,
+                                ),
+                              )}
+                              onChange={(
+                                event: ChangeEvent<HTMLInputElement>,
+                                { checked }: { checked: boolean },
+                              ) =>
+                                handleChange?.({
+                                  groupName,
+                                  change: fieldName,
+                                  checked,
+                                })
+                              }
+                            />
+                          ) : (
+                            <span
+                              className="slds-text-body_regular
+                                slds-p-top_xxx-small
+                                metecho-nested-items"
+                            >
+                              {fieldSchema.label}
+                            </span>
+                          )}
+                          <span
+                            className="slds-text-body_regular
+                              slds-p-top_xxx-small"
+                          >
+                            {fieldName}
+                          </span>
+                        </div>
+                      ))}
+                    </AccordionPanel>
+                  </Accordion>
+                );
+              })}
+              {truncated ? (
+                <>
+                  <hr className="slds-m-vertical_none" />
+                  <p
+                    className={classNames(
+                      'slds-p-vertical_x-small',
+                      paddingClasses,
+                    )}
+                  >
+                    {t(
+                      'Only the first {{limit}} objects are displayed. To narrow the list, enter a search term above.',
+                      { limit: SCHEMA_SIZE_LIMIT },
+                    )}
+                  </p>
+                </>
+              ) : null}
+            </div>
           </>
         )}
       </ModalCard>
