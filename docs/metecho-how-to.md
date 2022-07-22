@@ -149,7 +149,7 @@ History list.*
     need to do this step as changes are retrieved automatically when first
     navigating to the page.
 
-    ![check for unretrieved changes button](/docs/retrieve.jpg?raw=true)
+    ![check for unretrieved changes button](/docs/check-again.jpg?raw=true)
 
 - Select the location to retrieve changes.
   - Use the preselected package directory unless you know of a specific reason
@@ -171,6 +171,9 @@ History list.*
 ## Step 6b - Retrieve a Dataset
 - The Developer can also retrieve datasets anytime after they have visited the Dev Org within Salesforce.
 - Select `Retrieve Dataset`.
+
+  ![check for unretrieved changes button](/docs/retrieve-dataset.jpg?raw=true)
+  
 - Select the default dataset, an existing dataset, or enter a custom name to create a new dataset.
 - Begin typing to search for objects and fields to include or remove from the dataset. 
   - Only 50 objects are being displayed, but you can enter a term in the search box to search the full list.
