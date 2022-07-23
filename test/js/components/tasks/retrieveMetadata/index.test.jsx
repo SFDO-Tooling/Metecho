@@ -129,7 +129,7 @@ describe('<RetrieveMetadataModal/>', () => {
 
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
-        objectType: 'scratch_org_commit',
+        objectType: 'scratch_org_commit_metadata',
         url: window.api_urls.scratch_org_commit('org-id'),
         data: {
           commit_message: 'My Commit',

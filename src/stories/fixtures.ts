@@ -907,3 +907,30 @@ export const sampleGitHubOrg2 = {
   name: 'Another Test Org',
   avatar_url: '',
 };
+
+export const sampleDatasetSchema = {
+  Account: {
+    label: 'Account',
+    count: 5,
+    fields: {
+      FooBar: { label: 'Foo Bar' },
+      BuzBaz: { label: 'Buz Baz' },
+    },
+  },
+  ApexClass: {
+    label: 'Apex Class',
+    count: 1,
+    fields: {
+      ApiVersion: { label: 'Api Version' },
+    },
+  },
+};
+
+export const sampleChangeset = {
+  Account: ['FooBar', 'BuzBaz'],
+};
+
+export const sampleDatasets = {
+  Default: sampleChangeset,
+  'Another Dataset': { Account: ['Other'] },
+};

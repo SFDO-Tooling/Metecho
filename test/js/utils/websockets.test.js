@@ -12,6 +12,7 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  fetchFailed,
   orgConvertFailed,
   orgProvisioning,
   orgReassigned,
@@ -21,7 +22,6 @@ import {
   provisionOrg,
   recreateOrg,
   refreshError,
-  fetchFailed,
   updateOrg,
 } from '@/js/store/orgs/actions';
 import {
@@ -144,8 +144,6 @@ describe('getAction', () => {
     ['SCRATCH_ORG_RECREATE', 'recreateOrg', true],
     ['SCRATCH_ORG_REASSIGN', 'orgReassigned', true],
     ['SCRATCH_ORG_REASSIGN_FAILED', 'orgReassignFailed', false],
-    ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded', false],
-    ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed', false],
     ['SCRATCH_ORG_CONVERT_FAILED', 'orgConvertFailed', false],
     ['SOFT_DELETE', 'removeObject', true],
   ])('handles %s event', (type, action, modelOnly) => {
@@ -217,6 +215,28 @@ describe('getAction', () => {
       sockets.getAction(event);
 
       expect(projectError).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('SCRATCH_ORG_COMMIT_CHANGES', () => {
+    test('calls commitSucceeded', () => {
+      const payload = { model: 'bar' };
+      const msg = { type: 'SCRATCH_ORG_COMMIT_CHANGES', payload };
+      sockets.getAction(msg);
+
+      expect(commitSucceeded).toHaveBeenCalledWith(payload, {
+        is_metadata: true,
+      });
+    });
+  });
+
+  describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED', () => {
+    test('calls commitFailed', () => {
+      const payload = { model: 'bar' };
+      const msg = { type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED', payload };
+      sockets.getAction(msg);
+
+      expect(commitFailed).toHaveBeenCalledWith(payload, { is_metadata: true });
     });
   });
 

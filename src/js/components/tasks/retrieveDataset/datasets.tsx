@@ -131,7 +131,7 @@ const SelectDatasetForm = ({
           <RadioGroup
             labels={{
               label: t('Datasets'),
-              error: errors.dataset,
+              error: errors.dataset_name,
             }}
             assistiveText={{
               required: t('Required'),
