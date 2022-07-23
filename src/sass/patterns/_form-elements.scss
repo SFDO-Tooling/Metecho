@@ -10,6 +10,27 @@
   grid-template-columns: 1fr auto;
 }
 
+.metecho-modal-inner-content {
+  display: grid;
+  grid-template-rows: minmax(min-content, 30%) 1fr;
+  grid-template-rows: minmax(min-content, 23%) minmax(auto, 1fr);
+  max-height: 100%;
+  overflow-y: hidden;
+}
+
+.metecho-scroll-panel {
+  height: inherit;
+  overflow-y: auto;
+}
+
+.metecho-form-panels {
+  display: grid;
+  gap: #{$spacing-large};
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+  overflow-y: hidden;
+}
+
 // @@@
 .form-grid-three {
   display: grid;
@@ -40,6 +61,27 @@
 [data-form='task-retrieve-changes'] {
   display: grid;
   height: 100%;
+  overflow: inherit;
+
+  .slds-card {
+    display: flex;
+    flex-direction: column;
+    height: inherit;
+    overflow: inherit;
+  }
+
+  .metecho-panel-container {
+    height: inherit;
+  }
+
+  .slds-card__body {
+    height: inherit;
+    overflow: inherit;
+
+    > div {
+      height: inherit;
+    }
+  }
 
   .success-highlight {
     background-color: $color-background-highlight;
