@@ -475,6 +475,13 @@ class EpicSerializer(EpicMinimalSerializer):
         )
         return instance
 
+    def validate_project(self, project: Project | None):
+        if project and not project.has_push_permission(self.context["request"].user):
+            raise serializers.ValidationError(
+                _("You don't have Push permissions for this project")
+            )
+        return project
+
     def validate(self, data):
         branch_name = data.get("branch_name", "")
         project = data.get("project", None)
@@ -725,6 +732,20 @@ class TaskSerializer(HashIdModelSerializer):
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
+
+    def validate_epic(self, epic: Epic | None):
+        if epic and not epic.has_push_permission(self.context["request"].user):
+            raise serializers.ValidationError(
+                _("You don't have Push permissions for this epic")
+            )
+        return epic
+
+    def validate_project(self, project: Project | None):
+        if project and not project.has_push_permission(self.context["request"].user):
+            raise serializers.ValidationError(
+                _("You don't have Push permissions for this project")
+            )
+        return project
 
     def validate(self, data: dict) -> dict:
         project = data.get("project", getattr(self.instance, "project", None))
