@@ -60,6 +60,7 @@
 
   @media (min-width: $mq-large) {
     --form-panels-columns: 1fr 1fr;
+
     grid-row: 2; // incase the existing data to remove box is hidden
     overflow-y: hidden;
   }
