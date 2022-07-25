@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0110_alter_scratchorg_owner"),
+        ("api", "0111_alter_user_organizations"),
     ]
 
     operations = [
