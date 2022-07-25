@@ -1232,6 +1232,7 @@ def parse_datasets(*, org: ScratchOrg, user: User):
                     "fields": {
                         field_name: {"label": field.label}
                         for field_name, field in obj.fields.items()
+                        if not field_name.endswith("Id")
                     },
                 }
                 for obj_name, obj in schema.items()
