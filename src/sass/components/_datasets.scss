@@ -6,10 +6,7 @@
   overflow-y: hidden;
 
   @media (min-width: $mq-large) {
-    grid-template-rows: var(
-      --modal-content-rows,
-      minmax(min-content, 1fr) minmax(0, auto)
-    );
+    grid-template-rows: var(--modal-content-rows, minmax(0, 30%) 1fr);
     max-height: 100%;
   }
 }

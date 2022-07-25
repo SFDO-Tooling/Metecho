@@ -48,13 +48,13 @@
 [data-form='task-retrieve-changes'] {
   display: grid;
   height: 100%;
-  overflow: inherit;
+  overflow-y: hidden;
 
   .slds-card {
     display: flex;
     flex-direction: column;
-    height: inherit;
-    overflow: inherit;
+    // height: inherit;
+    overflow-y: hidden;
   }
 
   .metecho-panel-container {
@@ -62,13 +62,13 @@
   }
 
   .slds-card__body {
-    height: inherit;
-    overflow: inherit;
+    // height: inherit;
+    overflow-y: hidden;
 
     > div {
       display: flex;
       flex-direction: column;
-      height: inherit;
+      height: 100%;
     }
   }
 
