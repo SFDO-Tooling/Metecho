@@ -124,7 +124,9 @@ class User(PushMixin, HashIdMixin, AbstractUser):
     currently_fetching_repos = models.BooleanField(default=False)
     currently_fetching_orgs = models.BooleanField(default=False)
     organizations = models.ManyToManyField(
-        "api.GitHubOrganization", related_name="users"
+        "api.GitHubOrganization",
+        related_name="users",
+        blank=True,
     )
     devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
