@@ -365,8 +365,6 @@ const RemovingList = ({
         className,
       )}
       data-form="task-retrieve-changes"
-      // @@@
-      style={{ height: 'unset' }}
       {...props}
     >
       <ModalCard
