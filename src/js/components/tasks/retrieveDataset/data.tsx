@@ -160,7 +160,12 @@ export const SchemaList = ({
 
   return (
     <div
-      className={classNames('has-checkboxes', 'slds-form', className)}
+      className={classNames(
+        'has-checkboxes',
+        'slds-form',
+        'metecho-scroll-panel-container',
+        className,
+      )}
       data-form="task-retrieve-changes"
       {...props}
     >
@@ -362,6 +367,8 @@ const RemovingList = ({
         'slds-p-top_large',
         'slds-p-horizontal_large',
         'has-checkboxes',
+        'metecho-existing-data-remove',
+        'metecho-scroll-panel-container',
         className,
       )}
       data-form="task-retrieve-changes"
