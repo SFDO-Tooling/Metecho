@@ -486,34 +486,32 @@ const DataForm = ({
   };
 
   return (
-    <>
-      <div className="metecho-modal-inner-content">
-        {!isEmpty(outdatedChangeset) && (
-          <RemovingList changes={outdatedChangeset} />
-        )}
-        <div className="slds-p-around_large metecho-form-panels">
-          <SchemaList
-            type="all"
-            heading={t('Data Options')}
-            schema={schema}
-            checkedChanges={inputs.dataset_definition}
-            errors={errors.dataset_definition}
-            handleSelectGroup={handleSelectGroup}
-            handleChange={handleChange}
-          />
-          <SchemaList
-            type="selected"
-            heading={t('Selected Data')}
-            schema={selectedSchema}
-            errors={
-              noChanges && !isEmpty(selectedSchema)
-                ? t('Selected data matches existing dataset.')
-                : undefined
-            }
-          />
-        </div>
+    <div className="metecho-modal-inner-content">
+      {!isEmpty(outdatedChangeset) && (
+        <RemovingList changes={outdatedChangeset} />
+      )}
+      <div className="slds-p-around_large metecho-form-panels">
+        <SchemaList
+          type="all"
+          heading={t('Data Options')}
+          schema={schema}
+          checkedChanges={inputs.dataset_definition}
+          errors={errors.dataset_definition}
+          handleSelectGroup={handleSelectGroup}
+          handleChange={handleChange}
+        />
+        <SchemaList
+          type="selected"
+          heading={t('Selected Data')}
+          schema={selectedSchema}
+          errors={
+            noChanges && !isEmpty(selectedSchema)
+              ? t('Selected data matches existing dataset.')
+              : undefined
+          }
+        />
       </div>
-    </>
+    </div>
   );
 };
 
