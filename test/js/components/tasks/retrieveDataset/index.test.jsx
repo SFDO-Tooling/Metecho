@@ -223,7 +223,7 @@ describe('<RetrieveDatasetModal/>', () => {
     });
 
     describe('no selected items', () => {
-      it('displays empty message', () => {
+      test('displays empty message', () => {
         fireEvent.click(group1);
 
         expect(getters.getByText('No data selected')).toBeVisible();
@@ -294,6 +294,115 @@ describe('<RetrieveDatasetModal/>', () => {
         expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
       });
+    });
+  });
+
+  describe('has outdated schema items', () => {
+    let getters;
+
+    beforeEach(() => {
+      getters = setup();
+      const { getByLabelText, getByText } = getters;
+      fireEvent.click(getByLabelText('Another Dataset'));
+      fireEvent.click(getByText('Save & Next'));
+    });
+
+    test('displays items to remove', () => {
+      const { baseElement, getAllByTitle, getByText } = getters;
+      const content = baseElement.querySelector('.slds-accordion__content');
+
+      expect(getByText('Existing Data To Remove')).toBeVisible();
+      expect(getByText('Other')).toBeVisible();
+      expect(getByText('OpenType')).toBeVisible();
+      expect(content).toHaveAttribute('aria-hidden', 'true');
+
+      fireEvent.click(getAllByTitle('Account')[0]);
+
+      expect(content).toHaveAttribute('aria-hidden', 'false');
+    });
+  });
+
+  describe('has more than 50 objects', () => {
+    let getters;
+
+    beforeEach(() => {
+      const schema = Object.assign({}, sampleDatasetSchema);
+      for (let idx = 1; idx < 55; idx = idx + 1) {
+        const label = idx.toString();
+        schema[label] = {
+          label,
+          count: 2,
+          fields: {
+            [`${label}-field`]: {
+              label: `${label}-field`,
+            },
+          },
+        };
+      }
+      getters = setup({ schema });
+      const { getByLabelText, getByText } = getters;
+      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByText('Save & Next'));
+    });
+
+    test('displays truncated list', () => {
+      const { getAllByText } = getters;
+
+      expect(
+        getAllByText('Only displaying the first 50 objects.', { exact: false }),
+      ).toHaveLength(2);
+    });
+  });
+
+  describe('search form', () => {
+    let getters;
+
+    beforeEach(() => {
+      getters = setup();
+      const { getByLabelText, getByText } = getters;
+      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByText('Save & Next'));
+    });
+
+    test('displays filtered list', async () => {
+      const { getByText, getByLabelText, getAllByLabelText, queryByLabelText } =
+        getters;
+
+      expect(getByLabelText('Foo Bar')).toBeVisible();
+      expect(getByLabelText('Buz Baz')).toBeVisible();
+      expect(getByLabelText('Api Version')).toBeVisible();
+
+      fireEvent.input(getAllByLabelText('Search for objects or fields')[0], {
+        target: { value: 'ba' },
+      });
+      jest.runAllTimers();
+      await waitFor(() => expect(queryByLabelText('Api Version')).toBeNull());
+
+      expect(getByLabelText('Foo Bar')).toBeVisible();
+      expect(getByLabelText('Buz Baz')).toBeVisible();
+      expect(queryByLabelText('Api Version')).toBeNull();
+
+      fireEvent.click(getByText('Clear'));
+
+      expect(getByLabelText('Api Version')).toBeVisible();
+    });
+
+    test('can filter by entire object', async () => {
+      const { getByLabelText, getAllByLabelText, queryByLabelText } = getters;
+
+      expect(getByLabelText('Foo Bar')).toBeVisible();
+      expect(getByLabelText('Buz Baz')).toBeVisible();
+      expect(getByLabelText('Api Version')).toBeVisible();
+
+      fireEvent.input(getAllByLabelText('Search for objects or fields')[0], {
+        target: { value: 'apex' },
+      });
+      jest.runAllTimers();
+      await waitFor(() => expect(queryByLabelText('Foo Bar')).toBeNull());
+
+      expect(queryByLabelText('Foo Bar')).toBeNull();
+      expect(queryByLabelText('Buz Baz')).toBeNull();
+      expect(getByLabelText('Api Version')).toBeVisible();
     });
   });
 

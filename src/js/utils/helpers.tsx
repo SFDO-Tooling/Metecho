@@ -235,6 +235,7 @@ export const getSchemaForChangeset = (
   const matchedSchema: DatasetSchema = {};
 
   for (const [objectName, fieldNames] of Object.entries(changes)) {
+    /* istanbul ignore else */
     if (schema[objectName]) {
       const fields = pick(schema[objectName].fields, fieldNames);
       matchedSchema[objectName] = { ...schema[objectName], fields };
@@ -273,6 +274,7 @@ export const filterChangesetBySchema = (
 };
 
 export const filterSchema = (schema: DatasetSchema, search: string) => {
+  /* istanbul ignore if */
   if (!search) {
     return schema;
   }
