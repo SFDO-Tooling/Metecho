@@ -1,0 +1,32 @@
+// Dataset Capture Panels
+// ======================
+
+.metecho-modal-inner-content {
+  display: grid;
+  overflow-y: hidden;
+
+  @media (min-width: $mq-large) {
+    grid-template-rows: var(
+      --modal-content-rows,
+      minmax(min-content, 1fr) minmax(0, auto)
+    );
+    max-height: 100%;
+  }
+}
+
+.metecho-scroll-panel {
+  // height: inherit;
+  overflow-y: auto;
+}
+
+// Dataset Layout of the
+.metecho-form-panels {
+  display: grid;
+  gap: #{$spacing-large};
+  grid-template-columns: var(--form-panels-columns, 1fr);
+
+  @media (min-width: $mq-large) {
+    --form-panels-columns: 1fr 1fr;
+    overflow-y: hidden;
+  }
+}

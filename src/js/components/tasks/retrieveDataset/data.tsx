@@ -355,7 +355,7 @@ const RemovingList = ({
   };
 
   return (
-    <div className="metecho-modal-content-wrapper">
+    <>
       <div
         className={classNames(
           'slds-form',
@@ -437,7 +437,7 @@ const RemovingList = ({
             .value()}
         </ModalCard>
       </div>
-    </div>
+    </>
   );
 };
 

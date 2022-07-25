@@ -10,28 +10,15 @@
   grid-template-columns: 1fr auto;
 }
 
-.metecho-modal-inner-content {
-  display: grid;
-  grid-template-rows: minmax(min-content, 30%) 1fr;
-  grid-template-rows: minmax(min-content, 23%) minmax(auto, 1fr);
-  max-height: 100%;
-  overflow-y: hidden;
+.metecho-nested-checkboxes {
+  // line up with above label
+  // add grid + (faux checkbox + label margin)
+  padding-left: var(
+    --nested-checkboxes-padding-left,
+    calc($square-icon-x-small-boundary + $spacing-large)
+  );
 }
 
-.metecho-scroll-panel {
-  height: inherit;
-  overflow-y: auto;
-}
-
-.metecho-form-panels {
-  display: grid;
-  gap: #{$spacing-large};
-  grid-template-columns: 1fr 1fr;
-  height: 100%;
-  overflow-y: hidden;
-}
-
-// @@@
 .form-grid-three {
   display: grid;
   gap: $spacing-x-small;
@@ -79,6 +66,8 @@
     overflow: inherit;
 
     > div {
+      display: flex;
+      flex-direction: column;
       height: inherit;
     }
   }
@@ -114,15 +103,6 @@
       flex-grow: 1;
     }
   }
-}
-
-.metecho-nested-checkboxes {
-  // line up with above label
-  // add grid + (faux checkbox + label margin)
-  padding-left: var(
-    --nested-checkboxes-padding-left,
-    calc($square-icon-x-small-boundary + $spacing-large)
-  );
 }
 
 [data-form='create-epic-branch'] {
