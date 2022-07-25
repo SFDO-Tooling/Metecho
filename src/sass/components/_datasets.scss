@@ -6,17 +6,53 @@
   overflow-y: hidden;
 
   @media (min-width: $mq-large) {
-    grid-template-rows: var(--modal-content-rows, minmax(0, 30%) 1fr);
+    grid-template-rows: var(--modal-content-rows, minmax(0, auto) 1fr);
     max-height: 100%;
   }
 }
 
+.metecho-scroll-panel-container {
+  overflow-y: hidden;
+
+  .slds-card {
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
+  }
+
+  .slds-card__body {
+    overflow-y: hidden;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: var(--panel-overflow);
+    }
+  }
+
+  &.metecho-existing-data-remove {
+    .slds-card__body {
+      > div {
+        --panel-overflow: auto;
+      }
+    }
+  }
+}
+
 .metecho-scroll-panel {
-  // height: inherit;
   overflow-y: auto;
 }
 
-// Dataset Layout of the
+// Constrain height here instead of on the grid template so row will collapse
+// if not available
+.metecho-existing-data-remove {
+  @media (min-width: $mq-large) {
+    max-height: 30vh;
+  }
+}
+
+// Layout of the Data Options and Selected Data panels
 .metecho-form-panels {
   display: grid;
   gap: #{$spacing-large};
@@ -24,7 +60,7 @@
 
   @media (min-width: $mq-large) {
     --form-panels-columns: 1fr 1fr;
-
+    grid-row: 2; // incase the existing data to remove box is hidden
     overflow-y: hidden;
   }
 }

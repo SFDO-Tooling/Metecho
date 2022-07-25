@@ -48,29 +48,6 @@
 [data-form='task-retrieve-changes'] {
   display: grid;
   height: 100%;
-  overflow-y: hidden;
-
-  .slds-card {
-    display: flex;
-    flex-direction: column;
-    // height: inherit;
-    overflow-y: hidden;
-  }
-
-  .metecho-panel-container {
-    height: inherit;
-  }
-
-  .slds-card__body {
-    // height: inherit;
-    overflow-y: hidden;
-
-    > div {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-  }
 
   .success-highlight {
     background-color: $color-background-highlight;
