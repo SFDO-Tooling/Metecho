@@ -160,7 +160,7 @@ export const SchemaList = ({
 
   return (
     <div
-      className={classNames('has-checkboxes', className)}
+      className={classNames('has-checkboxes', 'slds-form', className)}
       data-form="task-retrieve-changes"
       {...props}
     >
@@ -355,89 +355,85 @@ const RemovingList = ({
   };
 
   return (
-    <>
-      <div
-        className={classNames(
-          'slds-form',
-          'slds-size_1-of-1',
-          'slds-p-top_large',
-          'slds-p-horizontal_large',
-          'has-checkboxes',
-          className,
-        )}
-        data-form="task-retrieve-changes"
-        // @@@
-        style={{ height: 'unset' }}
-        {...props}
+    <div
+      className={classNames(
+        'slds-form',
+        'slds-size_1-of-1',
+        'slds-p-top_large',
+        'slds-p-horizontal_large',
+        'has-checkboxes',
+        className,
+      )}
+      data-form="task-retrieve-changes"
+      {...props}
+    >
+      <ModalCard
+        heading={
+          <span className="slds-m-left_xx-small">
+            {t('Existing Data To Remove')}
+          </span>
+        }
+        noBodyPadding
       >
-        <ModalCard
-          heading={
-            <span className="slds-m-left_xx-small">
-              {t('Existing Data To Remove')}
-            </span>
-          }
-          noBodyPadding
-        >
-          <p
-            className="slds-text-color_error
+        <p
+          className="slds-text-color_error
             slds-m-left_xx-small
             slds-p-horizontal_medium
             slds-p-vertical_x-small"
-          >
-            <Trans i18nKey="outdatedSchemaWarning">
-              The dataset you selected contains fields that no longer exist in
-              this Dev Org. If you continue, the following data will be removed
-              from this dataset.
-            </Trans>
-          </p>
-          {chain(Object.keys(changes))
-            .sortBy(toLower)
-            .map((groupName, index) => {
-              const uniqueGroupName = `${type}-${groupName}`;
-              const fields = sortBy(changes[groupName], toLower);
+        >
+          <Trans i18nKey="outdatedSchemaWarning">
+            The dataset you selected contains fields that no longer exist in
+            this Dev Org. If you continue, the following data will be removed
+            from this dataset.
+          </Trans>
+        </p>
+        {chain(Object.keys(changes))
+          .sortBy(toLower)
+          .map((groupName, index) => {
+            const uniqueGroupName = `${type}-${groupName}`;
+            const fields = sortBy(changes[groupName], toLower);
 
-              return (
-                <Accordion key={uniqueGroupName} className="light-bordered-row">
-                  <AccordionPanel
-                    expanded={Boolean(expandedPanels[uniqueGroupName])}
-                    key={`${uniqueGroupName}-panel`}
-                    id={`${type}-group-${index}`}
-                    onTogglePanel={() => handlePanelToggle(uniqueGroupName)}
-                    title={groupName}
-                    panelContentActions={
-                      <div className="form-grid">
-                        <span
-                          className="slds-text-body_regular
+            return (
+              <Accordion key={uniqueGroupName} className="light-bordered-row">
+                <AccordionPanel
+                  expanded={Boolean(expandedPanels[uniqueGroupName])}
+                  key={`${uniqueGroupName}-panel`}
+                  id={`${type}-group-${index}`}
+                  onTogglePanel={() => handlePanelToggle(uniqueGroupName)}
+                  title={groupName}
+                  panelContentActions={
+                    <div className="form-grid">
+                      <span
+                        className="slds-text-body_regular
                           slds-p-top_xxx-small"
-                        >
-                          {groupName}
-                        </span>
-                      </div>
-                    }
-                    summary=""
-                  >
-                    {fields.map((fieldName) => (
-                      <div
-                        key={`${uniqueGroupName}-${fieldName}`}
-                        className="form-grid"
                       >
-                        <span
-                          className="slds-text-body_regular
+                        {groupName}
+                      </span>
+                    </div>
+                  }
+                  summary=""
+                >
+                  {fields.map((fieldName) => (
+                    <div
+                      key={`${uniqueGroupName}-${fieldName}`}
+                      className="form-grid"
+                    >
+                      <span
+                        className="slds-text-body_regular
                           slds-p-top_xxx-small
                           metecho-nested-checkboxes"
-                        >
-                          {fieldName}
-                        </span>
-                      </div>
-                    ))}
-                  </AccordionPanel>
-                </Accordion>
-              );
-            })
-            .value()}
-        </ModalCard>
-      </div>
-    </>
+                      >
+                        {fieldName}
+                      </span>
+                    </div>
+                  ))}
+                </AccordionPanel>
+              </Accordion>
+            );
+          })
+          .value()}
+      </ModalCard>
+    </div>
   );
 };
 
@@ -487,39 +483,33 @@ const DataForm = ({
     updateChecked(thisChange, checked);
   };
 
-  const classes = 'slds-form';
-
   return (
-    <>
-      <div className="metecho-modal-inner-content">
-        {!isEmpty(outdatedChangeset) && (
-          <RemovingList changes={outdatedChangeset} />
-        )}
-        <div className="slds-p-around_large metecho-form-panels">
-          <SchemaList
-            className={classes}
-            type="all"
-            heading={t('Data Options')}
-            schema={schema}
-            checkedChanges={inputs.dataset_definition}
-            errors={errors.dataset_definition}
-            handleSelectGroup={handleSelectGroup}
-            handleChange={handleChange}
-          />
-          <SchemaList
-            className={classNames('my-new-class', classes)}
-            type="selected"
-            heading={t('Selected Data')}
-            schema={selectedSchema}
-            errors={
-              noChanges && !isEmpty(selectedSchema)
-                ? t('Selected data matches existing dataset.')
-                : undefined
-            }
-          />
-        </div>
+    <div className="metecho-modal-inner-content">
+      {!isEmpty(outdatedChangeset) && (
+        <RemovingList changes={outdatedChangeset} />
+      )}
+      <div className="slds-p-around_large metecho-form-panels">
+        <SchemaList
+          type="all"
+          heading={t('Data Options')}
+          schema={schema}
+          checkedChanges={inputs.dataset_definition}
+          errors={errors.dataset_definition}
+          handleSelectGroup={handleSelectGroup}
+          handleChange={handleChange}
+        />
+        <SchemaList
+          type="selected"
+          heading={t('Selected Data')}
+          schema={selectedSchema}
+          errors={
+            noChanges && !isEmpty(selectedSchema)
+              ? t('Selected data matches existing dataset.')
+              : undefined
+          }
+        />
       </div>
-    </>
+    </div>
   );
 };
 
