@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0112_github_models_populate"),
+        ("api", "0113_github_models_populate"),
     ]
 
     operations = [

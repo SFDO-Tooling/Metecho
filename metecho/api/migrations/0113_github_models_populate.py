@@ -95,7 +95,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0111_github_models_refactor_start"),
+        ("api", "0112_github_models_refactor_start"),
         ("socialaccount", "0003_extra_data_default_dict"),
     ]
 
