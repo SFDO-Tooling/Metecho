@@ -2329,12 +2329,11 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: object
-          additionalProperties: {}
-          readOnly: true
+          type: integer
+          nullable: true
         assigned_qa:
-          type: object
-          additionalProperties: {}
+          allOf:
+          - $ref: '#/components/schemas/ShortGitHubUser'
           readOnly: true
         dev_org:
           type: string
@@ -2665,6 +2664,8 @@ components:
           type: integer
         login:
           type: string
+        name:
+          type: string
         avatar_url:
           type: string
           format: uri
@@ -2769,12 +2770,11 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: object
-          additionalProperties: {}
-          readOnly: true
+          type: integer
+          nullable: true
         assigned_qa:
-          type: object
-          additionalProperties: {}
+          allOf:
+          - $ref: '#/components/schemas/ShortGitHubUser'
           readOnly: true
         dev_org:
           type: string
@@ -2786,7 +2786,6 @@ components:
         org_config_name:
           type: string
       required:
-      - assigned_dev
       - assigned_qa
       - branch_diff_url
       - branch_url

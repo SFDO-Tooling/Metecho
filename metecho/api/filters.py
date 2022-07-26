@@ -73,8 +73,7 @@ class TaskFilter(filters.FilterSet):
     def filter_by_assigned(self, queryset, name, assigned_to_me):
         gh_id = self.request.user.github_id
         lookup = queryset.filter if assigned_to_me else queryset.exclude
-
-        return lookup(Q(assigned_dev=gh_id) | Q(assigned_qa=gh_id))
+        return lookup(Q(assigned_dev_id=gh_id) | Q(assigned_qa_id=gh_id))
 
 
 class ScratchOrgFilter(filters.FilterSet):
