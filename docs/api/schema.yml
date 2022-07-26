@@ -2214,7 +2214,7 @@ components:
           type: string
           readOnly: true
         owner_gh_id:
-          type: string
+          type: integer
           readOnly: true
           nullable: true
         has_been_visited:
@@ -2607,7 +2607,7 @@ components:
           type: string
           readOnly: true
         owner_gh_id:
-          type: string
+          type: integer
           readOnly: true
           nullable: true
         has_been_visited:

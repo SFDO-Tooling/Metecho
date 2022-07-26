@@ -121,4 +121,9 @@ class Migration(migrations.Migration):
                 to="api.githubuser",
             ),
         ),
+        migrations.AlterField(
+            model_name="scratchorg",
+            name="owner_gh_id",
+            field=models.IntegerField(blank=True, null=True),
+        ),
     ]

@@ -1241,7 +1241,7 @@ class ScratchOrg(
     expiry_job_id = StringField(blank=True, default="")
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
-    owner_gh_id = StringField(null=True, blank=True)
+    owner_gh_id = models.IntegerField(null=True, blank=True)
     has_been_visited = models.BooleanField(default=False)
     valid_target_directories = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
