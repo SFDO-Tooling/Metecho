@@ -14,11 +14,11 @@ const UserActions = ({
   setUser,
 }: {
   type: OrgTypes;
-  assignedUserId: string | undefined;
-  currentUserId: string | null;
+  assignedUserId: number | null;
+  currentUserId: number | null;
   userHasPermissions: boolean;
   openAssignUserModal: (orgType: OrgTypes) => void;
-  setUser: (user: string | null, shouldAlertAssignee: boolean) => void;
+  setUser: (user: number | null, shouldAlertAssignee: boolean) => void;
 }) => {
   const { t } = useTranslation();
 

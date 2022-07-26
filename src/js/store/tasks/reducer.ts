@@ -3,6 +3,7 @@ import { find, reject, unionBy, uniq } from 'lodash';
 import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
 import { TaskAction } from '@/js/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
+import { GitHubUser } from '@/js/store/user/reducer';
 import {
   NULL_FILTER_VALUE,
   OBJECT_TYPES,
@@ -11,8 +12,6 @@ import {
   TASKS_BY_PROJECT_KEY,
   TaskStatuses,
 } from '@/js/utils/constants';
-
-import { GitHubUser } from '../user/reducer';
 
 export interface Commit {
   id: string;
@@ -37,7 +36,7 @@ export interface Task {
     id: string;
     name: string;
     slug: string;
-    github_users: string[];
+    github_users: number[];
   } | null;
   project: string | null;
   root_project: string;

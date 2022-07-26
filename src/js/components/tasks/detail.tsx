@@ -124,7 +124,6 @@ const TaskDetail = (
   );
   const { orgs } = useFetchOrgsIfMissing({ taskId: task?.id }, props);
   const user = useSelector(selectUserState) as User;
-  const qaUser = task?.assigned_qa;
   const {
     history,
     location: { state },
@@ -135,9 +134,11 @@ const TaskDetail = (
   );
   const taskIsMerged = task?.status === TASK_STATUSES.COMPLETED;
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
+  const userIsAssignedDev = Boolean(
+    task?.assigned_dev && user.github_id === task.assigned_dev.id,
+  );
   const userIsAssignedTester = Boolean(
-    user.github_id === task?.assigned_qa?.id,
+    task?.assigned_qa && user.github_id === task.assigned_qa.id,
   );
   const hasReviewRejected = Boolean(
     task?.review_valid &&
@@ -962,7 +963,6 @@ const TaskDetail = (
                       task={task}
                       orgs={taskOrgs}
                       user={user}
-                      projectId={project.id}
                       hasPermissions={project.has_push_permission}
                       isCreatingOrg={isCreatingOrg}
                       handleAction={handleStepAction}
@@ -1095,7 +1095,7 @@ const TaskDetail = (
                 instanceType="task"
                 isOpen={submitModalOpen}
                 toggleModal={setSubmitModalOpen}
-                assignee={qaUser}
+                assignee={task?.assigned_qa}
                 originatingUser={user.github_id}
               />
             )}

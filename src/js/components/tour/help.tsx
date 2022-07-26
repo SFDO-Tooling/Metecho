@@ -3,7 +3,6 @@ import { pick } from 'lodash';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
-import { GitHubUser } from 'src/js/store/user/reducer';
 
 import GuidedTour, {
   getFinalStep,
@@ -11,28 +10,19 @@ import GuidedTour, {
 } from '@/js/components/tour/guided';
 import { getDemoEpic } from '@/js/components/tour/plan';
 import { Task } from '@/js/store/tasks/reducer';
+import { GitHubUser } from '@/js/store/user/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
-
-export const demoGithubUser: GitHubUser = {
-  id: '123',
-  login: 'gh-username',
-  avatar_url: 'gh-avatar-url',
-  name: 'gh-name',
-  permissions: {
-    pull: true,
-    push: false,
-    admin: false,
-  },
-};
 
 export const getDemoTask = ({
   project,
   project_slug,
+  githubUser,
 }: {
   project: string;
   project_slug: string;
+  githubUser: GitHubUser | null;
 }): Task => {
-  const epic = getDemoEpic({ project, demoGithubUser });
+  const epic = getDemoEpic({ project, githubUser });
 
   return {
     id: 'demo-task',
@@ -61,7 +51,7 @@ export const getDemoTask = ({
     review_sha: '',
     status: TASK_STATUSES.IN_PROGRESS,
     pr_is_open: false,
-    assigned_dev: demoGithubUser,
+    assigned_dev: githubUser,
     assigned_qa: null,
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,

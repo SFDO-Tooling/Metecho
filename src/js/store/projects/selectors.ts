@@ -51,6 +51,15 @@ export const selectProjectById = (appState: AppState, id?: string | null) =>
     .flat()
     .find((p) => p.id === id);
 
+export const selectProjectCollaborator = (
+  appState: AppState,
+  projectId?: string,
+  userId?: number | null,
+) => {
+  const project = selectProjectById(appState, projectId);
+  return project?.github_users.find((user) => user.id === userId) || null;
+};
+
 export const selectProjectDependencies = createSelector(
   selectProjectsState,
   (projects) => projects.dependencies,

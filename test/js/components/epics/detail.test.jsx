@@ -26,6 +26,7 @@ import {
   sampleIssue1,
   sampleIssue2,
   sampleReadOnlyGitHubUser,
+  sampleUser1,
 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -52,7 +53,7 @@ const defaultOrg = {
   id: 'org-id',
   epic: 'epic1',
   org_type: 'Playground',
-  owner: sampleGitHubUser1.id,
+  owner: sampleUser1.id,
   owner_gh_username: sampleGitHubUser1.username,
   owner_gh_id: sampleGitHubUser1.id,
   expires_at: '2019-09-16T12:58:53.721Z',
@@ -224,9 +225,9 @@ const defaultState = {
     },
   },
   user: {
-    id: sampleGitHubUser1.id,
-    username: sampleGitHubUser1.username,
-    github_id: sampleGitHubUser1.id,
+    id: sampleUser1.id,
+    username: sampleUser1.username,
+    github_id: sampleUser1.github_id,
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },

@@ -12,6 +12,7 @@ import { refetchOrg } from '@/js/store/orgs/actions';
 import {
   sampleGitHubUser1,
   sampleGitHubUser2,
+  sampleUser1,
 } from '../../../../src/stories/fixtures';
 import {
   renderWithRedux,
@@ -43,7 +44,7 @@ const defaultOrgs = {
     id: 'org-id',
     task: 'task-id',
     org_type: 'Dev',
-    owner: sampleGitHubUser1.id,
+    owner: sampleUser1.id,
     owner_gh_username: sampleGitHubUser1.username,
     owner_gh_id: sampleGitHubUser1.id,
     expires_at: '2019-09-16T12:58:53.721Z',
@@ -68,9 +69,9 @@ const defaultProject = {
 };
 const defaultState = {
   user: {
-    id: sampleGitHubUser1.id,
-    github_id: sampleGitHubUser1.id,
-    username: sampleGitHubUser1.name,
+    id: sampleUser1.id,
+    github_id: sampleUser1.github_id,
+    username: sampleUser1.username,
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
@@ -195,7 +196,7 @@ describe('<TaskOrgCards/>', () => {
         ...defaultOrgs,
         Dev: {
           ...defaultOrgs.Dev,
-          owner: sampleGitHubUser2.id,
+          owner: 'other-user-id',
           owner_gh_username: sampleGitHubUser2.name,
           owner_gh_id: sampleGitHubUser2.id,
           unsaved_changes: {},
@@ -225,7 +226,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
-          owner_gh_id: 'other-user-id',
+          owner_gh_id: 111111,
         },
       };
       const { queryByText, getByText } = setup({ orgs });

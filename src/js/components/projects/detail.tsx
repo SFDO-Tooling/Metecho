@@ -15,11 +15,8 @@ import SelectIssueModal from '@/js/components/githubIssues/selectIssueModal';
 import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import ProjectNotFound from '@/js/components/projects/project404';
 import CreateTaskModal from '@/js/components/tasks/createForm';
-import TasksTableComponent from '@/js/components/tasks/table';
-import HelpTour, {
-  demoGithubUser,
-  getDemoTask,
-} from '@/js/components/tour/help';
+import TaskTable from '@/js/components/tasks/table';
+import HelpTour, { getDemoTask } from '@/js/components/tour/help';
 import LandingModal from '@/js/components/tour/landing';
 import PlanTour, { getDemoEpic } from '@/js/components/tour/plan';
 import PlayTour, { getDemoOrg } from '@/js/components/tour/play';
@@ -40,10 +37,11 @@ import {
   useFetchProjectTasksIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
-import { ThunkDispatch } from '@/js/store';
+import { AppState, ThunkDispatch } from '@/js/store';
 import { fetchObjects } from '@/js/store/actions';
 import { GitHubIssue } from '@/js/store/githubIssues/reducer';
 import { Org } from '@/js/store/orgs/reducer';
+import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { onboarded } from '@/js/store/user/actions';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -94,6 +92,9 @@ const ProjectDetail = (
       tasksTabViewed,
     },
     props,
+  );
+  const githubUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, project?.id, user.github_id),
   );
   const assignUser = useAssignUserToTask();
   const runningPlayTour = tourRunning === WALKTHROUGH_TYPES.PLAY;
@@ -521,7 +522,7 @@ const ProjectDetail = (
                     ? [
                         getDemoEpic({
                           project: project.id,
-                          demoGithubUser,
+                          githubUser,
                         }),
                       ]
                     : epics?.epics || []
@@ -619,7 +620,7 @@ const ProjectDetail = (
                   />
                 </span>
               </div>
-              <TasksTableComponent
+              <TaskTable
                 projectId={project.id}
                 tasks={
                   tourRunning && !tasks?.length
@@ -627,6 +628,7 @@ const ProjectDetail = (
                         getDemoTask({
                           project: project.id,
                           project_slug: project.slug,
+                          githubUser,
                         }),
                       ]
                     : tasks || []

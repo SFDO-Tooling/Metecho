@@ -40,7 +40,7 @@ type AssignUserAction = ({
 }: {
   task: Task;
   type: OrgTypes;
-  assignee: string | null;
+  assignee: number | null;
   shouldAlertAssignee: boolean;
 }) => void;
 
@@ -151,7 +151,7 @@ const AssigneeTableCell = ({
   currentUser?: User;
   canAssign: boolean;
   isRefreshingUsers: boolean;
-  assignUserAction?: AssignUserAction | undefined;
+  assignUserAction?: AssignUserAction;
 }) => {
   const { t } = useTranslation();
 
@@ -165,7 +165,7 @@ const AssigneeTableCell = ({
   };
 
   const doAssignUserAction = useCallback(
-    (assignee: string | null, shouldAlertAssignee: boolean) => {
+    (assignee: number | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
       if (!item || !type || !assignUserAction) {
         return;
@@ -193,37 +193,67 @@ const AssigneeTableCell = ({
     return null;
   }
 
-  let contents, title, assignedUser;
+  let contents, title, assignedUser: GitHubUser | undefined;
 
   switch (type) {
     case ORG_TYPES.DEV:
       if (item?.assigned_dev) {
-        assignedUser = item?.assigned_dev;
-        contents = <GitHubUserAvatar user={item?.assigned_dev} />;
-        title = item?.assigned_dev?.login;
+        assignedUser = item.assigned_dev;
+        contents = <GitHubUserAvatar user={assignedUser} />;
+        title = assignedUser.login;
       } else {
         title = t('Assign Developer');
       }
       break;
     case ORG_TYPES.QA:
       if (item?.assigned_qa) {
-        assignedUser = item?.assigned_qa;
-        contents = <GitHubUserAvatar user={item?.assigned_qa} />;
-        title = item?.assigned_qa?.login;
+        assignedUser = item.assigned_qa;
+        contents = <GitHubUserAvatar user={assignedUser} />;
+        title = assignedUser.login;
       } else {
         title = t('Assign Tester');
       }
       break;
   }
 
-  if (!assignedUser && canAssign && assignUserAction && githubUsers) {
-    const epicCollaborators = item.epic
-      ? epicUsers ||
-        githubUsers?.filter((user) => item.epic?.github_users.includes(user.id))
-      : null;
+  if (!assignedUser && assignUserAction) {
+    if (canAssign && githubUsers) {
+      const epicCollaborators = item.epic
+        ? epicUsers ||
+          githubUsers.filter((user) =>
+            item.epic?.github_users.includes(user.id),
+          )
+        : null;
 
-    contents = (
-      <>
+      contents = (
+        <>
+          <Button
+            className="slds-m-left_xx-small"
+            assistiveText={{ icon: title }}
+            iconCategory="utility"
+            iconName="adduser"
+            iconSize="medium"
+            variant="icon"
+            title={title}
+            onClick={openAssignUserModal}
+          />
+          <AssignTaskRoleModal
+            projectId={item.root_project}
+            taskHasEpic={Boolean(item.epic)}
+            epicUsers={epicCollaborators}
+            githubUsers={githubUsers}
+            selectedUser={assignedUser || null}
+            orgType={type}
+            isOpen={assignUserModalOpen}
+            isRefreshingUsers={isRefreshingUsers}
+            onRequestClose={closeAssignUserModal}
+            setUser={doAssignUserAction}
+          />
+        </>
+      );
+    } else if (!canAssign && type === ORG_TYPES.QA && currentUser?.github_id) {
+      title = t('Self-Assign as Tester');
+      contents = (
         <Button
           className="slds-m-left_xx-small"
           assistiveText={{ icon: title }}
@@ -232,42 +262,12 @@ const AssigneeTableCell = ({
           iconSize="medium"
           variant="icon"
           title={title}
-          onClick={openAssignUserModal}
+          onClick={doSelfAssignUserAction}
         />
-        <AssignTaskRoleModal
-          projectId={item.root_project}
-          taskHasEpic={Boolean(item.epic)}
-          epicUsers={epicCollaborators}
-          githubUsers={githubUsers}
-          selectedUser={assignedUser || null}
-          orgType={type}
-          isOpen={assignUserModalOpen}
-          isRefreshingUsers={isRefreshingUsers}
-          onRequestClose={closeAssignUserModal}
-          setUser={doAssignUserAction}
-        />
-      </>
-    );
-  } else if (
-    type === ORG_TYPES.QA &&
-    currentUser?.github_id &&
-    assignUserAction &&
-    !assignedUser
-  ) {
-    title = t('Self-Assign as Tester');
-    contents = (
-      <Button
-        className="slds-m-left_xx-small"
-        assistiveText={{ icon: title }}
-        iconCategory="utility"
-        iconName="adduser"
-        iconSize="medium"
-        variant="icon"
-        title={title}
-        onClick={doSelfAssignUserAction}
-      />
-    );
+      );
+    }
   }
+
   return (
     <DataTableCell {...props} title={title} className={className}>
       {contents}

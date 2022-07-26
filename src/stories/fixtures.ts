@@ -54,7 +54,7 @@ export const sampleUser1 = {
   username: 'someuser1',
   email: 'developer@web.com',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
-  github_id: '999999',
+  github_id: 999999,
   valid_token_for: '00Dxxxxxxxxxxxxxxx',
   sf_username: 'developer@web.com',
   org_name: 'OddBird',
@@ -73,7 +73,7 @@ export const sampleUser1 = {
 };
 
 export const sampleGitHubUser1 = {
-  id: '123456',
+  id: 999999,
   login: 'TestGitHubUser',
   name: 'Test GitHub User',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
@@ -85,7 +85,7 @@ export const sampleGitHubUser1 = {
 };
 
 export const sampleGitHubUser2 = {
-  id: '234567',
+  id: 234567,
   login: 'OtherUser',
   name: 'Other User',
   avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
@@ -97,7 +97,7 @@ export const sampleGitHubUser2 = {
 };
 
 export const sampleGitHubUser3 = {
-  id: '345678',
+  id: 345678,
   login: 'ThirdUser',
   avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
   permissions: {
@@ -108,7 +108,7 @@ export const sampleGitHubUser3 = {
 };
 
 export const sampleGitHubUser4 = {
-  id: '123123',
+  id: 123123,
   login: 'FourthUser',
   avatar_url: 'https://randomuser.me/api/portraits/men/3.jpg',
   permissions: {
@@ -119,7 +119,7 @@ export const sampleGitHubUser4 = {
 };
 
 export const sampleReadOnlyGitHubUser = {
-  id: '44444',
+  id: 444444,
   login: 'ReadOnly',
   avatar_url: 'https://randomuser.me/api/portraits/men/4.jpg',
   permissions: {
@@ -820,7 +820,7 @@ export const sampleDevOrg = {
   org_type: ORG_TYPES.DEV,
   owner: 'user-id',
   owner_gh_username: 'user-name',
-  owner_gh_id: 'user-id',
+  owner_gh_id: 123456,
   description: '',
   description_rendered: '',
   org_config_name: 'dev',
@@ -855,7 +855,7 @@ export const sampleScratchOrg = {
   org_type: ORG_TYPES.PLAYGROUND,
   owner: 'user-id',
   owner_gh_username: 'user-name',
-  owner_gh_id: 'user-id',
+  owner_gh_id: 123456,
   description: '',
   description_rendered: '',
   org_config_name: 'dev',

@@ -84,12 +84,12 @@ const TaskOrgCard = ({
 }: TaskOrgCardProps) => {
   const { t } = useTranslation();
 
-  let assignedUserId: string | undefined, heading, orgHeading, assignedUser;
+  let assignedUser: GitHubUser | null = null;
+  let heading, orgHeading;
   let popover: ReactNode = null;
   switch (type) {
     case ORG_TYPES.QA:
       assignedUser = task.assigned_qa;
-      assignedUserId = assignedUser?.id;
       heading = t('Tester');
       orgHeading = t('Test Org');
       popover = (
@@ -111,9 +111,8 @@ const TaskOrgCard = ({
       break;
     case ORG_TYPES.DEV:
       assignedUser = task.assigned_dev;
-      assignedUserId = assignedUser?.id;
       heading =
-        !userHasPermissions && !assignedUserId
+        !userHasPermissions && !assignedUser
           ? t('No Developer')
           : t('Developer');
       orgHeading = t('Dev Org');
@@ -135,10 +134,12 @@ const TaskOrgCard = ({
       );
       break;
   }
-  const assignedToCurrentUser = user.github_id === assignedUser?.id;
+  const assignedToCurrentUser = Boolean(
+    assignedUser && user.github_id === assignedUser.id,
+  );
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
-    org?.is_created && org.owner_gh_id !== assignedUserId ? org : null;
+    org?.is_created && org.owner_gh_id !== assignedUser?.id ? org : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
@@ -168,7 +169,7 @@ const TaskOrgCard = ({
   };
 
   const doAssignUser = useCallback(
-    (assignee: string | null, shouldAlertAssignee: boolean) => {
+    (assignee: number | null, shouldAlertAssignee: boolean) => {
       handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [handleAssignUser, type],
@@ -222,10 +223,10 @@ const TaskOrgCard = ({
         headerActions={
           userHasPermissions ||
           type === ORG_TYPES.QA ||
-          (assignedUserId && assignedUserId === user.github_id) ? (
+          assignedToCurrentUser ? (
             <UserActions
               type={type}
-              assignedUserId={assignedUserId}
+              assignedUserId={(assignedUser as GitHubUser).id}
               currentUserId={user.github_id}
               userHasPermissions={userHasPermissions}
               openAssignUserModal={openAssignUserModal}

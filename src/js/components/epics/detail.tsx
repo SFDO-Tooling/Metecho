@@ -141,7 +141,7 @@ const EpicDetail = (
   }, [epic, epicSlug]);
 
   const usersAssignedToTasks = useMemo(() => {
-    const users = new Set<string>();
+    const users = new Set<number>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
         users.add(task.assigned_dev.id);

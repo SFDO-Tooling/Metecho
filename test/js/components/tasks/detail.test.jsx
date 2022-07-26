@@ -27,6 +27,7 @@ import {
   sampleGitHubUser2,
   sampleIssue1,
   sampleIssue2,
+  sampleUser1,
 } from '../../../../src/stories/fixtures';
 import {
   renderWithRedux,
@@ -67,7 +68,7 @@ const defaultOrg = {
   id: 'org-id',
   task: 'task1',
   org_type: 'Dev',
-  owner: sampleGitHubUser1.id,
+  owner: sampleUser1.id,
   owner_gh_username: sampleGitHubUser1.username,
   owner_gh_id: sampleGitHubUser1.id,
   expires_at: '2019-09-16T12:58:53.721Z',
@@ -92,9 +93,9 @@ const defaultOrg = {
 
 const defaultState = {
   user: {
-    id: sampleGitHubUser1.id,
-    github_id: sampleGitHubUser1.id,
-    username: sampleGitHubUser1.name,
+    id: sampleUser1.id,
+    github_id: sampleUser1.github_id,
+    username: sampleUser1.username,
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -1196,7 +1197,7 @@ describe('<TaskDetail/>', () => {
       id: 'dev-org',
       task: 'task1',
       org_type: 'Dev',
-      owner: sampleGitHubUser1.id,
+      owner: sampleUser1.id,
       owner_gh_username: sampleGitHubUser1.username,
       owner_gh_id: sampleGitHubUser1.id,
       url: '/foo/',
@@ -1208,7 +1209,7 @@ describe('<TaskDetail/>', () => {
       id: 'review-org',
       task: 'task1',
       org_type: 'QA',
-      owner: sampleGitHubUser1.id,
+      owner: sampleUser1.id,
       owner_gh_username: sampleGitHubUser1.username,
       owner_gh_id: sampleGitHubUser1.id,
       url: '/bar/',

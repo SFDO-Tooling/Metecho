@@ -2,21 +2,21 @@ import * as i18n from 'i18next';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Step } from 'react-joyride';
-import { GitHubUser } from 'src/js/store/user/reducer';
 
 import GuidedTour, {
   getFinalStep,
   TourProps,
 } from '@/js/components/tour/guided';
 import { Epic } from '@/js/store/epics/reducer';
+import { GitHubUser } from '@/js/store/user/reducer';
 import { EPIC_STATUSES } from '@/js/utils/constants';
 
 export const getDemoEpic = ({
   project,
-  demoGithubUser,
+  githubUser,
 }: {
   project: string;
-  demoGithubUser: GitHubUser | null;
+  githubUser: GitHubUser | null;
 }): Epic => {
   const description = i18n.t(
     'This is a sample description to show where the description of the Epic would appear.',
@@ -42,9 +42,7 @@ export const getDemoEpic = ({
     pr_is_open: false,
     pr_is_merged: false,
     status: EPIC_STATUSES.IN_PROGRESS,
-    github_users: /* istanbul ignore next */ demoGithubUser
-      ? [demoGithubUser?.id]
-      : [],
+    github_users: /* istanbul ignore next */ githubUser ? [githubUser.id] : [],
     latest_sha: '',
     issue: null,
   };

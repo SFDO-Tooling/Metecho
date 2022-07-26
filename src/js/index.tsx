@@ -260,13 +260,13 @@ initializeI18n((i18nError?: string) => {
           // Because the refetch-projects/orgs jobs may complete before the
           // websocket channel subscription is finalized, poll every second
           // to check if jobs have finished:
-          const POLLING_LIMIT = 10;
+          const POLLING_LIMIT = 20;
           let count = 0;
           const checkIfJobIsComplete = () => {
             window.setTimeout(() => {
               fetching = userFetching();
               if (fetching.size) {
-                // Stop polling after 10 seconds
+                // Stop polling after 20 seconds
                 if (count >= POLLING_LIMIT) {
                   if (fetching.has('currently_fetching_repos')) {
                     (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
