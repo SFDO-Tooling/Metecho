@@ -223,7 +223,7 @@ class User(PushMixin, HashIdMixin, AbstractUser):
             scratch_org_to_delete.owner = None
             scratch_org_to_delete.owner_sf_username = ""
             scratch_org_to_delete.owner_gh_username = ""
-            scratch_org_to_delete.owner_gh_id = ""
+            scratch_org_to_delete.owner_gh_id = None
             scratch_org_to_delete.save()
             scratch_org_to_delete.queue_delete(originating_user_id=self.id)
 
