@@ -17,6 +17,15 @@ from ..serializers import (
 fixture = pytest.lazy_fixture
 
 
+@pytest.fixture
+def project_with_collaborator(git_hub_collaboration_factory, auth_request):
+    collab = git_hub_collaboration_factory(
+        permissions={"push": True},
+        user__id=auth_request.user.github_id,
+    )
+    return collab.project, auth_request
+
+
 @pytest.mark.django_db
 class TestFullUserSerializer:
     def test_get_sf_username(self, user_factory, settings):
@@ -64,39 +73,36 @@ class TestEpicSerializer:
         ),
     )
     def test_create(
-        self, rf, user_factory, project, git_hub_collaboration_factory, user_perms
+        self, project_with_collaborator, git_hub_collaboration_factory, user_perms
     ):
-        git_hub_collaboration_factory(project=project, permissions=user_perms)
+        project, auth_request = project_with_collaborator
+        collab = git_hub_collaboration_factory(project=project, permissions=user_perms)
         data = {
             "name": "Test epic",
             "description": "Test `epic`",
-            "project": str(project.id),
-            "github_users": [project.github_users.get().id],
+            "project": project.id,
+            "github_users": [collab.user_id],
         }
-        r = rf.get("/")
-        r.user = user_factory()
         with ExitStack() as stack:
             available_org_config_names_job = stack.enter_context(
                 patch("metecho.api.jobs.available_org_config_names_job")
             )
-            serializer = EpicSerializer(data=data, context={"request": r})
+            serializer = EpicSerializer(data=data, context={"request": auth_request})
             assert serializer.is_valid(), serializer.errors
             serializer.save()
             assert available_org_config_names_job.delay.called
 
-    def test_markdown_fields_input(self, rf, user_factory, project_factory):
-        request = rf.post("/")
-        request.user = user_factory()
-        project = project_factory()
+    def test_markdown_fields_input(self, project_with_collaborator):
+        project, auth_request = project_with_collaborator
         serializer = EpicSerializer(
             data={
                 "name": "Test epic",
                 "description": "Test `epic`",
                 "branch_name": "some-branch",
-                "project": str(project.id),
+                "project": project.id,
                 "github_users": [],
             },
-            context={"request": request},
+            context={"request": auth_request},
         )
         assert serializer.is_valid(), serializer.errors
 
@@ -132,19 +138,22 @@ class TestEpicSerializer:
             serializer.data["description_rendered"] == "<p>Test <code>epic</code></p>"
         )
 
-    def test_validate_branch_name__non_feature(self, project_factory):
-        project = project_factory()
+    def test_validate_branch_name__non_feature(self, project_with_collaborator):
+        project, auth_request = project_with_collaborator
         serializer = EpicSerializer(
             data={
                 "branch_name": "test__non-feature",
                 "name": "Test",
                 "project": str(project.id),
-            }
+            },
+            context={"request": auth_request},
         )
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
 
-    def test_validate_branch_name__already_used(self, project_factory, epic_factory):
+    def test_validate_branch_name__already_used(
+        self, project_with_collaborator, epic_factory
+    ):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             gh.get_repo_info.return_value = MagicMock(
@@ -160,23 +169,25 @@ class TestEpicSerializer:
                 }
             )
 
-            project = project_factory()
+            project, auth_request = project_with_collaborator
             epic_factory(branch_name="test")
 
         serializer = EpicSerializer(
-            data={"branch_name": "test", "name": "Test", "project": str(project.id)}
+            data={"branch_name": "test", "name": "Test", "project": project.id},
+            context={"request": auth_request},
         )
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
 
-    def test_validate_branch_name__repo_default_branch(self, project_factory):
-        project = project_factory()
+    def test_validate_branch_name__repo_default_branch(self, project_with_collaborator):
+        project, auth_request = project_with_collaborator
         serializer = EpicSerializer(
             data={
                 "branch_name": project.branch_name,
                 "name": "Test",
                 "project": str(project.id),
-            }
+            },
+            context={"request": auth_request},
         )
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
@@ -213,8 +224,8 @@ class TestEpicSerializer:
         serializer = EpicSerializer(epic)
         assert serializer.data["branch_url"] is None
 
-    def test_unique_name_for_project(self, project_factory, epic_factory):
-        project = project_factory()
+    def test_unique_name_for_project(self, project_with_collaborator, epic_factory):
+        project, auth_request = project_with_collaborator
         epic_factory(project=project, name="Duplicate me")
         serializer = EpicSerializer(
             data={
@@ -222,7 +233,8 @@ class TestEpicSerializer:
                 "name": "Duplicate Me",
                 "description": "Blorp",
                 "github_users": [],
-            }
+            },
+            context={"request": auth_request},
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
@@ -230,9 +242,9 @@ class TestEpicSerializer:
         ]
 
     def test_unique_name_for_project__case_insensitive(
-        self, project_factory, epic_factory
+        self, project_with_collaborator, epic_factory
     ):
-        project = project_factory()
+        project, auth_request = project_with_collaborator
         epic_factory(project=project, name="Duplicate me")
         serializer = EpicSerializer(
             data={
@@ -240,7 +252,8 @@ class TestEpicSerializer:
                 "name": "duplicate me",
                 "description": "Blorp",
                 "github_users": [],
-            }
+            },
+            context={"request": auth_request},
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
@@ -248,9 +261,9 @@ class TestEpicSerializer:
         ]
 
     def test_unique_name_for_project__case_insensitive__update(
-        self, project_factory, epic_factory
+        self, project_with_collaborator, epic_factory
     ):
-        project = project_factory()
+        project, auth_request = project_with_collaborator
         epic = epic_factory(project=project, name="Duplicate me")
         serializer = EpicSerializer(
             instance=epic,
@@ -259,6 +272,7 @@ class TestEpicSerializer:
                 "description": "Blorp",
                 "github_users": [],
             },
+            context={"request": auth_request},
             partial=True,
         )
         assert serializer.is_valid(), serializer.errors
@@ -324,22 +338,18 @@ class TestTaskSerializer:
         attach_epic,
         attach_project,
         success,
-        rf,
-        user_factory,
+        project_with_collaborator,
         epic_factory,
-        project_factory,
     ):
-        user = user_factory()
+        project, auth_request = project_with_collaborator
         data = {
             "name": "Test Task",
             "description": "Description.",
-            "epic": str(epic_factory().id) if attach_epic else None,
-            "project": str(project_factory().id) if attach_project else None,
+            "epic": epic_factory(project=project).id if attach_epic else None,
+            "project": project.id if attach_project else None,
             "org_config_name": "dev",
         }
-        r = rf.get("/")
-        r.user = user
-        serializer = TaskSerializer(data=data, context={"request": r})
+        serializer = TaskSerializer(data=data, context={"request": auth_request})
         assert serializer.is_valid() == success, serializer.errors
         if success:
             serializer.save()
@@ -366,7 +376,9 @@ class TestTaskSerializer:
         convert_to_dev_org_job = mocker.patch("metecho.api.jobs.convert_to_dev_org_job")
         user = user_factory(socialaccount_set__uid="123")
         epic = epic_factory()
-        git_hub_collaboration_factory(project=epic.project, user__id=user.github_id)
+        git_hub_collaboration_factory(
+            project=epic.project, user__id=user.github_id, permissions={"push": True}
+        )
         git_hub_collaboration_factory(project=epic.project, user__id=456)
         scratch_org = scratch_org_factory(epic=epic, task=None)
         data = {
