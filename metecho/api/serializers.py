@@ -299,7 +299,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         logins = [u["login"] for u in github_users]
         if user.username not in logins:
-            github_users.append({"login": user.username, "id": int(user.github_id)})
+            github_users.append({"login": user.username, "id": user.github_id})
         return github_users
 
     def save(self, *args, **kwargs) -> Project:
@@ -581,12 +581,11 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
         if not epic.has_push_permission(user):
             added = new_collaborators.difference(epic_collaborators)
             removed = epic_collaborators.difference(new_collaborators)
-            gh_id = int(user.github_id)
-            if added and any(u != gh_id for u in added):
+            if added and any(u != user.github_id for u in added):
                 raise serializers.ValidationError(
                     _("You can only add yourself as a Collaborator")
                 )
-            if removed and any(u != gh_id for u in removed):
+            if removed and any(u != user.github_id for u in removed):
                 raise serializers.ValidationError(
                     _("You can only remove yourself as a Collaborator")
                 )
@@ -829,7 +828,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
         if not task.has_push_permission(user):
             is_removing_self = new_qa is None and task.assigned_qa_id == user.github_id
             is_assigning_self = (
-                new_qa and new_qa.id == int(user.github_id) and task.assigned_qa is None
+                new_qa and new_qa.id == user.github_id and task.assigned_qa is None
             )
             if not (is_removing_self or is_assigning_self):
                 raise serializers.ValidationError(
@@ -938,7 +937,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
     def get_matching_assigned_user(self, type_, validated_data):
         gh_user = validated_data.get(f"assigned_{type_}")
         sa = SocialAccount.objects.filter(
-            provider="github", uid=str(gh_user.id)
+            provider="github", uid=getattr(gh_user, "id", "")
         ).first()
         return getattr(sa, "user", None)  # Optional[User]
 
@@ -1139,4 +1138,4 @@ class SiteSerializer(serializers.ModelSerializer):
 
 class CanReassignSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=("assigned_qa", "assigned_dev"))
-    gh_uid = serializers.CharField()
+    gh_uid = serializers.IntegerField()

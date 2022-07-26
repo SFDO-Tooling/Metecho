@@ -1497,7 +1497,7 @@ components:
         role:
           $ref: '#/components/schemas/RoleEnum'
         gh_uid:
-          type: string
+          type: integer
       required:
       - gh_uid
       - role

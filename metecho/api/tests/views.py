@@ -581,7 +581,7 @@ class TestProjectViewset:
         assert project.repo_owner == git_hub_organization.login
         assert list(project.github_users.values_list("id", "login")) == [
             (123, "abc"),
-            (int(client.user.github_id), client.user.username),
+            (client.user.github_id, client.user.username),
         ]
         create_repository_job.delay.assert_called_with(
             project,
