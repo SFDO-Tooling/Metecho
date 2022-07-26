@@ -934,9 +934,9 @@ const TaskDetail = (
               >
                 {task.status === TASK_STATUSES.CANCELED ? (
                   <>
-                    <h3 className="slds-text-heading_medium slds-m-bottom_small">
+                    <h2 className="slds-text-heading_medium slds-m-bottom_small">
                       {t('Next Steps for this Task')}
-                    </h3>
+                    </h2>
                     <p>
                       <Trans i18nKey="taskCanceledHelp">
                         This Task was canceled on GitHub before completion.

@@ -60,7 +60,7 @@ docutils==0.16
     #   myst-parser
     #   restructuredtext-lint
     #   sphinx
-executing==0.8.3
+executing==0.9.0
     # via stack-data
 factory-boy==3.2.1
     # via
@@ -171,7 +171,7 @@ pytest==7.1.2
     #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
-pytest-asyncio==0.18.3
+pytest-asyncio==0.19.0
     # via -r requirements/dev.in
 pytest-cov==3.0.0
     # via -r requirements/dev.in
@@ -214,7 +214,7 @@ six==1.16.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.0.2
+sphinx==5.1.0
     # via
     #   -r requirements/dev.in
     #   myst-parser
