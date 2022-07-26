@@ -344,7 +344,6 @@ def _create_org_and_run_flow(
     repo_branch,
     project_path,
     originating_user_id,
-    sf_username=None,
 ):
     """
     Expects to be called in the context of a local github checkout.
@@ -363,7 +362,7 @@ def _create_org_and_run_flow(
         scratch_org=scratch_org,
         org_name=org_config_name,
         originating_user_id=originating_user_id,
-        sf_username=sf_username,
+        sf_username=scratch_org.owner_sf_username,
     )
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
@@ -377,9 +376,6 @@ def _create_org_and_run_flow(
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
-    scratch_org.owner_sf_username = sf_username or user.sf_username
-    scratch_org.owner_gh_username = user.username
-    scratch_org.owner_gh_id = user.github_id
     scratch_org.save()
 
     cases = {
@@ -514,7 +510,6 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
         user = scratch_org.owner
         repo_id = scratch_org.parent.get_repo_id()
         commit_ish = scratch_org.parent.branch_name
-        sf_username = scratch_org.owner_sf_username
 
         delete_org(scratch_org)
 
@@ -526,7 +521,6 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
                 repo_branch=commit_ish,
                 project_path=repo_root,
                 originating_user_id=originating_user_id,
-                sf_username=sf_username,
             )
     except Exception as e:
         scratch_org.refresh_from_db()

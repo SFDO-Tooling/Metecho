@@ -221,9 +221,6 @@ class User(PushMixin, HashIdMixin, AbstractUser):
     def delete(self, *args, **kwargs):
         for scratch_org_to_delete in self.scratchorg_set.all():
             scratch_org_to_delete.owner = None
-            scratch_org_to_delete.owner_sf_username = ""
-            scratch_org_to_delete.owner_gh_username = ""
-            scratch_org_to_delete.owner_gh_id = None
             scratch_org_to_delete.save()
             scratch_org_to_delete.queue_delete(originating_user_id=self.id)
 
@@ -1239,9 +1236,6 @@ class ScratchOrg(
     config = models.JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     expiry_job_id = StringField(blank=True, default="")
-    owner_sf_username = StringField(blank=True)
-    owner_gh_username = StringField(blank=True)
-    owner_gh_id = models.IntegerField(null=True, blank=True)
     has_been_visited = models.BooleanField(default=False)
     valid_target_directories = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
@@ -1275,6 +1269,18 @@ class ScratchOrg(
         if self.task:
             return self.task.root_project
         return None
+
+    @property
+    def owner_sf_username(self) -> Optional[str]:
+        return getattr(self.owner, "sf_username", None)
+
+    @property
+    def owner_gh_username(self) -> str:
+        return getattr(self.owner, "username", "")
+
+    @property
+    def owner_gh_id(self) -> Optional[int]:
+        return getattr(self.owner, "github_id", None)
 
     def save(self, *args, **kwargs):
         is_new = self.id is None

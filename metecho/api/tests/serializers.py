@@ -823,14 +823,14 @@ class TestTaskAssigneeSerializer:
             project=task.root_project,
         )
         scratch_org_factory(
-            owner_sf_username="test",
+            owner__devhub_username="test",
             task=task,
             org_type=ScratchOrgType.DEV,
             latest_commit="abc123",
             deleted_at=timezone.now(),
         )
         scratch_org_factory(
-            owner_sf_username="test",
+            owner__devhub_username="test",
             task=task,
             org_type=ScratchOrgType.QA,
             latest_commit="abc123",
