@@ -70,7 +70,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="epic",
             name="github_users",
-            field=models.ManyToManyField(related_name="epics", to="api.githubuser"),
+            field=models.ManyToManyField(
+                related_name="epics", to="api.githubuser", blank=True
+            ),
         ),
         migrations.RenameField(
             model_name="project",
@@ -84,6 +86,7 @@ class Migration(migrations.Migration):
                 to="api.githubuser",
                 through="api.GitHubCollaboration",
                 related_name="projects",
+                blank=True,
             ),
         ),
         migrations.RenameField(
@@ -102,7 +105,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.PROTECT,
+                on_delete=django.db.models.deletion.SET_NULL,
                 related_name="dev_tasks",
                 to="api.githubuser",
             ),
@@ -113,7 +116,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.PROTECT,
+                on_delete=django.db.models.deletion.SET_NULL,
                 related_name="qa_tasks",
                 to="api.githubuser",
             ),

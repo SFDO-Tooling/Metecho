@@ -230,9 +230,9 @@ class User(PushMixin, HashIdMixin, AbstractUser):
         super().delete(*args, **kwargs)
 
     @property
-    def github_id(self) -> Optional[str]:
+    def github_id(self) -> Optional[int]:
         try:
-            return self.github_account.uid
+            return int(self.github_account.uid)
         except (AttributeError, KeyError, TypeError):
             return None
 
@@ -387,7 +387,7 @@ class Project(
     )
     branch_prefix = StringField(blank=True)
     github_users = models.ManyToManyField(
-        "GitHubUser", through="GitHubCollaboration", related_name="projects"
+        "GitHubUser", through="GitHubCollaboration", related_name="projects", blank=True
     )
     # List of {
     #   "key": str,
@@ -687,7 +687,7 @@ class Epic(
     latest_sha = StringField(blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
-    github_users = models.ManyToManyField(GitHubUser, related_name="epics")
+    github_users = models.ManyToManyField(GitHubUser, related_name="epics", blank=True)
     issue = models.OneToOneField(
         GitHubIssue,
         related_name="epic",
@@ -907,14 +907,14 @@ class Task(
 
     assigned_dev = models.ForeignKey(
         GitHubUser,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="dev_tasks",
     )
     assigned_qa = models.ForeignKey(
         GitHubUser,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="qa_tasks",

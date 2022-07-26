@@ -510,8 +510,8 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert not user.github_id
 
-        social_account_factory(user=user, provider="github", uid="test-uid")
-        assert user.github_id == "test-uid"
+        social_account_factory(user=user, provider="github", uid="123")
+        assert user.github_id == 123
 
     def test_avatar_url(self, user_factory, social_account_factory):
         user = user_factory()

@@ -1683,7 +1683,7 @@ components:
           nullable: true
           readOnly: true
         github_id:
-          type: string
+          type: integer
           nullable: true
           readOnly: true
         is_staff:
