@@ -9,7 +9,7 @@ on:
 jobs:
   upgrade:
     name: Upgrade & Open Pull Request
-    runs-on: sfdc-ubuntu-latest
+    runs-on: ubuntu-latest
     env:
       BRANCH_NAME: auto-dependency-upgrades
     steps:
