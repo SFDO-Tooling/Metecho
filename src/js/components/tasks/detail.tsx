@@ -1027,7 +1027,7 @@ const TaskDetail = (
             align="top left"
             heading={t('View & play with a Task')}
             body={
-              <Trans i18nKey="tourTaskStratchOrg">
+              <Trans i18nKey="tourTaskScratchOrg">
                 Your Scratch Org is a temporary place for you to view the work
                 on this Task. You can also use a Scratch Org to play with
                 changes to the Task without affecting the Task.
