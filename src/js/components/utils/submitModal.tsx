@@ -25,7 +25,7 @@ interface Props {
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
   assignee?: GitHubUser | null;
-  originatingUser?: string | null;
+  originatingUser?: number | null;
 }
 
 const SubmitModal = ({

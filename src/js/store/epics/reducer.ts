@@ -22,7 +22,7 @@ export interface Epic {
   has_unmerged_commits: boolean;
   currently_creating_branch: boolean;
   currently_creating_pr: boolean;
-  github_users: string[];
+  github_users: number[];
   status: EpicStatuses;
   latest_sha: string;
   issue: string | null;

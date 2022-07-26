@@ -45,7 +45,7 @@ const defaultOrg = {
   org_type: 'Playground',
   owner: 'user-id',
   owner_gh_username: 'currentUser',
-  owner_gh_id: 'user-id',
+  owner_gh_id: 999999,
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -70,7 +70,7 @@ const epic = {
   id: 'epic1',
   slug: 'epic-1',
   name: 'Epic 1',
-  github_users: ['123456', '234567', 'user-id', 'readonly'],
+  github_users: [123456, 234567, 999999, 111111],
 };
 
 const defaultState = {
@@ -88,33 +88,33 @@ const defaultState = {
         repo_name: 'test-repo',
         github_users: [
           {
-            id: '123456',
+            id: 123456,
             login: 'TestGitHubUser',
             permissions: {
               push: true,
             },
           },
           {
-            id: '234567',
+            id: 234567,
             login: 'OtherUser',
             permissions: {
               push: true,
             },
           },
           {
-            id: '345678',
+            id: 345678,
             login: 'ThirdUser',
             permissions: {
               push: true,
             },
           },
           {
-            id: 'user-id',
+            id: 999999,
             login: 'currentUser',
             permissions: { push: true },
           },
           {
-            id: 'readonly',
+            id: 111111,
             login: 'readonly-user',
             permissions: {
               push: false,
@@ -175,7 +175,7 @@ const defaultState = {
           slug: 'task-2',
           epic,
           status: 'In progress',
-          assigned_dev: '123456',
+          assigned_dev: 123456,
         },
         {
           id: 'task3',
@@ -240,7 +240,7 @@ const defaultState = {
   user: {
     id: 'user-id',
     username: 'currentUser',
-    github_id: 'user-id',
+    github_id: 999999,
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -348,7 +348,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toBe('user-id');
+      expect(data.assigned_qa).toBe(999999);
       expect(data.should_alert_qa).toBe(false);
     });
   });
@@ -666,10 +666,7 @@ describe('<EpicDetail/>', () => {
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-        'user-id',
-        'readonly',
-        '123456',
-        '345678',
+        999999, 111111, 123456, 345678,
       ]);
     });
 
@@ -709,7 +706,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.p1.epics[0],
-                  github_users: ['234567'],
+                  github_users: [234567],
                 },
               ],
             },
@@ -732,7 +729,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.p1.epics[0],
-                  github_users: ['123456'],
+                  github_users: [123456],
                 },
               ],
             },
@@ -752,7 +749,7 @@ describe('<EpicDetail/>', () => {
     beforeEach(() => {
       const task = {
         ...defaultState.tasks.p1.tasks[0],
-        assigned_qa: '234567',
+        assigned_qa: 234567,
       };
       result = setup({
         initialState: {
@@ -796,8 +793,7 @@ describe('<EpicDetail/>', () => {
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
         expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-          'user-id',
-          'readonly',
+          999999, 111111,
         ]);
       });
     });
@@ -816,7 +812,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toBe('user-id');
+      expect(data.assigned_qa).toBe(999999);
       expect(data.should_alert_qa).toBe(false);
     });
 
