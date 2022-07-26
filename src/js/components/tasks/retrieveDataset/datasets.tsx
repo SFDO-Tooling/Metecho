@@ -81,7 +81,7 @@ const SelectDatasetForm = ({
 
   return (
     <form className="slds-form slds-p-around_large">
-      <button type="submit" style={{ display: 'none' }} disabled aria-hidden />
+      <button type="submit" style={{ display: 'none' }} disabled hidden />
       <div
         className="slds-grid
           slds-grid_vertical-align-start

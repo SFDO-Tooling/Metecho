@@ -333,7 +333,7 @@ const SubmitModal = ({
           type="submit"
           style={{ display: 'none' }}
           disabled={submittingReview}
-          aria-hidden
+          hidden
         />
       </form>
     </Modal>

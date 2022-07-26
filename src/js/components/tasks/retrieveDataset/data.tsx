@@ -44,9 +44,11 @@ const SCHEMA_SIZE_LIMIT = 50;
 const SearchForm = ({
   truncatedMsg,
   setSearch,
+  className,
 }: {
   truncatedMsg: string | null;
   setSearch: Dispatch<SetStateAction<string>>;
+  className?: string;
 }) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -70,7 +72,7 @@ const SearchForm = ({
 
   return (
     <Search
-      className="slds-text-body_regular slds-m-bottom_small"
+      className={classNames('slds-text-body_regular', className)}
       assistiveText={{ label: searchLabel }}
       placeholder={searchLabel}
       inlineHelpText={truncatedMsg}
@@ -170,14 +172,14 @@ export const SchemaList = ({
       {...props}
     >
       <ModalCard
-        heading={
-          <div className="slds-m-left_xx-small">
-            <SearchForm truncatedMsg={truncatedMsg} setSearch={setSearch} />
-            <p>{heading}</p>
-          </div>
-        }
+        heading={<span className="slds-m-left_xx-small">{heading}</span>}
         noBodyPadding
       >
+        <SearchForm
+          truncatedMsg={truncatedMsg}
+          setSearch={setSearch}
+          className={classNames('slds-m-vertical_small', paddingClasses)}
+        />
         {errors ? (
           <p
             className={classNames(

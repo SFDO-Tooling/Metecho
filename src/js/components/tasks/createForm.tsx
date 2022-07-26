@@ -286,7 +286,7 @@ const CreateTaskModal = ({
             type="submit"
             style={{ display: 'none' }}
             disabled={isSaving || isSavingBatch}
-            aria-hidden
+            hidden
           />
         </form>
       </div>

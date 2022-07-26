@@ -142,7 +142,7 @@ const ConnectModal = ({
             type="submit"
             style={{ display: 'none' }}
             disabled={!customDomain}
-            aria-hidden
+            hidden
           />
         </form>
       ) : (

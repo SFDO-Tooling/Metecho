@@ -133,17 +133,9 @@ const RetrieveDatasetModal = ({
     const selectedDataset = inputs.dataset_name;
     const prevValue = selectedDatasetRef.current;
     if (selectedDataset !== prevValue) {
-      const def = Object.assign({}, datasets[inputs.dataset_name] ?? {});
-      // @@@ Adding fake outdated fields
-      // if (datasets[inputs.dataset_name]) {
-      //   def.foo = ['bar', 'buz'];
-      //   for (let it = 1; it < 20; it = it + 1) {
-      //     def[`${it}-object`] = [`${it}-field`];
-      //   }
-      // }
       const { matchedChangeset, unmatchedChangeset } = filterChangesetBySchema(
         schema ?? /* istanbul ignore next */ {},
-        def,
+        datasets[inputs.dataset_name] ?? {},
       );
       setInputs({
         ...inputs,
