@@ -121,9 +121,16 @@ class Migration(migrations.Migration):
                 to="api.githubuser",
             ),
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name="scratchorg",
             name="owner_gh_id",
-            field=models.IntegerField(blank=True, null=True),
+        ),
+        migrations.RemoveField(
+            model_name="scratchorg",
+            name="owner_gh_username",
+        ),
+        migrations.RemoveField(
+            model_name="scratchorg",
+            name="owner_sf_username",
         ),
     ]

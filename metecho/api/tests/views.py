@@ -581,7 +581,7 @@ class TestProjectViewset:
         assert project.repo_owner == git_hub_organization.login
         assert list(project.github_users.values_list("id", "login")) == [
             (123, "abc"),
-            (int(client.user.github_id), client.user.username),
+            (client.user.github_id, client.user.username),
         ]
         create_repository_job.delay.assert_called_with(
             project,
@@ -1242,9 +1242,7 @@ class TestTaskViewSet:
 
         response = client.post(reverse("task-list"), data=data)
 
-        assert response.data["assigned_dev"] == int(
-            client.user.github_id
-        ), response.data
+        assert response.data["assigned_dev"] == client.user.github_id, response.data
 
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:

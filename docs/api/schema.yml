@@ -1502,7 +1502,7 @@ components:
         role:
           $ref: '#/components/schemas/RoleEnum'
         gh_uid:
-          type: string
+          type: integer
       required:
       - gh_uid
       - role
@@ -2220,8 +2220,8 @@ components:
           readOnly: true
         owner_gh_id:
           type: integer
-          readOnly: true
           nullable: true
+          readOnly: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -2617,8 +2617,8 @@ components:
           readOnly: true
         owner_gh_id:
           type: integer
-          readOnly: true
           nullable: true
+          readOnly: true
         has_been_visited:
           type: boolean
           readOnly: true
