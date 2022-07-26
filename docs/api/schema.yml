@@ -1561,7 +1561,7 @@ components:
         role:
           $ref: '#/components/schemas/RoleEnum'
         gh_uid:
-          type: string
+          type: integer
       required:
       - gh_uid
       - role
@@ -1697,7 +1697,7 @@ components:
         github_users:
           type: array
           items:
-            type: string
+            type: integer
           readOnly: true
         latest_sha:
           type: string
@@ -1732,7 +1732,7 @@ components:
         github_users:
           type: array
           items:
-            type: string
+            type: integer
       required:
       - github_users
     EpicStatusEnum:
@@ -1764,7 +1764,7 @@ components:
           nullable: true
           readOnly: true
         github_id:
-          type: string
+          type: integer
           nullable: true
           readOnly: true
         is_staff:
@@ -1843,6 +1843,25 @@ components:
       required:
       - messages
       - success
+    GitHubCollaborator:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        login:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        permissions:
+          $ref: '#/components/schemas/RepoPermission'
+      required:
+      - avatar_url
+      - id
+      - login
+      - name
     GitHubIssue:
       type: object
       properties:
@@ -1925,23 +1944,6 @@ components:
       required:
       - id
       - name
-    GitHubUser:
-      type: object
-      description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
-      properties:
-        id:
-          type: string
-        login:
-          type: string
-        avatar_url:
-          type: string
-          format: uri
-        name:
-          type: string
-        permissions:
-          $ref: '#/components/schemas/RepoPermission'
-      required:
-      - login
     GuidedTour:
       type: object
       properties:
@@ -2176,7 +2178,7 @@ components:
         github_users:
           type: array
           items:
-            type: string
+            type: integer
           readOnly: true
         latest_sha:
           type: string
@@ -2293,9 +2295,9 @@ components:
           type: string
           readOnly: true
         owner_gh_id:
-          type: string
-          readOnly: true
+          type: integer
           nullable: true
+          readOnly: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -2406,11 +2408,10 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: string
+          type: integer
           nullable: true
-          maxLength: 50
         assigned_qa:
-          type: string
+          type: integer
           readOnly: true
           nullable: true
         dev_org:
@@ -2463,7 +2464,8 @@ components:
         github_users:
           type: array
           items:
-            $ref: '#/components/schemas/GitHubUser'
+            $ref: '#/components/schemas/GitHubCollaborator'
+          readOnly: true
         github_issue_count:
           type: integer
           readOnly: true
@@ -2494,6 +2496,7 @@ components:
       - currently_fetching_org_config_names
       - description_rendered
       - github_issue_count
+      - github_users
       - has_push_permission
       - has_truncated_issues
       - id
@@ -2691,9 +2694,9 @@ components:
           type: string
           readOnly: true
         owner_gh_id:
-          type: string
-          readOnly: true
+          type: integer
           nullable: true
+          readOnly: true
         has_been_visited:
           type: boolean
           readOnly: true
@@ -2745,13 +2748,14 @@ components:
       description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
       properties:
         id:
-          type: string
+          type: integer
         login:
           type: string
         avatar_url:
           type: string
           format: uri
       required:
+      - id
       - login
     Task:
       type: object
@@ -2848,11 +2852,10 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: string
+          type: integer
           nullable: true
-          maxLength: 50
         assigned_qa:
-          type: string
+          type: integer
           readOnly: true
           nullable: true
         dev_org:
@@ -2893,10 +2896,10 @@ components:
       type: object
       properties:
         assigned_dev:
-          type: string
+          type: integer
           nullable: true
         assigned_qa:
-          type: string
+          type: integer
           nullable: true
         should_alert_dev:
           type: boolean

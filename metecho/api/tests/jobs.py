@@ -37,7 +37,7 @@ from ..jobs import (
     submit_review,
     user_reassign,
 )
-from ..models import ScratchOrgType
+from ..models import GitHubCollaboration, GitHubUser, ScratchOrgType
 
 Author = namedtuple("Author", ("avatar_url", "login"))
 Commit = namedtuple(
@@ -609,29 +609,37 @@ def test_delete_scratch_org__exception(scratch_org_factory):
 
 @pytest.mark.django_db
 class TestRefreshGitHubRepositoriesForUser:
-    def test_success(self, mocker, user_factory):
+    def test_success(self, mocker, project_factory, user_factory):
         user = user_factory(currently_fetching_repos=True)
+        project1 = project_factory(repo_id=123)
+        project2 = project_factory(repo_id=456)
         notify_changed = mocker.patch.object(
             user, "notify_changed", wraps=user.notify_changed
         )
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos",
             return_value=[
-                MagicMock(id=123, html_url="https://example.com/", permissions={}),
-                MagicMock(id=456, html_url="https://example.com/", permissions={}),
+                MagicMock(id=123, permissions={"push": True}),
+                MagicMock(id=456, permissions={"push": False}),
+                MagicMock(id=789),  # Not in Projects, should be ignored
             ],
         )
 
         refresh_github_repositories_for_user(user)
         user.refresh_from_db()
+        gh_user = GitHubUser.objects.get(id=user.github_id)
 
-        assert not user.currently_fetching_repos
-        assert user.repositories.count() == 2
         assert notify_changed.called
+        assert not user.currently_fetching_repos
+        assert list(
+            GitHubCollaboration.objects.values_list("user", "project", "permissions")
+        ) == [
+            (gh_user.id, project1.id, {"push": True}),
+            (gh_user.id, project2.id, {"push": False}),
+        ]
 
-    def test_error(self, mocker, caplog, user_factory, git_hub_repository_factory):
+    def test_error(self, mocker, caplog, user_factory):
         user = user_factory(currently_fetching_repos=True)
-        git_hub_repository_factory(user=user)
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos", side_effect=Exception("Oh no!")
         )
@@ -644,7 +652,7 @@ class TestRefreshGitHubRepositoriesForUser:
         user.refresh_from_db()
 
         assert not user.currently_fetching_repos
-        assert user.repositories.count() == 1
+        assert not GitHubCollaboration.objects.exists()
         assert notify_error.called
         assert "Oh no!" in caplog.text
 
@@ -800,17 +808,8 @@ class TestErrorHandling:
 
 @pytest.mark.django_db
 class TestRefreshCommits:
-    def test_refreshes_commits(
-        self,
-        user_factory,
-        project_factory,
-        epic_factory,
-        task_factory,
-        git_hub_repository_factory,
-    ):
-        user = user_factory()
+    def test_refreshes_commits(self, project_factory, epic_factory, task_factory):
         project = project_factory(repo_id=123, branch_name="project")
-        git_hub_repository_factory(repo_id=123, user=user)
         epic = epic_factory(project=project, branch_name="epic")
         task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
@@ -871,9 +870,9 @@ class TestRefreshCommits:
 
 
 @pytest.mark.django_db
-def test_create_pr(user_factory, task_factory):
+def test_create_pr(mailoutbox, user_factory, task_factory, git_hub_user_factory):
     user = user_factory()
-    task = task_factory(assigned_qa=user.github_id)
+    task = task_factory(assigned_qa=git_hub_user_factory(id=user.github_id))
     with ExitStack() as stack:
         pr = MagicMock(number=123)
         repository = MagicMock(**{"create_pull.return_value": pr})
@@ -897,6 +896,7 @@ def test_create_pr(user_factory, task_factory):
 
         assert repository.create_pull.called
         assert task.pr_number == 123
+        assert len(mailoutbox) == 1
 
 
 @pytest.mark.django_db
@@ -933,113 +933,77 @@ def test_create_pr__error(user_factory, task_factory):
 
 @pytest.mark.django_db
 class TestRefreshGitHubUsers:
-    def test_success(
-        self,
-        mocker,
-        user_factory,
-        project_factory,
-        git_hub_repository_factory,
-    ):
-        user = user_factory()
-        project = project_factory(repo_id=123, currently_fetching_github_users=True)
-        git_hub_repository_factory(repo_id=123, user=user)
+    def test_success(self, mocker, project_factory):
+        project = project_factory(currently_fetching_github_users=True)
+        notify_changed = mocker.patch.object(
+            project, "notify_changed", wraps=project.notify_changed
+        )
         collab1 = MagicMock(
-            id=123,
-            login="test-user-1",
-            avatar_url="https://example.com/avatar1.png",
-            permissions={"push": False},
+            id=123, login="u1", avatar_url="http://1", permissions={"push": False}
         )
         collab2 = MagicMock(
-            id=456,
-            login="test-user-2",
-            avatar_url="https://example.com/avatar2.png",
-            permissions={"push": True},
+            id=456, login="u2", avatar_url="http://2", permissions={"push": True}
         )
-        repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
-        mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
-        get_cached_user = mocker.patch(f"{PATCH_ROOT}.get_cached_user")
-        get_cached_user.return_value.name = "FULL NAME"
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(
+            f"{PATCH_ROOT}.get_repo_info",
+            **{"return_value.collaborators.return_value": [collab1, collab2]},
+        )
+        mocker.patch(f"{PATCH_ROOT}.get_cached_user", **{"return_value.name": "NAME"})
 
         refresh_github_users(project, originating_user_id=None)
 
         project.refresh_from_db()
-        assert project.github_users == [
-            {
-                "id": "123",
-                "name": "FULL NAME",
-                "login": "test-user-1",
-                "avatar_url": "https://example.com/avatar1.png",
-                "permissions": {"push": False},
-            },
-            {
-                "id": "456",
-                "name": "FULL NAME",
-                "login": "test-user-2",
-                "avatar_url": "https://example.com/avatar2.png",
-                "permissions": {"push": True},
-            },
+        assert list(project.github_users.values()) == [
+            {"id": 123, "name": "NAME", "login": "u1", "avatar_url": "http://1"},
+            {"id": 456, "name": "NAME", "login": "u2", "avatar_url": "http://2"},
+        ]
+        assert list(project.githubcollaboration_set.values("user", "permissions")) == [
+            {"user": 123, "permissions": {"push": False}},
+            {"user": 456, "permissions": {"push": True}},
         ]
         assert not project.currently_fetching_github_users
-        assert async_to_sync.called
+        assert notify_changed.called
 
-    def test_expand_user_error(
-        self,
-        caplog,
-        mocker,
-        user_factory,
-        project_factory,
-        git_hub_repository_factory,
-    ):
+    def test_expand_user_error(self, caplog, mocker, project_factory):
         """
         Expect the "simple" representation of the user if expanding them fails
         """
-        user = user_factory()
-        project = project_factory(repo_id=123, currently_fetching_github_users=True)
-        git_hub_repository_factory(repo_id=123, user=user)
-        collab1 = MagicMock(
-            id=123,
-            login="test-user-1",
-            avatar_url="https://example.com/avatar1.png",
-            permissions={},
+        project = project_factory(currently_fetching_github_users=True)
+        notify_changed = mocker.patch.object(
+            project, "notify_changed", wraps=project.notify_changed
         )
-        repo = MagicMock(**{"collaborators.return_value": [collab1]})
-        mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
+        user = MagicMock(id=123, login="u1", avatar_url="https://1", permissions={})
         mocker.patch(
-            f"{PATCH_ROOT}.get_cached_user", side_effect=Exception("GITHUB ERROR")
+            f"{PATCH_ROOT}.get_repo_info",
+            **{"return_value.collaborators.return_value": [user]},
         )
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(
+            f"{PATCH_ROOT}.get_cached_user", side_effect=Exception("CACHE ERROR")
+        )
 
         refresh_github_users(project, originating_user_id=None)
 
         project.refresh_from_db()
-        assert project.github_users == [
-            {
-                "id": "123",
-                "login": "test-user-1",
-                "avatar_url": "https://example.com/avatar1.png",
-                "permissions": {},
-            },
+        assert list(project.github_users.values()) == [
+            {"id": 123, "login": "u1", "name": "", "avatar_url": "https://1"},
         ]
         assert not project.currently_fetching_github_users
-        assert async_to_sync.called
-        assert "GITHUB ERROR" in caplog.text
+        assert notify_changed.called
+        assert "CACHE ERROR" in caplog.text
 
-    def test_error(
-        self, mocker, caplog, user_factory, project_factory, git_hub_repository_factory
-    ):
-        user = user_factory()
-        project = project_factory(repo_id=123, currently_fetching_github_users=True)
-        git_hub_repository_factory(repo_id=123, user=user)
+    def test_error(self, mocker, caplog, project_factory):
+        project = project_factory(currently_fetching_github_users=True)
+        notify_error = mocker.patch.object(
+            project, "notify_error", wraps=project.notify_error
+        )
         mocker.patch(f"{PATCH_ROOT}.get_repo_info", side_effect=Exception("Oh no!"))
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
         with pytest.raises(Exception):
             refresh_github_users(project, originating_user_id=None)
 
         project.refresh_from_db()
         assert not project.currently_fetching_github_users
-        assert async_to_sync.called
+        assert notify_error.called
         assert "Oh no!" in caplog.text
 
 
@@ -1350,12 +1314,15 @@ class TestUserReassign:
 @pytest.mark.django_db
 class TestCreateRepository:
     @pytest.fixture
-    def github_mocks(self, mocker, project_factory):
+    def github_mocks(self, mocker, project, git_hub_collaboration_factory):
         """
         Mock the best-case scenario where the user is a member of the GH organization
         and the repository and team are created successfully
         """
-        project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
+        # Add two users to the project
+        git_hub_collaboration_factory(project=project)
+        git_hub_collaboration_factory(project=project)
+
         team = mocker.MagicMock()
         repo = mocker.MagicMock(id=123456, html_url="", permissions=[])
 
@@ -1390,7 +1357,6 @@ class TestCreateRepository:
         project.refresh_from_db()
 
         assert project.repo_id == 123456
-        assert user.repositories.filter(repo_id=123456).exists()
         assert (
             team.add_or_update_membership.call_count == 2
         ), "Expected one call each collaborator"

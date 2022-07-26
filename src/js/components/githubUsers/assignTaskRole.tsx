@@ -35,7 +35,7 @@ const AssignTaskRoleModal = ({
   isOpen: boolean;
   isRefreshingUsers: boolean;
   onRequestClose: () => void;
-  setUser: (user: string | null, shouldAlertAssignee: boolean) => void;
+  setUser: (user: number | null, shouldAlertAssignee: boolean) => void;
 }) => {
   const { t } = useTranslation();
   const currentUser = useSelector(selectUserState) as User;

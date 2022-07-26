@@ -18,7 +18,7 @@ describe('AssignTaskRole', () => {
   const defaultState = {
     user: {
       id: 'user-id',
-      github_id: 'user-id',
+      github_id: 999999,
       username: 'user-name',
       name: 'User Name',
       valid_token_for: 'sf-org',
@@ -27,14 +27,14 @@ describe('AssignTaskRole', () => {
   };
   const githubUsers = [
     {
-      id: 'user-id',
+      id: 999999,
       login: 'user-name',
       name: 'User Name',
       avatar_url: 'https://example.com/avatar.png',
       permissions: { push: true },
     },
     {
-      id: '123456',
+      id: 123456,
       login: 'test user',
       name: 'Test User',
       avatar_url: 'https://example.com/avatar.png',

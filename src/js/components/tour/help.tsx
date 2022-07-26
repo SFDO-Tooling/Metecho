@@ -17,7 +17,7 @@ export const getDemoTask = ({
   github_id,
 }: {
   project: string;
-  github_id: string | null;
+  github_id: number | null;
 }): Task => {
   const epic = getDemoEpic({ project, github_id });
 

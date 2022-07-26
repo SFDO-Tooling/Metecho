@@ -9,9 +9,10 @@ from sfdo_template_helpers.crypto import fernet_encrypt
 
 from .api.models import (
     Epic,
+    GitHubCollaboration,
     GitHubIssue,
     GitHubOrganization,
-    GitHubRepository,
+    GitHubUser,
     Project,
     ProjectDependency,
     ScratchOrg,
@@ -94,6 +95,27 @@ class ProjectDependencyFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class GitHubUserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GitHubUser
+        django_get_or_create = ("id",)
+
+    id = factory.Sequence(lambda n: n)
+    login = factory.Sequence("user{}".format)
+    name = factory.Sequence("User {}".format)
+    avatar_url = factory.Sequence("https://avatar/{}".format)
+
+
+@register
+class GitHubCollaborationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GitHubCollaboration
+
+    project = factory.SubFactory(ProjectFactory)
+    user = factory.SubFactory(GitHubUserFactory)
+
+
+@register
 class GitHubIssueFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GitHubIssue
@@ -104,16 +126,6 @@ class GitHubIssueFactory(factory.django.DjangoModelFactory):
     state = "open"
     created_at = factory.LazyFunction(now)
     updated_at = factory.LazyFunction(now)
-
-
-@register
-class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = GitHubRepository
-
-    repo_url = "https://github.com/test/repo.git"
-    repo_id = factory.Sequence(lambda n: n)
-    user = factory.SubFactory(UserFactory)
 
 
 @register
@@ -190,3 +202,11 @@ def client(user_factory):
     client.force_login(user)
     client.user = user
     return client
+
+
+@pytest.fixture
+def auth_request(db, rf, user_factory):
+    """An authenticated request"""
+    request = rf.get("/")
+    request.user = user_factory()
+    return request

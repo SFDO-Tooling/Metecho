@@ -87,7 +87,7 @@ const TaskOrgCard = ({
 }: TaskOrgCardProps) => {
   const { t } = useTranslation();
 
-  let assignedUserId: string | null = null;
+  let assignedUserId: number | null = null;
   let heading, orgHeading;
   let popover: ReactNode = null;
   switch (type) {
@@ -173,7 +173,7 @@ const TaskOrgCard = ({
   };
 
   const doAssignUser = useCallback(
-    (assignee: string | null, shouldAlertAssignee: boolean) => {
+    (assignee: number | null, shouldAlertAssignee: boolean) => {
       handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [handleAssignUser, type],

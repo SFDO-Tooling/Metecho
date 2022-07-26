@@ -42,7 +42,7 @@ type AssignUserAction = ({
 }: {
   task: Task;
   type: OrgTypes;
-  assignee: string | null;
+  assignee: number | null;
   shouldAlertAssignee: boolean;
 }) => void;
 
@@ -164,7 +164,7 @@ const AssigneeTableCell = ({
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
-  children?: string | null;
+  children?: number | null;
 }) => {
   const { t } = useTranslation();
   const assignedUser = useSelector((state: AppState) =>
@@ -180,7 +180,7 @@ const AssigneeTableCell = ({
   };
 
   const doAssignUserAction = useCallback(
-    (assignee: string | null, shouldAlertAssignee: boolean) => {
+    (assignee: number | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
       if (!item || !type) {
         return;

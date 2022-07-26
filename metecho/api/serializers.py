@@ -14,8 +14,10 @@ from .email_utils import get_user_facing_url
 from .fields import MarkdownField
 from .models import (
     Epic,
+    GitHubCollaboration,
     GitHubIssue,
     GitHubOrganization,
+    GitHubUser,
     Project,
     ProjectDependency,
     ScratchOrg,
@@ -174,14 +176,21 @@ class RepoPermissionSerializer(serializers.Serializer):
 class ShortGitHubUserSerializer(serializers.Serializer):
     """See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser"""  # noqa: B950
 
-    id = serializers.CharField(required=False)
+    id = serializers.IntegerField()
     login = serializers.CharField()
     avatar_url = serializers.URLField(required=False)
 
 
-class GitHubUserSerializer(ShortGitHubUserSerializer):
-    name = serializers.CharField(required=False)
+class GitHubCollaboratorSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="user.id")
+    name = serializers.CharField(source="user.name")
+    login = serializers.CharField(source="user.login")
+    avatar_url = serializers.URLField(source="user.avatar_url")
     permissions = RepoPermissionSerializer(required=False)
+
+    class Meta:
+        model = GitHubCollaboration
+        fields = ("id", "name", "login", "avatar_url", "permissions")
 
 
 class GitHubOrganizationSerializer(HashIdModelSerializer):
@@ -290,7 +299,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         logins = [u["login"] for u in github_users]
         if user.username not in logins:
-            github_users.append({"login": user.username})
+            github_users.append({"login": user.username, "id": user.github_id})
         return github_users
 
     def save(self, *args, **kwargs) -> Project:
@@ -302,17 +311,28 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
         # Dependencies are used by the view, not stored in the model
         self.validated_data.pop("dependencies", None)
 
-        return super().save(*args, **kwargs)
+        # Pop `github_users` to save it `GitHubCollaboration`s later
+        user_stubs = self.validated_data.pop("github_users")
+
+        project = super().save(*args, **kwargs)
+
+        for stub in user_stubs:
+            user, _ = GitHubUser.objects.get_or_create(id=stub["id"], defaults=stub)
+            GitHubCollaboration.objects.create(
+                project=project, user=user, permissions={"push": True, "pull": True}
+            )
+
+        return project
 
 
 class ProjectSerializer(HashIdModelSerializer):
     slug = serializers.CharField()
     old_slugs = StringListField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
-    repo_url = serializers.SerializerMethodField()
+    repo_url = serializers.URLField(read_only=True)
     repo_image_url = serializers.SerializerMethodField()
     has_push_permission = serializers.SerializerMethodField()
-    github_users = GitHubUserSerializer(many=True, allow_empty=True, required=False)
+    github_users = serializers.SerializerMethodField()
     org_config_names = OrgConfigNameSerializer(many=True, read_only=True)
     github_issue_count = serializers.IntegerField(source="issues.count", read_only=True)
 
@@ -350,35 +370,34 @@ class ProjectSerializer(HashIdModelSerializer):
         }
 
     @extend_schema_field(OpenApiTypes.URI)
-    def get_repo_url(self, obj) -> Optional[str]:
-        return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
-
-    @extend_schema_field(OpenApiTypes.URI)
     def get_repo_image_url(self, obj) -> Optional[str]:
         return obj.repo_image_url if obj.include_repo_image_url else ""
 
     def get_has_push_permission(self, obj) -> bool:
         return obj.has_push_permission(self.context["request"].user)
 
+    @extend_schema_field(GitHubCollaboratorSerializer(many=True))
+    def get_github_users(self, obj):
+        collaborations = obj.githubcollaboration_set.select_related("user")
+        return GitHubCollaboratorSerializer(collaborations, many=True).data
+
 
 class EpicMinimalSerializer(HashIdModelSerializer):
-    name = serializers.CharField(read_only=True)
+    name = serializers.CharField()
     slug = serializers.CharField(read_only=True)
-    github_users = StringListField(read_only=True)
+    github_users = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
 
     class Meta:
         model = Epic
-        fields = ("id", "name", "slug", "github_users")
+        read_only_fields = fields = ("id", "name", "slug", "github_users")
 
 
-class EpicSerializer(HashIdModelSerializer):
-    slug = serializers.CharField(read_only=True)
+class EpicSerializer(EpicMinimalSerializer):
     old_slugs = StringListField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
-    github_users = StringListField(read_only=True)
     task_count = serializers.SerializerMethodField()
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
@@ -455,6 +474,13 @@ class EpicSerializer(HashIdModelSerializer):
             user=self.context["request"].user
         )
         return instance
+
+    def validate_project(self, project: Project | None):
+        if project and not project.has_push_permission(self.context["request"].user):
+            raise serializers.ValidationError(
+                _("You don't have Push permissions for this project")
+            )
+        return project
 
     def validate(self, data):
         branch_name = data.get("branch_name", "")
@@ -535,7 +561,9 @@ class EpicSerializer(HashIdModelSerializer):
 
 
 class EpicCollaboratorsSerializer(serializers.ModelSerializer):
-    github_users = StringListField(allow_empty=True)
+    github_users = serializers.ListField(
+        child=serializers.IntegerField(), allow_empty=True
+    )
 
     class Meta:
         model = Epic
@@ -544,12 +572,15 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
     def validate_github_users(self, github_users):
         user = self.context["request"].user
         epic: Epic = self.instance
+        project_collaborators = set(
+            epic.project.github_users.values_list("id", flat=True)
+        )
+        epic_collaborators = set(epic.github_users.values_list("id", flat=True))
+        new_collaborators = set(github_users)
 
         if not epic.has_push_permission(user):
-            collaborators = set(epic.github_users)
-            new_collaborators = set(github_users)
-            added = new_collaborators.difference(collaborators)
-            removed = collaborators.difference(new_collaborators)
+            added = new_collaborators.difference(epic_collaborators)
+            removed = epic_collaborators.difference(new_collaborators)
             if added and any(u != user.github_id for u in added):
                 raise serializers.ValidationError(
                     _("You can only add yourself as a Collaborator")
@@ -559,19 +590,17 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
                     _("You can only remove yourself as a Collaborator")
                 )
 
-        seen_github_users = []
-        for gh_uid in github_users:
-            if not self.instance.project.get_collaborator(gh_uid):
-                raise serializers.ValidationError(
-                    _(f"User is not a valid GitHub collaborator: {gh_uid}")
+        not_in_project = [
+            uid for uid in new_collaborators if uid not in project_collaborators
+        ]
+        if not_in_project:
+            raise serializers.ValidationError(
+                _("One or more users do not belong to %(project)s: %(users)s").format(
+                    epic.project, not_in_project
                 )
+            )
 
-            if gh_uid in seen_github_users:
-                raise serializers.ValidationError(_(f"Duplicate GitHub user: {gh_uid}"))
-            else:
-                seen_github_users.append(gh_uid)
-
-        return github_users
+        return list(new_collaborators)
 
 
 class TaskSerializer(HashIdModelSerializer):
@@ -703,6 +732,20 @@ class TaskSerializer(HashIdModelSerializer):
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
+    def validate_epic(self, epic: Epic | None):
+        if epic and not epic.has_push_permission(self.context["request"].user):
+            raise serializers.ValidationError(
+                _("You don't have Push permissions for this epic")
+            )
+        return epic
+
+    def validate_project(self, project: Project | None):
+        if project and not project.has_push_permission(self.context["request"].user):
+            raise serializers.ValidationError(
+                _("You don't have Push permissions for this project")
+            )
+        return project
+
     def validate(self, data: dict) -> dict:
         project = data.get("project", getattr(self.instance, "project", None))
         epic = data.get("epic", getattr(self.instance, "epic", None))
@@ -721,7 +764,7 @@ class TaskSerializer(HashIdModelSerializer):
         user = self.context["request"].user
 
         if dev_org and not validated_data.get("assigned_dev"):
-            validated_data["assigned_dev"] = user.github_id
+            validated_data["assigned_dev"] = GitHubUser.objects.get(id=user.github_id)
 
         task = super().create(validated_data)
         task.notify_created(originating_user_id=str(user.id))
@@ -737,8 +780,12 @@ class TaskSerializer(HashIdModelSerializer):
 
 
 class TaskAssigneeSerializer(serializers.Serializer):
-    assigned_dev = serializers.CharField(allow_null=True, required=False)
-    assigned_qa = serializers.CharField(allow_null=True, required=False)
+    assigned_dev = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubUser.objects, allow_null=True, required=False
+    )
+    assigned_qa = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubUser.objects, allow_null=True, required=False
+    )
     should_alert_dev = serializers.BooleanField(required=False)
     should_alert_qa = serializers.BooleanField(required=False)
 
@@ -752,34 +799,48 @@ class TaskAssigneeSerializer(serializers.Serializer):
     def validate_assigned_dev(self, new_dev):
         user = self.context["request"].user
         task: Task = self.instance
+
         if not task.has_push_permission(user):
             raise serializers.ValidationError(
                 _("You don't have permissions to change the assigned Developer")
             )
-        collaborator = task.root_project.get_collaborator(new_dev)
-        if new_dev and not collaborator:
+
+        collaboration = GitHubCollaboration.objects.filter(
+            user=new_dev, project=task.root_project
+        ).first()
+        if new_dev and not collaboration:
             raise serializers.ValidationError(
-                _(f"User is not a valid GitHub collaborator: {new_dev}")
+                _("User is not a valid GitHub collaborator: {}").format(new_dev)
             )
-        if new_dev and not collaborator.get("permissions", {}).get("push"):
-            raise serializers.ValidationError(
-                _(f"User does not have push permissions: {new_dev}")
-            )
+        if new_dev:
+            try:
+                assert collaboration.permissions["push"]
+            except Exception:
+                raise serializers.ValidationError(
+                    _("User does not have push permissions: {}").format(new_dev)
+                )
         return new_dev
 
     def validate_assigned_qa(self, new_qa):
         user = self.context["request"].user
         task: Task = self.instance
+
         if not task.has_push_permission(user):
-            is_removing_self = new_qa is None and task.assigned_qa == user.github_id
-            is_assigning_self = new_qa == user.github_id and task.assigned_qa is None
+            is_removing_self = new_qa is None and task.assigned_qa_id == user.github_id
+            is_assigning_self = (
+                new_qa and new_qa.id == user.github_id and task.assigned_qa is None
+            )
             if not (is_removing_self or is_assigning_self):
                 raise serializers.ValidationError(
                     _("You can only assign/remove yourself as a Tester")
                 )
-        if new_qa and not task.root_project.get_collaborator(new_qa):
+
+        collaboration_exists = GitHubCollaboration.objects.filter(
+            user=new_qa, project=task.root_project
+        ).exists()
+        if new_qa and not collaboration_exists:
             raise serializers.ValidationError(
-                _(f"User is not valid GitHub collaborator: {new_qa}")
+                _("User is not valid GitHub collaborator: {}").format(new_qa)
             )
         return new_qa
 
@@ -806,9 +867,8 @@ class TaskAssigneeSerializer(serializers.Serializer):
         org_type = {"dev": ScratchOrgType.DEV, "qa": ScratchOrgType.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
-            if epic and new_assignee not in epic.github_users:
-                epic.github_users.append(new_assignee)
-                epic.save()
+            if epic and not epic.github_users.filter(id=new_assignee.id).exists():
+                epic.github_users.add(new_assignee)
                 epic.notify_changed(originating_user_id=None)
 
             if validated_data.get(f"should_alert_{type_}"):
@@ -875,8 +935,10 @@ class TaskAssigneeSerializer(serializers.Serializer):
             assigned_user.notify(subject, body)
 
     def get_matching_assigned_user(self, type_, validated_data):
-        id_ = validated_data.get(f"assigned_{type_}")
-        sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
+        gh_user = validated_data.get(f"assigned_{type_}")
+        sa = SocialAccount.objects.filter(
+            provider="github", uid=getattr(gh_user, "id", "")
+        ).first()
         return getattr(sa, "user", None)  # Optional[User]
 
 
@@ -1084,4 +1146,4 @@ class SiteSerializer(serializers.ModelSerializer):
 
 class CanReassignSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=("assigned_qa", "assigned_dev"))
-    gh_uid = serializers.CharField()
+    gh_uid = serializers.IntegerField()

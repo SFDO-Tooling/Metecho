@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0111_alter_user_organizations"),
+        ("api", "0114_github_models_refactor_end"),
     ]
 
     operations = [
