@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0110_alter_scratchorg_owner"),
+        ("api", "0111_alter_user_organizations"),
     ]
 
     operations = [
@@ -72,32 +72,6 @@ class Migration(migrations.Migration):
             name="github_users",
             field=models.ManyToManyField(related_name="epics", to="api.githubuser"),
         ),
-        # migrations.AlterField(
-        #     model_name="githubrepository",
-        #     name="id",
-        #     field=models.AutoField(
-        #         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
-        #     ),
-        # ),
-        # migrations.AlterField(
-        #     model_name="githubrepository",
-        #     name="repo_id",
-        #     field=models.IntegerField(null=True, default=None),
-        # ),
-        # migrations.AlterField(
-        #     model_name="githubrepository",
-        #     name="user",
-        #     field=models.ForeignKey(
-        #         on_delete=django.db.models.deletion.CASCADE,
-        #         to="api.user",
-        #         null=True,
-        #         default=None,
-        #     ),
-        # ),
-        # migrations.AlterUniqueTogether(
-        #     name="githubrepository",
-        #     unique_together=set(),
-        # ),
         migrations.RenameField(
             model_name="project",
             new_name="github_users_json",
