@@ -40,6 +40,12 @@
   }
 }
 
+.metecho-nested-items {
+  // faux indent of the wrapped lines
+  margin-inline-start: 2ch;
+  text-indent: -2ch;
+}
+
 .metecho-scroll-panel {
   overflow-y: auto;
 }
