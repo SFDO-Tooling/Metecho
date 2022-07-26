@@ -40,7 +40,7 @@ ConfirmChangeUser.args = {
   isOpen: true,
   waitingToRemoveUser: {
     type: ORG_TYPES.DEV,
-    assignee: sampleUser1.id,
+    assignee: sampleUser1.github_id,
     shouldAlertAssignee: false,
   },
   handleClose: action('handleClose'),

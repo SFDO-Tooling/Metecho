@@ -15,7 +15,7 @@ export const getDemoEpic = ({
   github_id,
 }: {
   project: string;
-  github_id: string | null;
+  github_id: number | null;
 }): Epic => {
   const description = i18n.t(
     'This is a sample description to show where the description of the Epic would appear.',

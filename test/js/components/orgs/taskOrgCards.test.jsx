@@ -41,7 +41,7 @@ const defaultOrgs = {
     org_type: 'Dev',
     owner: 'user-id',
     owner_gh_username: 'user-name',
-    owner_gh_id: 'user-id',
+    owner_gh_id: 999999,
     expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a512-longlong',
     latest_commit_url: '/test/commit/url/',
@@ -59,12 +59,12 @@ const defaultOrgs = {
 };
 const defaultEpicUsers = [
   {
-    id: 'user-id',
+    id: 999999,
     login: 'user-name',
     name: 'Full User Name',
     permissions: { push: true },
   },
-  { id: 'other-user-id', login: 'other-user', permissions: { push: true } },
+  { id: 111111, login: 'other-user', permissions: { push: true } },
 ];
 const defaultProject = {
   id: 'p1',
@@ -73,7 +73,7 @@ const defaultProject = {
 const defaultState = {
   user: {
     id: 'user-id',
-    github_id: 'user-id',
+    github_id: 999999,
     username: 'user-name',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
@@ -85,8 +85,8 @@ const defaultState = {
 const defaultTask = {
   id: 'task-id',
   epic: {},
-  assigned_dev: 'user-id',
-  assigned_qa: 'user-id',
+  assigned_dev: 999999,
+  assigned_qa: 999999,
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
   review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -200,7 +200,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
-          owner_gh_id: 'other-user-id',
+          owner_gh_id: 111111,
           unsaved_changes: {},
           total_unsaved_changes: 0,
           has_unsaved_changes: false,
@@ -208,8 +208,8 @@ describe('<TaskOrgCards/>', () => {
       };
       const task = {
         ...defaultTask,
-        assigned_dev: 'other-user-id',
-        assigned_qa: 'other-user-id',
+        assigned_dev: 111111,
+        assigned_qa: 111111,
       };
       const { queryByText, getByText } = setup({ orgs, task });
 
@@ -228,7 +228,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
-          owner_gh_id: 'other-user-id',
+          owner_gh_id: 111111,
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -261,7 +261,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_dev).toBe('user-id');
+      expect(data.assigned_dev).toBe(999999);
       expect(data.should_alert_dev).toBe(true);
     });
 
@@ -281,7 +281,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toBe('user-id');
+      expect(data.assigned_qa).toBe(999999);
       expect(data.should_alert_qa).toBe(false);
     });
 
@@ -315,9 +315,7 @@ describe('<TaskOrgCards/>', () => {
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_qa).toBe(
-        'other-user-id',
-      );
+      expect(updateObject.mock.calls[0][0].data.assigned_qa).toBe(111111);
     });
   });
 
@@ -352,9 +350,7 @@ describe('<TaskOrgCards/>', () => {
           fireEvent.click(getByText('Confirm'));
 
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
-            'other-user-id',
-          );
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(111111);
         });
       });
 
@@ -376,9 +372,7 @@ describe('<TaskOrgCards/>', () => {
 
           expect(refetchOrg).not.toHaveBeenCalled();
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
-            'other-user-id',
-          );
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(111111);
         });
       });
     });
@@ -866,7 +860,7 @@ describe('<TaskOrgCards/>', () => {
       test('deletes org', async () => {
         const task = {
           ...defaultTask,
-          assigned_qa: 'other-user-id',
+          assigned_qa: 111111,
         };
         const orgs = {
           Dev: null,

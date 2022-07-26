@@ -35,7 +35,7 @@ export interface Task {
     id: string;
     name: string;
     slug: string;
-    github_users: string[];
+    github_users: number[];
   } | null;
   project: string | null;
   root_project: string;
@@ -51,8 +51,8 @@ export interface Task {
   pr_is_open: boolean;
   commits: Commit[];
   origin_sha: string;
-  assigned_dev: string | null;
-  assigned_qa: string | null;
+  assigned_dev: number | null;
+  assigned_qa: number | null;
   status: TaskStatuses;
   currently_submitting_review: boolean;
   review_submitted_at: string | null;

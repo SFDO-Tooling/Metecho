@@ -55,7 +55,7 @@ const defaultEpic = {
   id: 'epic1',
   slug: 'epic-1',
   name: 'Epic 1',
-  github_users: ['user-1'],
+  github_users: [123456],
 };
 
 const defaultOrg = {
@@ -64,7 +64,7 @@ const defaultOrg = {
   org_type: 'Dev',
   owner: 'user-id',
   owner_gh_username: 'user-name',
-  owner_gh_id: 'user-id',
+  owner_gh_id: 999999,
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -89,7 +89,7 @@ const defaultState = {
   user: {
     id: 'user-id',
     username: 'user-name',
-    github_id: 'user-id',
+    github_id: 999999,
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -107,12 +107,12 @@ const defaultState = {
         repo_name: 'test-repo',
         github_users: [
           {
-            id: 'user-1',
+            id: 123456,
             login: 'user-name',
             permissions: { push: true },
           },
           {
-            id: 'user-id',
+            id: 999999,
             login: 'user-name',
             permissions: { push: true },
           },
@@ -160,7 +160,7 @@ const defaultState = {
           description_rendered: '<p>Task Description</p>',
           has_unmerged_commits: false,
           commits: [],
-          assigned_dev: 'user-id',
+          assigned_dev: 999999,
           assigned_qa: null,
         },
         {
@@ -177,7 +177,7 @@ const defaultState = {
           description_rendered: '<p>Task Description</p>',
           has_unmerged_commits: false,
           commits: [],
-          assigned_dev: 'user-id',
+          assigned_dev: 999999,
           assigned_qa: null,
         },
       ],
@@ -298,7 +298,7 @@ describe('<TaskDetail/>', () => {
               {
                 ...defaultState.tasks.p1.tasks[0],
                 assigned_dev: null,
-                assigned_qa: 'user-id',
+                assigned_qa: 999999,
               },
             ],
           },
@@ -793,7 +793,7 @@ describe('<TaskDetail/>', () => {
           objectType: OBJECT_TYPES.TASK,
           url: window.api_urls.task_assignees('task1'),
           data: {
-            assigned_dev: 'user-id',
+            assigned_dev: 999999,
           },
         });
         expect(updateObject).toHaveBeenCalledWith({
@@ -1070,7 +1070,7 @@ describe('<TaskDetail/>', () => {
           {
             ...defaultState.tasks.p1.tasks[0],
             pr_is_open: true,
-            assigned_qa: 'user-id',
+            assigned_qa: 999999,
             commits: [],
             origin_sha: 'parent',
             review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -1147,7 +1147,7 @@ describe('<TaskDetail/>', () => {
                   {
                     ...defaultState.tasks.p1.tasks[0],
                     pr_is_open: true,
-                    assigned_qa: 'user-id',
+                    assigned_qa: 999999,
                     commits: [],
                     origin_sha: 'parent',
                     review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -1204,7 +1204,7 @@ describe('<TaskDetail/>', () => {
       org_type: 'Dev',
       owner: 'user-id',
       owner_gh_username: 'user-name',
-      owner_gh_id: 'user-id',
+      owner_gh_id: 999999,
       url: '/foo/',
       is_created: true,
       has_unsaved_changes: false,
@@ -1216,7 +1216,7 @@ describe('<TaskDetail/>', () => {
       org_type: 'QA',
       owner: 'user-id',
       owner_gh_username: 'user-name',
-      owner_gh_id: 'user-id',
+      owner_gh_id: 999999,
       url: '/bar/',
       is_created: true,
       has_been_visited: false,
@@ -1226,7 +1226,7 @@ describe('<TaskDetail/>', () => {
       latest_commit: 'foo',
     };
     const jonny = {
-      id: 'user-id',
+      id: 999999,
       login: 'user-name',
       permissions: { push: true },
     };
