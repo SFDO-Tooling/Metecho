@@ -45,6 +45,7 @@ from .gh import (
     try_to_make_branch,
 )
 from .models import (
+    Epic,
     GitHubCollaboration,
     GitHubOrganization,
     GitHubUser,
@@ -306,8 +307,6 @@ create_repository_job = job(create_repository)
 
 
 def alert_user_about_expiring_org(*, org, days):
-    from .models import ScratchOrg, User
-
     # if scratch org is there
     try:
         org.refresh_from_db()
@@ -823,8 +822,6 @@ def refresh_commits(*, project, branch_name, originating_user_id):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import Epic
-
     repo = get_repo_info(
         None, repo_owner=project.repo_owner, repo_name=project.repo_name
     )
