@@ -1198,6 +1198,10 @@ def parse_datasets(*, org: ScratchOrg, user: User):
     """
     Parse dataset definitions from the `datasets/` folder in the Task branch
     """
+    # These fields are automatically captured by CCI or cause trouble while capturing,
+    # so we don't even include them in the schema at all
+    IGNORED_FIELDS = ("Id",)
+
     datasets = {}
     org_schema = {}
     dataset_errors = []
@@ -1212,7 +1216,7 @@ def parse_datasets(*, org: ScratchOrg, user: User):
                     "fields": {
                         field_name: {"label": field.label}
                         for field_name, field in obj.fields.items()
-                        if not field_name.endswith("Id")
+                        if field_name not in IGNORED_FIELDS
                     },
                 }
                 for obj_name, obj in schema.items()
