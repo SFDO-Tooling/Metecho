@@ -1209,6 +1209,19 @@ class TestTaskViewSet:
         response = client.get(url, data={"project": str(project.pk)})
         assert len(response.json()["results"]) == 2
 
+    def test_get__assigned_filter(self, client, task_factory, git_hub_user_factory):
+        url = reverse("task-list")
+        task_factory(assigned_dev=git_hub_user_factory(id=client.user.github_id))
+        # Other tasks in other epics and projects
+        task_factory(assigned_dev=git_hub_user_factory())
+        task_factory()
+
+        response = client.get(url)
+        assert len(response.data["results"]) == 3
+
+        response = client.get(url, data={"assigned_to_me": True})
+        assert len(response.data["results"]) == 1
+
     def test_create__dev_org(
         self, client, git_hub_collaboration_factory, scratch_org_factory, epic
     ):
@@ -1228,7 +1241,9 @@ class TestTaskViewSet:
 
         response = client.post(reverse("task-list"), data=data)
 
-        assert response.data["assigned_dev"] == client.user.github_id, response.data
+        assert (
+            response.data["assigned_dev"]["id"] == client.user.github_id
+        ), response.data
 
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:

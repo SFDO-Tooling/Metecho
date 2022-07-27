@@ -45,12 +45,12 @@ const testOrgVisited = {
   latest_commit: 'foo',
 };
 const jonny = {
-  id: 'jonny',
+  id: 123456,
   login: 'jonny',
   permissions: { push: true },
 };
 const stacy = {
-  id: 'stacy',
+  id: 456789,
   login: 'stacy',
   permissions: { push: true },
 };
@@ -59,7 +59,7 @@ const defaultProject = {
   github_users: [jonny, stacy],
 };
 const taskWithDev = {
-  assigned_dev: jonny.id,
+  assigned_dev: jonny,
   status: TASK_STATUSES.IN_PROGRESS,
 };
 const taskWithChanges = {
@@ -73,7 +73,7 @@ const taskWithPR = {
 };
 const taskWithTester = {
   ...taskWithPR,
-  assigned_qa: stacy.id,
+  assigned_qa: stacy,
 };
 const taskSubmittingReview = {
   ...taskWithTester,
@@ -98,7 +98,7 @@ const taskWithReviewInvalid = {
 describe('<TaskStatusSteps />', () => {
   test.each([
     ['planned, no orgs', {}, null, null],
-    ['dev assigned, no orgs', { assigned_dev: jonny.id }, null, null],
+    ['dev assigned, no orgs', { assigned_dev: jonny }, null, null],
     ['dev org creating', taskWithDev, { is_created: false }, null],
     ['dev org', taskWithDev, {}, null],
     [

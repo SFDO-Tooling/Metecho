@@ -1,3 +1,4 @@
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -21,6 +22,18 @@ describe('<Manage /> tests', () => {
 
     return result;
   };
+
+  beforeEach(() => {
+    fetchMock.get(
+      {
+        url: window.api_urls.task_list(),
+        query: { assigned_to_me: true },
+      },
+      {
+        results: [],
+      },
+    );
+  });
 
   test('Manage Account heading renders', () => {
     const { getByRole } = setup();

@@ -29,7 +29,7 @@ const AssignTaskRoleModal = ({
 }: {
   projectId: string;
   taskHasEpic: boolean;
-  epicUsers: GitHubUser[] | null;
+  epicUsers?: GitHubUser[] | null;
   githubUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
   orgType: OrgTypes;

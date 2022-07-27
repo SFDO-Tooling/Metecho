@@ -144,10 +144,10 @@ const EpicDetail = (
     const users = new Set<number>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
-        users.add(task.assigned_dev);
+        users.add(task.assigned_dev.id);
       }
       if (task.assigned_qa) {
-        users.add(task.assigned_qa);
+        users.add(task.assigned_qa.id);
       }
     });
     return users;
@@ -782,7 +782,6 @@ const EpicDetail = (
                 <EpicProgress range={epicProgress} />
                 <TaskTable
                   projectId={project.id}
-                  projectSlug={project.slug}
                   tasks={tasks}
                   next={next}
                   count={count}
