@@ -5,8 +5,9 @@ from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.extensions import OpenApiSerializerFieldExtension
+from drf_spectacular.plumbing import build_basic_type
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import Direction, extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import JSONField
 
@@ -28,6 +29,8 @@ from .models import (
 )
 from .sf_run_flow import is_org_good
 from .validators import CaseInsensitiveUniqueTogetherValidator, UnattachedIssueValidator
+
+HASH_ID_OPENAPI_TYPE = {"type": "string", "format": "HashID"}
 
 User = get_user_model()
 
@@ -62,7 +65,7 @@ class HashIdFix(OpenApiSerializerFieldExtension):
     target_class = "hashid_field.rest.UnconfiguredHashidSerialField"
 
     def map_serializer_field(self, auto_schema, direction):  # pragma: nocover
-        return {"type": "string", "format": "HashID"}
+        return HASH_ID_OPENAPI_TYPE
 
 
 class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
@@ -91,6 +94,28 @@ class NestedPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
             queryset = queryset[:cutoff]
 
         return OrderedDict(((item.pk, self.display_value(item)) for item in queryset))
+
+
+class NestedPkExtension(OpenApiSerializerFieldExtension):
+
+    target_class = NestedPrimaryKeyRelatedField
+
+    def map_serializer_field(self, auto_schema, direction: Direction):
+        """
+        Ensure drf-spectacular use different read/write serializers for
+        `NestedPrimaryKeyRelatedField`. Requires `COMPONENT_SPLIT_REQUEST` to be enabled
+        in drf-spectacular settings.
+        """
+        if direction == "response":
+            component = auto_schema.resolve_serializer(
+                self.target.serializer, direction
+            )
+            return component.ref if component else None
+        return (
+            HASH_ID_OPENAPI_TYPE
+            if isinstance(self.target.pk_field, serializers.CharField)
+            else build_basic_type(int)
+        )
 
 
 class GitHubIssueSerializer(HashIdModelSerializer):

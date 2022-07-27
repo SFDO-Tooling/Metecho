@@ -404,6 +404,7 @@ SPECTACULAR_SETTINGS = {
         "ReviewStatusEnum": "metecho.api.models.TaskReviewStatus.choices",
     },
     "SERVE_INCLUDE_SCHEMA": False,  # Don't include schema view in docs
+    "COMPONENT_SPLIT_REQUEST": True,  # Create separate components for request/response
 }
 
 
