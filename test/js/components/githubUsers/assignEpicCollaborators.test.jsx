@@ -19,13 +19,13 @@ describe('AssignEpicCollaboratorsModal', () => {
     const setUsers = jest.fn();
     const allUsers = [
       {
-        id: '123456',
+        id: 123456,
         login: 'test user',
         avatar_url: 'https://example.com/avatar.png',
         permissions: { push: true },
       },
       {
-        id: 'readonly',
+        id: 999999,
         login: 'readonly-user',
         avatar_url: 'https://example.com/avatar.png',
         permissions: { push: false },

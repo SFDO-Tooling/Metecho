@@ -64,6 +64,7 @@ interface Props {
   isRefreshingUsers: boolean;
   assignUserAction?: AssignUserAction;
   viewEpicsColumn?: boolean;
+  fetchNextPage?: () => Promise<void>;
 }
 
 const NameTableCell = ({
@@ -242,7 +243,7 @@ const AssigneeTableCell = ({
             taskHasEpic={Boolean(item.epic)}
             epicUsers={epicCollaborators}
             githubUsers={githubUsers}
-            selectedUser={assignedUser || null}
+            selectedUser={null}
             orgType={type}
             isOpen={assignUserModalOpen}
             isRefreshingUsers={isRefreshingUsers}
@@ -289,6 +290,7 @@ const TaskTable = ({
   isRefreshingUsers,
   assignUserAction,
   viewEpicsColumn,
+  fetchNextPage,
 }: Props) => {
   const { t } = useTranslation();
   const isMounted = useIsMounted();
@@ -317,31 +319,40 @@ const TaskTable = ({
 
   const fetchMoreTasks = useCallback(() => {
     /* istanbul ignore else */
-    if (isFetched && projectId && next) {
+    if (isFetched && (projectId || fetchNextPage) && next) {
       /* istanbul ignore else */
       if (isMounted.current) {
         setFetchingTasks(true);
       }
 
-      const filters: ObjectFilters = { project: projectId };
-      if (epicId) {
-        filters.epic = epicId;
-      }
-
-      dispatch(
-        fetchObjects({
-          objectType: OBJECT_TYPES.TASK,
-          filters,
-          url: next,
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setFetchingTasks(false);
+      if (fetchNextPage) {
+        fetchNextPage().finally(() => {
+          /* istanbul ignore else */
+          if (isMounted.current) {
+            setFetchingTasks(false);
+          }
+        });
+      } else {
+        const filters: ObjectFilters = { project: projectId as string };
+        if (epicId) {
+          filters.epic = epicId;
         }
-      });
+
+        dispatch(
+          fetchObjects({
+            objectType: OBJECT_TYPES.TASK,
+            filters,
+            url: next,
+          }),
+        ).finally(() => {
+          /* istanbul ignore else */
+          if (isMounted.current) {
+            setFetchingTasks(false);
+          }
+        });
+      }
     }
-  }, [isFetched, projectId, next, isMounted, epicId, dispatch]);
+  }, [isFetched, projectId, fetchNextPage, next, isMounted, epicId, dispatch]);
 
   return isFetched ? (
     <>

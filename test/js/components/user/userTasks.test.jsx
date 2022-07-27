@@ -1,4 +1,4 @@
-import { act } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
@@ -7,29 +7,24 @@ import UserTasks from '@/js/components/user/userTasks';
 import { selectProjectById } from '@/js/store/projects/selectors';
 
 import {
-  sampleGitHubUser2,
-  sampleTask7,
+  sampleGitHubUser1,
+  sampleTask1,
+  sampleTask2,
 } from '../../../../src/stories/fixtures';
-import {
-  renderWithRedux,
-  reRenderWithRedux,
-  storeWithThunk,
-} from '../../utils';
+import { renderWithRedux, storeWithThunk } from '../../utils';
 
 jest.mock('@/js/store/projects/selectors');
-selectProjectById.mockReturnValue(sampleTask7.root_project);
+
+selectProjectById.mockReturnValue(sampleTask1.root_project);
 
 describe('<UserTasks />', () => {
-  const setup = ({ rerender = null, store = null, results } = {}) => {
+  const setup = (payload = {}) => {
     fetchMock.get(
       {
         url: window.api_urls.task_list(),
         query: { assigned_to_me: true },
-        overwriteRoutes: false,
       },
-      {
-        results,
-      },
+      payload,
     );
 
     const ui = (
@@ -38,11 +33,8 @@ describe('<UserTasks />', () => {
       </StaticRouter>
     );
     const initialState = {
-      user: sampleGitHubUser2,
+      user: sampleGitHubUser1,
     };
-    if (rerender) {
-      return reRenderWithRedux(ui, store, rerender);
-    }
     return renderWithRedux(ui, initialState, storeWithThunk);
   };
 
@@ -50,26 +42,41 @@ describe('<UserTasks />', () => {
     fetchMock.restore();
   });
 
-  test('UserTasks does not render with 0 tasks', async () => {
-    const { rerender, store, queryByText } = setup({ results: [] });
+  test('does not render with no tasks', () => {
+    const { queryByText } = setup({ results: [], count: 0 });
 
-    await act(() => setup({ rerender, store }));
-
-    expect(queryByText('Tasks With Unretrieved Changes')).toBeNull();
+    expect(queryByText('Your Tasks')).toBeNull();
   });
 
-  test('UserTasks renders with tasks', async () => {
-    const { rerender, store, queryByText, queryByRole, getAllByRole } = setup({
-      results: [sampleTask7],
+  test('renders with tasks', async () => {
+    const { findByText, getByText, getByRole } = setup({
+      results: [sampleTask1],
+      count: 1,
     });
 
-    await act(() => setup({ rerender, store }));
+    await findByText('Your Tasks');
+    expect(getByText(sampleTask1.name)).toBeVisible();
+    expect(getByRole('img', { title: sampleGitHubUser1.login })).toBeVisible();
+  });
 
-    expect(queryByText('Tasks With Unretrieved Changes')).toBeVisible();
-    expect(queryByRole('table')).toBeVisible();
-    expect(queryByText(sampleTask7.name)).toBeVisible();
-    expect(
-      getAllByRole('img', { title: sampleGitHubUser2.login }),
-    ).toHaveLength(2);
+  test('fetches next page of tasks', async () => {
+    const next = '/next/url';
+    const { findByText, getByText, queryByText } = setup({
+      results: [sampleTask1],
+      count: 2,
+      next,
+    });
+
+    await findByText('Load More');
+
+    fetchMock.get(next, { results: [sampleTask2], count: 2 });
+    fireEvent.click(getByText('Load More'));
+
+    await findByText('Loading…');
+    await findByText(sampleTask2.name);
+
+    expect(getByText(sampleTask1.name)).toBeVisible();
+    expect(getByText(sampleTask2.name)).toBeVisible();
+    expect(queryByText('Load More')).toBeNull();
   });
 });

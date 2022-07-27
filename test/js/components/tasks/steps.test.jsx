@@ -45,12 +45,12 @@ const testOrgVisited = {
   latest_commit: 'foo',
 };
 const jonny = {
-  id: 'jonny',
+  id: 123456,
   login: 'jonny',
   permissions: { push: true },
 };
 const stacy = {
-  id: 'stacy',
+  id: 456789,
   login: 'stacy',
   permissions: { push: true },
 };
@@ -98,7 +98,7 @@ const taskWithReviewInvalid = {
 describe('<TaskStatusSteps />', () => {
   test.each([
     ['planned, no orgs', {}, null, null],
-    ['dev assigned, no orgs', { assigned_dev: jonny.id }, null, null],
+    ['dev assigned, no orgs', { assigned_dev: jonny }, null, null],
     ['dev org creating', taskWithDev, { is_created: false }, null],
     ['dev org', taskWithDev, {}, null],
     [

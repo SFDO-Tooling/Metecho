@@ -226,7 +226,7 @@ const TaskOrgCard = ({
           assignedToCurrentUser ? (
             <UserActions
               type={type}
-              assignedUserId={(assignedUser as GitHubUser).id}
+              assignedUserId={assignedUser?.id ?? null}
               currentUserId={user.github_id}
               userHasPermissions={userHasPermissions}
               openAssignUserModal={openAssignUserModal}

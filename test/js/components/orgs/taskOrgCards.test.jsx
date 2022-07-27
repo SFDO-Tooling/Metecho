@@ -197,7 +197,7 @@ describe('<TaskOrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
-          owner_gh_username: sampleGitHubUser2.name,
+          owner_gh_username: sampleGitHubUser2.username,
           owner_gh_id: sampleGitHubUser2.id,
           unsaved_changes: {},
           total_unsaved_changes: 0,
