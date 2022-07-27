@@ -87,13 +87,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Epic'
+              $ref: '#/components/schemas/EpicRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Epic'
+              $ref: '#/components/schemas/EpicRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Epic'
+              $ref: '#/components/schemas/EpicRequest'
         required: true
       security:
       - tokenAuth: []
@@ -146,13 +146,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Epic'
+              $ref: '#/components/schemas/EpicRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Epic'
+              $ref: '#/components/schemas/EpicRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Epic'
+              $ref: '#/components/schemas/EpicRequest'
         required: true
       security:
       - tokenAuth: []
@@ -181,13 +181,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedEpic'
+              $ref: '#/components/schemas/PatchedEpicRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedEpic'
+              $ref: '#/components/schemas/PatchedEpicRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedEpic'
+              $ref: '#/components/schemas/PatchedEpicRequest'
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -237,13 +237,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EpicCollaborators'
+              $ref: '#/components/schemas/EpicCollaboratorsRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/EpicCollaborators'
+              $ref: '#/components/schemas/EpicCollaboratorsRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/EpicCollaborators'
+              $ref: '#/components/schemas/EpicCollaboratorsRequest'
         required: true
       security:
       - tokenAuth: []
@@ -274,13 +274,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EpicCollaborators'
+              $ref: '#/components/schemas/EpicCollaboratorsRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/EpicCollaborators'
+              $ref: '#/components/schemas/EpicCollaboratorsRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/EpicCollaborators'
+              $ref: '#/components/schemas/EpicCollaboratorsRequest'
         required: true
       security:
       - tokenAuth: []
@@ -310,13 +310,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePr'
+              $ref: '#/components/schemas/CreatePrRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CreatePr'
+              $ref: '#/components/schemas/CreatePrRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreatePr'
+              $ref: '#/components/schemas/CreatePrRequest'
         required: true
       security:
       - tokenAuth: []
@@ -484,13 +484,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CheckRepoName'
+              $ref: '#/components/schemas/CheckRepoNameRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CheckRepoName'
+              $ref: '#/components/schemas/CheckRepoNameRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CheckRepoName'
+              $ref: '#/components/schemas/CheckRepoNameRequest'
         required: true
       security:
       - tokenAuth: []
@@ -567,13 +567,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectCreate'
+              $ref: '#/components/schemas/ProjectCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ProjectCreate'
+              $ref: '#/components/schemas/ProjectCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ProjectCreate'
+              $ref: '#/components/schemas/ProjectCreateRequest'
         required: true
       security:
       - tokenAuth: []
@@ -742,13 +742,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScratchOrg'
+              $ref: '#/components/schemas/ScratchOrgRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ScratchOrg'
+              $ref: '#/components/schemas/ScratchOrgRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ScratchOrg'
+              $ref: '#/components/schemas/ScratchOrgRequest'
         required: true
       security:
       - tokenAuth: []
@@ -801,13 +801,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScratchOrg'
+              $ref: '#/components/schemas/ScratchOrgRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ScratchOrg'
+              $ref: '#/components/schemas/ScratchOrgRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ScratchOrg'
+              $ref: '#/components/schemas/ScratchOrgRequest'
         required: true
       security:
       - tokenAuth: []
@@ -836,13 +836,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedScratchOrg'
+              $ref: '#/components/schemas/PatchedScratchOrgRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedScratchOrg'
+              $ref: '#/components/schemas/PatchedScratchOrgRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedScratchOrg'
+              $ref: '#/components/schemas/PatchedScratchOrgRequest'
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -890,13 +890,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Commit'
+              $ref: '#/components/schemas/CommitRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Commit'
+              $ref: '#/components/schemas/CommitRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Commit'
+              $ref: '#/components/schemas/CommitRequest'
         required: true
       security:
       - tokenAuth: []
@@ -926,13 +926,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CommitDataset'
+              $ref: '#/components/schemas/CommitDatasetRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CommitDataset'
+              $ref: '#/components/schemas/CommitDatasetRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CommitDataset'
+              $ref: '#/components/schemas/CommitDatasetRequest'
         required: true
       security:
       - tokenAuth: []
@@ -1018,6 +1018,11 @@ paths:
       description: Manage Tasks related to a Metecho Project or Epic.
       parameters:
       - in: query
+        name: assigned_to_me
+        schema:
+          type: boolean
+        description: Filter/exclude tasks assigned to the current user
+      - in: query
         name: epic
         schema:
           type: string
@@ -1058,13 +1063,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskRequest'
         required: true
       security:
       - tokenAuth: []
@@ -1117,13 +1122,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskRequest'
         required: true
       security:
       - tokenAuth: []
@@ -1152,13 +1157,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedTask'
+              $ref: '#/components/schemas/PatchedTaskRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedTask'
+              $ref: '#/components/schemas/PatchedTaskRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedTask'
+              $ref: '#/components/schemas/PatchedTaskRequest'
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1208,13 +1213,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskAssignee'
+              $ref: '#/components/schemas/TaskAssigneeRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TaskAssignee'
+              $ref: '#/components/schemas/TaskAssigneeRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TaskAssignee'
+              $ref: '#/components/schemas/TaskAssigneeRequest'
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1244,13 +1249,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TaskAssignee'
+              $ref: '#/components/schemas/TaskAssigneeRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TaskAssignee'
+              $ref: '#/components/schemas/TaskAssigneeRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TaskAssignee'
+              $ref: '#/components/schemas/TaskAssigneeRequest'
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1279,13 +1284,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CanReassign'
+              $ref: '#/components/schemas/CanReassignRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CanReassign'
+              $ref: '#/components/schemas/CanReassignRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CanReassign'
+              $ref: '#/components/schemas/CanReassignRequest'
         required: true
       security:
       - tokenAuth: []
@@ -1317,13 +1322,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePr'
+              $ref: '#/components/schemas/CreatePrRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CreatePr'
+              $ref: '#/components/schemas/CreatePrRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreatePr'
+              $ref: '#/components/schemas/CreatePrRequest'
         required: true
       security:
       - tokenAuth: []
@@ -1353,13 +1358,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Review'
+              $ref: '#/components/schemas/ReviewRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Review'
+              $ref: '#/components/schemas/ReviewRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Review'
+              $ref: '#/components/schemas/ReviewRequest'
         required: true
       security:
       - tokenAuth: []
@@ -1465,13 +1470,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GuidedTour'
+              $ref: '#/components/schemas/GuidedTourRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/GuidedTour'
+              $ref: '#/components/schemas/GuidedTourRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/GuidedTour'
+              $ref: '#/components/schemas/GuidedTourRequest'
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1555,7 +1560,7 @@ paths:
           description: ''
 components:
   schemas:
-    CanReassign:
+    CanReassignRequest:
       type: object
       properties:
         role:
@@ -1565,52 +1570,60 @@ components:
       required:
       - gh_uid
       - role
-    CheckRepoName:
+    CheckRepoNameRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 1
       required:
       - name
-    Commit:
+    CommitDatasetRequest:
       type: object
       properties:
         commit_message:
           type: string
-        changes:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        target_directory:
-          type: string
-      required:
-      - changes
-      - commit_message
-      - target_directory
-    CommitDataset:
-      type: object
-      properties:
-        commit_message:
-          type: string
+          minLength: 1
         dataset_name:
           type: string
+          minLength: 1
         dataset_definition:
           type: object
           additionalProperties:
             type: array
             items:
               type: string
+              minLength: 1
       required:
       - commit_message
       - dataset_definition
       - dataset_name
-    CreatePr:
+    CommitRequest:
+      type: object
+      properties:
+        commit_message:
+          type: string
+          minLength: 1
+        changes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              minLength: 1
+        target_directory:
+          type: string
+          minLength: 1
+      required:
+      - changes
+      - commit_message
+      - target_directory
+    CreatePrRequest:
       type: object
       properties:
         title:
           type: string
+          minLength: 1
         critical_changes:
           type: string
         additional_changes:
@@ -1726,7 +1739,7 @@ components:
       - slug
       - status
       - task_count
-    EpicCollaborators:
+    EpicCollaboratorsRequest:
       type: object
       properties:
         github_users:
@@ -1735,6 +1748,49 @@ components:
             type: integer
       required:
       - github_users
+    EpicMinimal:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        slug:
+          type: string
+          readOnly: true
+        github_users:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+      required:
+      - github_users
+      - id
+      - name
+      - slug
+    EpicRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        project:
+          type: string
+          format: HashID
+        branch_name:
+          type: string
+          pattern: ^[-\w/]+$
+          maxLength: 100
+        issue:
+          type: string
+          format: HashID
+          nullable: true
+      required:
+      - name
+      - project
     EpicStatusEnum:
       enum:
       - Planned
@@ -1944,7 +2000,7 @@ components:
       required:
       - id
       - name
-    GuidedTour:
+    GuidedTourRequest:
       type: object
       properties:
         enabled:
@@ -2109,90 +2165,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Task'
-    PatchedEpic:
+    PatchedEpicRequest:
       type: object
       properties:
-        id:
-          type: string
-          readOnly: true
         name:
           type: string
+          minLength: 1
         description:
           type: string
-        description_rendered:
-          type: string
-          readOnly: true
-        slug:
-          type: string
-          readOnly: true
-        old_slugs:
-          type: array
-          items:
-            type: string
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
         project:
           type: string
           format: HashID
-        task_count:
-          type: integer
-          readOnly: true
-        branch_url:
-          type: string
-          format: uri
-          readOnly: true
-        branch_diff_url:
-          type: string
-          format: uri
-          readOnly: true
         branch_name:
           type: string
           pattern: ^[-\w/]+$
           maxLength: 100
-        has_unmerged_commits:
-          type: boolean
-          readOnly: true
-        currently_creating_branch:
-          type: boolean
-          readOnly: true
-        currently_creating_pr:
-          type: boolean
-          readOnly: true
-        pr_url:
-          type: string
-          format: uri
-          readOnly: true
-        pr_is_open:
-          type: boolean
-          readOnly: true
-        pr_is_merged:
-          type: boolean
-          readOnly: true
-        status:
-          allOf:
-          - $ref: '#/components/schemas/EpicStatusEnum'
-          readOnly: true
-        github_users:
-          type: array
-          items:
-            type: integer
-          readOnly: true
-        latest_sha:
-          type: string
-          readOnly: true
         issue:
           type: string
           format: HashID
           nullable: true
-    PatchedScratchOrg:
+    PatchedScratchOrgRequest:
       type: object
       properties:
-        id:
-          type: string
-          readOnly: true
         project:
           type: string
           format: HashID
@@ -2207,125 +2201,23 @@ components:
           nullable: true
         org_type:
           $ref: '#/components/schemas/OrgTypeEnum'
-        owner:
-          type: string
-          format: HashID
-          readOnly: true
         description:
           type: string
-        description_rendered:
-          type: string
-          readOnly: true
-        last_modified_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        expires_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        latest_commit:
-          type: string
-          readOnly: true
-        latest_commit_url:
-          type: string
-          format: uri
-          readOnly: true
-        latest_commit_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        last_checked_unsaved_changes_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        url:
-          type: string
-          format: uri
-          readOnly: true
-        unsaved_changes:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-        total_unsaved_changes:
-          type: integer
-          readOnly: true
-        has_unsaved_changes:
-          type: boolean
-          readOnly: true
-        ignored_changes:
-          type: object
-          additionalProperties: {}
-          readOnly: true
         ignored_changes_write:
           type: object
           additionalProperties: {}
           writeOnly: true
-        total_ignored_changes:
-          type: integer
-          readOnly: true
-        has_ignored_changes:
-          type: boolean
-          readOnly: true
-        currently_refreshing_changes:
-          type: boolean
-          readOnly: true
-        currently_retrieving_metadata:
-          type: boolean
-          readOnly: true
-        currently_refreshing_org:
-          type: boolean
-          readOnly: true
-        currently_reassigning_user:
-          type: boolean
-          readOnly: true
-        is_created:
-          type: boolean
-          readOnly: true
-        delete_queued_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        owner_gh_username:
-          type: string
-          readOnly: true
-        owner_gh_id:
-          type: integer
-          nullable: true
-          readOnly: true
-        has_been_visited:
-          type: boolean
-          readOnly: true
-        valid_target_directories:
-          type: object
-          additionalProperties: {}
-          readOnly: true
         org_config_name:
           type: string
-        currently_parsing_datasets:
-          type: boolean
-          readOnly: true
-        currently_retrieving_dataset:
-          type: boolean
-          readOnly: true
-    PatchedTask:
+          minLength: 1
+    PatchedTaskRequest:
       type: object
       properties:
-        id:
-          type: string
-          readOnly: true
         name:
           type: string
+          minLength: 1
         description:
           type: string
-        description_rendered:
-          type: string
-          readOnly: true
         epic:
           type: string
           format: HashID
@@ -2334,95 +2226,24 @@ components:
           type: string
           format: HashID
           nullable: true
-        slug:
-          type: string
-          readOnly: true
-        old_slugs:
-          type: array
-          items:
-            type: string
-          readOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        has_unmerged_commits:
-          type: boolean
-          readOnly: true
-        currently_creating_branch:
-          type: boolean
-          readOnly: true
-        currently_creating_pr:
-          type: boolean
-          readOnly: true
         branch_name:
           type: string
           pattern: ^[-\w/]+$
           maxLength: 100
-        root_project:
-          type: string
-          readOnly: true
-        branch_url:
-          type: string
-          format: uri
-          readOnly: true
-        commits:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-        origin_sha:
-          type: string
-          readOnly: true
-        branch_diff_url:
-          type: string
-          format: uri
-          readOnly: true
-        pr_url:
-          type: string
-          format: uri
-          readOnly: true
         issue:
           type: string
           format: HashID
           nullable: true
-        review_submitted_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        review_valid:
-          type: boolean
-          readOnly: true
-        review_status:
-          allOf:
-          - $ref: '#/components/schemas/ReviewStatusEnum'
-          readOnly: true
-        review_sha:
-          type: string
-          readOnly: true
-        status:
-          allOf:
-          - $ref: '#/components/schemas/TaskStatusEnum'
-          readOnly: true
-        pr_is_open:
-          type: boolean
-          readOnly: true
         assigned_dev:
           type: integer
-          nullable: true
-        assigned_qa:
-          type: integer
-          readOnly: true
           nullable: true
         dev_org:
           type: string
           format: HashID
           writeOnly: true
-        currently_submitting_review:
-          type: boolean
-          readOnly: true
         org_config_name:
           type: string
+          minLength: 1
     Project:
       type: object
       properties:
@@ -2509,11 +2330,12 @@ components:
       - repo_owner
       - repo_url
       - slug
-    ProjectCreate:
+    ProjectCreateRequest:
       type: object
       properties:
         name:
           type: string
+          minLength: 1
         description:
           type: string
         organization:
@@ -2521,10 +2343,11 @@ components:
           format: HashID
         repo_name:
           type: string
+          minLength: 1
         github_users:
           type: array
           items:
-            $ref: '#/components/schemas/ShortGitHubUser'
+            $ref: '#/components/schemas/ShortGitHubUserRequest'
         dependencies:
           type: array
           items:
@@ -2558,7 +2381,7 @@ components:
           type: boolean
         admin:
           type: boolean
-    Review:
+    ReviewRequest:
       type: object
       properties:
         notes:
@@ -2660,10 +2483,6 @@ components:
           type: object
           additionalProperties: {}
           readOnly: true
-        ignored_changes_write:
-          type: object
-          additionalProperties: {}
-          writeOnly: true
         total_ignored_changes:
           type: integer
           readOnly: true
@@ -2743,6 +2562,35 @@ components:
       - unsaved_changes
       - url
       - valid_target_directories
+    ScratchOrgRequest:
+      type: object
+      properties:
+        project:
+          type: string
+          format: HashID
+          nullable: true
+        epic:
+          type: string
+          format: HashID
+          nullable: true
+        task:
+          type: string
+          format: HashID
+          nullable: true
+        org_type:
+          $ref: '#/components/schemas/OrgTypeEnum'
+        description:
+          type: string
+        ignored_changes_write:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+        org_config_name:
+          type: string
+          minLength: 1
+      required:
+      - org_config_name
+      - org_type
     ShortGitHubUser:
       type: object
       description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
@@ -2751,9 +2599,30 @@ components:
           type: integer
         login:
           type: string
+        name:
+          type: string
         avatar_url:
           type: string
           format: uri
+      required:
+      - id
+      - login
+    ShortGitHubUserRequest:
+      type: object
+      description: See https://github3py.readthedocs.io/en/master/api-reference/users.html#github3.users.ShortUser
+      properties:
+        id:
+          type: integer
+        login:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        avatar_url:
+          type: string
+          format: uri
+          minLength: 1
       required:
       - id
       - login
@@ -2771,8 +2640,8 @@ components:
           type: string
           readOnly: true
         epic:
-          type: string
-          format: HashID
+          allOf:
+          - $ref: '#/components/schemas/EpicMinimal'
           nullable: true
         project:
           type: string
@@ -2804,6 +2673,9 @@ components:
           pattern: ^[-\w/]+$
           maxLength: 100
         root_project:
+          type: string
+          readOnly: true
+        root_project_slug:
           type: string
           readOnly: true
         branch_url:
@@ -2852,16 +2724,13 @@ components:
           type: boolean
           readOnly: true
         assigned_dev:
-          type: integer
+          allOf:
+          - $ref: '#/components/schemas/ShortGitHubUser'
           nullable: true
         assigned_qa:
-          type: integer
+          allOf:
+          - $ref: '#/components/schemas/ShortGitHubUser'
           readOnly: true
-          nullable: true
-        dev_org:
-          type: string
-          format: HashID
-          writeOnly: true
         currently_submitting_review:
           type: boolean
           readOnly: true
@@ -2890,9 +2759,10 @@ components:
       - review_submitted_at
       - review_valid
       - root_project
+      - root_project_slug
       - slug
       - status
-    TaskAssignee:
+    TaskAssigneeRequest:
       type: object
       properties:
         assigned_dev:
@@ -2905,6 +2775,43 @@ components:
           type: boolean
         should_alert_qa:
           type: boolean
+    TaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        epic:
+          type: string
+          format: HashID
+          nullable: true
+        project:
+          type: string
+          format: HashID
+          nullable: true
+        branch_name:
+          type: string
+          pattern: ^[-\w/]+$
+          maxLength: 100
+        issue:
+          type: string
+          format: HashID
+          nullable: true
+        assigned_dev:
+          type: integer
+          nullable: true
+        dev_org:
+          type: string
+          format: HashID
+          writeOnly: true
+        org_config_name:
+          type: string
+          minLength: 1
+      required:
+      - name
+      - org_config_name
     TaskStatusEnum:
       enum:
       - Planned

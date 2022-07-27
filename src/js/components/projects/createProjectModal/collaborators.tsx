@@ -9,7 +9,7 @@ import RefreshCollaboratorsButton from '@/js/components/githubOrgs/refreshCollab
 import { UserTableCell } from '@/js/components/githubUsers/assignEpicCollaborators';
 import { CreateProjectData } from '@/js/components/projects/createProjectModal';
 import { SpinnerWrapper, UseFormProps } from '@/js/components/utils';
-import { GitHubUser } from '@/js/store/user/reducer';
+import { GitHubUser, GitHubUserTableItem } from '@/js/store/user/reducer';
 
 interface Props {
   collaborators: GitHubUser[];
@@ -54,10 +54,21 @@ const SelectProjectCollaboratorsForm = ({
 
   const updateSelection = (
     event: ChangeEvent<HTMLInputElement>,
-    data: { selection: GitHubUser[] },
+    data: { selection: GitHubUserTableItem[] },
   ) => {
-    setInputs({ ...inputs, github_users: data.selection });
+    const users: GitHubUser[] = data.selection.map((u) => ({
+      ...u,
+      id: Number(u.id),
+    }));
+    setInputs({ ...inputs, github_users: users });
   };
+
+  // <DataTable> expects `item.id` to be a `string`
+  const items = collaborators.map((c) => ({ ...c, id: c.id.toString() }));
+  const selectedItems = inputs.github_users.map((c) => ({
+    ...c,
+    id: c.id.toString(),
+  }));
 
   return (
     <form className="slds-form">
@@ -91,9 +102,9 @@ const SelectProjectCollaboratorsForm = ({
         {collaborators.length ? (
           <DataTable
             className="align-checkboxes table-row-targets"
-            items={collaborators}
+            items={items}
             selectRows="checkbox"
-            selection={inputs.github_users}
+            selection={selectedItems}
             onRowChange={updateSelection}
           >
             <DataTableColumn

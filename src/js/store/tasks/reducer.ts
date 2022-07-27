@@ -3,6 +3,7 @@ import { find, reject, unionBy, uniq } from 'lodash';
 import { ObjectsAction, PaginatedObjectResponse } from '@/js/store/actions';
 import { TaskAction } from '@/js/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/js/store/user/actions';
+import { GitHubUser } from '@/js/store/user/reducer';
 import {
   NULL_FILTER_VALUE,
   OBJECT_TYPES,
@@ -39,6 +40,7 @@ export interface Task {
   } | null;
   project: string | null;
   root_project: string;
+  root_project_slug: string;
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;
@@ -51,8 +53,8 @@ export interface Task {
   pr_is_open: boolean;
   commits: Commit[];
   origin_sha: string;
-  assigned_dev: number | null;
-  assigned_qa: number | null;
+  assigned_dev: GitHubUser | null;
+  assigned_qa: GitHubUser | null;
   status: TaskStatuses;
   currently_submitting_review: boolean;
   review_submitted_at: string | null;

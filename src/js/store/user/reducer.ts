@@ -16,6 +16,10 @@ export interface GitHubUser {
   };
 }
 
+export interface GitHubUserTableItem extends Omit<GitHubUser, 'id'> {
+  id: string;
+}
+
 export interface GitHubOrg {
   id: string;
   name: string;
