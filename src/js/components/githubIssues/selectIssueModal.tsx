@@ -286,7 +286,7 @@ const SelectIssueModal = ({
           />
         </div>
         <form className="slds-form">
-          <button type="submit" style={{ display: 'none' }} disabled hidden />
+          <button type="submit" disabled hidden />
           <div className="slds-grid slds-gutters slds-wrap">
             <div className="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
               <h2 className="slds-text-heading_small">

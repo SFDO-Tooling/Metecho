@@ -193,7 +193,6 @@ const SubmitReviewModal = ({
         <button
           ref={submitButton}
           type="submit"
-          style={{ display: 'none' }}
           disabled={submittingReview}
           hidden
         />

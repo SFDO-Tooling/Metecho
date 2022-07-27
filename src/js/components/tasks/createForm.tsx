@@ -284,7 +284,6 @@ const CreateTaskModal = ({
           <button
             ref={submitButton}
             type="submit"
-            style={{ display: 'none' }}
             disabled={isSaving || isSavingBatch}
             hidden
           />

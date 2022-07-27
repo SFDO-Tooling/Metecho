@@ -72,7 +72,7 @@ const CreateProjectForm = ({
 
   return (
     <form className="slds-form slds-p-around_large">
-      <button type="submit" style={{ display: 'none' }} disabled hidden />
+      <button type="submit" disabled hidden />
       <div className="slds-grid slds-wrap slds-form-element_stacked slds-p-left_none">
         <div className="slds-grid slds-wrap slds-shrink">
           <Combobox

@@ -72,7 +72,7 @@ const SelectProjectCollaboratorsForm = ({
 
   return (
     <form className="slds-form">
-      <button type="submit" style={{ display: 'none' }} disabled hidden />
+      <button type="submit" disabled hidden />
       <div
         className="slds-grid
           slds-grid_vertical-align-start

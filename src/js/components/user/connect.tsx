@@ -140,7 +140,6 @@ const ConnectModal = ({
           <button
             ref={customDomainSubmitButton}
             type="submit"
-            style={{ display: 'none' }}
             disabled={!customDomain}
             hidden
           />

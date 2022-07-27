@@ -216,13 +216,7 @@ const EditModal = ({
           />
         ) : null}
         {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={isSaving}
-          hidden
-        />
+        <button ref={submitButton} type="submit" disabled={isSaving} hidden />
       </form>
     </Modal>
   );
