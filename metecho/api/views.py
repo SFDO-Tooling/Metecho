@@ -47,6 +47,7 @@ from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
     CheckRepoNameSerializer,
+    CommitDatasetSerializer,
     CommitSerializer,
     CreatePrSerializer,
     EpicCollaboratorsSerializer,
@@ -363,7 +364,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         instance.queue_refresh_github_issues(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
-    @extend_schema(request=None, responses={202: None})
+    @extend_schema(request=None, responses={202: ProjectSerializer})
     @action(detail=True, methods=["POST"])
     def refresh_org_config_names(self, request, pk=None):
         """Queue a job to refresh the list of ScratchOrg configs for a Project."""
@@ -595,7 +596,7 @@ class ScratchOrgViewSet(
         filters = {
             "org_type__in": [ScratchOrgType.DEV, ScratchOrgType.PLAYGROUND],
             "delete_queued_at__isnull": True,
-            "currently_capturing_changes": False,
+            "currently_retrieving_metadata": False,
             "currently_refreshing_changes": False,
         }
         if not force_get:
@@ -630,7 +631,7 @@ class ScratchOrgViewSet(
             instance.org_type in [ScratchOrgType.DEV, ScratchOrgType.PLAYGROUND],
             instance.is_created,
             instance.delete_queued_at is None,
-            not instance.currently_capturing_changes,
+            not instance.currently_retrieving_metadata,
             not instance.currently_refreshing_changes,
         ]
         if not force_get:
@@ -645,7 +646,7 @@ class ScratchOrgViewSet(
     @extend_schema(request=CommitSerializer, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
     def commit(self, request, pk=None):
-        """Queue a job that commits changes captured from a ScratchOrg."""
+        """Queue a job that commits changes retrieved from a ScratchOrg."""
         serializer = CommitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         scratch_org = self.get_object()
@@ -671,6 +672,33 @@ class ScratchOrgViewSet(
             target_directory=target_directory,
             originating_user_id=str(request.user.id),
         )
+        return Response(
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )
+
+    @extend_schema(request=None, responses={202: ScratchOrgSerializer})
+    @action(detail=True, methods=["POST"])
+    def parse_datasets(self, request, pk=None):
+        """Queue a job to parse the dataset definitions for this Org's Task"""
+        org = self.get_object()
+        org.queue_parse_datasets(user=request.user)
+        return Response(self.get_serializer(org).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(
+        request=CommitDatasetSerializer, responses={202: ScratchOrgSerializer}
+    )
+    @action(detail=True, methods=["POST"])
+    def commit_dataset(self, request, pk=None):
+        """Queue a job that updates and commits a dataset from the Dev Org"""
+        serializer = CommitDatasetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": _("Requesting user did not create Org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        scratch_org.queue_commit_dataset(**serializer.validated_data, user=request.user)
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )

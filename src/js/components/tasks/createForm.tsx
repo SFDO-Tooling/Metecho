@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import React, { useRef, useState } from 'react';
+import React, { FormEvent, MouseEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -144,7 +144,7 @@ const CreateTaskModal = ({
       submitButton.current.click();
     }
   };
-  const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const doSubmit = (e: FormEvent<HTMLFormElement>) => {
     setIsSaving(true);
     handleSubmit(e, { success: addSuccess });
   };
@@ -157,7 +157,7 @@ const CreateTaskModal = ({
       showTransientMessage();
     }
   };
-  const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
+  const batchSubmitClicked = (e: MouseEvent<HTMLFormElement>) => {
     setIsSavingBatch(true);
     handleSubmit(e, { success: batchAddSuccess });
   };
@@ -284,8 +284,8 @@ const CreateTaskModal = ({
           <button
             ref={submitButton}
             type="submit"
-            style={{ display: 'none' }}
             disabled={isSaving || isSavingBatch}
+            hidden
           />
         </form>
       </div>

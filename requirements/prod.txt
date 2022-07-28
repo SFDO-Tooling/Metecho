@@ -86,7 +86,7 @@ cryptography==37.0.4
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.62.0
+cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/67a426763e11c6838c9fa2d518b3da7349ff6a5a.tar.gz
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -299,7 +299,7 @@ requests-futures==1.0.0
     # via cumulusci
 requests-oauthlib==1.3.1
     # via django-allauth
-rich==12.5.1
+rich==12.4.4
     # via cumulusci
 robotframework==4.1.3
     # via
@@ -311,7 +311,7 @@ robotframework==4.1.3
     #   robotframework-stacktrace
 robotframework-lint==1.1
     # via cumulusci
-robotframework-pabot==2.5.4
+robotframework-pabot==2.5.3
     # via cumulusci
 robotframework-pythonlibcore==3.0.0
     # via
@@ -413,7 +413,7 @@ wrapt==1.14.1
     # via deprecated
 xmltodict==0.13.0
     # via cumulusci
-zipp==3.8.1
+zipp==3.8.0
     # via
     #   cumulusci
     #   importlib-metadata

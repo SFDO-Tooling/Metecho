@@ -38,3 +38,7 @@
     margin-bottom: 0;
   }
 }
+
+[hidden] {
+  display: none !important; // stylelint-disable-line declaration-no-important
+}

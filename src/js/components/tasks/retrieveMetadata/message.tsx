@@ -8,13 +8,13 @@ import { useTranslation } from 'react-i18next';
 
 import {
   BooleanObject,
-  CommitData,
+  MetadataCommit,
   ModalCard,
-} from '@/js/components/tasks/capture';
+} from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 
 interface Props {
-  inputs: CommitData;
+  inputs: MetadataCommit;
   errors: UseFormProps['errors'];
   handleInputChange: UseFormProps['handleInputChange'];
 }
@@ -32,6 +32,7 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
 
   return (
     <form className="slds-form slds-p-around_large">
+      <button type="submit" disabled hidden />
       <ModalCard>
         <Icon category="utility" name="open_folder" size="small" />
         <code className="slds-p-left_x-small v-align-center">
@@ -61,7 +62,7 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
         />
       </ModalCard>
       <ModalCard heading={t('Selected Changes')} noBodyPadding>
-        <div data-form="task-capture">
+        <div data-form="task-retrieve-changes">
           {Object.keys(inputs.changes)
             .sort()
             .map((groupName, index) => (

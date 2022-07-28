@@ -23,11 +23,15 @@ export const api_urls = {
   project_refresh_github_users: (id: string) =>
     `/api/projects/${id}/refresh_github_users/`,
   epic_list: () => '/api/epics/',
-  scratch_org_list: () => '/api/scratch_orgs/',
-  scratch_org_detail: (id: string) => `/api/scratch_orgs/${id}/`,
+  scratch_org_list: () => '/api/scratch-orgs/',
+  scratch_org_detail: (id: string) => `/api/scratch-orgs/${id}/`,
   scratch_org_commit: (id: string) => `/api/scratch_orgs/${id}/commit/`,
-  scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
-  scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
+  scratch_org_commit_dataset: (id: string) =>
+    `/api/scratch-orgs/${id}/commit_dataset/`,
+  scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
+  scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
+  scratch_org_parse_datasets: (id: string) =>
+    `/api/scratch-orgs/${id}/parse_datasets/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
   task_list: () => 'api/tasks/',
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
@@ -793,13 +797,15 @@ export const sampleDevOrg = {
   has_ignored_changes: false,
   is_created: true,
   currently_refreshing_changes: false,
-  currently_capturing_changes: false,
+  currently_retrieving_metadata: false,
+  currently_retrieving_dataset: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  currently_parsing_datasets: false,
 };
 
 export const sampleScratchOrg = {
@@ -828,13 +834,15 @@ export const sampleScratchOrg = {
   has_ignored_changes: false,
   is_created: true,
   currently_refreshing_changes: false,
-  currently_capturing_changes: false,
+  currently_retrieving_metadata: false,
+  currently_retrieving_dataset: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  currently_parsing_datasets: false,
 };
 
 export const sampleIssue1 = {
@@ -926,4 +934,31 @@ export const sampleGitHubOrg2 = {
   id: 'org-2',
   name: 'Another Test Org',
   avatar_url: '',
+};
+
+export const sampleDatasetSchema = {
+  Account: {
+    label: 'Account',
+    count: 5,
+    fields: {
+      FooBar: { label: 'Foo Bar' },
+      BuzBaz: { label: 'Buz Baz' },
+    },
+  },
+  ApexClass: {
+    label: 'Apex Class',
+    count: 1,
+    fields: {
+      ApiVersion: { label: 'Api Version' },
+    },
+  },
+};
+
+export const sampleChangeset = {
+  Account: ['FooBar', 'BuzBaz'],
+};
+
+export const sampleDatasets = {
+  Default: sampleChangeset,
+  'Another Dataset': { Account: ['Other'], WebLink: ['OpenType'] },
 };

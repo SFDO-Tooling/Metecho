@@ -10,7 +10,11 @@ import {
   fetchObjects,
   updateObject,
 } from '@/js/store/actions';
-import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
+import {
+  refetchOrg,
+  refreshDatasets,
+  refreshOrg,
+} from '@/js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '@/js/store/orgs/reducer';
 import { refreshOrgConfigs } from '@/js/store/projects/actions';
 import {
@@ -45,6 +49,7 @@ fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refetchOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshDatasets.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
@@ -54,6 +59,7 @@ afterEach(() => {
   updateObject.mockClear();
   refetchOrg.mockClear();
   refreshOrg.mockClear();
+  refreshDatasets.mockClear();
   refreshOrgConfigs.mockClear();
 });
 
@@ -633,7 +639,7 @@ describe('<TaskDetail/>', () => {
     });
   });
 
-  describe('retrieving changes', () => {
+  describe('retrieving metadata', () => {
     test('renders loading button', () => {
       const { getAllByText } = setup({
         initialState: {
@@ -643,7 +649,7 @@ describe('<TaskDetail/>', () => {
             orgs: {
               [defaultOrg.id]: {
                 ...defaultOrg,
-                currently_capturing_changes: true,
+                currently_retrieving_metadata: true,
               },
             },
           },
@@ -651,6 +657,27 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(getAllByText('Retrieving Selected Changes…')).toHaveLength(2);
+    });
+  });
+
+  describe('retrieving dataset', () => {
+    test('renders loading button', () => {
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            ...defaultState.orgs,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
+                currently_retrieving_dataset: true,
+              },
+            },
+          },
+        },
+      });
+
+      expect(getAllByText('Retrieving Selected Dataset…')).toHaveLength(2);
     });
   });
 
@@ -854,6 +881,25 @@ describe('<TaskDetail/>', () => {
         expect(
           getByText('You do not have “push” access', { exact: false }),
         ).toBeVisible();
+      });
+    });
+  });
+
+  describe('<RetrieveDatasetModal />', () => {
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText, getByTitle } = setup();
+        fireEvent.click(getByText('Retrieve Dataset'));
+
+        expect(
+          getByText('Select the dataset to create or modify'),
+        ).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(
+          queryByText('Select the dataset to create or modify'),
+        ).toBeNull();
       });
     });
   });

@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Iterable, Optional, Tuple
+from typing import Any, Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -1229,7 +1229,9 @@ class ScratchOrg(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     currently_refreshing_changes = models.BooleanField(default=False)
-    currently_capturing_changes = models.BooleanField(default=False)
+    currently_retrieving_metadata = models.BooleanField(default=False)
+    currently_parsing_datasets = models.BooleanField(default=False)
+    currently_retrieving_dataset = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
     currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)
@@ -1471,7 +1473,7 @@ class ScratchOrg(
     ):
         from .jobs import commit_changes_from_org_job
 
-        self.currently_capturing_changes = True
+        self.currently_retrieving_metadata = True
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -1485,7 +1487,7 @@ class ScratchOrg(
         )
 
     def finalize_commit_changes(self, *, error=None, originating_user_id):
-        self.currently_capturing_changes = False
+        self.currently_retrieving_metadata = False
         self.save()
         if error is None:
             self.notify_changed(
@@ -1500,6 +1502,91 @@ class ScratchOrg(
             self.notify_scratch_org_error(
                 error=error,
                 type_="SCRATCH_ORG_COMMIT_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
+    def queue_parse_datasets(self, *, user: User):
+        from .jobs import parse_datasets_job
+
+        self.currently_parsing_datasets = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+        parse_datasets_job.delay(org=self, user=user)
+
+    def finalize_parse_datasets(
+        self,
+        *,
+        error: Exception | None = None,
+        schema: dict[str, Any] | None = None,
+        dataset_errors: list[str] | None = None,
+        datasets: dict[str, Any] | None = None,
+        originating_user_id=None,
+    ):
+        # Notify about the boolean flag changing
+        self.currently_parsing_datasets = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+        # The dataset information is not stored in the model, it's only pushed via WS
+        type_ = "SCRATCH_ORG_PARSE_DATASETS"
+        message = {
+            "schema": schema,
+            "dataset_errors": dataset_errors,
+            "datasets": datasets,
+        }
+        if error is not None:
+            type_ = "SCRATCH_ORG_PARSE_DATASETS_FAILED"
+            message = {
+                "dataset_errors": [
+                    str(
+                        _("Unable to parse dataset schema from Org: {}").format(
+                            str(error)
+                        )
+                    )
+                ],
+            }
+        self.notify_changed(
+            type_=type_, message=message, originating_user_id=originating_user_id
+        )
+
+    def queue_commit_dataset(
+        self,
+        *,
+        user: User,
+        commit_message: str,
+        dataset_name: str,
+        dataset_definition: dict,
+    ):
+        from .jobs import commit_dataset_from_org_job
+
+        self.currently_retrieving_dataset = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+
+        commit_dataset_from_org_job.delay(
+            org=self,
+            user=user,
+            commit_message=commit_message,
+            dataset_name=dataset_name,
+            dataset_definition=dataset_definition,
+        )
+
+    def finalize_commit_dataset(self, *, error=None, originating_user_id):
+        self.currently_retrieving_dataset = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="SCRATCH_ORG_COMMIT_DATASET",
+                originating_user_id=originating_user_id,
+            )
+            if self.task:
+                self.task.finalize_commit_changes(
+                    originating_user_id=originating_user_id
+                )
+        else:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_COMMIT_DATASET_FAILED",
                 originating_user_id=originating_user_id,
             )
 

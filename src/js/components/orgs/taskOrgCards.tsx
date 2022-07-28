@@ -49,7 +49,7 @@ const TaskOrgCards = ({
   testOrgReadyForReview,
   testOrgSubmittingReview,
   convertingOrg,
-  openCaptureModal,
+  openRetrieveMetadataModal,
   openAssignUserModal,
   closeAssignUserModal,
   openSubmitReviewModal,
@@ -70,7 +70,7 @@ const TaskOrgCards = ({
   testOrgReadyForReview: boolean;
   testOrgSubmittingReview: boolean;
   convertingOrg?: boolean;
-  openCaptureModal: () => void;
+  openRetrieveMetadataModal: () => void;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
   openSubmitReviewModal: () => void;
@@ -288,7 +288,7 @@ const TaskOrgCards = ({
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
-          openCaptureModal={openCaptureModal}
+          openRetrieveMetadataModal={openRetrieveMetadataModal}
         />
         <TaskOrgCard
           org={orgs[ORG_TYPES.QA]}

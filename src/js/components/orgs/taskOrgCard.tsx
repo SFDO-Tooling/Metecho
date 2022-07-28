@@ -48,7 +48,7 @@ interface TaskOrgCardProps {
   handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
-  openCaptureModal?: () => void;
+  openRetrieveMetadataModal?: () => void;
   openSubmitReviewModal?: () => void;
   testOrgReadyForReview?: boolean;
   testOrgSubmittingReview?: boolean;
@@ -77,7 +77,7 @@ const TaskOrgCard = ({
   handleDelete,
   handleCheckForOrgChanges,
   handleRefresh,
-  openCaptureModal,
+  openRetrieveMetadataModal,
   openSubmitReviewModal,
   testOrgReadyForReview,
   testOrgSubmittingReview,
@@ -200,9 +200,8 @@ const TaskOrgCard = ({
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
   // We consider an org out-of-date if it is not based on the first commit.
-  const testOrgOutOfDate = Boolean(
-    type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
-  );
+  const orgOutOfDate = Boolean(org && orgCommitIdx !== 0);
+  const testOrgOutOfDate = type === ORG_TYPES.QA && orgOutOfDate;
 
   return (
     <div
@@ -310,10 +309,10 @@ const TaskOrgCard = ({
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}
                 isSubmittingReview={testOrgSubmittingReview}
-                orgOutOfDate={testOrgOutOfDate}
+                orgOutOfDate={orgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
-                openCaptureModal={openCaptureModal}
+                openRetrieveMetadataModal={openRetrieveMetadataModal}
               />
               <OrgSpinner
                 org={org}
