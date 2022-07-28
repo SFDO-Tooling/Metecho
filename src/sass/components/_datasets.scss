@@ -27,14 +27,13 @@
       display: flex;
       flex-direction: column;
       height: 100%;
-      overflow-y: var(--panel-overflow);
     }
   }
 
   &.metecho-existing-data-remove {
     .slds-card__body {
       > div {
-        --panel-overflow: auto;
+        overflow-y: auto;
       }
     }
   }
