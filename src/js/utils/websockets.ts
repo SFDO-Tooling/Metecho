@@ -289,7 +289,10 @@ interface OrgReassignFailedEvent {
   };
 }
 interface CommitSucceededEvent {
-  type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_DATASET';
+  type:
+    | 'SCRATCH_ORG_COMMIT_CHANGES'
+    | 'SCRATCH_ORG_COMMIT_DATASET'
+    | 'SCRATCH_ORG_COMMIT_OMNISTUDIO';
   payload: {
     model: Org;
     originating_user_id: string | null;
@@ -298,7 +301,8 @@ interface CommitSucceededEvent {
 interface CommitFailedEvent {
   type:
     | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED'
-    | 'SCRATCH_ORG_COMMIT_DATASET_FAILED';
+    | 'SCRATCH_ORG_COMMIT_DATASET_FAILED'
+    | 'SCRATCH_ORG_COMMIT_OMNISTUDIO_FAILED';
   payload: {
     message?: string;
     model: Org;

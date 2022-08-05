@@ -1232,6 +1232,7 @@ class ScratchOrg(
     currently_retrieving_metadata = models.BooleanField(default=False)
     currently_parsing_datasets = models.BooleanField(default=False)
     currently_retrieving_dataset = models.BooleanField(default=False)
+    currently_retrieving_omnistudio = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
     currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)

@@ -82,6 +82,7 @@ export interface Org extends MinimalOrg {
   currently_refreshing_changes: boolean;
   currently_retrieving_metadata: boolean;
   currently_retrieving_dataset: boolean;
+  currently_retrieving_omnistudio: boolean;
   currently_refreshing_org: boolean;
   currently_reassigning_user: boolean;
   is_created: boolean;
@@ -169,7 +170,8 @@ const reducer = (
           return orgs;
         }
         case OBJECT_TYPES.COMMIT_METADATA:
-        case OBJECT_TYPES.COMMIT_DATASET: {
+        case OBJECT_TYPES.COMMIT_DATASET:
+        case OBJECT_TYPES.COMMIT_OMNISTUDIO: {
           const { object }: { object: Org } = action.payload;
           if (object) {
             const existingOrg = orgs.orgs[object.id] ?? {};
@@ -184,6 +186,9 @@ const reducer = (
                     action.payload.objectType === OBJECT_TYPES.COMMIT_METADATA,
                   currently_retrieving_dataset:
                     action.payload.objectType === OBJECT_TYPES.COMMIT_DATASET,
+                  currently_retrieving_omnistudio:
+                    action.payload.objectType ===
+                    OBJECT_TYPES.COMMIT_OMNISTUDIO,
                 },
               },
             };

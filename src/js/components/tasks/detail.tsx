@@ -26,6 +26,7 @@ import CreateTaskModal from '@/js/components/tasks/createForm';
 import TaskStatusPath from '@/js/components/tasks/path';
 import RetrieveDatasetModal from '@/js/components/tasks/retrieveDataset';
 import RetrieveMetadataModal from '@/js/components/tasks/retrieveMetadata';
+import RetrieveOmnistudioModal from '@/js/components/tasks/retrieveOmnistudio';
 import TaskStatusSteps from '@/js/components/tasks/steps';
 import TourPopover from '@/js/components/tour/popover';
 import {
@@ -97,6 +98,8 @@ const TaskDetail = (
     useState(false);
   const [retrieveDatasetModalOpen, setRetrieveDatasetModalOpen] =
     useState(false);
+  const [retrieveOmnistudioModalOpen, setRetrieveOmnistudioModalOpen] =
+    useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -151,6 +154,7 @@ const TaskDetail = (
   let currentlyFetching = false;
   let currentlyCommittingMetadata = false;
   let currentlyCommittingDataset = false;
+  let currentlyCommittingOmnistudio = false;
   let currentlyReassigning = false;
   let orgHasChanges = false;
   let userIsDevOwner = false;
@@ -192,6 +196,9 @@ const TaskDetail = (
       devOrg?.currently_retrieving_metadata,
     );
     currentlyCommittingDataset = Boolean(devOrg?.currently_retrieving_dataset);
+    currentlyCommittingOmnistudio = Boolean(
+      devOrg?.currently_retrieving_omnistudio,
+    );
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
     devOrgIsCreating = Boolean(
@@ -226,7 +233,8 @@ const TaskDetail = (
     currentlyFetching ||
     currentlyReassigning ||
     currentlyCommittingMetadata ||
-    currentlyCommittingDataset;
+    currentlyCommittingDataset ||
+    currentlyCommittingOmnistudio;
   const testOrgLoading =
     testOrgIsCreating ||
     testOrgIsDeleting ||
@@ -284,6 +292,7 @@ const TaskDetail = (
   const openRetrieveDatasetModal = () => {
     setRetrieveDatasetModalOpen(true);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
@@ -297,11 +306,29 @@ const TaskDetail = (
   const closeRetrieveDatasetModal = () => {
     setRetrieveDatasetModalOpen(false);
   };
+  const openRetrieveOmnistudioModal = () => {
+    setRetrieveDatasetModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveOmnistudioModalOpen(true);
+    setSubmitReviewModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
+  };
+  const closeRetrieveOmnistudioModal = () => {
+    setRetrieveOmnistudioModalOpen(false);
+  };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
@@ -789,6 +816,7 @@ const TaskDetail = (
 
   let retrieveButtons: ReactNode = null;
   let retrieveDatasetButton: ReactNode = null;
+  let retrieveOmnistudioButton: ReactNode = null;
   if (
     project.has_push_permission &&
     !taskIsMerged &&
@@ -848,6 +876,30 @@ const TaskDetail = (
           />
         </div>
       );
+      retrieveOmnistudioButton = (
+        <div className="inline-container slds-m-left_small">
+          <Button
+            label={
+              currentlyCommittingOmnistudio ? (
+                <LabelWithSpinner
+                  label={t('Retrieving Selected Omnistudio Configuration…')}
+                  variant="base"
+                />
+              ) : (
+                t('Retrieve Omnistudio Configuration')
+              )
+            }
+            variant="outline-brand"
+            className="slds-align-middle"
+            onClick={openRetrieveOmnistudioModal}
+            disabled={
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingOmnistudio
+            }
+          />
+        </div>
+      );
     }
     retrieveButtons = (
       <div
@@ -866,10 +918,12 @@ const TaskDetail = (
             currentlyFetching ||
             currentlyCommittingMetadata ||
             currentlyCommittingDataset ||
+            currentlyCommittingOmnistudio ||
             currentlyReassigning
           }
         />
         {retrieveDatasetButton}
+        {retrieveOmnistudioButton}
         <TourPopover
           id="tour-task-retrieve"
           align="right"
@@ -1160,6 +1214,13 @@ const TaskDetail = (
                 fetchingDatasets={(devOrg as Org).currently_parsing_datasets}
                 isOpen={retrieveDatasetModalOpen}
                 closeModal={closeRetrieveDatasetModal}
+              />
+            )}
+            {orgHasBeenVisited && (
+              <RetrieveOmnistudioModal
+                orgId={(devOrg as Org).id}
+                isOpen={retrieveOmnistudioModalOpen}
+                closeModal={closeRetrieveOmnistudioModal}
               />
             )}
             {readyToSubmit && (
