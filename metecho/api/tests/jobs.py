@@ -391,7 +391,7 @@ def test_create_org_and_run_flow__fall_back_to_cases():
         stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
         create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
         create_org.return_value = (
-            MagicMock(expires=datetime(2020, 1, 1, 12, 0)),
+            MagicMock(expires=datetime(2020, 1, 1, 12, 0), setup_flow=None),
             MagicMock(
                 **{
                     "project_config.keychain.get_org.return_value": MagicMock(
@@ -424,6 +424,46 @@ def test_create_org_and_run_flow__fall_back_to_cases():
 
         assert create_org.called
         assert run_flow.called
+
+
+def test_create_org_and_run_flow__no_setup_flow():
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
+        create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
+        create_org.return_value = (
+            MagicMock(expires=datetime(2020, 1, 1, 12, 0), setup_flow=None),
+            MagicMock(
+                **{
+                    "project_config.keychain.get_org.return_value": MagicMock(
+                        setup_flow=None
+                    ),
+                }
+            ),
+            MagicMock(),
+        )
+        run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_valid_target_directories = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_valid_target_directories")
+        )
+        get_valid_target_directories.return_value = (
+            {"source": ["src"], "config": [], "post": [], "pre": []},
+            False,
+        )
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
+        Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
+        Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
+        _create_org_and_run_flow(
+            MagicMock(org_type=ScratchOrgType.DEV, org_config_name="trial"),
+            user=MagicMock(),
+            repo_id=123,
+            repo_branch=MagicMock(),
+            project_path="",
+            originating_user_id=None,
+        )
+
+        assert create_org.called
+        assert not run_flow.called
 
 
 @pytest.mark.django_db
