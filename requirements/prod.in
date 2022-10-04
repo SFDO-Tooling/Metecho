@@ -8,7 +8,7 @@ beautifulsoup4
 bleach
 channels
 channels-redis
-cumulusci
+cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/fix-commitdir-timeouts.tar.gz
 dj-database-url
 django-allauth
 django-anymail[mailgun]
