@@ -53,7 +53,7 @@ doc8==0.11.2
     # via -r requirements/dev.in
 docopt==0.6.2
     # via coveralls
-docutils==0.16
+docutils>=0.19
     # via
     #   -c requirements/prod.txt
     #   doc8
