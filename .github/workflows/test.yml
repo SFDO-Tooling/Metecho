@@ -1,8 +1,7 @@
 name: Test
 on:
-  push:
   pull_request:
-    types: [reopened]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
