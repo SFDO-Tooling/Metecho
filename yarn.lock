@@ -2972,6 +2972,13 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.2.tgz#ee771e2ba4b3dc5b372935d549fd9617bf345b8c"
   integrity sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==
 
+"@types/minipass@*":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@types/minipass/-/minipass-3.3.5.tgz#ba65aaae3fe7318520bd4a40bc71c53fc8826e45"
+  integrity sha512-M2BLHQdEmDmH671h0GIlOQQJrgezd1vNqq7PVj1VOsHZ2uQQb4iPiQIl0SlMdhxZPUsLIfEklmeEHXg8DJRewA==
+  dependencies:
+    minipass "*"
+
 "@types/ms@*":
   version "0.7.31"
   resolved "https://registry.yarnpkg.com/@types/ms/-/ms-0.7.31.tgz#31b7ca6407128a3d2bbc27fe2d21b345397f6197"
@@ -14974,6 +14981,38 @@ vinyl@^2.0.0, vinyl@^2.2.0:
     cloneable-readable "^1.0.0"
     remove-trailing-separator "^1.0.1"
     replace-ext "^1.0.0"
+
+vlocity@^1.15.6:
+  version "1.15.8"
+  resolved "https://registry.yarnpkg.com/vlocity/-/vlocity-1.15.8.tgz#cf0178bea3e6e689dea8d190d385714be2f7017e"
+  integrity sha512-v8p7v9vpNbgV3H0KzeqEgvGqDRYO5AcmvdXoMHYUjvL3bIC6mVB3ZqzOrhmpp5TjHKoBPfX1Oi+zEDYLTEzgjw==
+  dependencies:
+    async "3.2.0"
+    diff2html "2.5.0"
+    fast-json-stable-stringify "2.1.0"
+    file-type "10.9.0"
+    filterxml "1.1.4"
+    fs-extra "8.0.1"
+    git-diff "2.0.6"
+    global-modules-path "^2.3.1"
+    ignore "5.0.4"
+    is-utf8 "0.2.1"
+    js-yaml "3.13.1"
+    jsforce "1.9.3"
+    json-stable-stringify "1.0.1"
+    mustache "3.0.0"
+    nopt "4.0.1"
+    opn "6.0.0"
+    properties "1.2.1"
+    puppeteer-core "^5.3.1"
+    runtime-plugin-manager-clone "0.1.0"
+    salesforce-alm "49.5.0"
+    sass.js "0.11.1"
+    semver "6.2.0"
+    simple-git "1.107.0"
+    unidecode "0.1.8"
+    xml2js "0.4.22"
+    xmlbuilder "13.0.2"
 
 vm-browserify@^1.0.1:
   version "1.1.2"
