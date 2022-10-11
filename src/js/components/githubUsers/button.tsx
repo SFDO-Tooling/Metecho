@@ -22,7 +22,9 @@ const GitHubUserButton = ({
   const name = user.name ? `${user.name} (${user.login})` : user.login;
   const contents = (
     <>
-      <GitHubUserAvatar user={user} />
+      <span aria-hidden="true">
+        <GitHubUserAvatar user={user} />
+      </span>
       <span className="collaborator-username slds-m-right_x-small">{name}</span>
       {user.permissions && !user.permissions.push && (
         <ReadonlyBadge color={badgeColor || 'default'} />
@@ -53,12 +55,11 @@ const GitHubUserButton = ({
         },
       )}
       title={name}
+      label={contents}
       variant="base"
       aria-pressed={isSelected}
       {...props}
-    >
-      {contents}
-    </Button>
+    />
   );
 };
 
