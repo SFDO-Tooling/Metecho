@@ -53,10 +53,12 @@ const GitHubUserButton = ({
         },
       )}
       title={name}
-      label={contents}
       variant="base"
+      aria-pressed={isSelected}
       {...props}
-    />
+    >
+      {contents}
+    </Button>
   );
 };
 
