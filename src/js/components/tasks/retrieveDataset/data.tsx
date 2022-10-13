@@ -511,11 +511,6 @@ const DataForm = ({
           type="selected"
           heading={t('Selected Data')}
           schema={selectedSchema}
-          errors={
-            noChanges && !isEmpty(selectedSchema)
-              ? t('Selected data matches existing dataset.')
-              : undefined
-          }
         />
       </div>
     </div>
