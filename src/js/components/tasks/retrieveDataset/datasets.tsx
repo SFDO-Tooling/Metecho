@@ -49,7 +49,7 @@ const SelectDatasetForm = ({
   const { t } = useTranslation();
   const existingDatasetSelected = Boolean(
     inputs.dataset_name &&
-      map(datasets, toLower).includes(inputs.dataset_name.toLowerCase()),
+    map(datasets, toLower).includes(inputs.dataset_name.toLowerCase()),
   );
   const [creatingDataset, setCreatingDataset] = useState(
     Boolean(inputs.dataset_name && !existingDatasetSelected),
@@ -97,10 +97,10 @@ const SelectDatasetForm = ({
           {fetchingDatasets
             ? null
             : datasetErrors.map((err, idx) => (
-                <p key={idx} className="slds-text-color_error">
-                  {err}
-                </p>
-              ))}
+              <p key={idx} className="slds-text-color_error">
+                {err}
+              </p>
+            ))}
         </div>
         <div
           className="slds-grid

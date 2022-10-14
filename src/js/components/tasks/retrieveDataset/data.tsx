@@ -1,4 +1,4 @@
-import Accordion from '@salesforce/design-system-react/components/accordion';
+gimport Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Search from '@salesforce/design-system-react/components/input/search';
@@ -16,7 +16,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
 import { DatasetCommit } from '@/js/components/tasks/retrieveDataset';
-import {
+import {g
   BooleanObject,
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
@@ -148,8 +148,8 @@ export const SchemaList = ({
     type === 'all'
       ? null
       : t(
-          'Choose objects or fields from the left panel to add them to this dataset.',
-        );
+        'Choose objects or fields from the left panel to add them to this dataset.',
+      );
   if (search) {
     emptyHeading = t('No data found');
     emptyMsg = t(
@@ -246,7 +246,7 @@ export const SchemaList = ({
                               checked={checkedChildren === fields.length}
                               indeterminate={Boolean(
                                 checkedChildren &&
-                                  checkedChildren !== fields.length,
+                                checkedChildren !== fields.length,
                               )}
                               onChange={handleSelectThisGroup}
                             />
