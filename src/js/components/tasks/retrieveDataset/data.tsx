@@ -450,7 +450,6 @@ const DataForm = ({
   schema,
   selectedSchema,
   outdatedChangeset,
-  noChanges,
   inputs,
   errors,
   setInputs,
