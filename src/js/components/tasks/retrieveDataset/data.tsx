@@ -148,12 +148,12 @@ export const SchemaList = ({
     type === 'all'
       ? null
       : t(
-          'Choose objects or fields from the left panel to add them to this dataset.',
+        'Choose objects or fields from the left panel to add them to this dataset.',
       );
   if (search) {
     emptyHeading = t('No data found');
     emptyMsg = t(
-      'Change or remove your search term above to view additional data.',
+        'Change or remove your search term above to view additional data.',
     );
   }
 
@@ -245,8 +245,8 @@ export const SchemaList = ({
                               labels={{ label: groupSchema.label }}
                               checked={checkedChildren === fields.length}
                               indeterminate={Boolean(
-                                checkedChildren &&
-                                checkedChildren !== fields.length,
+                                checkedChildren
+                                && checkedChildren !== fields.length,
                               )}
                               onChange={handleSelectThisGroup}
                             />
