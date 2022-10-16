@@ -241,7 +241,7 @@ const RetrieveDatasetModal = ({
           label={t('Save & Next')}
           variant="brand"
           onClick={nextPage}
-          disabled={noChanges || !hasDataSelected || hasError}
+          disabled={!hasDataSelected || hasError}
         />,
       ],
     },
