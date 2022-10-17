@@ -15,6 +15,7 @@ exports[`<EpicStatusPath /> renders steps from epic status: all tasks complete 1
           class="slds-grid slds-path__track"
         >
           <ul
+            aria-label="Epic Status"
             aria-orientation="horizontal"
             class="slds-path__nav"
             role="listbox"
@@ -177,6 +178,7 @@ exports[`<EpicStatusPath /> renders steps from epic status: in progress 1`] = `
           class="slds-grid slds-path__track"
         >
           <ul
+            aria-label="Epic Status"
             aria-orientation="horizontal"
             class="slds-path__nav"
             role="listbox"
@@ -334,6 +336,7 @@ exports[`<EpicStatusPath /> renders steps from epic status: merged 1`] = `
           class="slds-grid slds-path__track"
         >
           <ul
+            aria-label="Epic Status"
             aria-orientation="horizontal"
             class="slds-path__nav"
             role="listbox"
@@ -501,6 +504,7 @@ exports[`<EpicStatusPath /> renders steps from epic status: planned 1`] = `
           class="slds-grid slds-path__track"
         >
           <ul
+            aria-label="Epic Status"
             aria-orientation="horizontal"
             class="slds-path__nav"
             role="listbox"
@@ -653,6 +657,7 @@ exports[`<EpicStatusPath /> renders steps from epic status: pr opened 1`] = `
           class="slds-grid slds-path__track"
         >
           <ul
+            aria-label="Epic Status"
             aria-orientation="horizontal"
             class="slds-path__nav"
             role="listbox"
