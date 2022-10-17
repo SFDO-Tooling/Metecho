@@ -8,6 +8,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_COLOR: 1 # Enable color output for pytest, pip, etc.
+
 jobs:
   build:
     name: Build
