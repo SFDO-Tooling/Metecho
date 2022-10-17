@@ -1601,9 +1601,9 @@ class TestParseDatasets:
         assert not org.currently_parsing_datasets
         assert "Failed to parse" in caplog.text
         errors = [
-            "Missing dataset definition file: datasets/FooBar/FooBar.extract.yml",
             "Failed to parse file: datasets/Default/Default.extract.yml",
             "Missing dataset definition file: datasets/Empty/Empty.extract.yml",
+            "Missing dataset definition file: datasets/FooBar/FooBar.extract.yml",
         ]
         async_to_sync.assert_called_with(
             org,
