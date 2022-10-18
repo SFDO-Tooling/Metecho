@@ -9,14 +9,17 @@ from typing import Iterable
 import cumulusci
 import requests
 import sarge
+import yaml
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
+from cumulusci.core.config import TaskConfig
 from cumulusci.core.datasets import Dataset
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
 from cumulusci.tasks.github.util import CommitDir
+from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
@@ -1288,7 +1291,7 @@ def commit_dataset_from_org(
         org.refresh_from_db()
         task = org.task
         task.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+        with dataset_env(org, user) as (project_config, sf, org_config, schema, repo):
             with Dataset(
                 dataset_name, project_config, org_config, sf, schema
             ) as dataset:
@@ -1315,3 +1318,59 @@ def commit_dataset_from_org(
 
 
 commit_dataset_from_org_job = job(commit_dataset_from_org)
+
+
+def commit_omnistudio_from_org(
+    *,
+    org: ScratchOrg,
+    user: User,
+    commit_message: str,
+    yaml_path: str,
+):
+    """
+    Given a yaml_path:
+
+    """
+    try:
+        org.refresh_from_db()
+        task = org.task
+        task.refresh_from_db()
+        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+            task_config = TaskConfig(
+                config={"options": {"job_file": yaml_path, "org": org_config.name}}
+            )
+            vlocity_task = VlocityRetrieveTask(project_config, task_config, org_config)
+            vlocity_task()
+            commit = CommitDir(
+                repo, author={"name": user.username, "email": user.email}
+            )
+
+            with local_github_checkout(
+                user, repo.id, commit_ish=task.branch_name
+            ) as repo_root:
+                with (Path(repo_root) / yaml_path) as jobfile:
+                    jobfileobj = yaml.safe_load(open(jobfile))
+                    vlocity_path = (
+                        Path(project_config.repo_root) / jobfileobj["projectPath"]
+                    )
+                    if not vlocity_path:
+                        pass
+                        # TODO: raise error 'no project path specified'
+
+            commit(
+                str(vlocity_path),
+                repo_dir=str(vlocity_path.relative_to(project_config.repo_root)),
+                branch=task.branch_name,
+                commit_message=commit_message,
+            )
+    except Exception as e:
+        org.refresh_from_db()
+        org.finalize_commit_omnistudio(error=e, originating_user_id=user.id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        org.finalize_commit_omnistudio(originating_user_id=user.id)
+
+
+commit_omnistudio_from_org_job = job(commit_omnistudio_from_org)

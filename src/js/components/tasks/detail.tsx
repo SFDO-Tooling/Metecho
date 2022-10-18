@@ -246,6 +246,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -261,6 +262,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(true);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -276,6 +278,7 @@ const TaskDetail = (
   const openRetrieveMetadataModal = () => {
     setRetrieveMetadataModalOpen(true);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
@@ -344,6 +347,7 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
@@ -362,6 +366,7 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -378,6 +383,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -398,6 +404,7 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -414,6 +421,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -433,6 +441,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -855,7 +864,7 @@ const TaskDetail = (
     }
     if (!(currentlyReassigning || currentlyCommittingMetadata)) {
       retrieveDatasetButton = (
-        <div className="inline-container slds-m-left_small">
+        <div className="inline-container slds-m-right_small">
           <Button
             label={
               currentlyCommittingDataset ? (
@@ -868,16 +877,23 @@ const TaskDetail = (
               )
             }
             variant="outline-brand"
-            className="slds-align-middle"
+            className={classNames('slds-align-middle', {
+              'slds-m-bottom_medium': readyToSubmit,
+              'slds-m-bottom_x-large': !readyToSubmit,
+            })}
             onClick={openRetrieveDatasetModal}
             disabled={
-              fetchingChanges || currentlyFetching || currentlyCommittingDataset
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
             }
           />
         </div>
       );
       retrieveOmnistudioButton = (
-        <div className="inline-container slds-m-left_small">
+        <div className="inline-container slds-m-right_small">
           <Button
             label={
               currentlyCommittingOmnistudio ? (
@@ -890,28 +906,31 @@ const TaskDetail = (
               )
             }
             variant="outline-brand"
-            className="slds-align-middle"
+            className={classNames('slds-align-middle', {
+              'slds-m-bottom_medium': readyToSubmit,
+              'slds-m-bottom_x-large': !readyToSubmit,
+            })}
             onClick={openRetrieveOmnistudioModal}
             disabled={
               fetchingChanges ||
               currentlyFetching ||
-              currentlyCommittingOmnistudio
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
             }
           />
         </div>
       );
     }
     retrieveButtons = (
-      <div
-        className={classNames('slds-is-relative', {
-          'slds-m-bottom_medium': readyToSubmit,
-          'slds-m-bottom_x-large': !readyToSubmit,
-        })}
-      >
+      <div className="slds-is-relative">
         <Button
           label={retrieveMetadataText}
           variant={isPrimary ? 'brand' : 'outline-brand'}
-          className="slds-align-middle"
+          className={classNames('slds-align-middle', 'slds-m-right_small', {
+            'slds-m-bottom_medium': readyToSubmit,
+            'slds-m-bottom_x-large': !readyToSubmit,
+          })}
           onClick={doRetrieveMetadata}
           disabled={
             fetchingChanges ||

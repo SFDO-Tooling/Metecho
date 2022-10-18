@@ -1,6 +1,6 @@
-import Icon from '@salesforce/design-system-react/components/icon';
+import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import React from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ModalCard } from '@/js/components/tasks/retrieveMetadata';
@@ -15,15 +15,35 @@ interface Props {
 
 const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
   const { t } = useTranslation();
+  const inputEl = useRef<HTMLInputElement | null>(null);
 
   return (
     <form className="slds-form slds-p-around_large">
       <button type="submit" disabled hidden />
-      <ModalCard>
-        <Icon category="utility" name="open_folder" size="small" />
-        <code className="slds-p-left_x-small v-align-center">
-          {inputs.yaml_path}
-        </code>
+      <ModalCard
+        heading={
+          <>
+            <abbr className="slds-required" title="required">
+              *
+            </abbr>
+            {t('Jobfile YAML Path')}
+          </>
+        }
+      >
+        <Input
+          inputRef={(ref: HTMLInputElement) => (inputEl.current = ref)}
+          placeholder={t('Jobfile YAML Path')}
+          name="yaml_path"
+          value={inputs.yaml_path}
+          required
+          aria-required
+          // errorText={
+          //   existingDatasetSelected
+          //     ? t('Dataset name cannot match existing dataset.')
+          //     : undefined
+          // }
+          onChange={handleInputChange}
+        />
       </ModalCard>
       <ModalCard
         heading={

@@ -8,7 +8,7 @@ beautifulsoup4
 bleach
 channels
 channels-redis
-cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/67a426763e11c6838c9fa2d518b3da7349ff6a5a.tar.gz
+cumulusci
 dj-database-url
 django-allauth
 django-anymail[mailgun]

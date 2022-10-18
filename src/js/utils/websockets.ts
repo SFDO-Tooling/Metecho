@@ -481,6 +481,14 @@ export const getAction = (event: EventType) => {
       return (
         hasModel(event) && commitFailed(event.payload, { is_metadata: false })
       );
+    case 'SCRATCH_ORG_COMMIT_OMNISTUDIO':
+      return (
+        hasModel(event) && commitSucceeded(event.payload, { is_metadata: true })
+      );
+    case 'SCRATCH_ORG_COMMIT_OMNISTUDIO_FAILED':
+      return (
+        hasModel(event) && commitFailed(event.payload, { is_metadata: true })
+      );
     case 'SCRATCH_ORG_RECREATE':
       return hasModel(event) && recreateOrg(event.payload.model);
     case 'SCRATCH_ORG_REASSIGN':

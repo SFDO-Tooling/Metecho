@@ -80,7 +80,7 @@ const RetrieveOmnistudioModal = ({ orgId, isOpen, closeModal }: Props) => {
         commit_message: '',
       } as OmnistudioCommit,
       objectType: OBJECT_TYPES.COMMIT_OMNISTUDIO,
-      url: window.api_urls.scratch_org_commit_dataset(orgId),
+      url: window.api_urls.scratch_org_commit_omnistudio(orgId),
       onSuccess: handleSuccess,
       onError: handleError,
       shouldSubscribeToObject: false,
