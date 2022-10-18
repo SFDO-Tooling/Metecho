@@ -74,6 +74,14 @@ class TaskReviewIntegrityError(Exception):
     pass
 
 
+class MissingJobfileError(Exception):
+    pass
+
+
+class MissingProjectPathError(Exception):
+    pass
+
+
 @contextlib.contextmanager
 def creating_gh_branch(instance):
     instance.currently_creating_branch = True
@@ -1339,23 +1347,28 @@ def commit_omnistudio_from_org(
             task_config = TaskConfig(
                 config={"options": {"job_file": yaml_path, "org": org_config.name}}
             )
+            with local_github_checkout(
+                user, repo.id, commit_ish=task.branch_name
+            ) as repo_root:
+                if not (Path(repo_root) / yaml_path).is_file():
+                    raise MissingJobfileError(f"Jobfile not found at path {yaml_path}")
+
+                with (Path(repo_root) / yaml_path) as jobfile:
+                    jobfileobj = yaml.safe_load(open(jobfile))
+                    if "projectPath" not in jobfileobj:
+                        raise MissingProjectPathError(
+                            f"No projectPath defined in Jobfile at path {yaml_path}"
+                        )
+
+                    vlocity_path = (
+                        Path(project_config.repo_root) / jobfileobj["projectPath"]
+                    )
+
             vlocity_task = VlocityRetrieveTask(project_config, task_config, org_config)
             vlocity_task()
             commit = CommitDir(
                 repo, author={"name": user.username, "email": user.email}
             )
-
-            with local_github_checkout(
-                user, repo.id, commit_ish=task.branch_name
-            ) as repo_root:
-                with (Path(repo_root) / yaml_path) as jobfile:
-                    jobfileobj = yaml.safe_load(open(jobfile))
-                    vlocity_path = (
-                        Path(project_config.repo_root) / jobfileobj["projectPath"]
-                    )
-                    if not vlocity_path:
-                        pass
-                        # TODO: raise error 'no project path specified'
 
             commit(
                 str(vlocity_path),

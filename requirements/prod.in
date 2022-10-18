@@ -26,6 +26,7 @@ github3-py
 honcho
 logfmt
 markdown
+pyyaml
 
 # psycopg2 is used as the database driver for Django to connect to PostgreSQL.
 # It is LGPL-licensed and we must follow these rules for compliance with Salesforce 3rd-party software policy:
