@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
+import UserTasks from '@/js/components/user/userTasks';
 import { DeleteModal } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -21,7 +22,7 @@ const DeleteAccount = () => {
   const { t } = useTranslation();
 
   return (
-    <div>
+    <>
       <div className="slds-text-heading_large slds-m-bottom_small">
         {t('Delete Account')}
       </div>
@@ -44,7 +45,8 @@ const DeleteAccount = () => {
         redirect={routes.login()}
         handleClose={closeDeleteModal}
       />
-    </div>
+      <UserTasks />
+    </>
   );
 };
 
