@@ -5,7 +5,7 @@ import {
 import { UserAction } from '@/js/store/user/actions';
 
 export interface GitHubUser {
-  id: string;
+  id: number;
   login: string;
   avatar_url: string;
   name?: string;
@@ -14,6 +14,10 @@ export interface GitHubUser {
     push: boolean;
     admin: boolean;
   };
+}
+
+export interface GitHubUserTableItem extends Omit<GitHubUser, 'id'> {
+  id: string;
 }
 
 export interface GitHubOrg {
@@ -27,7 +31,7 @@ export interface User {
   username: string;
   email: string;
   avatar_url: string | null;
-  github_id: string | null;
+  github_id: number | null;
   valid_token_for: string | null;
   sf_username: string | null;
   org_name: string | null;

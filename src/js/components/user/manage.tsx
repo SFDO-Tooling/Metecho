@@ -48,11 +48,12 @@ const Manage = () => {
             />
           </div>
         </div>
-        <div className="slds-p-around_x-large">
+        <div className="slds-p-around_x-large slds-grid slds-gutters">
           <div
             className="slds-m-bottom_medium
-              slds-p-right_x-large
-              restricted-container"
+              slds-col
+              slds-size_1-of-1
+              slds-large-size_2-of-3"
           >
             <DeleteAccount />
           </div>
