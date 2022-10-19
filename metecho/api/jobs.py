@@ -1337,7 +1337,10 @@ def commit_omnistudio_from_org(
 ):
     """
     Given a yaml_path:
-
+    1. Check that the yaml jobfile exists at the path
+    2. Check that the projectPath is defined in the yaml jobfile
+    3. Pass the yaml path to cci vlocity_retrieve
+    4. Commit the projectPath to the repo
     """
     try:
         org.refresh_from_db()
@@ -1347,22 +1350,20 @@ def commit_omnistudio_from_org(
             task_config = TaskConfig(
                 config={"options": {"job_file": yaml_path, "org": org_config.name}}
             )
-            with local_github_checkout(
-                user, repo.id, commit_ish=task.branch_name
-            ) as repo_root:
-                if not (Path(repo_root) / yaml_path).is_file():
-                    raise MissingJobfileError(f"Jobfile not found at path {yaml_path}")
+            repo_root = project_config.repo_root
+            if not (Path(repo_root) / yaml_path).is_file():
+                raise MissingJobfileError(f"Jobfile not found at path {yaml_path}")
 
-                with (Path(repo_root) / yaml_path) as jobfile:
-                    jobfileobj = yaml.safe_load(open(jobfile))
-                    if "projectPath" not in jobfileobj:
-                        raise MissingProjectPathError(
-                            f"No projectPath defined in Jobfile at path {yaml_path}"
-                        )
-
-                    vlocity_path = (
-                        Path(project_config.repo_root) / jobfileobj["projectPath"]
+            with (Path(repo_root) / yaml_path) as jobfile:
+                jobfileobj = yaml.safe_load(open(jobfile))
+                if "projectPath" not in jobfileobj:
+                    raise MissingProjectPathError(
+                        f"No projectPath defined in Jobfile at path {yaml_path}"
                     )
+
+                vlocity_path = (
+                    Path(project_config.repo_root) / jobfileobj["projectPath"]
+                )
 
             vlocity_task = VlocityRetrieveTask(project_config, task_config, org_config)
             vlocity_task()
