@@ -62,6 +62,7 @@ import {
   ORG_TYPES,
   OrgTypes,
   RETRIEVE_CHANGES,
+  RETRIEVE_DATASETS,
   REVIEW_STATUSES,
   TASK_STATUSES,
 } from '@/js/utils/constants';
@@ -825,7 +826,7 @@ const TaskDetail = (
     } else if (orgHasChanges) {
       retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
-    if (!(currentlyReassigning || currentlyCommittingMetadata)) {
+    if (RETRIEVE_DATASETS && !(currentlyReassigning || currentlyCommittingMetadata)) {
       retrieveDatasetButton = (
         <div className="inline-container slds-m-left_small">
           <Button

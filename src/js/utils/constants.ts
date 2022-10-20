@@ -84,6 +84,8 @@ export const SHOW_WALKTHROUGH = 'show_walkthrough';
 
 export type ConfirmOrgTracker = 'delete' | 'refresh' | null;
 
+export const RETRIEVE_DATASETS: boolean = false;
+
 export const CONFIRM_ORG_TRACKER = {
   DELETE: 'delete' as const,
   REFRESH: 'refresh' as const,
