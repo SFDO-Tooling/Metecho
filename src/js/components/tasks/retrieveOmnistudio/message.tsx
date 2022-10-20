@@ -37,11 +37,6 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
           value={inputs.yaml_path}
           required
           aria-required
-          // errorText={
-          //   existingDatasetSelected
-          //     ? t('Dataset name cannot match existing dataset.')
-          //     : undefined
-          // }
           onChange={handleInputChange}
         />
       </ModalCard>

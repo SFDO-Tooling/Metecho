@@ -1756,7 +1756,6 @@ class TestCommitOmnistudioFromOrg:
         )
         assert scratch_org.currently_retrieving_omnistudio
 
-        # mocker.patch(f"{PATCH_ROOT}.Dataset", autospec=True)
         vlocity_task = mocker.patch(
             f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
         ).return_value
