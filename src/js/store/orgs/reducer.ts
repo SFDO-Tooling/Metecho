@@ -21,8 +21,9 @@ export interface Changeset {
   [key: string]: string[];
 }
 
-interface DatasetField {
+export interface DatasetField {
   label: string;
+  referenceTo: string[];
 }
 
 export interface DatasetObject {
