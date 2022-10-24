@@ -1237,6 +1237,7 @@ class ScratchOrg(
     currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)
     config = models.JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
+    installed_packages = models.JSONField(default=dict, encoder=DjangoJSONEncoder)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     expiry_job_id = StringField(blank=True, default="")
     has_been_visited = models.BooleanField(default=False)
@@ -1258,6 +1259,10 @@ class ScratchOrg(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    @property
+    def is_omnistudio_installed(self):
+        return "omni" in self.installed_packages
 
     @property
     def parent(self):

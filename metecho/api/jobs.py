@@ -415,6 +415,10 @@ def _create_org_and_run_flow(
         log_path = Path(project_path, ".cumulusci/logs/cci.log")
         if log_path.exists():
             scratch_org.refresh_from_db()
+            breakpoint()
+            # scratch_org is a model instance
+            # org_config is an instance of OrgConfig cci class
+            # scratch_org_config is a pydantic model??
             scratch_org.cci_log = log_path.read_text()
             scratch_org.save()
     scratch_org.refresh_from_db()
@@ -427,6 +431,8 @@ def _create_org_and_run_flow(
         originating_user_id=originating_user_id,
     )
     scratch_org.is_created = True
+    breakpoint()
+    scratch_org.installed_packages = org_config.installed_packages
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
