@@ -13,12 +13,14 @@ def forwards(apps, schema_editor):
     # Create GitHubCollaboration objects from Project.github_users
     for project in Project.objects.all():
         for collaborator in project.github_users_json:
+            name = collaborator.get("name")
+            avatar_url = collaborator.get("avatar_url")
             user, _ = GitHubUser.objects.update_or_create(
                 id=collaborator["id"],
                 defaults={
                     "login": collaborator["login"],
-                    "name": collaborator.get("name", ""),
-                    "avatar_url": collaborator.get("avatar_url", ""),
+                    "name": name or "",
+                    "avatar_url": avatar_url or "",
                 },
             )
 
