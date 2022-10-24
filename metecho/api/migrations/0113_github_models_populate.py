@@ -22,14 +22,8 @@ def forwards(apps, schema_editor):
                 },
             )
 
-            # receiving KeyError on "permissions"
-            # for some users in the wild
-            perms = None
-            if "permissions" in collaborator:
-                perms = collaborator["permissions"]
-
             GitHubCollaboration.objects.create(
-                project=project, user=user, permissions=perms
+                project=project, user=user, permissions=collaborator.get("permissions")
             )
 
     # Convert JSON Epic collaborators into m2m entries
