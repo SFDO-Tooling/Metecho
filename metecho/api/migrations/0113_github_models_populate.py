@@ -39,10 +39,14 @@ def forwards(apps, schema_editor):
 
     # Convert Task assignees into GitHubUser instances
     for task in Task.objects.all():
-        if task.assigned_dev_old:
-            task.assigned_dev = GitHubUser.objects.get(id=task.assigned_dev_old)
-        if task.assigned_qa_old:
-            task.assigned_qa = GitHubUser.objects.get(id=task.assigned_qa_old)
+        try:
+            if task.assigned_dev_old:
+                task.assigned_dev = GitHubUser.objects.get(id=task.assigned_dev_old)
+            if task.assigned_qa_old:
+                task.assigned_qa = GitHubUser.objects.get(id=task.assigned_qa_old)
+        except GitHubUser.DoesNotExist:
+            pass
+
         if task.assigned_dev or task.assigned_qa:
             task.save()
 
