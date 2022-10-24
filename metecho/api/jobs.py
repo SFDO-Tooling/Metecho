@@ -1,10 +1,12 @@
 import contextlib
+from io import StringIO
 import logging
+from pprint import pprint
 import string
 import traceback
 from datetime import timedelta
 from pathlib import Path
-from typing import Iterable
+from typing import Dict, Iterable, List
 
 import cumulusci
 import requests
@@ -13,9 +15,15 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
-from cumulusci.core.datasets import Dataset
+from cumulusci.core.datasets import (
+    Dataset,
+    DEFAULT_EXTRACT_DATA,
+    ExtractRulesFile,
+    flatten_declarations,
+    SimplifiedExtractDeclaration
+)
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
+from cumulusci.salesforce_api.org_schema import Filters, get_org_schema, Schema
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
@@ -1150,13 +1158,39 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 
 user_reassign_job = job(user_reassign)
 
+# TODO: Move some of this into CCI itself
+def get_objs_and_fields_from_org(schema: Schema) -> Dict[str, Dict]:
+    extract_file = StringIO(DEFAULT_EXTRACT_DATA)
+    decls = ExtractRulesFile.parse_extract(extract_file)
+    flattened = flatten_declarations(list(decls.values()), schema)
+    print("F", [f.sf_object for f in flattened])
+    return {objdecl.sf_object: schema_obj_to_json(schema, objdecl) for objdecl in flattened}
+    
+def schema_obj_to_json(schema: Schema, objdecl: SimplifiedExtractDeclaration):
+    schema_obj = schema[objdecl.sf_object]
+    return {"label": schema_obj.label,
+                    "count": schema_obj.count,
+                    "fields": {fieldname: schema_field_to_json(schema_obj, fieldname)
+                    for fieldname in objdecl.fields}
+    }
+
+def schema_field_to_json(schema_obj, fieldname: str):
+    field_data = schema_obj.fields[fieldname]
+    return {
+        "label": field_data.label,
+         # TODO: compress empty reference targets to reduce wire waste
+        "referenceTo": field_data.referenceTo,
+    }
+
+
 
 @contextlib.contextmanager
-def dataset_env(org: ScratchOrg, user: User):
+def dataset_env(org: ScratchOrg):
     """
     Yields all configuration objects required by the CumulusCI `Dataset` class
     """
     task = org.task
+    assert task
     repo = get_repo_info(
         None,
         repo_owner=task.root_project.repo_owner,
@@ -1193,6 +1227,7 @@ def dataset_env(org: ScratchOrg, user: User):
             include_counts=True,
             filters=[Filters.extractable, Filters.createable],
         ) as schema:
+            print("OC", org_config.get_orginfo_cache_dir("a").__enter__())
             yield project_config, org_config, sf, schema, repo
 
 
@@ -1209,20 +1244,12 @@ def parse_datasets(*, org: ScratchOrg, user: User):
     dataset_errors = []
     try:
         org.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
-            # JSON-friendly version of `schema`
-            org_schema = {
-                obj_name: {
-                    "label": obj.label,
-                    "count": obj.count,
-                    "fields": {
-                        field_name: {"label": field.label}
-                        for field_name, field in obj.fields.items()
-                        if field_name not in IGNORED_FIELDS
-                    },
-                }
-                for obj_name, obj in schema.items()
-            }
+        with dataset_env(org) as (project_config, org_config, sf, schema, repo):
+            org_schema = get_objs_and_fields_from_org(schema)
+            import cumulusci
+            print(cumulusci.__version__)
+            print("Coontacts", schema["Contact"].count)
+            pprint(org_schema.keys())
 
             project_path = project_config.repo_root
             datasets_dir = Path(project_path) / "datasets"
@@ -1236,7 +1263,7 @@ def parse_datasets(*, org: ScratchOrg, user: User):
                 if not entry.is_dir():
                     continue
                 with Dataset(
-                    entry.name, project_config, org_config, sf, schema
+                    entry.name, project_config, sf, org_config, schema
                 ) as dataset:
                     rel_file = dataset.extract_file.relative_to(project_path)
                     if not dataset.extract_file.exists():
@@ -1291,9 +1318,9 @@ def commit_dataset_from_org(
         org.refresh_from_db()
         task = org.task
         task.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+        with dataset_env(org) as (project_config, org_config, sf, schema, repo):
             with Dataset(
-                dataset_name, project_config, org_config, sf, schema
+                dataset_name, project_config, sf, org_config, schema
             ) as dataset:
                 dataset.path.mkdir(parents=True, exist_ok=True)
                 dataset.update_schema_subset(dataset_definition)

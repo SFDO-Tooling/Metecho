@@ -21,7 +21,12 @@ import {
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
-import { Changeset, DatasetSchema } from '@/js/store/orgs/reducer';
+import {
+  Changeset,
+  DatasetField,
+  DatasetObject,
+  DatasetSchema,
+} from '@/js/store/orgs/reducer';
 import {
   filterSchema,
   mergeChangesets,
@@ -446,6 +451,48 @@ const RemovingList = ({
   );
 };
 
+const inferChangesToLookupTargets = (
+  changeset: Changeset,
+  schema: DatasetSchema,
+): Changeset => {
+  const all_fields = Object.entries(changeset).map(([objname, fields]) =>
+    fields.map((field) => schema[objname].fields[field]),
+  );
+  // flatten into field list
+  const all_fields_flattened = ([] as DatasetField[]).concat(...all_fields);
+
+  // find monomorphic reference fields
+  const reference_fields = all_fields_flattened.filter(
+    (field) => field.referenceTo && field.referenceTo.length === 1,
+  );
+
+  // find lookup targets matching those fields
+  const target_sojects = reference_fields.map((field) => [
+    field.referenceTo[0],
+    schema[field.referenceTo[0]],
+  ]) as [string, DatasetObject][];
+
+  // find all non-lookup fields
+  const relevant_target_fields = target_sojects.map(
+    ([sobjname, sobj]) =>
+      [
+        sobjname,
+        Object.entries(sobj.fields)
+          .filter(
+            ([_x, field]) =>
+              !field.referenceTo || field.referenceTo.length === 0,
+          )
+          .map(([fieldname, _field]) => fieldname),
+      ] as [string, string[]],
+  );
+
+  const ret = Object.fromEntries(relevant_target_fields);
+
+  console.log(ret);
+
+  return ret as Changeset;
+};
+
 const DataForm = ({
   schema,
   selectedSchema,
@@ -462,9 +509,17 @@ const DataForm = ({
 
   const updateChecked = (dataset_definition: Changeset, checked: boolean) => {
     if (checked) {
-      setChanges(
-        mergeChangesets(inputs.dataset_definition, dataset_definition),
+      let changes = mergeChangesets(
+        inputs.dataset_definition,
+        dataset_definition,
       );
+      const impliedChanges = inferChangesToLookupTargets(
+        dataset_definition,
+        schema,
+      );
+      changes = mergeChangesets(changes, impliedChanges);
+      console.log(impliedChanges);
+      setChanges(changes);
     } else {
       const { remaining } = splitChangeset(
         inputs.dataset_definition,
