@@ -10,6 +10,11 @@ import { deleteObject, updateObject } from '@/js/store/actions';
 import { refetchOrg } from '@/js/store/orgs/actions';
 
 import {
+  sampleGitHubUser1,
+  sampleGitHubUser2,
+  sampleUser1,
+} from '../../../../src/stories/fixtures';
+import {
   renderWithRedux,
   reRenderWithRedux,
   storeWithThunk,
@@ -39,9 +44,9 @@ const defaultOrgs = {
     id: 'org-id',
     task: 'task-id',
     org_type: 'Dev',
-    owner: 'user-id',
-    owner_gh_username: 'user-name',
-    owner_gh_id: 'user-id',
+    owner: sampleUser1.id,
+    owner_gh_username: sampleGitHubUser1.username,
+    owner_gh_id: sampleGitHubUser1.id,
     expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a512-longlong',
     latest_commit_url: '/test/commit/url/',
@@ -57,24 +62,16 @@ const defaultOrgs = {
   },
   QA: null,
 };
-const defaultEpicUsers = [
-  {
-    id: 'user-id',
-    login: 'user-name',
-    name: 'Full User Name',
-    permissions: { push: true },
-  },
-  { id: 'other-user-id', login: 'other-user', permissions: { push: true } },
-];
+const defaultEpicUsers = [sampleGitHubUser1, sampleGitHubUser2];
 const defaultProject = {
   id: 'p1',
   github_users: [...defaultEpicUsers],
 };
 const defaultState = {
   user: {
-    id: 'user-id',
-    github_id: 'user-id',
-    username: 'user-name',
+    id: sampleUser1.id,
+    github_id: sampleUser1.github_id,
+    username: sampleUser1.username,
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
@@ -85,13 +82,14 @@ const defaultState = {
 const defaultTask = {
   id: 'task-id',
   epic: {},
-  assigned_dev: 'user-id',
-  assigned_qa: 'user-id',
+  assigned_dev: sampleGitHubUser1,
+  assigned_qa: sampleGitHubUser1,
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
   review_submitted_at: '2019-10-16T12:58:53.721Z',
   has_unmerged_commits: true,
 };
+
 const createOrg = jest.fn();
 const refreshOrg = jest.fn();
 
@@ -199,8 +197,8 @@ describe('<TaskOrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
-          owner_gh_username: 'other-user',
-          owner_gh_id: 'other-user-id',
+          owner_gh_username: sampleGitHubUser2.username,
+          owner_gh_id: sampleGitHubUser2.id,
           unsaved_changes: {},
           total_unsaved_changes: 0,
           has_unsaved_changes: false,
@@ -208,8 +206,8 @@ describe('<TaskOrgCards/>', () => {
       };
       const task = {
         ...defaultTask,
-        assigned_dev: 'other-user-id',
-        assigned_qa: 'other-user-id',
+        assigned_dev: sampleGitHubUser2,
+        assigned_qa: sampleGitHubUser2,
       };
       const { queryByText, getByText } = setup({ orgs, task });
 
@@ -228,7 +226,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
-          owner_gh_id: 'other-user-id',
+          owner_gh_id: 111111,
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -251,7 +249,8 @@ describe('<TaskOrgCards/>', () => {
       });
       fireEvent.click(
         baseElement.querySelector(
-          '.collaborator-button[title="Full User Name (user-name)"]',
+          // eslint-disable-next-line max-len
+          `.collaborator-button[title="${sampleGitHubUser1.name} (${sampleGitHubUser1.login})"]`,
         ),
       );
       fireEvent.click(getByText('Notify Assigned Developer by Email'));
@@ -261,7 +260,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_dev).toBe('user-id');
+      expect(data.assigned_dev).toBe(sampleGitHubUser1.id);
       expect(data.should_alert_dev).toBe(true);
     });
 
@@ -281,7 +280,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa).toBe('user-id');
+      expect(data.assigned_qa).toBe(sampleGitHubUser1.id);
       expect(data.should_alert_qa).toBe(false);
     });
 
@@ -311,12 +310,14 @@ describe('<TaskOrgCards/>', () => {
         orgs: {},
         assignUserModalOpen: 'QA',
       });
-      fireEvent.click(getByText('other-user'));
+      fireEvent.click(
+        getByText(`${sampleGitHubUser2.name} (${sampleGitHubUser2.login})`),
+      );
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa).toBe(
-        'other-user-id',
+        sampleGitHubUser2.id,
       );
     });
   });
@@ -337,7 +338,9 @@ describe('<TaskOrgCards/>', () => {
             task,
             assignUserModalOpen: 'Dev',
           });
-          fireEvent.click(getByText('other-user'));
+          fireEvent.click(
+            getByText(`${sampleGitHubUser2.name} (${sampleGitHubUser2.login})`),
+          );
           fireEvent.click(getByText('Save'));
 
           expect.assertions(5);
@@ -353,7 +356,7 @@ describe('<TaskOrgCards/>', () => {
 
           expect(updateObject).toHaveBeenCalledTimes(1);
           expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
-            'other-user-id',
+            sampleGitHubUser2.id,
           );
         });
       });
@@ -364,7 +367,9 @@ describe('<TaskOrgCards/>', () => {
             can_reassign: true,
           });
           const { getByText } = setup({ task, assignUserModalOpen: 'Dev' });
-          fireEvent.click(getByText('other-user'));
+          fireEvent.click(
+            getByText(`${sampleGitHubUser2.name} (${sampleGitHubUser2.login})`),
+          );
           fireEvent.click(getByText('Save'));
 
           expect.assertions(3);
@@ -377,7 +382,7 @@ describe('<TaskOrgCards/>', () => {
           expect(refetchOrg).not.toHaveBeenCalled();
           expect(updateObject).toHaveBeenCalledTimes(1);
           expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
-            'other-user-id',
+            sampleGitHubUser2.id,
           );
         });
       });
@@ -419,7 +424,7 @@ describe('<TaskOrgCards/>', () => {
       const task = {
         ...defaultTask,
         assigned_dev: null,
-        assigned_qa: 'other-user',
+        assigned_qa: sampleGitHubUser2,
       };
       const { queryByText } = setup({
         task,
@@ -585,7 +590,10 @@ describe('<TaskOrgCards/>', () => {
           const { getByText } = setup({
             orgs: {
               ...orgs,
-              QA: { ...orgs.QA, latest_commit: 'not-a-commit-we-know-about' },
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'not-a-commit-we-know-about',
+              },
             },
           });
           fireEvent.click(getByText('View Org'));
@@ -629,7 +637,11 @@ describe('<TaskOrgCards/>', () => {
           },
           orgs: {
             ...orgs,
-            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+            QA: {
+              ...orgs.QA,
+              latest_commit: 'parent',
+              has_been_visited: true,
+            },
           },
           testOrgSubmittingReview: true,
         });
@@ -866,7 +878,7 @@ describe('<TaskOrgCards/>', () => {
       test('deletes org', async () => {
         const task = {
           ...defaultTask,
-          assigned_qa: 'other-user-id',
+          assigned_qa: sampleGitHubUser2,
         };
         const orgs = {
           Dev: null,

@@ -9,7 +9,7 @@ from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.urls import reverse
 from github3.exceptions import NotFoundError, ResponseError
-from github3.users import User as gh_user
+from github3.users import User as GitHubApiUser
 from rest_framework import status
 
 from metecho.api.serializers import EpicSerializer, TaskSerializer
@@ -132,13 +132,13 @@ class TestGitHubOrganizationViewset:
         assert tuple(response.json().keys()) == ("id", "name", "avatar_url")
 
     def test_members(self, client, mocker, git_hub_organization):
-        member1 = mocker.MagicMock(spec=gh_user)
+        member1 = mocker.MagicMock(spec=GitHubApiUser)
         member1.as_dict.return_value = {
             "id": 123,
             "login": "user-xyz",
             "avatar_url": "http://123.com",
         }
-        member2 = mocker.MagicMock(spec=gh_user)
+        member2 = mocker.MagicMock(spec=GitHubApiUser)
         member2.as_dict.return_value = {
             "id": 456,
             "login": "user-abc",
@@ -155,8 +155,8 @@ class TestGitHubOrganizationViewset:
         )
 
         assert response.json() == [
-            {"id": "456", "login": "user-abc", "avatar_url": "http://456.com"},
-            {"id": "123", "login": "user-xyz", "avatar_url": "http://123.com"},
+            {"id": 456, "login": "user-abc", "avatar_url": "http://456.com"},
+            {"id": 123, "login": "user-xyz", "avatar_url": "http://123.com"},
         ]
 
     @pytest.mark.parametrize(
@@ -351,11 +351,10 @@ class TestGitHubIssueViewset:
 @pytest.mark.django_db
 class TestProjectViewset:
     def test_refresh_org_config_names(
-        self, client, project_factory, git_hub_repository_factory
+        self, client, git_hub_collaboration_factory, project
     ):
+        git_hub_collaboration_factory(user__id=client.user.github_id, project=project)
         with ExitStack() as stack:
-            git_hub_repository_factory(user=client.user, repo_id=123)
-            project = project_factory(repo_id=123)
             available_org_config_names_job = stack.enter_context(
                 patch("metecho.api.jobs.available_org_config_names_job", autospec=True)
             )
@@ -369,10 +368,9 @@ class TestProjectViewset:
             assert available_org_config_names_job.delay.called
 
     def test_refresh_github_users(
-        self, client, mocker, project_factory, git_hub_repository_factory
+        self, client, mocker, git_hub_collaboration_factory, project
     ):
-        git_hub_repository_factory(user=client.user, repo_id=123)
-        project = project_factory(repo_id=123)
+        git_hub_collaboration_factory(user__id=client.user.github_id, project=project)
         refresh_github_users_job = mocker.patch(
             "metecho.api.jobs.refresh_github_users_job", autospec=True
         )
@@ -387,13 +385,13 @@ class TestProjectViewset:
         assert refresh_github_users_job.delay.called
 
     def test_refresh_github_issues(
-        self, mocker, client, project_factory, git_hub_repository_factory
+        self, mocker, client, git_hub_collaboration_factory, project
     ):
-        git_hub_repository_factory(user=client.user, repo_id=123)
-        project = project_factory(repo_id=123)
+        git_hub_collaboration_factory(user__id=client.user.github_id, project=project)
         populate_github_issues_job = mocker.patch(
             "metecho.api.jobs.refresh_github_issues_job"
         )
+
         response = client.post(
             reverse("project-refresh-github-issues", args=[str(project.pk)])
         )
@@ -403,11 +401,8 @@ class TestProjectViewset:
         assert populate_github_issues_job.delay.called
         assert project.currently_fetching_issues
 
-    def test_feature_branches(
-        self, client, project_factory, git_hub_repository_factory
-    ):
-        git_hub_repository_factory(user=client.user, repo_id=123)
-        project = project_factory(repo_id=123)
+    def test_feature_branches(self, client, git_hub_collaboration_factory, project):
+        git_hub_collaboration_factory(user__id=client.user.github_id, project=project)
         with patch("metecho.api.views.gh.get_repo_info") as get_repo_info:
             repo = MagicMock(
                 **{
@@ -424,11 +419,11 @@ class TestProjectViewset:
             )
             assert response.json() == ["include_me"], response.json()
 
-    def test_get_queryset(self, client, project_factory, git_hub_repository_factory):
-        git_hub_repository_factory(
-            user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
-        )
-        project = project_factory(repo_name="repo", repo_id=123)
+    def test_get_queryset(self, client, project_factory, git_hub_collaboration_factory):
+        project = project_factory(repo_name="repo")
+        gh_user = git_hub_collaboration_factory(
+            user__id=client.user.github_id, project=project
+        ).user
         project_factory(repo_name="repo2", repo_id=456)
         project_factory(repo_name="repo3", repo_id=None)
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
@@ -457,7 +452,15 @@ class TestProjectViewset:
                     "repo_name": str(project.repo_name),
                     "has_push_permission": False,
                     "branch_prefix": "",
-                    "github_users": [],
+                    "github_users": [
+                        {
+                            "id": gh_user.id,
+                            "name": gh_user.name,
+                            "avatar_url": gh_user.avatar_url,
+                            "login": gh_user.login,
+                            "permissions": None,
+                        }
+                    ],
                     "github_issue_count": 0,
                     "repo_image_url": "",
                     "org_config_names": [],
@@ -470,12 +473,12 @@ class TestProjectViewset:
         }, response.json()
 
     def test_get_queryset__bad(
-        self, client, project_factory, git_hub_repository_factory
+        self, client, project_factory, git_hub_collaboration_factory
     ):
-        git_hub_repository_factory(
-            user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
-        )
-        project = project_factory(repo_name="repo", repo_id=123)
+        project = project_factory(repo_name="repo")
+        gh_user = git_hub_collaboration_factory(
+            user__id=client.user.github_id, project=project
+        ).user
         project_factory(repo_name="repo2", repo_id=456)
         project_factory(repo_name="repo3", repo_id=None)
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
@@ -504,7 +507,15 @@ class TestProjectViewset:
                     "repo_name": str(project.repo_name),
                     "has_push_permission": False,
                     "branch_prefix": "",
-                    "github_users": [],
+                    "github_users": [
+                        {
+                            "id": gh_user.id,
+                            "name": gh_user.name,
+                            "avatar_url": gh_user.avatar_url,
+                            "login": gh_user.login,
+                            "permissions": None,
+                        }
+                    ],
                     "github_issue_count": 0,
                     "repo_image_url": "",
                     "org_config_names": [],
@@ -519,7 +530,7 @@ class TestProjectViewset:
     def test_get_queryset__superuser(self, admin_client, project_factory):
         """
         Superuser should be able to access all projects even if they don't have a
-        matching GitHubRepository on record
+        matching GitHubCollaboration on record
         """
         project_factory(repo_name="repo", repo_id=123)
         project_factory(repo_name="repo2", repo_id=456)
@@ -568,9 +579,9 @@ class TestProjectViewset:
         assert project.name == "Foo"
         assert project.repo_name == "foo"
         assert project.repo_owner == git_hub_organization.login
-        assert project.github_users == [
-            {"id": "123", "login": "abc", "avatar_url": "http://example.com"},
-            {"login": client.user.username},
+        assert list(project.github_users.values_list("id", "login")) == [
+            (123, "abc"),
+            (client.user.github_id, client.user.username),
         ]
         create_repository_job.delay.assert_called_with(
             project,
@@ -602,7 +613,6 @@ class TestHookView:
         self,
         settings,
         client,
-        git_hub_repository_factory,
         _task_factory,
         task_data,
     ):
@@ -624,7 +634,6 @@ class TestHookView:
             )
             gh.normalize_commit.return_value = "1234abcd"
 
-            git_hub_repository_factory(repo_id=123)
             task = _task_factory(**task_data, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
@@ -672,13 +681,11 @@ class TestHookView:
         settings,
         client,
         project_factory,
-        git_hub_repository_factory,
         epic_factory,
     ):
         settings.GITHUB_HOOK_SECRET = b""
         with ExitStack() as stack:
             project = project_factory(repo_id=123)
-            git_hub_repository_factory(repo_id=123)
             epic = epic_factory(project=project, branch_name="test-epic")
 
             refresh_commits_job = stack.enter_context(
@@ -726,12 +733,10 @@ class TestHookView:
         settings,
         client,
         project_factory,
-        git_hub_repository_factory,
     ):
         settings.GITHUB_HOOK_SECRET = b""
         with ExitStack() as stack:
             project = project_factory(repo_id=123, branch_name="test-project")
-            git_hub_repository_factory(repo_id=123)
 
             refresh_commits_job = stack.enter_context(
                 patch("metecho.api.jobs.refresh_commits_job", autospec=True)
@@ -790,12 +795,9 @@ class TestHookView:
         )
         assert response.status_code == 400, response.content
 
-    def test_202__push_forced(
-        self, settings, client, project_factory, git_hub_repository_factory
-    ):
+    def test_202__push_forced(self, settings, client, project_factory):
         settings.GITHUB_HOOK_SECRET = b""
         project_factory(repo_id=123)
-        git_hub_repository_factory(repo_id=123)
         with patch(
             "metecho.api.jobs.refresh_commits_job", autospec=True
         ) as refresh_commits_job:
@@ -819,12 +821,9 @@ class TestHookView:
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
 
-    def test_400__push_error(
-        self, settings, client, project_factory, git_hub_repository_factory
-    ):
+    def test_400__push_error(self, settings, client, project_factory):
         settings.GITHUB_HOOK_SECRET = b""
         project_factory(repo_id=123)
-        git_hub_repository_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
             json.dumps(
@@ -1210,11 +1209,27 @@ class TestTaskViewSet:
         response = client.get(url, data={"project": str(project.pk)})
         assert len(response.json()["results"]) == 2
 
+    def test_get__assigned_filter(self, client, task_factory, git_hub_user_factory):
+        url = reverse("task-list")
+        task_factory(assigned_dev=git_hub_user_factory(id=client.user.github_id))
+        # Other tasks in other epics and projects
+        task_factory(assigned_dev=git_hub_user_factory())
+        task_factory()
+
+        response = client.get(url)
+        assert len(response.data["results"]) == 3
+
+        response = client.get(url, data={"assigned_to_me": True})
+        assert len(response.data["results"]) == 1
+
     def test_create__dev_org(
-        self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
+        self, client, git_hub_collaboration_factory, scratch_org_factory, epic
     ):
-        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
-        epic = epic_factory(project__repo_id=repo.repo_id)
+        git_hub_collaboration_factory(
+            permissions={"push": True},
+            user__id=client.user.github_id,
+            project=epic.project,
+        )
         scratch_org = scratch_org_factory(epic=epic, task=None)
         data = {
             "name": "Test Task with Org",
@@ -1225,9 +1240,10 @@ class TestTaskViewSet:
         }
 
         response = client.post(reverse("task-list"), data=data)
-        task_data = response.json()
 
-        assert task_data["assigned_dev"] == client.user.github_id, task_data
+        assert (
+            response.data["assigned_dev"]["id"] == client.user.github_id
+        ), response.data
 
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:
@@ -1382,7 +1398,7 @@ class TestTaskViewSet:
     def test_repo_permissions(
         self,
         client,
-        git_hub_repository_factory,
+        git_hub_collaboration_factory,
         repo_perms,
         check,
         _task_factory,
@@ -1393,8 +1409,10 @@ class TestTaskViewSet:
         permissions
         """
         task = _task_factory(issue=None)
-        git_hub_repository_factory(
-            repo_id=task.root_project.repo_id, user=client.user, permissions=repo_perms
+        git_hub_collaboration_factory(
+            project=task.root_project,
+            user__id=client.user.github_id,
+            permissions=repo_perms,
         )
         url = reverse("task-detail", args=[task.pk])
         data = TaskSerializer(task).data
@@ -1411,20 +1429,21 @@ class TestTaskViewSet:
 
         assert check(response.status_code), response.content
 
-    def test_assignees(self, client, git_hub_repository_factory, task_factory):
-        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": "123456", "permissions": {"push": True}}
-            ],
+    def test_assignees(self, client, git_hub_collaboration_factory, task):
+        git_hub_collaboration_factory(
+            permissions={"push": True},
+            user__id=client.user.github_id,
+            project=task.root_project,
         )
-        data = {"assigned_dev": "123456", "assigned_qa": "123456"}
+        collab = git_hub_collaboration_factory(
+            permissions={"push": True}, project=task.root_project
+        )
+        data = {"assigned_dev": collab.user_id, "assigned_qa": collab.user_id}
         client.post(reverse("task-assignees", args=[task.id]), data=data)
 
         task.refresh_from_db()
-        assert task.assigned_dev == "123456"
-        assert task.assigned_qa == "123456"
+        assert task.assigned_dev == collab.user
+        assert task.assigned_qa == collab.user
 
 
 @pytest.mark.django_db
@@ -1452,14 +1471,14 @@ class TestEpicViewSet:
         self,
         client,
         epic_factory,
-        git_hub_repository_factory,
+        git_hub_collaboration_factory,
         repo_perms,
         check,
         method,
     ):
         epic = epic_factory(issue=None)
-        git_hub_repository_factory(
-            repo_id=epic.project.repo_id, user=client.user, permissions=repo_perms
+        git_hub_collaboration_factory(
+            project=epic.project, user__id=client.user.github_id, permissions=repo_perms
         )
         data = EpicSerializer(epic).data
         url = reverse("epic-detail", args=[epic.pk])
@@ -1471,16 +1490,53 @@ class TestEpicViewSet:
 
         assert check(response.status_code), response.content
 
-    def test_collaborators(self, client, git_hub_repository_factory, epic_factory):
-        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
-        epic = epic_factory(
-            project__repo_id=repo.repo_id,
-            project__github_users=[{"id": "123"}, {"id": "456"}],
+    @pytest.mark.parametrize(
+        "can_write, current_collaborators, new_collaborators, response_code",
+        (
+            pytest.param(True, [], [1, 2], 200, id="Read-write, add any"),
+            pytest.param(True, [1, 2], [], 200, id="Read-write, remove any"),
+            pytest.param(True, [], [3], 400, id="Read-write, user not in project"),
+            pytest.param(True, [], [4], 400, id="Read-write, unknown user"),
+            pytest.param(False, [], [1], 200, id="Read-only, add self"),
+            pytest.param(False, [], [2], 400, id="Read-only, add other"),
+            pytest.param(False, [2], [], 400, id="Read-only, remove other"),
+            pytest.param(False, [1], [], 200, id="Read-only, remove self"),
+        ),
+    )
+    def test_collaborators(
+        self,
+        client,
+        git_hub_user_factory,
+        epic,
+        can_write,
+        current_collaborators,
+        new_collaborators,
+        response_code,
+    ):
+        client.user.socialaccount_set.update(uid="1")
+        gh_user1 = git_hub_user_factory(id=1)  # Self
+        gh_user2 = git_hub_user_factory(id=2)  # Other user in project
+        git_hub_user_factory(id=3)  # Other user not in project
+        epic.project.githubcollaboration_set.create(
+            user=gh_user1, permissions={"push": can_write}
         )
-        data = {"github_users": ["123", "456"]}
-        client.post(
-            reverse("epic-collaborators", args=[epic.id]), data=data, format="json"
+        epic.project.githubcollaboration_set.create(user=gh_user2)
+        epic.github_users.set(current_collaborators)
+
+        response = client.post(
+            reverse("epic-collaborators", args=[epic.id]),
+            data={"github_users": new_collaborators},
+            format="json",
         )
 
-        epic.refresh_from_db()
-        assert epic.github_users == ["123", "456"]
+        assert response.status_code == response_code, response.content
+        if response_code == 200:
+            epic.refresh_from_db()
+            assert (
+                list(epic.github_users.values_list("id", flat=True))
+                == new_collaborators
+            )
+        else:
+            assert (
+                "github_users" in response.data.keys()
+            ), "Expected an error on the `github_users` field"

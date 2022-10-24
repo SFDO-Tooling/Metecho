@@ -49,7 +49,7 @@ const defaultOrg = {
   org_type: 'Playground',
   owner: 'my-user',
   owner_gh_username: 'currentUser',
-  owner_gh_id: 'my-user-id',
+  owner_gh_id: 123456,
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',

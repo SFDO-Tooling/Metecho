@@ -342,6 +342,8 @@ To continue, go up to [Step 2 - Create a Task](#step-2---create-a-task) or
 
 - Select your avatar in the upper right-hand corner.
 - Select `Manage Account`.
+- If you are assigned to a Task, you will see a list of those Tasks.
+  - Navigate to those Tasks and retrieve any relevant changes from Dev Orgs.
 - Select `Delete Account`.
   - Your Dev Orgs will be deleted, and any unretrieved changes will be lost.
   - This action cannot be undone.

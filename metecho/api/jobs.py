@@ -40,7 +40,14 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
-from .models import GitHubOrganization, Project, TaskReviewStatus, User
+from .models import (
+    GitHubCollaboration,
+    GitHubOrganization,
+    GitHubUser,
+    Project,
+    TaskReviewStatus,
+    User,
+)
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -204,9 +211,9 @@ def create_repository(
                     counter += 1
                 else:
                     raise
-        for collaborator in project.github_users:
-            role = "maintainer" if collaborator["login"] == user.username else "member"
-            team.add_or_update_membership(collaborator["login"], role=role)
+        for login in project.github_users.values_list("login", flat=True):
+            role = "maintainer" if login == user.username else "member"
+            team.add_or_update_membership(login, role=role)
 
         # Create repo on GitHub
         repo = org.create_repository(
@@ -264,13 +271,6 @@ def create_repository(
             copy_branch_protection(
                 source=tpl_repo.branch(branch_name), target=repo.branch(branch_name)
             )
-
-        # Create GitHubRepository instance for local permission checks
-        user.repositories.create(
-            repo_id=repo.id,
-            repo_url=repo.html_url,
-            permissions={"pull": True, "push": True},
-        )
     except Exception as e:
         project.finalize_create_repository(error=e, user=user)
         tb = traceback.format_exc()
@@ -344,7 +344,6 @@ def _create_org_and_run_flow(
     repo_branch,
     project_path,
     originating_user_id,
-    sf_username=None,
 ):
     """
     Expects to be called in the context of a local github checkout.
@@ -363,7 +362,7 @@ def _create_org_and_run_flow(
         scratch_org=scratch_org,
         org_name=org_config_name,
         originating_user_id=originating_user_id,
-        sf_username=sf_username,
+        sf_username=scratch_org.owner_sf_username,
     )
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
@@ -377,9 +376,6 @@ def _create_org_and_run_flow(
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
-    scratch_org.owner_sf_username = sf_username or user.sf_username
-    scratch_org.owner_gh_username = user.username
-    scratch_org.owner_gh_id = user.github_id
     scratch_org.save()
 
     cases = {
@@ -516,7 +512,6 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
         user = scratch_org.owner
         repo_id = scratch_org.parent.get_repo_id()
         commit_ish = scratch_org.parent.branch_name
-        sf_username = scratch_org.owner_sf_username
 
         delete_org(scratch_org)
 
@@ -528,7 +523,6 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
                 repo_branch=commit_ish,
                 project_path=repo_root,
                 originating_user_id=originating_user_id,
-                sf_username=sf_username,
             )
     except Exception as e:
         scratch_org.refresh_from_db()
@@ -741,24 +735,24 @@ def delete_scratch_org(scratch_org, *, originating_user_id):
 delete_scratch_org_job = job(delete_scratch_org)
 
 
-def refresh_github_repositories_for_user(user):
-    from .models import GitHubRepository
+def refresh_github_repositories_for_user(user: User):
 
     try:
         repos = get_all_org_repos(user)
         with transaction.atomic():
-            GitHubRepository.objects.filter(user=user).delete()
-            GitHubRepository.objects.bulk_create(
-                [
-                    GitHubRepository(
-                        user=user,
-                        repo_id=repo.id,
-                        repo_url=repo.html_url,
-                        permissions=repo.permissions,
-                    )
-                    for repo in repos
-                ]
+            gh_user, _ = GitHubUser.objects.get_or_create(
+                id=user.github_id, defaults={"login": user.username}
             )
+            for repo in repos:
+                try:
+                    project = Project.objects.get(repo_id=repo.id)
+                except Project.DoesNotExist:
+                    continue
+                GitHubCollaboration.objects.update_or_create(
+                    user=gh_user,
+                    project=project,
+                    defaults={"permissions": repo.permissions},
+                )
     except Exception as e:
         user.finalize_refresh_repositories(error=e)
         tb = traceback.format_exc()
@@ -863,40 +857,34 @@ def refresh_commits(*, project, branch_name, originating_user_id):
 refresh_commits_job = job(refresh_commits)
 
 
-def refresh_github_users(project, *, originating_user_id):
+def refresh_github_users(project: Project, *, originating_user_id):
     try:
         project.refresh_from_db()
         repo = get_repo_info(
             None, repo_owner=project.repo_owner, repo_name=project.repo_name
         )
-        project.github_users = list(
-            sorted(
-                [
-                    {
-                        "id": str(collaborator.id),
-                        "login": collaborator.login,
-                        "avatar_url": collaborator.avatar_url,
-                        "permissions": collaborator.permissions,
-                    }
-                    for collaborator in repo.collaborators()
-                ],
-                key=lambda x: x["login"].lower(),
-            )
-        )
-
-        # Retrieve additional information for each user by querying GitHub
-        gh = GitHub(repo)
-        expanded_users = []
-        for user in project.github_users:
+        for collaborator in repo.collaborators():
             try:
-                full_user = get_cached_user(gh, user["login"])
-                expanded = {**user, "name": full_user.name}
+                # Retrieve additional information for each user by querying GitHub
+                collaborator.name = get_cached_user(
+                    GitHub(repo), collaborator.login
+                ).name
             except Exception:
-                logger.exception(f"Failed to expand GitHub user {user['login']}")
-                expanded = user
-            expanded_users.append(expanded)
-        project.github_users = expanded_users
-
+                logger.exception(f"Failed to expand GitHub user {collaborator}")
+                collaborator.name = ""
+            user, _ = GitHubUser.objects.update_or_create(
+                id=collaborator.id,
+                defaults={
+                    "login": collaborator.login,
+                    "name": collaborator.name,
+                    "avatar_url": collaborator.avatar_url,
+                },
+            )
+            GitHubCollaboration.objects.update_or_create(
+                user=user,
+                project=project,
+                defaults={"permissions": collaborator.permissions},
+            )
     except Exception as e:
         project.finalize_refresh_github_users(
             error=e, originating_user_id=originating_user_id

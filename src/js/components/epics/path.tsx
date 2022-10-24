@@ -34,7 +34,12 @@ const EpicStatusPath = ({ status, prIsOpen }: Props) => {
 
   return (
     <div className="slds-p-bottom_x-large">
-      <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />
+      <Path
+        steps={steps}
+        activeIdx={activeIdx}
+        isCompleted={isCompleted}
+        label={t('Epic Status')}
+      />
     </div>
   );
 };

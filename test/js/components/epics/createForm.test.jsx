@@ -86,7 +86,7 @@ describe('<CreateEpicModal/>', () => {
     test('adds current user to github_users', async () => {
       const user = {
         ...defaultUser,
-        github_id: '1',
+        github_id: 1,
       };
       const { findByText, getByText, getByLabelText } = setup({ user });
       const submit = getByText('Create');

@@ -68,7 +68,7 @@ export const UserCards = ({
 }: {
   className?: string;
   users: GitHubUser[];
-  userId?: string | null;
+  userId?: number | null;
   canRemoveUser?: boolean;
   removeUser?: (user: GitHubUser) => void;
   twoColumn?: boolean;
