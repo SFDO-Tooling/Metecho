@@ -31,8 +31,11 @@ def forwards(apps, schema_editor):
     # Convert JSON Epic collaborators into m2m entries
     for epic in Epic.objects.all():
         for user_id in epic.github_users_json:
-            user = GitHubUser.objects.get(id=user_id)
-            epic.github_users.add(user)
+            try:
+                user = GitHubUser.objects.get(id=user_id)
+                epic.github_users.add(user)
+            except GitHubUser.DoesNotExist:
+                pass
 
     # Convert Task assignees into GitHubUser instances
     for task in Task.objects.all():
