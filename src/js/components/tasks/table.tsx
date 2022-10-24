@@ -20,9 +20,7 @@ import {
   useIsMounted,
 } from '@/js/components/utils';
 import { ThunkDispatch } from '@/js/store';
-import { AppState } from '@/js/store';
 import { fetchObjects, ObjectFilters } from '@/js/store/actions';
-import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { Task } from '@/js/store/tasks/reducer';
 import { GitHubUser, User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
@@ -42,7 +40,7 @@ type AssignUserAction = ({
 }: {
   task: Task;
   type: OrgTypes;
-  assignee: string | null;
+  assignee: number | null;
   shouldAlertAssignee: boolean;
 }) => void;
 
@@ -54,37 +52,38 @@ interface TableCellProps {
 }
 
 interface Props {
-  projectId: string;
-  projectSlug: string;
+  projectId?: string;
   tasks: Task[];
   next?: string | null;
   count?: number;
   isFetched: boolean;
   epicId?: string;
   epicUsers?: GitHubUser[];
-  githubUsers: GitHubUser[];
+  githubUsers?: GitHubUser[];
   canAssign: boolean;
   isRefreshingUsers: boolean;
-  assignUserAction: AssignUserAction;
+  assignUserAction?: AssignUserAction;
   viewEpicsColumn?: boolean;
+  fetchNextPage?: () => Promise<void>;
 }
 
 const NameTableCell = ({
-  projectSlug,
   item,
   className,
   children,
   ...props
-}: TableCellProps & {
-  projectSlug: string;
-}) => (
+}: TableCellProps) => (
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
-    {projectSlug && item && (
+    {item && (
       <Link
         to={
           item.epic
-            ? routes.epic_task_detail(projectSlug, item.epic.slug, item.slug)
-            : routes.project_task_detail(projectSlug, item.slug)
+            ? routes.epic_task_detail(
+                item.root_project_slug,
+                item.epic.slug,
+                item.slug,
+              )
+            : routes.project_task_detail(item.root_project_slug, item.slug)
         }
       >
         {children}
@@ -94,17 +93,10 @@ const NameTableCell = ({
 );
 NameTableCell.displayName = DataTableCell.displayName;
 
-const EpicTableCell = ({
-  projectSlug,
-  item,
-  className,
-  ...props
-}: TableCellProps & {
-  projectSlug: string;
-}) => (
+const EpicTableCell = ({ item, className, ...props }: TableCellProps) => (
   <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
-    {item?.epic?.slug && item?.epic?.name && projectSlug ? (
-      <Link to={routes.epic_detail(projectSlug, item.epic.slug)}>
+    {item?.epic?.slug && item?.epic?.name ? (
+      <Link to={routes.epic_detail(item.root_project_slug, item.epic.slug)}>
         {item.epic.name}
       </Link>
     ) : (
@@ -144,7 +136,6 @@ StatusTableCell.displayName = DataTableCell.displayName;
 
 const AssigneeTableCell = ({
   type,
-  projectId,
   epicUsers,
   githubUsers,
   currentUser,
@@ -153,23 +144,18 @@ const AssigneeTableCell = ({
   assignUserAction,
   item,
   className,
-  children,
   ...props
 }: TableCellProps & {
   type: OrgTypes;
-  projectId: string;
   epicUsers?: GitHubUser[];
-  githubUsers: GitHubUser[];
+  githubUsers?: GitHubUser[];
   currentUser?: User;
   canAssign: boolean;
   isRefreshingUsers: boolean;
-  assignUserAction: AssignUserAction;
-  children?: string | null;
+  assignUserAction?: AssignUserAction;
 }) => {
   const { t } = useTranslation();
-  const assignedUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, projectId, children),
-  );
+
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
   const openAssignUserModal = () => {
@@ -180,9 +166,9 @@ const AssigneeTableCell = ({
   };
 
   const doAssignUserAction = useCallback(
-    (assignee: string | null, shouldAlertAssignee: boolean) => {
+    (assignee: number | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
-      if (!item || !type) {
+      if (!item || !type || !assignUserAction) {
         return;
       }
       assignUserAction({ task: item, type, assignee, shouldAlertAssignee });
@@ -192,7 +178,7 @@ const AssigneeTableCell = ({
 
   const doSelfAssignUserAction = useCallback(() => {
     /* istanbul ignore if */
-    if (!item || !type || !currentUser?.github_id) {
+    if (!item || !type || !currentUser?.github_id || !assignUserAction) {
       return;
     }
     assignUserAction({
@@ -207,27 +193,68 @@ const AssigneeTableCell = ({
   if (!item) {
     return null;
   }
-  let contents, title;
-  if (assignedUser) {
-    contents = <GitHubUserAvatar user={assignedUser} />;
-    title = assignedUser.login;
-  } else if (canAssign) {
-    switch (type) {
-      case ORG_TYPES.DEV:
+
+  let contents, title, assignedUser: GitHubUser | undefined;
+
+  switch (type) {
+    case ORG_TYPES.DEV:
+      if (item?.assigned_dev) {
+        assignedUser = item.assigned_dev;
+        contents = <GitHubUserAvatar user={assignedUser} />;
+        title = assignedUser.login;
+      } else {
         title = t('Assign Developer');
-        break;
-      case ORG_TYPES.QA:
+      }
+      break;
+    case ORG_TYPES.QA:
+      if (item?.assigned_qa) {
+        assignedUser = item.assigned_qa;
+        contents = <GitHubUserAvatar user={assignedUser} />;
+        title = assignedUser.login;
+      } else {
         title = t('Assign Tester');
-        break;
-    }
+      }
+      break;
+  }
 
-    const epicCollaborators = item.epic
-      ? epicUsers ||
-        githubUsers.filter((user) => item.epic?.github_users.includes(user.id))
-      : null;
+  if (!assignedUser && assignUserAction) {
+    if (canAssign && githubUsers) {
+      const epicCollaborators = item.epic
+        ? epicUsers ||
+          githubUsers.filter((user) =>
+            item.epic?.github_users.includes(user.id),
+          )
+        : null;
 
-    contents = (
-      <>
+      contents = (
+        <>
+          <Button
+            className="slds-m-left_xx-small"
+            assistiveText={{ icon: title }}
+            iconCategory="utility"
+            iconName="adduser"
+            iconSize="medium"
+            variant="icon"
+            title={title}
+            onClick={openAssignUserModal}
+          />
+          <AssignTaskRoleModal
+            projectId={item.root_project}
+            taskHasEpic={Boolean(item.epic)}
+            epicUsers={epicCollaborators}
+            githubUsers={githubUsers}
+            selectedUser={null}
+            orgType={type}
+            isOpen={assignUserModalOpen}
+            isRefreshingUsers={isRefreshingUsers}
+            onRequestClose={closeAssignUserModal}
+            setUser={doAssignUserAction}
+          />
+        </>
+      );
+    } else if (!canAssign && type === ORG_TYPES.QA && currentUser?.github_id) {
+      title = t('Self-Assign as Tester');
+      contents = (
         <Button
           className="slds-m-left_xx-small"
           assistiveText={{ icon: title }}
@@ -236,37 +263,12 @@ const AssigneeTableCell = ({
           iconSize="medium"
           variant="icon"
           title={title}
-          onClick={openAssignUserModal}
+          onClick={doSelfAssignUserAction}
         />
-        <AssignTaskRoleModal
-          projectId={projectId}
-          taskHasEpic={Boolean(item.epic)}
-          epicUsers={epicCollaborators}
-          githubUsers={githubUsers}
-          selectedUser={assignedUser || null}
-          orgType={type}
-          isOpen={assignUserModalOpen}
-          isRefreshingUsers={isRefreshingUsers}
-          onRequestClose={closeAssignUserModal}
-          setUser={doAssignUserAction}
-        />
-      </>
-    );
-  } else if (type === ORG_TYPES.QA && currentUser?.github_id) {
-    title = t('Self-Assign as Tester');
-    contents = (
-      <Button
-        className="slds-m-left_xx-small"
-        assistiveText={{ icon: title }}
-        iconCategory="utility"
-        iconName="adduser"
-        iconSize="medium"
-        variant="icon"
-        title={title}
-        onClick={doSelfAssignUserAction}
-      />
-    );
+      );
+    }
   }
+
   return (
     <DataTableCell {...props} title={title} className={className}>
       {contents}
@@ -277,7 +279,6 @@ AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({
   projectId,
-  projectSlug,
   tasks,
   next,
   count,
@@ -289,6 +290,7 @@ const TaskTable = ({
   isRefreshingUsers,
   assignUserAction,
   viewEpicsColumn,
+  fetchNextPage,
 }: Props) => {
   const { t } = useTranslation();
   const isMounted = useIsMounted();
@@ -317,31 +319,40 @@ const TaskTable = ({
 
   const fetchMoreTasks = useCallback(() => {
     /* istanbul ignore else */
-    if (isFetched && projectId && next) {
+    if (isFetched && (projectId || fetchNextPage) && next) {
       /* istanbul ignore else */
       if (isMounted.current) {
         setFetchingTasks(true);
       }
 
-      const filters: ObjectFilters = { project: projectId };
-      if (epicId) {
-        filters.epic = epicId;
-      }
-
-      dispatch(
-        fetchObjects({
-          objectType: OBJECT_TYPES.TASK,
-          filters,
-          url: next,
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setFetchingTasks(false);
+      if (fetchNextPage) {
+        fetchNextPage().finally(() => {
+          /* istanbul ignore else */
+          if (isMounted.current) {
+            setFetchingTasks(false);
+          }
+        });
+      } else {
+        const filters: ObjectFilters = { project: projectId as string };
+        if (epicId) {
+          filters.epic = epicId;
         }
-      });
+
+        dispatch(
+          fetchObjects({
+            objectType: OBJECT_TYPES.TASK,
+            filters,
+            url: next,
+          }),
+        ).finally(() => {
+          /* istanbul ignore else */
+          if (isMounted.current) {
+            setFetchingTasks(false);
+          }
+        });
+      }
     }
-  }, [isFetched, projectId, next, isMounted, epicId, dispatch]);
+  }, [isFetched, projectId, fetchNextPage, next, isMounted, epicId, dispatch]);
 
   return isFetched ? (
     <>
@@ -377,7 +388,7 @@ const TaskTable = ({
               width={viewEpicsColumn ? '40%' : '60%'}
               primaryColumn
             >
-              <NameTableCell projectSlug={projectSlug} />
+              <NameTableCell />
             </DataTableColumn>
             {viewEpicsColumn && (
               <DataTableColumn
@@ -402,7 +413,7 @@ const TaskTable = ({
                 property="epic"
                 width="30%"
               >
-                <EpicTableCell projectSlug={projectSlug} />
+                <EpicTableCell />
               </DataTableColumn>
             )}
             <DataTableColumn
@@ -463,7 +474,6 @@ const TaskTable = ({
             >
               <AssigneeTableCell
                 type={ORG_TYPES.DEV}
-                projectId={projectId}
                 epicUsers={epicUsers}
                 githubUsers={githubUsers}
                 canAssign={canAssign}
@@ -498,7 +508,6 @@ const TaskTable = ({
             >
               <AssigneeTableCell
                 type={ORG_TYPES.QA}
-                projectId={projectId}
                 epicUsers={epicUsers}
                 githubUsers={githubUsers}
                 currentUser={currentUser}

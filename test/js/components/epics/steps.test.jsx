@@ -7,12 +7,12 @@ import { EPIC_STATUSES, TASK_STATUSES } from '@/js/utils/constants';
 import { render } from './../../utils';
 
 const jonny = {
-  id: 'jonny',
+  id: 111111,
   login: 'jonny',
   permissions: { push: true },
 };
 const stacy = {
-  id: 'stacy',
+  id: 999999,
   login: 'stacy',
   permissions: { push: true },
 };
@@ -58,7 +58,7 @@ const defaultTask = {
   origin_sha: 'parent_sha',
 };
 const taskWithDev = {
-  assigned_dev: jonny.id,
+  assigned_dev: jonny,
   status: TASK_STATUSES.IN_PROGRESS,
 };
 

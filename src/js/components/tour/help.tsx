@@ -10,16 +10,19 @@ import GuidedTour, {
 } from '@/js/components/tour/guided';
 import { getDemoEpic } from '@/js/components/tour/plan';
 import { Task } from '@/js/store/tasks/reducer';
+import { GitHubUser } from '@/js/store/user/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, TASK_STATUSES } from '@/js/utils/constants';
 
 export const getDemoTask = ({
   project,
-  github_id,
+  project_slug,
+  githubUser,
 }: {
   project: string;
-  github_id: string | null;
+  project_slug: string;
+  githubUser: GitHubUser | null;
 }): Task => {
-  const epic = getDemoEpic({ project, github_id });
+  const epic = getDemoEpic({ project, githubUser });
 
   return {
     id: 'demo-task',
@@ -36,6 +39,7 @@ export const getDemoTask = ({
     currently_creating_pr: false,
     branch_name: '',
     root_project: project,
+    root_project_slug: project_slug,
     branch_url: null,
     commits: [],
     origin_sha: '',
@@ -47,7 +51,7 @@ export const getDemoTask = ({
     review_sha: '',
     status: TASK_STATUSES.IN_PROGRESS,
     pr_is_open: false,
-    assigned_dev: github_id,
+    assigned_dev: githubUser,
     assigned_qa: null,
     currently_submitting_review: false,
     org_config_name: DEFAULT_ORG_CONFIG_NAME,

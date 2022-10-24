@@ -235,7 +235,7 @@ describe('<CreateProjectModal />', () => {
 
     test('renders list of collaborators', () => {
       expect(
-        result.getByText(sampleGitHubUser1.login, { exact: false }),
+        result.getByText(sampleGitHubUser2.login, { exact: false }),
       ).toBeVisible();
     });
 
@@ -292,19 +292,20 @@ describe('<CreateProjectModal />', () => {
     });
 
     test('can select and deselect collaborators', () => {
-      const checkbox1 = result.getByLabelText('Select row 1');
-      const checkbox2 = result.getByLabelText('Select row 2');
+      const checkbox = result.getByLabelText('Select row 1');
       const user2 = result.getByText(sampleGitHubUser2.login, { exact: false });
 
-      fireEvent.click(checkbox1);
-      fireEvent.click(user2);
+      fireEvent.click(checkbox);
 
-      expect(checkbox1).toBeChecked();
-      expect(checkbox2).toBeChecked();
+      expect(checkbox).toBeChecked();
 
       fireEvent.click(user2);
 
-      expect(checkbox2).not.toBeChecked();
+      expect(checkbox).not.toBeChecked();
+
+      fireEvent.click(user2);
+
+      expect(checkbox).toBeChecked();
     });
   });
 
@@ -392,7 +393,7 @@ describe('<CreateProjectModal />', () => {
       expect(result.getByText('Project Name: “Name of Project”')).toBeVisible();
       expect(result.getByText(sampleGitHubOrg.name)).toBeVisible();
       expect(
-        result.getByText(sampleGitHubUser1.login, { exact: false }),
+        result.getByText(sampleGitHubUser2.login, { exact: false }),
       ).toBeVisible();
       expect(result.getByText(sampleProjectDependency.name)).toBeVisible();
     });
@@ -410,7 +411,7 @@ describe('<CreateProjectModal />', () => {
             name: 'Name of Project',
             repo_name: 'Name-of-Project',
             description: '',
-            github_users: [sampleGitHubUser1],
+            github_users: [sampleGitHubUser2],
             dependencies: [sampleProjectDependency.id],
           },
           hasForm: true,

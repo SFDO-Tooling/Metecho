@@ -102,21 +102,24 @@ class TestProjectAdmin:
         mocker.patch("metecho.api.admin.gh")
         get_social_image_job = mocker.patch("metecho.api.jobs.get_social_image_job")
 
-        admin_client.post(
+        response = admin_client.post(
             reverse("admin:api_project_add"),
             data={
                 "repo_image_url": repo_image_url,
                 "repo_owner": "gh-user",
                 "repo_name": "gh-repo",
                 "name": "Project 1",
-                "github_users": "[]",
                 "org_config_names": "[]",
                 "branch_name": "main",
                 "latest_sha": "abc123",
+                "githubcollaboration_set-TOTAL_FORMS": 0,
+                "githubcollaboration_set-INITIAL_FORMS": 0,
             },
         )
 
-        assert get_social_image_job.delay.called == should_fetch
+        assert get_social_image_job.delay.called == should_fetch, response.context[
+            "form"
+        ].errors
 
 
 @pytest.mark.django_db

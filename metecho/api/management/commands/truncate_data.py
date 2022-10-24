@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from ...models import (
     Epic,
     EpicSlug,
-    GitHubRepository,
+    GitHubUser,
     Project,
     ProjectSlug,
     ScratchOrg,
@@ -22,7 +22,7 @@ class Command(BaseCommand):
             Task,
             EpicSlug,
             Epic,
-            GitHubRepository,
+            GitHubUser,
             ProjectSlug,
             Project,
         ]

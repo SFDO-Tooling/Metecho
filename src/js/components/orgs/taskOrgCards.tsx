@@ -20,7 +20,7 @@ import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
 export interface AssignedUserTracker {
   type: OrgTypes;
-  assignee: string | null;
+  assignee: number | null;
   shouldAlertAssignee: boolean;
 }
 
@@ -100,7 +100,7 @@ const TaskOrgCards = ({
     [dispatch],
   );
 
-  const checkIfTaskCanBeReassigned = async (assignee: string) => {
+  const checkIfTaskCanBeReassigned = async (assignee: number) => {
     const { can_reassign } = await apiFetch({
       url: window.api_urls.task_can_reassign(task.id),
       dispatch,

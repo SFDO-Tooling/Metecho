@@ -11,7 +11,7 @@ from github3.exceptions import ConnectionError, NotFoundError, ResponseError
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
@@ -70,37 +70,22 @@ from .serializers import (
 User = get_user_model()
 
 
-class RepoPushPermissionMixin:
+class RepoPushPermission(BasePermission):
     """
-    Require repository Push permission for all operations other than list/read.
+    Require repository Push permission for all actions other than list/detail.
     Assumes the related model implements a `has_push_permission(user)` method.
+
+    For existing instances only, validation on creation should be handled by serializers.
     """
 
-    def check_push_permission(self, instance):
-        if not instance.has_push_permission(self.request.user):
-            raise PermissionDenied(
-                _('You do not have "Push" permissions in the related repository')
-            )
+    def has_permission(self, request, view):
+        return True  # Let `has_object_permission` handle everything
 
-    def perform_create(self, serializer):
-        # instance = serializer.Meta.model(**serializer.validated_data)
-        # The for-loop could be replaced with the line above but that raises TypeError
-        # if the serializer has extra fields not contained in the model. `setattr()`
-        # works around this while still creating a valid instance.
-        instance = serializer.Meta.model()
-        for k, v in serializer.validated_data.items():
-            setattr(instance, k, v)
-
-        self.check_push_permission(instance)
-        return super().perform_create(serializer)
-
-    def perform_update(self, serializer):
-        self.check_push_permission(serializer.instance)
-        return super().perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        self.check_push_permission(instance)
-        return super().perform_destroy(instance)
+    def has_object_permission(self, request, view, obj):
+        """Only check DRF's default actions that can modify data"""
+        if view.action in ("update", "partial_update", "destroy"):
+            return obj.has_push_permission(request.user)
+        return True
 
 
 class CreatePrMixin:
@@ -343,8 +328,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         if self.request.user.is_superuser:
             return self.queryset
 
-        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
-        return self.queryset.filter(repo_id__in=repo_ids)
+        return self.queryset.filter(github_users__id=self.request.user.github_id)
 
     @extend_schema(request=ProjectCreateSerializer)
     def create(self, request):
@@ -419,10 +403,10 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         return Response(data)
 
 
-class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
+class EpicViewSet(CreatePrMixin, ModelViewSet):
     """Manage Epics related to a Metecho Project."""
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, RepoPushPermission)
     serializer_class = EpicSerializer
     pagination_class = CustomPaginator
     queryset = Epic.objects.active()
@@ -458,10 +442,10 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         return Response(self.get_serializer(epic).data)
 
 
-class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
+class TaskViewSet(CreatePrMixin, ModelViewSet):
     """Manage Tasks related to a Metecho Project or Epic."""
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, RepoPushPermission)
     serializer_class = TaskSerializer
     pagination_class = CustomPaginator
     queryset = Task.objects.select_related("epic", "epic__project").active()
