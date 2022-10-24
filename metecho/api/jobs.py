@@ -1226,7 +1226,8 @@ def parse_datasets(*, org: ScratchOrg, user: User):
 
             project_path = project_config.repo_root
             datasets_dir = Path(project_path) / "datasets"
-            entries = list(datasets_dir.iterdir()) if datasets_dir.is_dir() else ()
+            entries = datasets_dir.iterdir() if datasets_dir.is_dir() else ()
+            entries = sorted(entries)
             if not entries:
                 dataset_errors.append(
                     _("Found empty 'datasets/' directory in the Task branch")
