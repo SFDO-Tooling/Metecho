@@ -488,8 +488,6 @@ const inferChangesToLookupTargets = (
 
   const ret = Object.fromEntries(relevant_target_fields);
 
-  console.log(ret);
-
   return ret as Changeset;
 };
 
@@ -518,7 +516,6 @@ const DataForm = ({
         schema,
       );
       changes = mergeChangesets(changes, impliedChanges);
-      console.log(impliedChanges);
       setChanges(changes);
     } else {
       const { remaining } = splitChangeset(
