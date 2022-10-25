@@ -12,7 +12,7 @@ asgiref==3.5.2
     #   django
 asttokens==2.0.5
     # via stack-data
-attrs==21.4.0
+attrs==22.1.0
     # via
     #   -c requirements/prod.txt
     #   flake8-bugbear
@@ -23,11 +23,11 @@ backcall==0.2.0
     # via ipython
 black==22.6.0
     # via -r requirements/dev.in
-certifi==2021.10.8
+certifi==2022.9.24
     # via
     #   -c requirements/prod.txt
     #   requests
-charset-normalizer==2.0.12
+charset-normalizer==2.1.1
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -39,7 +39,7 @@ coverage[toml]==6.4.2
     # via pytest-cov
 decorator==5.1.1
     # via ipython
-django==4.0.6
+django==4.1.2
     # via
     #   -c requirements/prod.txt
     #   django-extensions
@@ -60,7 +60,7 @@ factory-boy==3.2.1
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==12.3.3
+faker==15.0.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -70,7 +70,7 @@ flake8==4.0.1
     #   flake8-bugbear
 flake8-bugbear==22.7.1
     # via -r requirements/dev.in
-idna==3.3
+idna==3.4
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -88,7 +88,7 @@ isort==5.10.1
     # via -r requirements/dev.in
 jedi==0.18.1
     # via ipython
-jinja2==2.11.3
+jinja2==3.1.2
     # via
     #   -c requirements/prod.txt
     #   myst-parser
@@ -97,7 +97,7 @@ markdown-it-py==2.1.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.0.1
+markupsafe==2.1.1
     # via
     #   -c requirements/prod.txt
     #   jinja2
@@ -145,7 +145,7 @@ pycodestyle==2.8.0
     # via flake8
 pyflakes==2.4.0
     # via flake8
-pygments==2.12.0
+pygments==2.13.0
     # via
     #   -c requirements/prod.txt
     #   doc8
@@ -183,7 +183,7 @@ python-dateutil==2.8.2
     # via
     #   -c requirements/prod.txt
     #   faker
-pytz==2022.1
+pytz==2022.4
     # via
     #   -c requirements/prod.txt
     #   babel
@@ -193,7 +193,7 @@ pyyaml==6.0
     #   myst-parser
 remote-pdb==2.1.0
     # via -r requirements/dev.in
-requests==2.27.1
+requests==2.28.1
     # via
     #   -c requirements/prod.txt
     #   sphinx
@@ -226,7 +226,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.2
+sqlparse==0.4.3
     # via
     #   -c requirements/prod.txt
     #   django
@@ -245,12 +245,12 @@ traitlets==5.3.0
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.2.0
+typing-extensions==4.3.0
     # via
     #   -c requirements/prod.txt
     #   myst-parser
     #   pytest-factoryboy
-urllib3==1.26.9
+urllib3==1.26.12
     # via
     #   -c requirements/prod.txt
     #   requests
