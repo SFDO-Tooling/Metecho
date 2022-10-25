@@ -1,19 +1,10 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { isEmpty, isEqual, sortBy, toLower } from 'lodash';
-import React, {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import CommitMessageForm from '@/js/components/tasks/retrieveOmnistudio/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
-import { ThunkDispatch } from '@/js/store';
 import { ApiError } from '@/js/utils/api';
 import { OBJECT_TYPES } from '@/js/utils/constants';
 
@@ -34,19 +25,10 @@ export interface BooleanObject {
 
 const RetrieveOmnistudioModal = ({ orgId, isOpen, closeModal }: Props) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<ThunkDispatch>();
   const [retrievingOmnistudio, setRetrievingOmnistudio] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [hasError] = useState(false);
   const isMounted = useIsMounted();
-
-  const nextPage = () => {
-    setPageIndex(pageIndex + 1);
-  };
-
-  const prevPage = () => {
-    setPageIndex(Math.max(pageIndex - 1, 0));
-  };
 
   const handleSuccess = () => {
     /* istanbul ignore else */
