@@ -47,10 +47,18 @@ const Footer = ({
     return t('Reassigning Org Ownership…') as JSX.Element;
   }
   if (org && ownedByCurrentUser) {
-    if (org.currently_capturing_changes) {
+    if (org.currently_retrieving_metadata) {
       return (
         <>
           {t('Retrieving Selected Changes…')}
+          <div className="slds-p-top_small">{loadingMsg}</div>
+        </>
+      );
+    }
+    if (org.currently_retrieving_dataset) {
+      return (
+        <>
+          {t('Retrieving Selected Dataset…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
         </>
       );

@@ -4,7 +4,8 @@ export type ObjectTypes =
   | 'epic'
   | 'task'
   | 'scratch_org'
-  | 'scratch_org_commit'
+  | 'scratch_org_commit_metadata'
+  | 'scratch_org_commit_dataset'
   | 'task_pr'
   | 'epic_pr'
   | 'issue'
@@ -16,7 +17,8 @@ export const OBJECT_TYPES = {
   EPIC: 'epic' as const,
   TASK: 'task' as const,
   ORG: 'scratch_org' as const,
-  COMMIT: 'scratch_org_commit' as const,
+  COMMIT_METADATA: 'scratch_org_commit_metadata' as const,
+  COMMIT_DATASET: 'scratch_org_commit_dataset' as const,
   TASK_PR: 'task_pr' as const,
   EPIC_PR: 'epic_pr' as const,
   GITHUB_ISSUE: 'issue' as const,

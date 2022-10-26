@@ -4,14 +4,14 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
   BooleanObject,
-  CommitData,
+  MetadataCommit,
   ModalCard,
-} from '@/js/components/tasks/capture';
+} from '@/js/components/tasks/retrieveMetadata';
 import { UseFormProps } from '@/js/components/utils';
 import { Changeset } from '@/js/store/orgs/reducer';
 import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
@@ -19,7 +19,7 @@ import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 interface Props {
   changeset: Changeset;
   ignoredChanges: Changeset;
-  inputs: CommitData;
+  inputs: MetadataCommit;
   changesChecked: Changeset;
   ignoredChecked: Changeset;
   errors: UseFormProps['errors'];
@@ -63,7 +63,7 @@ const ChangesList = ({
         const uniqueGroupName = `${type}-${groupName}`;
         const children = allChanges[groupName];
         const handleSelectThisGroup = (
-          event: React.ChangeEvent<HTMLInputElement>,
+          event: ChangeEvent<HTMLInputElement>,
           { checked }: { checked: boolean },
         ) => handleSelectGroup(type, groupName, checked);
         let checkedChildren = 0;
@@ -106,7 +106,7 @@ const ChangesList = ({
                   name="changes"
                   checked={Boolean(checkedChanges[groupName]?.includes(change))}
                   onChange={(
-                    event: React.ChangeEvent<HTMLInputElement>,
+                    event: ChangeEvent<HTMLInputElement>,
                     { checked }: { checked: boolean },
                   ) => handleChange({ groupName, change, checked })}
                 />
@@ -195,14 +195,14 @@ const ChangesForm = ({
   };
 
   const handleSelectAllChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     updateChecked(filteredChanges, checked);
   };
 
   const handleSelectAllIgnored = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
     updateChecked(ignoredChanges, checked);
@@ -211,8 +211,9 @@ const ChangesForm = ({
   return (
     <form
       className="slds-form slds-p-around_large has-checkboxes"
-      data-form="task-capture"
+      data-form="task-retrieve-changes"
     >
+      <button type="submit" disabled hidden />
       <ModalCard>
         <Icon category="utility" name="open_folder" size="small" />
         <code className="slds-p-left_x-small v-align-center">

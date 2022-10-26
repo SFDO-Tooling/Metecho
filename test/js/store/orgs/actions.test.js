@@ -4,6 +4,10 @@ import * as actions from '@/js/store/orgs/actions';
 import { addUrlParams } from '@/js/utils/api';
 import { ORG_TYPES } from '@/js/utils/constants';
 
+import {
+  sampleDatasets,
+  sampleDatasetSchema,
+} from '../../../../src/stories/fixtures';
 import { getStoreWithHistory, storeWithThunk } from './../../utils';
 
 const defaultState = {
@@ -348,7 +352,7 @@ describe('updateOrg', () => {
   });
 });
 
-describe('updateFailed', () => {
+describe('fetchFailed', () => {
   test('adds error message', () => {
     const store = storeWithThunk(defaultState);
     const org = {
@@ -362,7 +366,7 @@ describe('updateFailed', () => {
       payload: org,
     };
     store.dispatch(
-      actions.updateFailed({
+      actions.fetchFailed({
         model: org,
         message: 'error msg',
         originating_user_id: 'user-id',
@@ -372,7 +376,7 @@ describe('updateFailed', () => {
 
     expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error checking for changes on your Test Org for Task “My Task.”',
+      'Uh oh. There was an error communicating with your Test Org for Task “My Task.”',
     );
     expect(allActions[0].payload.details).toBe('error msg');
     expect(allActions[0].payload.variant).toBe('error');
@@ -391,7 +395,7 @@ describe('updateFailed', () => {
       payload: org,
     };
     store.dispatch(
-      actions.updateFailed({
+      actions.fetchFailed({
         model: org,
         originating_user_id: 'user-id',
       }),
@@ -400,7 +404,7 @@ describe('updateFailed', () => {
 
     expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toBe(
-      'Uh oh. There was an error checking for changes on your Scratch Org.',
+      'Uh oh. There was an error communicating with your Scratch Org.',
     );
     expect(allActions[0].payload.details).toBeUndefined();
     expect(allActions[0].payload.variant).toBe('error');
@@ -531,11 +535,14 @@ describe('commitSucceeded', () => {
       owner: 'user-id',
     };
     const action = {
-      type: 'SCRATCH_ORG_COMMIT_CHANGES',
+      type: 'SCRATCH_ORG_COMMIT',
       payload: org,
     };
     store.dispatch(
-      actions.commitSucceeded({ model: org, originating_user_id: 'user-id' }),
+      actions.commitSucceeded(
+        { model: org, originating_user_id: 'user-id' },
+        { is_metadata: true },
+      ),
     );
     const allActions = store.getActions();
 
@@ -557,17 +564,20 @@ describe('commitSucceeded', () => {
       owner: 'user-id',
     };
     const action = {
-      type: 'SCRATCH_ORG_COMMIT_CHANGES',
+      type: 'SCRATCH_ORG_COMMIT',
       payload: org,
     };
     store.dispatch(
-      actions.commitSucceeded({ model: org, originating_user_id: 'user-id' }),
+      actions.commitSucceeded(
+        { model: org, originating_user_id: 'user-id' },
+        { is_metadata: false },
+      ),
     );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toBe(
-      'Successfully retrieved changes from your Scratch Org.',
+      'Successfully retrieved data from your Scratch Org.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -582,15 +592,18 @@ describe('commitFailed', () => {
       owner: 'user-id',
     };
     const action = {
-      type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
+      type: 'SCRATCH_ORG_COMMIT_FAILED',
       payload: org,
     };
     store.dispatch(
-      actions.commitFailed({
-        model: org,
-        message: 'error msg',
-        originating_user_id: 'user-id',
-      }),
+      actions.commitFailed(
+        {
+          model: org,
+          message: 'error msg',
+          originating_user_id: 'user-id',
+        },
+        { is_metadata: true },
+      ),
     );
     const allActions = store.getActions();
 
@@ -614,21 +627,24 @@ describe('commitFailed', () => {
       owner: 'user-id',
     };
     const action = {
-      type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
+      type: 'SCRATCH_ORG_COMMIT_FAILED',
       payload: org,
     };
     store.dispatch(
-      actions.commitFailed({
-        model: org,
-        message: 'error msg',
-        originating_user_id: 'user-id',
-      }),
+      actions.commitFailed(
+        {
+          model: org,
+          message: 'error msg',
+          originating_user_id: 'user-id',
+        },
+        { is_metadata: false },
+      ),
     );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toBe('TOAST_ADDED');
     expect(allActions[0].payload.heading).toBe(
-      'Uh oh. There was an error retrieving changes from your Scratch Org.',
+      'Uh oh. There was an error retrieving data from your Scratch Org.',
     );
     expect(allActions[0].payload.details).toBe('error msg');
     expect(allActions[0].payload.variant).toBe('error');
@@ -1034,5 +1050,95 @@ describe('orgConvertFailed', () => {
     );
     expect(allActions[0].payload.details).toBe('error msg');
     expect(allActions[0].payload.variant).toBe('error');
+  });
+});
+
+describe('refreshDatasets', () => {
+  const org = 'org-id';
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.scratch_org_parse_datasets(org);
+  });
+
+  test('dispatches RefreshDatasets actions', () => {
+    const store = storeWithThunk({});
+    fetchMock.postOnce(url, 202);
+    const RefreshDatasetsRequested = {
+      type: 'REFRESH_DATASETS_REQUESTED',
+      payload: org,
+    };
+    const RefreshDatasetsAccepted = {
+      type: 'REFRESH_DATASETS_ACCEPTED',
+      payload: org,
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.refreshDatasets(org)).then(() => {
+      expect(store.getActions()).toEqual([
+        RefreshDatasetsRequested,
+        RefreshDatasetsAccepted,
+      ]);
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches REFRESH_DATASETS_REJECTED action', async () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, {
+        status: 500,
+        body: { non_field_errors: ['Foobar'] },
+      });
+      const started = {
+        type: 'REFRESH_DATASETS_REQUESTED',
+        payload: org,
+      };
+      const failed = {
+        type: 'REFRESH_DATASETS_REJECTED',
+        payload: org,
+      };
+
+      expect.assertions(4);
+      try {
+        await store.dispatch(actions.refreshDatasets(org));
+      } catch (error) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toBe('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual(['Foobar']);
+        expect(allActions[2]).toEqual(failed);
+      }
+    });
+  });
+});
+
+describe('datasetsRefreshed', () => {
+  test('returns SCRATCH_ORG_UPDATE action with additional data', () => {
+    const store = storeWithThunk(defaultState);
+    const org = { id: 'org-id' };
+    const datasets = sampleDatasets;
+    const schema = sampleDatasetSchema;
+    const payload = {
+      ...org,
+      datasets,
+      dataset_errors: [],
+      dataset_schema: schema,
+    };
+    const expected = { type: 'SCRATCH_ORG_UPDATE', payload };
+
+    store.dispatch(
+      actions.datasetsRefreshed({
+        model: org,
+        datasets,
+        dataset_errors: [],
+        schema,
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0]).toEqual(expected);
   });
 });

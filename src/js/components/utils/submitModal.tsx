@@ -3,7 +3,13 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import React, { useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useRef,
+  useState,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
@@ -23,7 +29,7 @@ interface Props {
   instanceDiffUrl: string | null;
   instanceType: ObjectTypes;
   isOpen: boolean;
-  toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleModal: Dispatch<SetStateAction<boolean>>;
   assignee?: GitHubUser | null;
   originatingUser?: number | null;
 }
@@ -127,7 +133,7 @@ const SubmitModal = ({
     resetForm();
   };
 
-  const submitInstance = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitInstance = (e: FormEvent<HTMLFormElement>) => {
     setSubmittingReview(true);
     handleSubmit(e);
   };
@@ -325,8 +331,8 @@ const SubmitModal = ({
         <button
           ref={submitButton}
           type="submit"
-          style={{ display: 'none' }}
           disabled={submittingReview}
+          hidden
         />
       </form>
     </Modal>
