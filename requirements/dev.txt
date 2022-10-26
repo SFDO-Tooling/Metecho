@@ -36,7 +36,8 @@ click==8.1.3
     #   -c requirements/prod.txt
     #   black
 coverage[toml]==6.4.2
-    # via pytest-cov
+    # via
+    #   pytest-cov
 decorator==5.1.1
     # via ipython
 django==4.0.6
