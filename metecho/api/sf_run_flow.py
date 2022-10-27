@@ -390,6 +390,19 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         "HOME": project_path,
         "PATH": os.environ["PATH"],
     }
+
+    # Pass exta env vars when running in the context of Heroku stack-22.
+    # To determine this, check for the presence of env vars related to dyno metadata.
+    # The heroku labs feature must be enabled on the application for this to work:
+    # https://devcenter.heroku.com/articles/dyno-metadata#dyno-metadata
+    if os.environ["HEROKU_APP_ID"]:  # pragma: nocover
+        heroku_specific_env = {
+            "PYTHONPATH": os.environ["PYTHONPATH"],
+            "LD_LIBRARY_PATH": os.environ["LD_LIBRARY_PATH"],
+            "LIBRARY_PATH": os.environ["LIBRARY_PATH"],
+        }
+        env = env | heroku_specific_env
+
     p = subprocess.Popen(
         args,
         stdout=subprocess.PIPE,
