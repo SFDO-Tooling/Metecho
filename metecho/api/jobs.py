@@ -19,7 +19,6 @@ from cumulusci.core.datasets import (
     DEFAULT_EXTRACT_DATA,
     ExtractRulesFile,
     flatten_declarations,
-    SimplifiedExtractDeclaration
 )
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Filters, get_org_schema, Schema, Field
@@ -1163,6 +1162,7 @@ FieldList = List[str]
 
 SchemaFilter = Dict[sobjname, FieldList]
 
+
 # TODO: Move this function somewhere into CCI itself
 #       perhaps as a method of ExtractRulesFile or Schema
 def filter_schema_to_extractaable_objs_and_fields(schema: Schema) -> SchemaFilter:
@@ -1174,17 +1174,28 @@ def filter_schema_to_extractaable_objs_and_fields(schema: Schema) -> SchemaFilte
     flattened_declarations = flatten_declarations(list(decls.values()), schema)
     return {decl.sf_object: decl.fields for decl in flattened_declarations}
 
+
 def get_objs_and_fields_from_org(schema: Schema) -> Dict[str, Dict]:
-    filtered_schema: SchemaFilter = filter_schema_to_extractaable_objs_and_fields(schema)
-    return {objname: schema_obj_to_json(schema, objname, fields) for objname, fields in filtered_schema.items()}
+    filtered_schema: SchemaFilter = filter_schema_to_extractaable_objs_and_fields(
+        schema
+    )
+    return {
+        objname: schema_obj_to_json(schema, objname, fields)
+        for objname, fields in filtered_schema.items()
+    }
+
 
 def schema_obj_to_json(schema: Schema, objname: str, fields: FieldList):
     schema_obj = schema[objname]
-    return {"label": schema_obj.label,
-                    "count": schema_obj.count,
-                    "fields": {fieldname: schema_field_to_json(schema_obj.fields[fieldname])
-                    for fieldname in fields}
+    return {
+        "label": schema_obj.label,
+        "count": schema_obj.count,
+        "fields": {
+            fieldname: schema_field_to_json(schema_obj.fields[fieldname])
+            for fieldname in fields
+        },
     }
+
 
 def schema_field_to_json(field_data: Field):
     return {
@@ -1192,7 +1203,6 @@ def schema_field_to_json(field_data: Field):
         # TODO: compress empty reference targets to reduce network bytes
         "referenceTo": field_data.referenceTo,
     }
-
 
 
 @contextlib.contextmanager
@@ -1247,7 +1257,6 @@ def parse_datasets(*, org: ScratchOrg, user: User):
     """
     # These fields are automatically captured by CCI or cause trouble while capturing,
     # so we don't even include them in the schema at all
-    IGNORED_FIELDS = ("Id",)
 
     datasets = {}
     org_schema = {}
