@@ -467,23 +467,26 @@ const inferChangesToLookupTargets = (
   );
 
   // find lookup targets matching those fields
-  const target_sojects = reference_fields.map((field) => [
+  let target_sojects = reference_fields.map((field) => [
     field.referenceTo[0],
     schema[field.referenceTo[0]],
   ]) as [string, DatasetObject][];
+
+  // filter out broken targets: sobj is undefined or null
+  target_sojects = target_sojects.filter(([_name, sobj]) => sobj);
 
   // find all non-lookup fields
   // we don't want turning on a reference field to
   //    cascade into turning on dozens of sobjects
   //    recursively.
   const relevant_target_fields = target_sojects.map(
-    ([sobjname, sobj]) =>
+    ([sobjname, sobj]) => 
       [
         sobjname,
         Object.entries(sobj.fields)
           .filter(  // get rid of fields that are references
             ([_x, field]) =>
-              !field.referenceTo || field.referenceTo.length === 0,
+              isEmpty(field.referenceTo)
           )
           .map(([fieldname, _field]) => fieldname),
       ] as [string, string[]],
