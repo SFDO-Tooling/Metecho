@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -17,6 +18,7 @@ from ..jobs import (
     alert_user_about_expiring_org,
     available_org_config_names,
     commit_changes_from_org,
+    commit_dataset_from_org,
     convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
@@ -25,6 +27,7 @@ from ..jobs import (
     delete_scratch_org,
     get_social_image,
     get_unsaved_changes,
+    parse_datasets,
     refresh_commits,
     refresh_github_issues,
     refresh_github_organizations_for_user,
@@ -34,7 +37,7 @@ from ..jobs import (
     submit_review,
     user_reassign,
 )
-from ..models import ScratchOrgType
+from ..models import GitHubCollaboration, GitHubUser, ScratchOrgType
 
 Author = namedtuple("Author", ("avatar_url", "login"))
 Commit = namedtuple(
@@ -646,29 +649,37 @@ def test_delete_scratch_org__exception(scratch_org_factory):
 
 @pytest.mark.django_db
 class TestRefreshGitHubRepositoriesForUser:
-    def test_success(self, mocker, user_factory):
+    def test_success(self, mocker, project_factory, user_factory):
         user = user_factory(currently_fetching_repos=True)
+        project1 = project_factory(repo_id=123)
+        project2 = project_factory(repo_id=456)
         notify_changed = mocker.patch.object(
             user, "notify_changed", wraps=user.notify_changed
         )
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos",
             return_value=[
-                MagicMock(id=123, html_url="https://example.com/", permissions={}),
-                MagicMock(id=456, html_url="https://example.com/", permissions={}),
+                MagicMock(id=123, permissions={"push": True}),
+                MagicMock(id=456, permissions={"push": False}),
+                MagicMock(id=789),  # Not in Projects, should be ignored
             ],
         )
 
         refresh_github_repositories_for_user(user)
         user.refresh_from_db()
+        gh_user = GitHubUser.objects.get(id=user.github_id)
 
-        assert not user.currently_fetching_repos
-        assert user.repositories.count() == 2
         assert notify_changed.called
+        assert not user.currently_fetching_repos
+        assert list(
+            GitHubCollaboration.objects.values_list("user", "project", "permissions")
+        ) == [
+            (gh_user.id, project1.id, {"push": True}),
+            (gh_user.id, project2.id, {"push": False}),
+        ]
 
-    def test_error(self, mocker, caplog, user_factory, git_hub_repository_factory):
+    def test_error(self, mocker, caplog, user_factory):
         user = user_factory(currently_fetching_repos=True)
-        git_hub_repository_factory(user=user)
         mocker.patch(
             "metecho.api.jobs.get_all_org_repos", side_effect=Exception("Oh no!")
         )
@@ -681,7 +692,7 @@ class TestRefreshGitHubRepositoriesForUser:
         user.refresh_from_db()
 
         assert not user.currently_fetching_repos
-        assert user.repositories.count() == 1
+        assert not GitHubCollaboration.objects.exists()
         assert notify_error.called
         assert "Oh no!" in caplog.text
 
@@ -837,17 +848,8 @@ class TestErrorHandling:
 
 @pytest.mark.django_db
 class TestRefreshCommits:
-    def test_refreshes_commits(
-        self,
-        user_factory,
-        project_factory,
-        epic_factory,
-        task_factory,
-        git_hub_repository_factory,
-    ):
-        user = user_factory()
+    def test_refreshes_commits(self, project_factory, epic_factory, task_factory):
         project = project_factory(repo_id=123, branch_name="project")
-        git_hub_repository_factory(repo_id=123, user=user)
         epic = epic_factory(project=project, branch_name="epic")
         task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
@@ -908,9 +910,9 @@ class TestRefreshCommits:
 
 
 @pytest.mark.django_db
-def test_create_pr(user_factory, task_factory):
+def test_create_pr(mailoutbox, user_factory, task_factory, git_hub_user_factory):
     user = user_factory()
-    task = task_factory(assigned_qa=user.github_id)
+    task = task_factory(assigned_qa=git_hub_user_factory(id=user.github_id))
     with ExitStack() as stack:
         pr = MagicMock(number=123)
         repository = MagicMock(**{"create_pull.return_value": pr})
@@ -934,6 +936,7 @@ def test_create_pr(user_factory, task_factory):
 
         assert repository.create_pull.called
         assert task.pr_number == 123
+        assert len(mailoutbox) == 1
 
 
 @pytest.mark.django_db
@@ -970,113 +973,77 @@ def test_create_pr__error(user_factory, task_factory):
 
 @pytest.mark.django_db
 class TestRefreshGitHubUsers:
-    def test_success(
-        self,
-        mocker,
-        user_factory,
-        project_factory,
-        git_hub_repository_factory,
-    ):
-        user = user_factory()
-        project = project_factory(repo_id=123, currently_fetching_github_users=True)
-        git_hub_repository_factory(repo_id=123, user=user)
+    def test_success(self, mocker, project_factory):
+        project = project_factory(currently_fetching_github_users=True)
+        notify_changed = mocker.patch.object(
+            project, "notify_changed", wraps=project.notify_changed
+        )
         collab1 = MagicMock(
-            id=123,
-            login="test-user-1",
-            avatar_url="https://example.com/avatar1.png",
-            permissions={"push": False},
+            id=123, login="u1", avatar_url="http://1", permissions={"push": False}
         )
         collab2 = MagicMock(
-            id=456,
-            login="test-user-2",
-            avatar_url="https://example.com/avatar2.png",
-            permissions={"push": True},
+            id=456, login="u2", avatar_url="http://2", permissions={"push": True}
         )
-        repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
-        mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
-        get_cached_user = mocker.patch(f"{PATCH_ROOT}.get_cached_user")
-        get_cached_user.return_value.name = "FULL NAME"
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(
+            f"{PATCH_ROOT}.get_repo_info",
+            **{"return_value.collaborators.return_value": [collab1, collab2]},
+        )
+        mocker.patch(f"{PATCH_ROOT}.get_cached_user", **{"return_value.name": "NAME"})
 
         refresh_github_users(project, originating_user_id=None)
 
         project.refresh_from_db()
-        assert project.github_users == [
-            {
-                "id": "123",
-                "name": "FULL NAME",
-                "login": "test-user-1",
-                "avatar_url": "https://example.com/avatar1.png",
-                "permissions": {"push": False},
-            },
-            {
-                "id": "456",
-                "name": "FULL NAME",
-                "login": "test-user-2",
-                "avatar_url": "https://example.com/avatar2.png",
-                "permissions": {"push": True},
-            },
+        assert list(project.github_users.values()) == [
+            {"id": 123, "name": "NAME", "login": "u1", "avatar_url": "http://1"},
+            {"id": 456, "name": "NAME", "login": "u2", "avatar_url": "http://2"},
+        ]
+        assert list(project.githubcollaboration_set.values("user", "permissions")) == [
+            {"user": 123, "permissions": {"push": False}},
+            {"user": 456, "permissions": {"push": True}},
         ]
         assert not project.currently_fetching_github_users
-        assert async_to_sync.called
+        assert notify_changed.called
 
-    def test_expand_user_error(
-        self,
-        caplog,
-        mocker,
-        user_factory,
-        project_factory,
-        git_hub_repository_factory,
-    ):
+    def test_expand_user_error(self, caplog, mocker, project_factory):
         """
         Expect the "simple" representation of the user if expanding them fails
         """
-        user = user_factory()
-        project = project_factory(repo_id=123, currently_fetching_github_users=True)
-        git_hub_repository_factory(repo_id=123, user=user)
-        collab1 = MagicMock(
-            id=123,
-            login="test-user-1",
-            avatar_url="https://example.com/avatar1.png",
-            permissions={},
+        project = project_factory(currently_fetching_github_users=True)
+        notify_changed = mocker.patch.object(
+            project, "notify_changed", wraps=project.notify_changed
         )
-        repo = MagicMock(**{"collaborators.return_value": [collab1]})
-        mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
+        user = MagicMock(id=123, login="u1", avatar_url="https://1", permissions={})
         mocker.patch(
-            f"{PATCH_ROOT}.get_cached_user", side_effect=Exception("GITHUB ERROR")
+            f"{PATCH_ROOT}.get_repo_info",
+            **{"return_value.collaborators.return_value": [user]},
         )
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+        mocker.patch(
+            f"{PATCH_ROOT}.get_cached_user", side_effect=Exception("CACHE ERROR")
+        )
 
         refresh_github_users(project, originating_user_id=None)
 
         project.refresh_from_db()
-        assert project.github_users == [
-            {
-                "id": "123",
-                "login": "test-user-1",
-                "avatar_url": "https://example.com/avatar1.png",
-                "permissions": {},
-            },
+        assert list(project.github_users.values()) == [
+            {"id": 123, "login": "u1", "name": "", "avatar_url": "https://1"},
         ]
         assert not project.currently_fetching_github_users
-        assert async_to_sync.called
-        assert "GITHUB ERROR" in caplog.text
+        assert notify_changed.called
+        assert "CACHE ERROR" in caplog.text
 
-    def test_error(
-        self, mocker, caplog, user_factory, project_factory, git_hub_repository_factory
-    ):
-        user = user_factory()
-        project = project_factory(repo_id=123, currently_fetching_github_users=True)
-        git_hub_repository_factory(repo_id=123, user=user)
+    def test_error(self, mocker, caplog, project_factory):
+        project = project_factory(currently_fetching_github_users=True)
+        notify_error = mocker.patch.object(
+            project, "notify_error", wraps=project.notify_error
+        )
         mocker.patch(f"{PATCH_ROOT}.get_repo_info", side_effect=Exception("Oh no!"))
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
         with pytest.raises(Exception):
             refresh_github_users(project, originating_user_id=None)
 
         project.refresh_from_db()
         assert not project.currently_fetching_github_users
-        assert async_to_sync.called
+        assert notify_error.called
         assert "Oh no!" in caplog.text
 
 
@@ -1387,12 +1354,15 @@ class TestUserReassign:
 @pytest.mark.django_db
 class TestCreateRepository:
     @pytest.fixture
-    def github_mocks(self, mocker, project_factory):
+    def github_mocks(self, mocker, project, git_hub_collaboration_factory):
         """
         Mock the best-case scenario where the user is a member of the GH organization
         and the repository and team are created successfully
         """
-        project = project_factory(github_users=({"login": "user1"}, {"login": "user2"}))
+        # Add two users to the project
+        git_hub_collaboration_factory(project=project)
+        git_hub_collaboration_factory(project=project)
+
         team = mocker.MagicMock()
         repo = mocker.MagicMock(id=123456, html_url="", permissions=[])
 
@@ -1427,7 +1397,6 @@ class TestCreateRepository:
         project.refresh_from_db()
 
         assert project.repo_id == 123456
-        assert user.repositories.filter(repo_id=123456).exists()
         assert (
             team.add_or_update_membership.call_count == 2
         ), "Expected one call each collaborator"
@@ -1573,3 +1542,231 @@ class TestCreateRepository:
             group_name=None,
             include_user=False,
         )
+
+
+DATASET_YAML = """
+extract:
+    OBJECTS(ALL):
+        fields: FIELDS(ALL)
+"""
+
+
+@pytest.fixture
+def patch_dataset_env(mocker, tmp_path):
+    """Mock all values returned by SF and GH APIs in the `dataset_env` context manager"""
+    repo = mocker.MagicMock()
+    project_config = mocker.MagicMock(repo_root=str(tmp_path))
+    org_config = mocker.MagicMock()
+    sf = mocker.MagicMock()
+    schema = mocker.MagicMock()
+
+    mocker.patch(
+        "metecho.api.models.refresh_access_token",
+        autospec=True,
+        return_value=org_config,
+    )
+    mocker.patch(f"{PATCH_ROOT}.get_repo_info", autospec=True, return_value=repo)
+    mocker.patch(f"{PATCH_ROOT}.local_github_checkout", autospec=True)
+    mocker.patch(
+        f"{PATCH_ROOT}.get_project_config", autospec=True, return_value=project_config
+    )
+    mocker.patch(f"{PATCH_ROOT}.BaseCumulusCI")
+    mocker.patch(
+        f"{PATCH_ROOT}.get_org_schema",
+        **{"return_value.__enter__.return_value": schema},
+        autospec=True,
+    )
+    yield (project_config, org_config, sf, schema, repo)
+
+
+@pytest.mark.django_db
+class TestParseDatasets:
+    def test_ok(self, mocker, scratch_org_factory, patch_dataset_env):
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
+        project_config, *_ = patch_dataset_env
+        repo_root = Path(project_config.repo_root)
+        folder1 = repo_root / "datasets" / "Default"
+        folder1.mkdir(parents=True)
+        (folder1 / "Default.extract.yml").write_text(DATASET_YAML)
+        folder2 = repo_root / "datasets" / "MyDataset"
+        folder2.mkdir(parents=True)
+        (folder2 / "MyDataset.extract.yml").write_text(DATASET_YAML)
+        org = scratch_org_factory(currently_parsing_datasets=True)
+
+        parse_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
+
+        assert not org.currently_parsing_datasets
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "schema": {},
+                    "dataset_errors": [],
+                    "datasets": {"Default": {}, "MyDataset": {}},
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+
+    def test_errors(self, mocker, caplog, scratch_org_factory, patch_dataset_env):
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
+        project_config, *_ = patch_dataset_env
+        repo_root = Path(project_config.repo_root)
+        folder1 = repo_root / "datasets" / "Default"
+        folder1.mkdir(parents=True)
+        (folder1 / "Default.extract.yml").write_text("INVALID CONTENT")
+        folder2 = repo_root / "datasets" / "Empty"
+        folder2.mkdir(parents=True)
+        (folder2 / "this-is-not-yaml.json").touch()
+        folder3 = repo_root / "datasets" / "FooBar"
+        folder3.mkdir(parents=True)
+        (folder3 / "WrongName.extract.yml").touch()
+        (repo_root / "datasets" / "invalid-top-level-file.csv").touch()
+        org = scratch_org_factory(currently_parsing_datasets=True)
+
+        parse_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
+
+        assert not org.currently_parsing_datasets
+        assert "Failed to parse" in caplog.text
+        errors = [
+            "Failed to parse file: datasets/Default/Default.extract.yml",
+            "Missing dataset definition file: datasets/Empty/Empty.extract.yml",
+            "Missing dataset definition file: datasets/FooBar/FooBar.extract.yml",
+        ]
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "schema": {},
+                    "dataset_errors": errors,
+                    "datasets": {},
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+
+    def test_missing_folder(self, mocker, scratch_org_factory, patch_dataset_env):
+        # By not creating a `datasets/` directory inside `patch_dataset_env` we are on
+        # the "missing folder" case by default
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
+        org = scratch_org_factory(currently_parsing_datasets=True)
+
+        parse_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
+
+        assert not org.currently_parsing_datasets
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "schema": {},
+                    "dataset_errors": [
+                        "Found empty 'datasets/' directory in the Task branch"
+                    ],
+                    "datasets": {},
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+
+    def test_exception(self, mocker, caplog, scratch_org_factory):
+        async_to_sync = mocker.patch(
+            "metecho.api.model_mixins.async_to_sync",
+            autospec=True,
+        ).return_value
+        mocker.patch(
+            f"{PATCH_ROOT}.dataset_env",
+            autospec=True,
+            side_effect=Exception("Oh no!"),
+        )
+        org = scratch_org_factory(currently_parsing_datasets=True)
+
+        with pytest.raises(Exception, match="Oh no!"):
+            parse_datasets(org=org, user=org.owner)
+        org.refresh_from_db()
+
+        assert not org.currently_parsing_datasets
+        assert "Oh no!" in caplog.text
+        async_to_sync.assert_called_with(
+            org,
+            {
+                "type": "SCRATCH_ORG_PARSE_DATASETS_FAILED",
+                "payload": {
+                    "originating_user_id": org.owner.id,
+                    "dataset_errors": [
+                        "Unable to parse dataset schema from Org: Oh no!"
+                    ],
+                },
+            },
+            for_list=False,
+            group_name=None,
+            include_user=False,
+        )
+
+
+@pytest.mark.django_db
+class TestCommitDatasetFromOrg:
+    def test_ok(self, mocker, scratch_org_factory, patch_dataset_env):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_dataset=True, task__epic__project__repo_id=123
+        )
+        mocker.patch(f"{PATCH_ROOT}.Dataset", autospec=True)
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        commit_dataset_from_org(
+            org=scratch_org,
+            user=scratch_org.owner,
+            commit_message="Testing dataset",
+            dataset_name="Test",
+            dataset_definition={"foo": ["bar"]},
+        )
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_dataset
+        assert commit.called
+
+    def test_exception(self, mocker, caplog, scratch_org_factory):
+        mocker.patch(
+            f"{PATCH_ROOT}.dataset_env",
+            autospec=True,
+            side_effect=Exception("Oh no!"),
+        )
+        scratch_org = scratch_org_factory(
+            currently_retrieving_dataset=True, task__epic__project__repo_id=123
+        )
+
+        with pytest.raises(Exception, match="Oh no!"):
+            commit_dataset_from_org(
+                org=scratch_org,
+                user=scratch_org.owner,
+                commit_message="Testing dataset",
+                dataset_name="Test",
+                dataset_definition={"foo": "bar"},
+            )
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_dataset
+        assert "Oh no!" in caplog.text

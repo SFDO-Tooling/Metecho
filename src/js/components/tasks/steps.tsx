@@ -1,13 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { OrgTypeTracker } from '@/js/components/orgs/taskOrgCards';
 import Steps from '@/js/components/steps';
 import { Step } from '@/js/components/steps/stepsItem';
-import { AppState } from '@/js/store';
 import { OrgsByParent } from '@/js/store/orgs/reducer';
-import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { Task } from '@/js/store/tasks/reducer';
 import { User } from '@/js/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '@/js/utils/constants';
@@ -17,7 +14,6 @@ interface TaskStatusStepsProps {
   task: Task;
   orgs: OrgsByParent;
   user: User;
-  projectId: string;
   hasPermissions: boolean;
   isCreatingOrg: OrgTypeTracker;
   handleAction: (step: Step) => void;
@@ -27,20 +23,15 @@ const TaskStatusSteps = ({
   task,
   orgs,
   user,
-  projectId,
   hasPermissions,
   isCreatingOrg,
   handleAction,
 }: TaskStatusStepsProps) => {
   const { t } = useTranslation();
-  const devUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, projectId, task.assigned_dev),
-  );
-  const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, projectId, task.assigned_qa),
-  );
-  const hasDev = Boolean(task.assigned_dev);
-  const hasTester = Boolean(task.assigned_qa);
+  const devUser = task.assigned_dev;
+  const qaUser = task.assigned_qa;
+  const hasDev = Boolean(devUser);
+  const hasTester = Boolean(qaUser);
   const hasReviewApproved =
     task.review_valid && task.review_status === REVIEW_STATUSES.APPROVED;
   const hasReviewRejected =
@@ -52,17 +43,20 @@ const TaskStatusSteps = ({
   const testOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg?.is_created);
   const hasTestOrg = Boolean(testOrg?.is_created);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
-  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
+  const userIsAssignedDev = Boolean(devUser && user.github_id === devUser.id);
+  const userIsAssignedTester = Boolean(qaUser && user.github_id === qaUser.id);
   const userIsDevOrgOwner = Boolean(
     userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
   );
   const userIsTestOrgOwner = Boolean(
     userIsAssignedTester && testOrg?.is_created && testOrg?.owner === user.id,
   );
-  const taskIsSubmitting = Boolean(task?.currently_creating_pr);
+  const taskIsSubmitting = task.currently_creating_pr;
   const devOrgFetching = Boolean(devOrg?.currently_refreshing_changes);
-  const devOrgCommitting = Boolean(devOrg?.currently_capturing_changes);
+  const devOrgCommittingMetadata = Boolean(
+    devOrg?.currently_retrieving_metadata,
+  );
+  const devOrgCommittingDataset = Boolean(devOrg?.currently_retrieving_dataset);
   const devOrgIsCreating = Boolean(
     isCreatingOrg[ORG_TYPES.DEV] || (devOrg && !devOrg.is_created),
   );
@@ -73,7 +67,7 @@ const TaskStatusSteps = ({
   );
   const testOrgIsDeleting = Boolean(testOrg?.delete_queued_at);
   const testOrgIsRefreshing = Boolean(testOrg?.currently_refreshing_org);
-  const testOrgIsSubmittingReview = Boolean(task?.currently_submitting_review);
+  const testOrgIsSubmittingReview = task.currently_submitting_review;
   const taskCommits = getTaskCommits(task);
   const testOrgOutOfDate =
     hasTestOrg && taskCommits.indexOf(testOrg?.latest_commit || '') !== 0;
@@ -83,7 +77,8 @@ const TaskStatusSteps = ({
     devOrgIsDeleting ||
     devOrgFetching ||
     devOrgIsReassigning ||
-    devOrgCommitting;
+    devOrgCommittingMetadata ||
+    devOrgCommittingDataset;
   const testOrgLoading =
     testOrgIsCreating ||
     testOrgIsDeleting ||
@@ -93,9 +88,10 @@ const TaskStatusSteps = ({
   let retrieveChangesLabel = t('Retrieve changes from Dev Org');
   if (devOrgFetching) {
     retrieveChangesLabel = t('Checking for Unretrieved Changes…');
-  }
-  if (devOrgCommitting) {
+  } else if (devOrgCommittingMetadata) {
     retrieveChangesLabel = t('Retrieving changes from Dev Org…');
+  } else if (devOrgCommittingDataset) {
+    retrieveChangesLabel = t('Retrieving dataset from Dev Org…');
   }
 
   const steps: Step[] = [

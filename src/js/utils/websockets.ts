@@ -13,8 +13,10 @@ import { Epic } from '@/js/store/epics/reducer';
 import {
   commitFailed,
   commitSucceeded,
+  datasetsRefreshed,
   deleteFailed,
   deleteOrg,
+  fetchFailed,
   orgConvertFailed,
   orgProvisioning,
   orgReassigned,
@@ -24,10 +26,14 @@ import {
   provisionOrg,
   recreateOrg,
   refreshError,
-  updateFailed,
   updateOrg,
 } from '@/js/store/orgs/actions';
-import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
+import {
+  Datasets,
+  DatasetSchema,
+  MinimalOrg,
+  Org,
+} from '@/js/store/orgs/reducer';
 import {
   projectCreated,
   projectCreateError,
@@ -214,7 +220,7 @@ interface OrgUpdatedEvent {
     originating_user_id: string | null;
   };
 }
-interface OrgUpdateFailedEvent {
+interface OrgFetchFailedEvent {
   type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
   payload: {
     message?: string;
@@ -283,14 +289,16 @@ interface OrgReassignFailedEvent {
   };
 }
 interface CommitSucceededEvent {
-  type: 'SCRATCH_ORG_COMMIT_CHANGES';
+  type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_DATASET';
   payload: {
     model: Org;
     originating_user_id: string | null;
   };
 }
 interface CommitFailedEvent {
-  type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  type:
+    | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED'
+    | 'SCRATCH_ORG_COMMIT_DATASET_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -312,6 +320,16 @@ interface SoftDeletedEvent {
     originating_user_id: null;
   };
 }
+export interface OrgDatasetRefreshedEvent {
+  type: 'SCRATCH_ORG_PARSE_DATASETS' | 'SCRATCH_ORG_PARSE_DATASETS_FAILED';
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+    datasets?: Datasets;
+    dataset_errors: string[];
+    schema?: DatasetSchema;
+  };
+}
 type ModelEvent =
   | ProjectUpdatedEvent
   | ProjectUpdateErrorEvent
@@ -329,7 +347,7 @@ type ModelEvent =
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
-  | OrgUpdateFailedEvent
+  | OrgFetchFailedEvent
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
   | OrgRemovedEvent
@@ -341,7 +359,8 @@ type ModelEvent =
   | CommitSucceededEvent
   | CommitFailedEvent
   | OrgConvertFailedEvent
-  | SoftDeletedEvent;
+  | SoftDeletedEvent
+  | OrgDatasetRefreshedEvent;
 type EventType =
   | SubscriptionEvent
   | ModelEvent
@@ -430,7 +449,7 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_UPDATE':
       return hasModel(event) && updateOrg(event.payload.model);
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
-      return hasModel(event) && updateFailed(event.payload);
+      return hasModel(event) && fetchFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
       return hasModel(event) && deleteOrg(event.payload);
     case 'SCRATCH_ORG_REMOVE':
@@ -442,9 +461,22 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_REFRESH_FAILED':
       return hasModel(event) && refreshError(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES':
-      return hasModel(event) && commitSucceeded(event.payload);
+      return (
+        hasModel(event) && commitSucceeded(event.payload, { is_metadata: true })
+      );
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-      return hasModel(event) && commitFailed(event.payload);
+      return (
+        hasModel(event) && commitFailed(event.payload, { is_metadata: true })
+      );
+    case 'SCRATCH_ORG_COMMIT_DATASET':
+      return (
+        hasModel(event) &&
+        commitSucceeded(event.payload, { is_metadata: false })
+      );
+    case 'SCRATCH_ORG_COMMIT_DATASET_FAILED':
+      return (
+        hasModel(event) && commitFailed(event.payload, { is_metadata: false })
+      );
     case 'SCRATCH_ORG_RECREATE':
       return hasModel(event) && recreateOrg(event.payload.model);
     case 'SCRATCH_ORG_REASSIGN':
@@ -455,6 +487,9 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && orgConvertFailed(event.payload);
     case 'SOFT_DELETE':
       return hasModel(event) && removeObject(event.payload.model);
+    case 'SCRATCH_ORG_PARSE_DATASETS':
+    case 'SCRATCH_ORG_PARSE_DATASETS_FAILED':
+      return hasModel(event) && datasetsRefreshed(event.payload);
   }
   return null;
 };

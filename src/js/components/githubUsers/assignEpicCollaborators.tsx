@@ -3,18 +3,18 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
 import GitHubUserButton from '@/js/components/githubUsers/button';
 import RefreshGitHubUsersButton from '@/js/components/githubUsers/refreshUsersButton';
 import { SpinnerWrapper } from '@/js/components/utils';
-import { GitHubUser } from '@/js/store/user/reducer';
+import { GitHubUser, GitHubUserTableItem } from '@/js/store/user/reducer';
 
 interface TableCellProps {
   [key: string]: any;
-  item?: GitHubUser;
+  item?: GitHubUserTableItem;
   handleUserClick: (user: GitHubUser) => void;
 }
 
@@ -27,13 +27,14 @@ export const UserTableCell = ({
   if (!item) {
     return null;
   }
-  const { login } = item;
+  const user: GitHubUser = { ...item, id: Number(item.id) };
   const handleClick = () => {
-    handleUserClick(item);
+    handleUserClick(user);
   };
+
   return (
-    <DataTableCell {...props} title={login} className="slds-p-around_none">
-      <GitHubUserButton user={item} badgeColor="light" onClick={handleClick} />
+    <DataTableCell {...props} title={user.login} className="slds-p-around_none">
+      <GitHubUserButton user={user} badgeColor="light" onClick={handleClick} />
     </DataTableCell>
   );
 };
@@ -85,15 +86,23 @@ const AssignEpicCollaboratorsModal = ({
     onRequestClose();
   };
   const updateSelection = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    data: { selection: GitHubUser[] },
+    event: ChangeEvent<HTMLInputElement>,
+    data: { selection: GitHubUserTableItem[] },
   ) => {
-    setSelection(data.selection);
+    const users: GitHubUser[] = data.selection.map((u) => ({
+      ...u,
+      id: Number(u.id),
+    }));
+    setSelection(users);
   };
   const handleSubmit = () => {
     setUsers([...selection]);
     reset();
   };
+
+  // <DataTable> expects `item.id` to be a `string`
+  const items = allUsers.map((u) => ({ ...u, id: u.id.toString() }));
+  const selectedItems = selection.map((u) => ({ ...u, id: u.id.toString() }));
 
   return (
     <Modal
@@ -149,9 +158,9 @@ const AssignEpicCollaboratorsModal = ({
         {allUsers.length ? (
           <DataTable
             className="align-checkboxes table-row-targets"
-            items={allUsers}
+            items={items}
             selectRows="checkbox"
-            selection={selection}
+            selection={selectedItems}
             onRowChange={updateSelection}
           >
             <DataTableColumn

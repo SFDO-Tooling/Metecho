@@ -10,6 +10,7 @@ import {
   intersectionBy,
 } from 'lodash';
 import React, {
+  MouseEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -102,7 +103,7 @@ const CreateProjectModal = ({
   };
 
   const prevPage = () => {
-    setPageIndex(pageIndex - 1 || 0);
+    setPageIndex(Math.max(pageIndex - 1, 0));
   };
 
   const handleSuccess = (action: AnyAction) => {
@@ -306,7 +307,7 @@ const CreateProjectModal = ({
     (inputs as CreateProjectData).dependencies.includes(d.id),
   );
 
-  const doSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const doSubmit = (e: MouseEvent<HTMLButtonElement>) => {
     setIsSaving(true);
     handleSubmit(e as any);
   };
@@ -349,7 +350,7 @@ const CreateProjectModal = ({
   ]);
 
   const handleStepEvent = (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: MouseEvent<HTMLButtonElement>,
     {
       step,
     }: {

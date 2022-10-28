@@ -10,7 +10,42 @@
   grid-template-columns: 1fr auto;
 }
 
-[data-form='task-capture'] {
+.metecho-nested-checkboxes {
+  // line up with above label
+  // add grid + (faux checkbox + label margin)
+  padding-left: var(
+    --nested-checkboxes-padding-left,
+    calc($square-icon-x-small-boundary + $spacing-large)
+  );
+}
+
+.form-grid-three {
+  display: grid;
+  gap: $spacing-x-small;
+  grid-template-columns: 43% 43% 1fr;
+
+  // allow multi-line checkbox labels to line up on left
+  .slds-checkbox__label {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+  }
+
+  // when using grid on wrapper,
+  // vertically align faux checkbox with with label
+  .slds-checkbox_faux {
+    margin-top: 0.35rem;
+  }
+
+  .slds-accordion__content & {
+    margin-left: $square-icon-x-small-boundary;
+  }
+
+  .metecho-nested-checkboxes {
+    --nested-checkboxes-padding-left: #{$spacing-large};
+  }
+}
+
+[data-form='task-retrieve-changes'] {
   display: grid;
   height: 100%;
 
@@ -23,6 +58,12 @@
     --slds-c-accordion-section-spacing-block-end: #{$spacing-x-small};
     --slds-c-accordion-section-spacing-inline-start: #{$spacing-medium};
     --slds-c-accordion-section-spacing-inline-end: #{$spacing-medium};
+  }
+
+  &.metecho-scroll-panel-container {
+    .slds-accordion__section {
+      --slds-c-accordion-section-spacing-inline-end: 0;
+    }
   }
 
   .accordion-no-padding {
@@ -53,11 +94,6 @@
       flex-grow: 1;
     }
   }
-}
-
-.metecho-nested-checkboxes {
-  // line up with above label; add grid + (faux checkbox + label margin)
-  padding-left: $square-icon-x-small-boundary + $spacing-large;
 }
 
 [data-form='create-epic-branch'] {

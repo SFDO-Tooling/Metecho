@@ -10,6 +10,49 @@ import {
   OrgTypes,
 } from '@/js/utils/constants';
 
+export interface TargetDirectories {
+  source?: string[];
+  pre?: string[];
+  post?: string[];
+  config?: string[];
+}
+
+export interface Changeset {
+  [key: string]: string[];
+}
+
+export interface DatasetField {
+  label: string;
+  referenceTo: string[];
+}
+
+export interface DatasetObject {
+  label: string;
+  count: number;
+  fields: {
+    // `key` is the API name of a DatasetField
+    [key: string]: DatasetField;
+  };
+}
+
+export interface DatasetSchema {
+  // `key` is the API name of a DatasetObject
+  [key: string]: DatasetObject;
+}
+
+export interface Datasets {
+  // `key` is the name of a Dataset
+  [key: string]: Changeset;
+  // Changeset `key` is the API name of a DatasetObject
+  // Changeset `value` is a list of API names of DatasetFields
+}
+
+export interface DatasetPairsObject extends Omit<DatasetObject, 'fields'> {
+  fields: [string, DatasetField][];
+}
+
+export type DatasetPairs = [string, DatasetPairsObject][];
+
 export interface MinimalOrg {
   id: string;
   task: string | null;
@@ -21,7 +64,7 @@ export interface MinimalOrg {
 export interface Org extends MinimalOrg {
   owner: string | null;
   owner_gh_username: string;
-  owner_gh_id: string | null;
+  owner_gh_id: number | null;
   description: string;
   description_rendered: string;
   org_config_name: string;
@@ -38,7 +81,8 @@ export interface Org extends MinimalOrg {
   has_ignored_changes: boolean;
   total_ignored_changes: number;
   currently_refreshing_changes: boolean;
-  currently_capturing_changes: boolean;
+  currently_retrieving_metadata: boolean;
+  currently_retrieving_dataset: boolean;
   currently_refreshing_org: boolean;
   currently_reassigning_user: boolean;
   is_created: boolean;
@@ -46,17 +90,10 @@ export interface Org extends MinimalOrg {
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;
   last_checked_unsaved_changes_at: string | null;
-}
-
-export interface TargetDirectories {
-  source?: string[];
-  pre?: string[];
-  post?: string[];
-  config?: string[];
-}
-
-export interface Changeset {
-  [key: string]: string[];
+  currently_parsing_datasets: boolean;
+  dataset_schema?: DatasetSchema;
+  datasets?: Datasets;
+  dataset_errors?: string[];
 }
 
 export interface OrgsByParent {
@@ -132,14 +169,23 @@ const reducer = (
           }
           return orgs;
         }
-        case OBJECT_TYPES.COMMIT: {
+        case OBJECT_TYPES.COMMIT_METADATA:
+        case OBJECT_TYPES.COMMIT_DATASET: {
           const { object }: { object: Org } = action.payload;
           if (object) {
+            const existingOrg = orgs.orgs[object.id] ?? {};
             return {
               ...orgs,
               orgs: {
                 ...orgs.orgs,
-                [object.id]: { ...object, currently_capturing_changes: true },
+                [object.id]: {
+                  ...existingOrg,
+                  ...object,
+                  currently_retrieving_metadata:
+                    action.payload.objectType === OBJECT_TYPES.COMMIT_METADATA,
+                  currently_retrieving_dataset:
+                    action.payload.objectType === OBJECT_TYPES.COMMIT_DATASET,
+                },
               },
             };
           }
@@ -152,8 +198,8 @@ const reducer = (
     case 'SCRATCH_ORG_PROVISION':
     case 'SCRATCH_ORG_UPDATE':
     case 'SCRATCH_ORG_DELETE_FAILED':
-    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-    case 'SCRATCH_ORG_COMMIT_CHANGES':
+    case 'SCRATCH_ORG_COMMIT_FAILED':
+    case 'SCRATCH_ORG_COMMIT':
     case 'SCRATCH_ORG_RECREATE':
     case 'SCRATCH_ORG_REASSIGN':
     case 'SCRATCH_ORG_REASSIGN_FAILED':
@@ -175,9 +221,10 @@ const reducer = (
         return orgs;
       }
       const org = maybeOrg;
+      const existingOrg = orgs.orgs[org.id] ?? {};
       return {
         ...orgs,
-        orgs: { ...orgs.orgs, [org.id]: org },
+        orgs: { ...orgs.orgs, [org.id]: { ...existingOrg, ...org } },
       };
     }
     case 'SCRATCH_ORG_PROVISION_FAILED':
@@ -192,11 +239,13 @@ const reducer = (
     case 'REFETCH_ORG_SUCCEEDED':
     case 'REFETCH_ORG_FAILED': {
       const { org } = action.payload;
+      const existingOrg = orgs.orgs[org.id] ?? {};
       return {
         ...orgs,
         orgs: {
           ...orgs.orgs,
           [org.id]: {
+            ...existingOrg,
             ...org,
             currently_refreshing_changes:
               action.type === 'REFETCH_ORG_SUCCEEDED'
@@ -206,15 +255,36 @@ const reducer = (
         },
       };
     }
+    case 'REFRESH_DATASETS_REQUESTED':
+    case 'REFRESH_DATASETS_REJECTED': {
+      const orgId = action.payload;
+      const existingOrg = orgs.orgs[orgId];
+      if (existingOrg) {
+        return {
+          ...orgs,
+          orgs: {
+            ...orgs.orgs,
+            [orgId]: {
+              ...existingOrg,
+              currently_parsing_datasets:
+                action.type === 'REFRESH_DATASETS_REQUESTED',
+            },
+          },
+        };
+      }
+      return orgs;
+    }
     case 'DELETE_OBJECT_SUCCEEDED': {
       const { objectType, object }: { objectType?: ObjectTypes; object: Org } =
         action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
+        const existingOrg = orgs.orgs[object.id] ?? {};
         return {
           ...orgs,
           orgs: {
             ...orgs.orgs,
             [object.id]: {
+              ...existingOrg,
               ...object,
               delete_queued_at: new Date().toISOString(),
             },

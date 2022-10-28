@@ -20,7 +20,7 @@ import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
 export interface AssignedUserTracker {
   type: OrgTypes;
-  assignee: string | null;
+  assignee: number | null;
   shouldAlertAssignee: boolean;
 }
 
@@ -49,7 +49,7 @@ const TaskOrgCards = ({
   testOrgReadyForReview,
   testOrgSubmittingReview,
   convertingOrg,
-  openCaptureModal,
+  openRetrieveMetadataModal,
   openAssignUserModal,
   closeAssignUserModal,
   openSubmitReviewModal,
@@ -70,7 +70,7 @@ const TaskOrgCards = ({
   testOrgReadyForReview: boolean;
   testOrgSubmittingReview: boolean;
   convertingOrg?: boolean;
-  openCaptureModal: () => void;
+  openRetrieveMetadataModal: () => void;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
   openSubmitReviewModal: () => void;
@@ -100,7 +100,7 @@ const TaskOrgCards = ({
     [dispatch],
   );
 
-  const checkIfTaskCanBeReassigned = async (assignee: string) => {
+  const checkIfTaskCanBeReassigned = async (assignee: number) => {
     const { can_reassign } = await apiFetch({
       url: window.api_urls.task_can_reassign(task.id),
       dispatch,
@@ -288,7 +288,7 @@ const TaskOrgCards = ({
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
-          openCaptureModal={openCaptureModal}
+          openRetrieveMetadataModal={openRetrieveMetadataModal}
         />
         <TaskOrgCard
           org={orgs[ORG_TYPES.QA]}

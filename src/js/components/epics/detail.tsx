@@ -1,7 +1,13 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import { pick } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -141,13 +147,13 @@ const EpicDetail = (
   }, [epic, epicSlug]);
 
   const usersAssignedToTasks = useMemo(() => {
-    const users = new Set<string>();
+    const users = new Set<number>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
-        users.add(task.assigned_dev);
+        users.add(task.assigned_dev.id);
       }
       if (task.assigned_qa) {
-        users.add(task.assigned_qa);
+        users.add(task.assigned_qa.id);
       }
     });
     return users;
@@ -427,7 +433,7 @@ const EpicDetail = (
   const epicProgress: [number, number] = [tasksCompleted, tasksTotal];
 
   // "Submit Epic for Review on GitHub" button:
-  let submitButton: React.ReactNode = null;
+  let submitButton: ReactNode = null;
   if (readyToSubmit && project.has_push_permission) {
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
@@ -782,7 +788,6 @@ const EpicDetail = (
                 <EpicProgress range={epicProgress} />
                 <TaskTable
                   projectId={project.id}
-                  projectSlug={project.slug}
                   tasks={tasks}
                   next={next}
                   count={count}

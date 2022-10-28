@@ -13,7 +13,9 @@ ALLOWED_PRODUCTION_COMMANDS = [
 
 
 if __name__ == "__main__":
-    settings_module = os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    settings_module = os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE", "config.settings.base"
+    )
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

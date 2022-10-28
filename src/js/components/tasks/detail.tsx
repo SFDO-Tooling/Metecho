@@ -4,6 +4,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
+import cookies from 'js-cookie';
 import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -22,9 +23,10 @@ import TaskOrgCards, {
   OrgTypeTracker,
 } from '@/js/components/orgs/taskOrgCards';
 import { Step } from '@/js/components/steps/stepsItem';
-import CaptureModal from '@/js/components/tasks/capture';
 import CreateTaskModal from '@/js/components/tasks/createForm';
 import TaskStatusPath from '@/js/components/tasks/path';
+import RetrieveDatasetModal from '@/js/components/tasks/retrieveDataset';
+import RetrieveMetadataModal from '@/js/components/tasks/retrieveMetadata';
 import TaskStatusSteps from '@/js/components/tasks/steps';
 import TourPopover from '@/js/components/tour/popover';
 import {
@@ -49,11 +51,10 @@ import {
   useFetchTaskIfMissing,
   useIsMounted,
 } from '@/js/components/utils';
-import { AppState, ThunkDispatch } from '@/js/store';
+import { ThunkDispatch } from '@/js/store';
 import { createObject, updateObject } from '@/js/store/actions';
 import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
 import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
-import { selectProjectCollaborator } from '@/js/store/projects/selectors';
 import { User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
 import {
@@ -93,7 +94,10 @@ const TaskDetail = (
   const { t } = useTranslation();
   const dispatch = useDispatch<ThunkDispatch>();
   const [fetchingChanges, setFetchingChanges] = useState(false);
-  const [captureModalOpen, setCaptureModalOpen] = useState(false);
+  const [retrieveMetadataModalOpen, setRetrieveMetadataModalOpen] =
+    useState(false);
+  const [retrieveDatasetModalOpen, setRetrieveDatasetModalOpen] =
+    useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -125,9 +129,6 @@ const TaskDetail = (
   );
   const { orgs } = useFetchOrgsIfMissing({ taskId: task?.id }, props);
   const user = useSelector(selectUserState) as User;
-  const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, project?.id, task?.assigned_qa),
-  );
   const {
     history,
     location: { state },
@@ -138,14 +139,19 @@ const TaskDetail = (
   );
   const taskIsMerged = task?.status === TASK_STATUSES.COMPLETED;
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
-  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
+  const userIsAssignedDev = Boolean(
+    task?.assigned_dev && user.github_id === task.assigned_dev.id,
+  );
+  const userIsAssignedTester = Boolean(
+    task?.assigned_qa && user.github_id === task.assigned_qa.id,
+  );
   const hasReviewRejected = Boolean(
     task?.review_valid &&
       task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
   );
   let currentlyFetching = false;
-  let currentlyCommitting = false;
+  let currentlyCommittingMetadata = false;
+  let currentlyCommittingDataset = false;
   let currentlyReassigning = false;
   let orgHasChanges = false;
   let userIsDevOwner = false;
@@ -183,7 +189,10 @@ const TaskDetail = (
       userIsAssignedTester && testOrg?.is_created && testOrg?.owner === user.id,
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
-    currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    currentlyCommittingMetadata = Boolean(
+      devOrg?.currently_retrieving_metadata,
+    );
+    currentlyCommittingDataset = Boolean(devOrg?.currently_retrieving_dataset);
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
     devOrgIsCreating = Boolean(
@@ -199,7 +208,7 @@ const TaskDetail = (
       hasOrgs = true;
     }
   }
-  const readyToCaptureChanges = userIsDevOwner && orgHasChanges;
+  const readyToRetrieveMetadata = userIsDevOwner && orgHasChanges;
   const orgHasBeenVisited = Boolean(userIsDevOwner && devOrg?.has_been_visited);
   const taskCommits = task ? getTaskCommits(task) : [];
   const testOrgOutOfDate = Boolean(
@@ -217,7 +226,8 @@ const TaskDetail = (
     devOrgIsDeleting ||
     currentlyFetching ||
     currentlyReassigning ||
-    currentlyCommitting;
+    currentlyCommittingMetadata ||
+    currentlyCommittingDataset;
   const testOrgLoading =
     testOrgIsCreating ||
     testOrgIsDeleting ||
@@ -227,7 +237,8 @@ const TaskDetail = (
   const openSelectIssueModal = useCallback(() => {
     setSelectIssueModalOpen(true);
     setSubmitReviewModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -241,7 +252,8 @@ const TaskDetail = (
   }, []);
   const openSubmitReviewModal = () => {
     setSubmitReviewModalOpen(true);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -254,8 +266,9 @@ const TaskDetail = (
   const closeSubmitReviewModal = () => {
     setSubmitReviewModalOpen(false);
   };
-  const openCaptureModal = () => {
-    setCaptureModalOpen(true);
+  const openRetrieveMetadataModal = () => {
+    setRetrieveMetadataModalOpen(true);
+    setRetrieveDatasetModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
@@ -266,13 +279,30 @@ const TaskDetail = (
     setConvertOrgData(null);
     setSelectIssueModalOpen(false);
   };
-  const closeCaptureModal = () => {
-    setCaptureModalOpen(false);
+  const closeRetrieveMetadataModal = () => {
+    setRetrieveMetadataModalOpen(false);
+  };
+  const openRetrieveDatasetModal = () => {
+    setRetrieveDatasetModalOpen(true);
+    setRetrieveMetadataModalOpen(false);
+    setSubmitReviewModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
+  };
+  const closeRetrieveDatasetModal = () => {
+    setRetrieveDatasetModalOpen(false);
   };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setSubmitReviewModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
@@ -286,7 +316,8 @@ const TaskDetail = (
     setEditModalOpen(true);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
@@ -303,7 +334,8 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -318,7 +350,8 @@ const TaskDetail = (
   const openAssignUserModal = (type: OrgTypes) => {
     setAssignUserModalOpen(type);
     setSubmitReviewModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -337,7 +370,8 @@ const TaskDetail = (
     setEditModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -352,7 +386,8 @@ const TaskDetail = (
   const openContributeModal = () => {
     setContributeModalOpen(true);
     setSubmitReviewModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -370,7 +405,8 @@ const TaskDetail = (
     setConvertOrgData(orgData);
     setContributeModalOpen(false);
     setSubmitReviewModalOpen(false);
-    setCaptureModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveDatasetModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -429,7 +465,7 @@ const TaskDetail = (
     ],
   );
 
-  const doCaptureChanges = useCallback(() => {
+  const doRetrieveMetadata = useCallback(() => {
     /* istanbul ignore else */
     if (devOrg) {
       let shouldCheck = true;
@@ -447,7 +483,7 @@ const TaskDetail = (
         setFetchingChanges(true);
         doRefetchOrg(devOrg);
       } else {
-        openCaptureModal();
+        openRetrieveMetadataModal();
       }
     }
   }, [devOrg, doRefetchOrg, orgHasChanges]);
@@ -508,8 +544,8 @@ const TaskDetail = (
         }
         case 'retrieve-changes': {
           /* istanbul ignore else */
-          if (readyToCaptureChanges && !devOrgLoading) {
-            doCaptureChanges();
+          if (readyToRetrieveMetadata && !devOrgLoading) {
+            doRetrieveMetadata();
           }
           break;
         }
@@ -558,7 +594,7 @@ const TaskDetail = (
       userIsAssignedDev,
       userIsAssignedTester,
       userIsTestOwner,
-      readyToCaptureChanges,
+      readyToRetrieveMetadata,
       readyToSubmit,
       testOrgOutOfDate,
       devOrgLoading,
@@ -566,7 +602,7 @@ const TaskDetail = (
       currentlySubmitting,
       testOrgSubmittingReview,
       doCreateOrg,
-      doCaptureChanges,
+      doRetrieveMetadata,
       doRefreshOrg,
     ],
   );
@@ -576,22 +612,22 @@ const TaskDetail = (
   useEffect(() => {
     if (
       shouldRetrieve &&
-      readyToCaptureChanges &&
+      readyToRetrieveMetadata &&
       project?.has_push_permission
     ) {
       // Remove location state
       history.replace({ state: {} });
-      doCaptureChanges();
+      doRetrieveMetadata();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    doCaptureChanges,
+    doRetrieveMetadata,
     project?.has_push_permission,
-    readyToCaptureChanges,
+    readyToRetrieveMetadata,
     shouldRetrieve,
   ]);
 
-  // When capture changes has been triggered, wait until org has been refreshed
+  // When retrieve-metadata has been triggered wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
       fetchingChanges && devOrg && !devOrg.currently_refreshing_changes;
@@ -600,7 +636,7 @@ const TaskDetail = (
       setFetchingChanges(false);
       /* istanbul ignore else */
       if (orgHasChanges && !submitModalOpen) {
-        openCaptureModal();
+        openRetrieveMetadataModal();
       }
     }
   }, [fetchingChanges, devOrg, orgHasChanges, submitModalOpen]);
@@ -716,9 +752,9 @@ const TaskDetail = (
     </PageHeaderControl>
   );
 
-  let submitButton: React.ReactNode = null;
+  let submitButton: ReactNode = null;
   if (readyToSubmit && project.has_push_permission && !taskIsMerged) {
-    const isPrimary = !readyToCaptureChanges;
+    const isPrimary = !readyToRetrieveMetadata;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
         label={t('Submitting Task for Testing…')}
@@ -728,10 +764,9 @@ const TaskDetail = (
       t('Submit Task for Testing')
     );
     submitButton = (
-      <div className="slds-is-relative">
+      <div className="slds-is-relative slds-m-bottom_x-large">
         <Button
           label={submitButtonText}
-          className="slds-m-bottom_x-large slds-m-left_none"
           variant={isPrimary ? 'brand' : 'outline-brand'}
           onClick={openSubmitModal}
           disabled={currentlySubmitting}
@@ -753,19 +788,20 @@ const TaskDetail = (
     );
   }
 
-  let captureButton: React.ReactNode = null;
+  let retrieveButtons: ReactNode = null;
+  let retrieveDatasetButton: ReactNode = null;
   if (
     project.has_push_permission &&
     !taskIsMerged &&
-    (readyToCaptureChanges || orgHasBeenVisited)
+    (readyToRetrieveMetadata || orgHasBeenVisited)
   ) {
-    let captureButtonText: JSX.Element = t('Check for Unretrieved Changes');
+    let retrieveMetadataText: JSX.Element = t('Check for Unretrieved Changes');
     const isPrimary =
       (orgHasChanges || !readyToSubmit) &&
       (!task.pr_is_open || hasReviewRejected);
-    if (currentlyCommitting) {
+    if (currentlyCommittingMetadata) {
       /* istanbul ignore next */
-      captureButtonText = (
+      retrieveMetadataText = (
         <LabelWithSpinner
           label={t('Retrieving Selected Changes…')}
           variant={isPrimary ? 'inverse' : 'base'}
@@ -773,7 +809,7 @@ const TaskDetail = (
       );
     } else if (fetchingChanges || currentlyFetching) {
       /* istanbul ignore next */
-      captureButtonText = (
+      retrieveMetadataText = (
         <LabelWithSpinner
           label={t('Checking for Unretrieved Changes…')}
           variant={isPrimary ? 'inverse' : 'base'}
@@ -781,31 +817,68 @@ const TaskDetail = (
       );
     } else if (currentlyReassigning) {
       /* istanbul ignore next */
-      captureButtonText = (
+      retrieveMetadataText = (
         <LabelWithSpinner
           label={t('Reassigning Org Ownership…')}
           variant={isPrimary ? 'inverse' : 'base'}
         />
       );
     } else if (orgHasChanges) {
-      captureButtonText = t('Retrieve Changes from Dev Org');
+      retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
-    captureButton = (
-      <div className="slds-is-relative">
+
+    const should_show_datasets_button = cookies.get(
+      'should_show_datasets_button',
+    );
+
+    if (
+      should_show_datasets_button &&
+      !(currentlyReassigning || currentlyCommittingMetadata)
+    ) {
+      retrieveDatasetButton = (
+        <div className="inline-container slds-m-left_small">
+          <Button
+            label={
+              currentlyCommittingDataset ? (
+                <LabelWithSpinner
+                  label={t('Retrieving Selected Dataset…')}
+                  variant="base"
+                />
+              ) : (
+                t('Retrieve Dataset')
+              )
+            }
+            variant="outline-brand"
+            className="slds-align-middle"
+            onClick={openRetrieveDatasetModal}
+            disabled={
+              fetchingChanges || currentlyFetching || currentlyCommittingDataset
+            }
+          />
+        </div>
+      );
+    }
+    retrieveButtons = (
+      <div
+        className={classNames('slds-is-relative', {
+          'slds-m-bottom_medium': readyToSubmit,
+          'slds-m-bottom_x-large': !readyToSubmit,
+        })}
+      >
         <Button
-          label={captureButtonText}
-          className={classNames('slds-m-bottom_x-large', {
-            'slds-m-right_medium': readyToSubmit,
-          })}
+          label={retrieveMetadataText}
           variant={isPrimary ? 'brand' : 'outline-brand'}
-          onClick={doCaptureChanges}
+          className="slds-align-middle"
+          onClick={doRetrieveMetadata}
           disabled={
             fetchingChanges ||
             currentlyFetching ||
-            currentlyCommitting ||
+            currentlyCommittingMetadata ||
+            currentlyCommittingDataset ||
             currentlyReassigning
           }
         />
+        {retrieveDatasetButton}
         <TourPopover
           id="tour-task-retrieve"
           align="right"
@@ -963,7 +1036,6 @@ const TaskDetail = (
                       task={task}
                       orgs={taskOrgs}
                       user={user}
-                      projectId={project.id}
                       hasPermissions={project.has_push_permission}
                       isCreatingOrg={isCreatingOrg}
                       handleAction={handleStepAction}
@@ -992,7 +1064,7 @@ const TaskDetail = (
           </>
         }
       >
-        {captureButton}
+        {retrieveButtons}
         {submitButton}
 
         {taskOrgs ? (
@@ -1005,7 +1077,7 @@ const TaskDetail = (
             githubUsers={project.github_users}
             epicCreatingBranch={Boolean(epic?.currently_creating_branch)}
             repoUrl={project.repo_url}
-            openCaptureModal={openCaptureModal}
+            openRetrieveMetadataModal={openRetrieveMetadataModal}
             assignUserModalOpen={assignUserModalOpen}
             isCreatingOrg={isCreatingOrg}
             isRefreshingUsers={project.currently_fetching_github_users}
@@ -1082,12 +1154,23 @@ const TaskDetail = (
             {devOrg &&
               userIsDevOwner &&
               (orgHasChanges || devOrg.has_ignored_changes) && (
-                <CaptureModal
+                <RetrieveMetadataModal
                   org={devOrg}
-                  isOpen={captureModalOpen}
-                  closeModal={closeCaptureModal}
+                  isOpen={retrieveMetadataModalOpen}
+                  closeModal={closeRetrieveMetadataModal}
                 />
               )}
+            {orgHasBeenVisited && (
+              <RetrieveDatasetModal
+                orgId={(devOrg as Org).id}
+                datasets={(devOrg as Org).datasets ?? {}}
+                datasetErrors={(devOrg as Org).dataset_errors ?? []}
+                schema={(devOrg as Org).dataset_schema}
+                fetchingDatasets={(devOrg as Org).currently_parsing_datasets}
+                isOpen={retrieveDatasetModalOpen}
+                closeModal={closeRetrieveDatasetModal}
+              />
+            )}
             {readyToSubmit && (
               <SubmitModal
                 instanceId={task.id}
@@ -1096,7 +1179,7 @@ const TaskDetail = (
                 instanceType="task"
                 isOpen={submitModalOpen}
                 toggleModal={setSubmitModalOpen}
-                assignee={qaUser}
+                assignee={task?.assigned_qa}
                 originatingUser={user.github_id}
               />
             )}

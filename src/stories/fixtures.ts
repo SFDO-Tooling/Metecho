@@ -23,11 +23,15 @@ export const api_urls = {
   project_refresh_github_users: (id: string) =>
     `/api/projects/${id}/refresh_github_users/`,
   epic_list: () => '/api/epics/',
-  scratch_org_list: () => '/api/scratch_orgs/',
-  scratch_org_detail: (id: string) => `/api/scratch_orgs/${id}/`,
+  scratch_org_list: () => '/api/scratch-orgs/',
+  scratch_org_detail: (id: string) => `/api/scratch-orgs/${id}/`,
   scratch_org_commit: (id: string) => `/api/scratch_orgs/${id}/commit/`,
-  scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
-  scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
+  scratch_org_commit_dataset: (id: string) =>
+    `/api/scratch-orgs/${id}/commit_dataset/`,
+  scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
+  scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
+  scratch_org_parse_datasets: (id: string) =>
+    `/api/scratch-orgs/${id}/parse_datasets/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
   task_list: () => 'api/tasks/',
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
@@ -54,7 +58,7 @@ export const sampleUser1 = {
   username: 'someuser1',
   email: 'developer@web.com',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
-  github_id: '999999',
+  github_id: 999999,
   valid_token_for: '00Dxxxxxxxxxxxxxxx',
   sf_username: 'developer@web.com',
   org_name: 'OddBird',
@@ -73,7 +77,7 @@ export const sampleUser1 = {
 };
 
 export const sampleGitHubUser1 = {
-  id: '123456',
+  id: 999999,
   login: 'TestGitHubUser',
   name: 'Test GitHub User',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
@@ -85,7 +89,7 @@ export const sampleGitHubUser1 = {
 };
 
 export const sampleGitHubUser2 = {
-  id: '234567',
+  id: 234567,
   login: 'OtherUser',
   name: 'Other User',
   avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
@@ -97,11 +101,33 @@ export const sampleGitHubUser2 = {
 };
 
 export const sampleGitHubUser3 = {
-  id: '345678',
+  id: 345678,
   login: 'ThirdUser',
   avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
   permissions: {
     push: true,
+    pull: true,
+    admin: false,
+  },
+};
+
+export const sampleGitHubUser4 = {
+  id: 123123,
+  login: 'FourthUser',
+  avatar_url: 'https://randomuser.me/api/portraits/men/3.jpg',
+  permissions: {
+    push: true,
+    pull: true,
+    admin: false,
+  },
+};
+
+export const sampleReadOnlyGitHubUser = {
+  id: 444444,
+  login: 'ReadOnly',
+  avatar_url: 'https://randomuser.me/api/portraits/men/4.jpg',
+  permissions: {
+    push: false,
     pull: true,
     admin: false,
   },
@@ -285,6 +311,7 @@ export const sampleTask1 = {
   },
   project: null,
   root_project: 'p1',
+  root_project_slug: 'p1',
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
@@ -299,7 +326,7 @@ export const sampleTask1 = {
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser1.id,
+  assigned_dev: sampleGitHubUser1,
   assigned_qa: null,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
@@ -325,6 +352,7 @@ export const sampleTask2 = {
   },
   project: null,
   root_project: 'p1',
+  root_project_slug: 'p1',
   description:
     'Add panel for controls toggles allowing for accessible interaction',
   description_rendered:
@@ -365,6 +393,7 @@ export const sampleTask3 = {
   },
   project: null,
   root_project: 'p1',
+  root_project_slug: 'p1',
   description: 'Include options set by operating system preferences',
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
@@ -380,8 +409,8 @@ export const sampleTask3 = {
   pr_is_open: false,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser3.id,
-  assigned_qa: sampleGitHubUser1.id,
+  assigned_dev: sampleGitHubUser3,
+  assigned_qa: sampleGitHubUser1,
   status: TASK_STATUSES.COMPLETED,
   currently_submitting_review: false,
   review_submitted_at: '2019-03-01T19:47:49Z',
@@ -406,6 +435,7 @@ export const sampleTask4 = {
   },
   project: null,
   root_project: 'p1',
+  root_project_slug: 'p1',
   description: 'Internationalization and Localization built in options',
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
@@ -421,8 +451,8 @@ export const sampleTask4 = {
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2.id,
-  assigned_qa: sampleGitHubUser3.id,
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: '2019-03-01T19:47:49Z',
@@ -447,6 +477,7 @@ export const sampleTask5 = {
   },
   project: null,
   root_project: 'p1',
+  root_project_slug: 'p1',
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -461,7 +492,7 @@ export const sampleTask5 = {
   pr_is_open: false,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser1.id,
+  assigned_dev: sampleGitHubUser1,
   assigned_qa: null,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
@@ -487,6 +518,7 @@ export const sampleTask6 = {
   },
   project: null,
   root_project: 'p1',
+  root_project_slug: 'p1',
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
@@ -501,8 +533,8 @@ export const sampleTask6 = {
   pr_is_open: true,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2.id,
-  assigned_qa: sampleGitHubUser3.id,
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: null,
@@ -747,7 +779,7 @@ export const sampleDevOrg = {
   org_type: ORG_TYPES.DEV,
   owner: 'user-id',
   owner_gh_username: 'user-name',
-  owner_gh_id: 'user-id',
+  owner_gh_id: 123456,
   description: '',
   description_rendered: '',
   org_config_name: 'dev',
@@ -765,13 +797,15 @@ export const sampleDevOrg = {
   has_ignored_changes: false,
   is_created: true,
   currently_refreshing_changes: false,
-  currently_capturing_changes: false,
+  currently_retrieving_metadata: false,
+  currently_retrieving_dataset: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  currently_parsing_datasets: false,
 };
 
 export const sampleScratchOrg = {
@@ -782,7 +816,7 @@ export const sampleScratchOrg = {
   org_type: ORG_TYPES.PLAYGROUND,
   owner: 'user-id',
   owner_gh_username: 'user-name',
-  owner_gh_id: 'user-id',
+  owner_gh_id: 123456,
   description: '',
   description_rendered: '',
   org_config_name: 'dev',
@@ -800,13 +834,15 @@ export const sampleScratchOrg = {
   has_ignored_changes: false,
   is_created: true,
   currently_refreshing_changes: false,
-  currently_capturing_changes: false,
+  currently_retrieving_metadata: false,
+  currently_retrieving_dataset: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
   has_been_visited: true,
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
+  currently_parsing_datasets: false,
 };
 
 export const sampleIssue1 = {
@@ -898,4 +934,31 @@ export const sampleGitHubOrg2 = {
   id: 'org-2',
   name: 'Another Test Org',
   avatar_url: '',
+};
+
+export const sampleDatasetSchema = {
+  Account: {
+    label: 'Account',
+    count: 5,
+    fields: {
+      FooBar: { label: 'Foo Bar' },
+      BuzBaz: { label: 'Buz Baz' },
+    },
+  },
+  ApexClass: {
+    label: 'Apex Class',
+    count: 1,
+    fields: {
+      ApiVersion: { label: 'Api Version' },
+    },
+  },
+};
+
+export const sampleChangeset = {
+  Account: ['FooBar', 'BuzBaz'],
+};
+
+export const sampleDatasets = {
+  Default: sampleChangeset,
+  'Another Dataset': { Account: ['Other'], WebLink: ['OpenType'] },
 };

@@ -19,7 +19,7 @@ export default () => {
     }: {
       task: Task;
       type: OrgTypes;
-      assignee: string | null;
+      assignee: number | null;
       shouldAlertAssignee: boolean;
     }) => {
       /* istanbul ignore next */

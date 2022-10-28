@@ -2,7 +2,7 @@ import html
 import logging
 from contextlib import suppress
 from datetime import timedelta
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Any, Iterable, Optional, Tuple
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -124,7 +124,9 @@ class User(PushMixin, HashIdMixin, AbstractUser):
     currently_fetching_repos = models.BooleanField(default=False)
     currently_fetching_orgs = models.BooleanField(default=False)
     organizations = models.ManyToManyField(
-        "api.GitHubOrganization", related_name="users"
+        "api.GitHubOrganization",
+        related_name="users",
+        blank=True,
     )
     devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
@@ -219,18 +221,15 @@ class User(PushMixin, HashIdMixin, AbstractUser):
     def delete(self, *args, **kwargs):
         for scratch_org_to_delete in self.scratchorg_set.all():
             scratch_org_to_delete.owner = None
-            scratch_org_to_delete.owner_sf_username = ""
-            scratch_org_to_delete.owner_gh_username = ""
-            scratch_org_to_delete.owner_gh_id = ""
             scratch_org_to_delete.save()
             scratch_org_to_delete.queue_delete(originating_user_id=self.id)
 
         super().delete(*args, **kwargs)
 
     @property
-    def github_id(self) -> Optional[str]:
+    def github_id(self) -> Optional[int]:
         try:
-            return self.github_account.uid
+            return int(self.github_account.uid)
         except (AttributeError, KeyError, TypeError):
             return None
 
@@ -384,19 +383,9 @@ class Project(
         validators=[validate_unicode_branch],
     )
     branch_prefix = StringField(blank=True)
-    # User data is shaped like this:
-    #   {
-    #     "id": str,
-    #     "login": str,
-    #     "name": str,
-    #     "avatar_url": str,
-    #     "permissions": {
-    #       "push": bool,
-    #       "pull": bool,
-    #       "admin": bool,
-    #     },
-    #   }
-    github_users = models.JSONField(default=list, blank=True)
+    github_users = models.ManyToManyField(
+        "GitHubUser", through="GitHubCollaboration", related_name="projects", blank=True
+    )
     # List of {
     #   "key": str,
     #   "label": str,
@@ -454,6 +443,10 @@ class Project(
                 self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
         super().save(*args, **kwargs)
+
+    @property
+    def repo_url(self) -> str:
+        return f"https://github.com/{self.repo_owner}/{self.repo_name}"
 
     def finalize_get_social_image(self):
         self.save()
@@ -580,17 +573,9 @@ class Project(
             task.add_commits(commits, sender)
 
     def has_push_permission(self, user):
-        return GitHubRepository.objects.filter(
-            user=user,
-            repo_id=self.repo_id,
-            permissions__push=True,
+        return self.githubcollaboration_set.filter(
+            user_id=user.github_id, permissions__push=True
         ).exists()
-
-    def get_collaborator(self, gh_uid: str) -> Optional[Dict[str, object]]:
-        try:
-            return [u for u in self.github_users if u["id"] == gh_uid][0]
-        except IndexError:
-            return None
 
 
 class ProjectDependency(HashIdMixin, TimestampsMixin):
@@ -624,20 +609,26 @@ class GitHubOrganization(HashIdMixin, TimestampsMixin):
         return f"https://github.com/{self.login}"
 
 
-class GitHubRepository(HashIdMixin, models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="repositories"
-    )
-    repo_id = models.IntegerField()
-    repo_url = models.URLField()
-    permissions = models.JSONField(null=True)
+class GitHubUser(models.Model):
+    login = StringField()
+    name = StringField()
+    avatar_url = models.URLField()
 
     class Meta:
-        verbose_name_plural = "GitHub repositories"
-        unique_together = (("user", "repo_id"),)
+        ordering = ("login",)
+        verbose_name = _("GitHub user")
+        verbose_name_plural = _("GitHub users")
 
     def __str__(self):
-        return self.repo_url
+        return self.login
+
+
+class GitHubCollaboration(models.Model):
+    """A record of a GitHubUser participating in a Project"""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    user = models.ForeignKey(GitHubUser, on_delete=models.CASCADE)
+    permissions = models.JSONField(null=True)
 
 
 class GitHubIssue(HashIdMixin):
@@ -693,7 +684,7 @@ class Epic(
     latest_sha = StringField(blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
-    github_users = models.JSONField(default=list, blank=True)
+    github_users = models.ManyToManyField(GitHubUser, related_name="epics", blank=True)
     issue = models.OneToOneField(
         GitHubIssue,
         related_name="epic",
@@ -911,9 +902,20 @@ class Task(
         choices=TaskStatus.choices, default=TaskStatus.PLANNED, max_length=16
     )
 
-    # GitHub IDs of task assignees
-    assigned_dev = models.CharField(max_length=50, null=True, blank=True)
-    assigned_qa = models.CharField(max_length=50, null=True, blank=True)
+    assigned_dev = models.ForeignKey(
+        GitHubUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dev_tasks",
+    )
+    assigned_qa = models.ForeignKey(
+        GitHubUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="qa_tasks",
+    )
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
@@ -1026,7 +1028,7 @@ class Task(
     def try_to_notify_assigned_user(self):
         # This takes the tester (a.k.a. assigned_qa) and sends them an
         # email when a PR has been made.
-        id_ = getattr(self, "assigned_qa", None)
+        id_ = getattr(self, "assigned_qa_id", None)
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:
@@ -1227,16 +1229,15 @@ class ScratchOrg(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     currently_refreshing_changes = models.BooleanField(default=False)
-    currently_capturing_changes = models.BooleanField(default=False)
+    currently_retrieving_metadata = models.BooleanField(default=False)
+    currently_parsing_datasets = models.BooleanField(default=False)
+    currently_retrieving_dataset = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
     currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)
     config = models.JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     expiry_job_id = StringField(blank=True, default="")
-    owner_sf_username = StringField(blank=True)
-    owner_gh_username = StringField(blank=True)
-    owner_gh_id = StringField(null=True, blank=True)
     has_been_visited = models.BooleanField(default=False)
     valid_target_directories = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
@@ -1270,6 +1271,18 @@ class ScratchOrg(
         if self.task:
             return self.task.root_project
         return None
+
+    @property
+    def owner_sf_username(self) -> Optional[str]:
+        return getattr(self.owner, "sf_username", None)
+
+    @property
+    def owner_gh_username(self) -> str:
+        return getattr(self.owner, "username", "")
+
+    @property
+    def owner_gh_id(self) -> Optional[int]:
+        return getattr(self.owner, "github_id", None)
 
     def save(self, *args, **kwargs):
         is_new = self.id is None
@@ -1460,7 +1473,7 @@ class ScratchOrg(
     ):
         from .jobs import commit_changes_from_org_job
 
-        self.currently_capturing_changes = True
+        self.currently_retrieving_metadata = True
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -1474,7 +1487,7 @@ class ScratchOrg(
         )
 
     def finalize_commit_changes(self, *, error=None, originating_user_id):
-        self.currently_capturing_changes = False
+        self.currently_retrieving_metadata = False
         self.save()
         if error is None:
             self.notify_changed(
@@ -1489,6 +1502,91 @@ class ScratchOrg(
             self.notify_scratch_org_error(
                 error=error,
                 type_="SCRATCH_ORG_COMMIT_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
+    def queue_parse_datasets(self, *, user: User):
+        from .jobs import parse_datasets_job
+
+        self.currently_parsing_datasets = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+        parse_datasets_job.delay(org=self, user=user)
+
+    def finalize_parse_datasets(
+        self,
+        *,
+        error: Exception | None = None,
+        schema: dict[str, Any] | None = None,
+        dataset_errors: list[str] | None = None,
+        datasets: dict[str, Any] | None = None,
+        originating_user_id=None,
+    ):
+        # Notify about the boolean flag changing
+        self.currently_parsing_datasets = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+        # The dataset information is not stored in the model, it's only pushed via WS
+        type_ = "SCRATCH_ORG_PARSE_DATASETS"
+        message = {
+            "schema": schema,
+            "dataset_errors": dataset_errors,
+            "datasets": datasets,
+        }
+        if error is not None:
+            type_ = "SCRATCH_ORG_PARSE_DATASETS_FAILED"
+            message = {
+                "dataset_errors": [
+                    str(
+                        _("Unable to parse dataset schema from Org: {}").format(
+                            str(error)
+                        )
+                    )
+                ],
+            }
+        self.notify_changed(
+            type_=type_, message=message, originating_user_id=originating_user_id
+        )
+
+    def queue_commit_dataset(
+        self,
+        *,
+        user: User,
+        commit_message: str,
+        dataset_name: str,
+        dataset_definition: dict,
+    ):
+        from .jobs import commit_dataset_from_org_job
+
+        self.currently_retrieving_dataset = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+
+        commit_dataset_from_org_job.delay(
+            org=self,
+            user=user,
+            commit_message=commit_message,
+            dataset_name=dataset_name,
+            dataset_definition=dataset_definition,
+        )
+
+    def finalize_commit_dataset(self, *, error=None, originating_user_id):
+        self.currently_retrieving_dataset = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="SCRATCH_ORG_COMMIT_DATASET",
+                originating_user_id=originating_user_id,
+            )
+            if self.task:
+                self.task.finalize_commit_changes(
+                    originating_user_id=originating_user_id
+                )
+        else:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_COMMIT_DATASET_FAILED",
                 originating_user_id=originating_user_id,
             )
 

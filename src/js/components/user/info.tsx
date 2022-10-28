@@ -5,7 +5,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -26,7 +26,7 @@ const ConnectToSalesforce = ({
   toggleModal,
   closeDropdown,
 }: {
-  toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleModal: Dispatch<SetStateAction<boolean>>;
   closeDropdown: () => void;
 }) => {
   const { t } = useTranslation();

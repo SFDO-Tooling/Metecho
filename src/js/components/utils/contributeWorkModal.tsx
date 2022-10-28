@@ -3,7 +3,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
-import React, { useCallback, useState } from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import mapSvg from '@/img/map-lg.svg?raw';
@@ -79,9 +79,7 @@ const ContributeWorkModal = ({
       </Trans>
     );
   } else if (task) {
-    const handleTaskSelectChange = (
-      event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
+    const handleTaskSelectChange = (event: ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === 'true') {
         setUseExistingTask(true);
       } else {
@@ -156,9 +154,7 @@ const ContributeWorkModal = ({
       </Trans>
     );
   } else {
-    const handleEpicLessTaskChange = (
-      event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
+    const handleEpicLessTaskChange = (event: ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === 'true') {
         setCreateEpicLessTask(true);
       } else {
