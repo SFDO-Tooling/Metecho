@@ -827,10 +827,9 @@ const TaskDetail = (
       retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
 
-    const should_show_datasets_button = true;
-    // cookies.get(
-    //   'should_show_datasets_button',
-    // );
+    const should_show_datasets_button = cookies.get(
+      'should_show_datasets_button',
+    );
 
     if (
       should_show_datasets_button &&
