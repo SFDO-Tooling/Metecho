@@ -1,7 +1,6 @@
 import contextlib
 from io import StringIO
 import logging
-from pprint import pprint
 import string
 import traceback
 from datetime import timedelta
@@ -23,7 +22,7 @@ from cumulusci.core.datasets import (
     SimplifiedExtractDeclaration
 )
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.salesforce_api.org_schema import Filters, get_org_schema, Schema
+from cumulusci.salesforce_api.org_schema import Filters, get_org_schema, Schema, Field
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
@@ -1158,27 +1157,39 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 
 user_reassign_job = job(user_reassign)
 
-# TODO: Move some of this into CCI itself
-def get_objs_and_fields_from_org(schema: Schema) -> Dict[str, Dict]:
+sobjname = str
+
+FieldList = List[str]
+
+SchemaFilter = Dict[sobjname, FieldList]
+
+# TODO: Move this function somewhere into CCI itself
+#       perhaps as a method of ExtractRulesFile or Schema
+def filter_schema_to_extractaable_objs_and_fields(schema: Schema) -> SchemaFilter:
+    # DEFAULT_EXTRACT_DATA is a rule to extract basically everything
     extract_file = StringIO(DEFAULT_EXTRACT_DATA)
     decls = ExtractRulesFile.parse_extract(extract_file)
-    flattened = flatten_declarations(list(decls.values()), schema)
-    print("F", [f.sf_object for f in flattened])
-    return {objdecl.sf_object: schema_obj_to_json(schema, objdecl) for objdecl in flattened}
-    
-def schema_obj_to_json(schema: Schema, objdecl: SimplifiedExtractDeclaration):
-    schema_obj = schema[objdecl.sf_object]
+
+    # Find the obbjects and fields that constitute "everything"
+    flattened_declarations = flatten_declarations(list(decls.values()), schema)
+    return {decl.sf_object: decl.fields for decl in flattened_declarations}
+
+def get_objs_and_fields_from_org(schema: Schema) -> Dict[str, Dict]:
+    filtered_schema: SchemaFilter = filter_schema_to_extractaable_objs_and_fields(schema)
+    return {objname: schema_obj_to_json(schema, objname, fields) for objname, fields in filtered_schema.items()}
+
+def schema_obj_to_json(schema: Schema, objname: str, fields: FieldList):
+    schema_obj = schema[objname]
     return {"label": schema_obj.label,
                     "count": schema_obj.count,
-                    "fields": {fieldname: schema_field_to_json(schema_obj, fieldname)
-                    for fieldname in objdecl.fields}
+                    "fields": {fieldname: schema_field_to_json(schema_obj.fields[fieldname])
+                    for fieldname in fields}
     }
 
-def schema_field_to_json(schema_obj, fieldname: str):
-    field_data = schema_obj.fields[fieldname]
+def schema_field_to_json(field_data: Field):
     return {
         "label": field_data.label,
-         # TODO: compress empty reference targets to reduce wire waste
+        # TODO: compress empty reference targets to reduce network bytes
         "referenceTo": field_data.referenceTo,
     }
 
@@ -1227,7 +1238,6 @@ def dataset_env(org: ScratchOrg):
             include_counts=True,
             filters=[Filters.extractable, Filters.createable],
         ) as schema:
-            print("OC", org_config.get_orginfo_cache_dir("a").__enter__())
             yield project_config, org_config, sf, schema, repo
 
 
@@ -1246,10 +1256,6 @@ def parse_datasets(*, org: ScratchOrg, user: User):
         org.refresh_from_db()
         with dataset_env(org) as (project_config, org_config, sf, schema, repo):
             org_schema = get_objs_and_fields_from_org(schema)
-            import cumulusci
-            print(cumulusci.__version__)
-            print("Coontacts", schema["Contact"].count)
-            pprint(org_schema.keys())
 
             project_path = project_config.repo_root
             datasets_dir = Path(project_path) / "datasets"

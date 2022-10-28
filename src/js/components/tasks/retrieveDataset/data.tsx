@@ -473,12 +473,15 @@ const inferChangesToLookupTargets = (
   ]) as [string, DatasetObject][];
 
   // find all non-lookup fields
+  // we don't want turning on a reference field to
+  //    cascade into turning on dozens of sobjects
+  //    recursively.
   const relevant_target_fields = target_sojects.map(
     ([sobjname, sobj]) =>
       [
         sobjname,
         Object.entries(sobj.fields)
-          .filter(
+          .filter(  // get rid of fields that are references
             ([_x, field]) =>
               !field.referenceTo || field.referenceTo.length === 0,
           )

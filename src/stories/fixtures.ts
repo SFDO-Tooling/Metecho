@@ -952,6 +952,13 @@ export const sampleDatasetSchema = {
       ApiVersion: { label: 'Api Version' },
     },
   },
+  Contact: {
+    label: 'Contact',
+    count: 1,
+    fields: {
+      AccountId: { label: 'Parent Account', referenceTo: ["Account"] },
+    },
+  }
 };
 
 export const sampleChangeset = {
