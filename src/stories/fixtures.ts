@@ -942,7 +942,7 @@ export const sampleDatasetSchema = {
     count: 5,
     fields: {
       FooBar: { label: 'Foo Bar' },
-      BuzBaz: { label: 'Buz Baz'}, // , referenceTo: [] 
+      BuzBaz: { label: 'Buz Baz' }, // , referenceTo: []
       Custom__ApexRef__c: { label: 'Fake Apex Ref' }, // , referenceTo: ['Apex Class']
     },
   },
@@ -957,9 +957,9 @@ export const sampleDatasetSchema = {
     label: 'Contact',
     count: 3,
     fields: {
-      AccountId: { label: 'Parent Account', referenceTo: ["Account"] },
+      AccountId: { label: 'Parent Account', referenceTo: ['Account'] },
     },
-  }
+  },
 };
 
 export const sampleChangeset = {

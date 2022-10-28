@@ -473,6 +473,7 @@ const inferChangesToLookupTargets = (
   ]) as [string, DatasetObject][];
 
   // filter out broken targets: sobj is undefined or null
+  /* eslint-disable-next-line  @typescript-eslint/no-unused-vars */
   target_sojects = target_sojects.filter(([_name, sobj]) => sobj);
 
   // find all non-lookup fields
@@ -480,15 +481,17 @@ const inferChangesToLookupTargets = (
   //    cascade into turning on dozens of sobjects
   //    recursively.
   const relevant_target_fields = target_sojects.map(
-    ([sobjname, sobj]) => 
+    ([sobjname, sobj]) =>
       [
         sobjname,
         Object.entries(sobj.fields)
-          .filter(  // get rid of fields that are references
-            ([_x, field]) =>
-              isEmpty(field.referenceTo)
+          .filter(
+            // get rid of fields that are references
+            /* eslint-disable @typescript-eslint/no-unused-vars */
+            ([_x, field]) => isEmpty(field.referenceTo),
           )
           .map(([fieldname, _field]) => fieldname),
+        /* eslint-enable @typescript-eslint/no-unused-vars */
       ] as [string, string[]],
   );
 

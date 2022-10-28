@@ -1,9 +1,9 @@
 import contextlib
-from io import StringIO
 import logging
 import string
 import traceback
 from datetime import timedelta
+from io import StringIO
 from pathlib import Path
 from typing import Dict, Iterable, List
 
@@ -15,13 +15,13 @@ from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
 from cumulusci.core.datasets import (
-    Dataset,
     DEFAULT_EXTRACT_DATA,
+    Dataset,
     ExtractRulesFile,
     flatten_declarations,
 )
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.salesforce_api.org_schema import Filters, get_org_schema, Schema, Field
+from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings

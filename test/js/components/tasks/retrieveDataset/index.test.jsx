@@ -256,7 +256,7 @@ describe('<RetrieveDatasetModal/>', () => {
         expect(inputs[2].checked).toBe(true);
       });
     });
-  
+
     describe('select/lookup', () => {
       test('selects lookup targets', () => {
         expect(inputs[0].checked).toBe(true);
