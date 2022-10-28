@@ -197,3 +197,11 @@ rules:
   prefer-template: 2
   sort-imports: 0
   symbol-description: 2
+
+  # Typescript
+  no-unused-vars: off # disable the base rule or we get incorrect errors
+  @typescript-eslint/no-unused-vars:
+    - "error"
+    - varsIgnorePattern: "^_"
+    - argsIgnorePattern: "^_"
+    - destructuredArrayIgnorePattern: "^_"
