@@ -19,6 +19,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from github3 import GitHub, login, users
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.repos.branch import Branch
+from requests.exceptions import HTTPError
 
 from .custom_cci_configs import MetechoUniversalConfig, ProjectConfig
 
@@ -174,7 +175,14 @@ def get_cached_user(gh: GitHub, username: str) -> users.User:
 
 
 def get_zip_file(repo, commit_ish):
-    repo.archive("zipball", path=ZIP_FILE_NAME, ref=commit_ish)
+    success = repo.archive("zipball", path=ZIP_FILE_NAME, ref=commit_ish)
+    if not success: # pragma: no cov
+        message = (
+            "Cannot download zipfile. "
+            "This may be caused by networking issues on the Metecho Server. "
+            f"Please report this to the Metecho Admins. ({repo} : {commit_ish})"
+        )
+        raise HTTPError(message)
     return zipfile.ZipFile(ZIP_FILE_NAME)
 
 
