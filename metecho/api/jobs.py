@@ -520,9 +520,7 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
 
         delete_org(scratch_org)
 
-        with local_github_checkout(
-            user, repo_id, commit_ish
-        ) as repo_root:
+        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
                 scratch_org,
                 user=user,

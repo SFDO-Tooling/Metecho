@@ -205,7 +205,11 @@ def extract_zip_file(zip_file, owner, repo_name):
 
 @contextlib.contextmanager
 def local_github_checkout(
-    user=None, repo_id=None, commit_ish=None, repo_owner=None, repo_name=None,
+    user=None,
+    repo_id=None,
+    commit_ish=None,
+    repo_owner=None,
+    repo_name=None,
 ):
     with temporary_dir() as repo_root:
         # pretend it's a git clone to satisfy cci

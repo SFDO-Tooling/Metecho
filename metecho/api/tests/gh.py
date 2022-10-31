@@ -190,7 +190,7 @@ class TestLocalGitHubCheckout:
             glob.return_value = [".."]
 
             with pytest.raises(UnsafeZipfileError):
-                with local_github_checkout( user, repo, "commit-ish" ):  # pragma: nocover
+                with local_github_checkout(user, repo, "commit-ish"):  # pragma: nocover
                     pass
 
     def test_cumulusci_yml_error(self, mocker):
