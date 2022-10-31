@@ -176,7 +176,7 @@ def get_cached_user(gh: GitHub, username: str) -> users.User:
 
 def get_zip_file(repo, commit_ish):
     success = repo.archive("zipball", path=ZIP_FILE_NAME, ref=commit_ish)
-    if not success: # pragma: no cov
+    if not success:  # pragma: no cover
         message = (
             "Cannot download zipfile. "
             "This may be caused by networking issues on the Metecho Server. "
