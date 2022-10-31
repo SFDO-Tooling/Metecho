@@ -52,13 +52,15 @@ export const getDemoOrg = ({
     total_ignored_changes: 0,
     has_ignored_changes: false,
     currently_refreshing_changes: false,
-    currently_capturing_changes: false,
+    currently_retrieving_metadata: false,
+    currently_retrieving_dataset: false,
     currently_refreshing_org: false,
     currently_reassigning_user: false,
     is_created: true,
     delete_queued_at: null,
     has_been_visited: true,
     valid_target_directories: {},
+    currently_parsing_datasets: false,
   };
 };
 

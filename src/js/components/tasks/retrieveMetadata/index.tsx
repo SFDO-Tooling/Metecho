@@ -2,13 +2,13 @@ import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
-import React, { ReactNode, useState } from 'react';
+import React, { FormEvent, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import ChangesForm from '@/js/components/tasks/capture/changes';
-import TargetDirectoriesForm from '@/js/components/tasks/capture/directories';
-import CommitMessageForm from '@/js/components/tasks/capture/message';
+import ChangesForm from '@/js/components/tasks/retrieveMetadata/changes';
+import TargetDirectoriesForm from '@/js/components/tasks/retrieveMetadata/directories';
+import CommitMessageForm from '@/js/components/tasks/retrieveMetadata/message';
 import {
   LabelWithSpinner,
   useForm,
@@ -29,7 +29,7 @@ interface Props {
   closeModal: () => void;
 }
 
-export interface CommitData {
+export interface MetadataCommit {
   changes: Changeset;
   commit_message: string;
   target_directory: string;
@@ -68,9 +68,9 @@ export const ModalCard = ({
   </Card>
 );
 
-const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
+const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   const { t } = useTranslation();
-  const [capturingChanges, setCapturingChanges] = useState(false);
+  const [retrievingChanges, setRetrievingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const { showTransientMessage, isShowingTransientMessage } =
@@ -83,13 +83,13 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   };
 
   const prevPage = () => {
-    setPageIndex(pageIndex - 1 || 0);
+    setPageIndex(Math.max(pageIndex - 1, 0));
   };
 
   const handleSuccess = () => {
     /* istanbul ignore else */
     if (isMounted.current) {
-      setCapturingChanges(false);
+      setRetrievingChanges(false);
       closeModal();
       setPageIndex(0);
     }
@@ -103,7 +103,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     /* istanbul ignore else */
     if (isMounted.current) {
       setIgnoringChanges(false);
-      setCapturingChanges(false);
+      setRetrievingChanges(false);
       if (fieldErrors.target_directory) {
         setPageIndex(0);
       } else if (fieldErrors.changes) {
@@ -128,8 +128,8 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       changes: {},
       commit_message: '',
       target_directory: defaultDir,
-    } as CommitData,
-    objectType: OBJECT_TYPES.COMMIT,
+    } as MetadataCommit,
+    objectType: OBJECT_TYPES.COMMIT_METADATA,
     url: window.api_urls.scratch_org_commit(org.id),
     onSuccess: handleSuccess,
     onError: handleError,
@@ -191,7 +191,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     }
   };
 
-  let ignoreLabel: React.ReactNode = t('Ignore Selected Changes');
+  let ignoreLabel: ReactNode = t('Ignore Selected Changes');
   if (ignoringChanges) {
     ignoreLabel = (
       <LabelWithSpinner
@@ -209,12 +209,12 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     resetForm();
   };
 
-  const submitChanges = (e: React.FormEvent<HTMLFormElement>) => {
-    setCapturingChanges(true);
+  const submitChanges = (e: FormEvent<HTMLFormElement>) => {
+    setRetrievingChanges(true);
     handleSubmit(e);
   };
 
-  const saveIgnored = (e: React.FormEvent<HTMLFormElement>) => {
+  const saveIgnored = (e: FormEvent<HTMLFormElement>) => {
     setIgnoringChanges(true);
     handleSubmit(e, { action: submitIgnored, success: handleIgnoredSuccess });
   };
@@ -226,7 +226,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
         <TargetDirectoriesForm
           key="page-1-contents"
           directories={org.valid_target_directories}
-          inputs={inputs as CommitData}
+          inputs={inputs as MetadataCommit}
           errors={errors}
           handleInputChange={handleInputChange}
         />
@@ -248,7 +248,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
           key="page-2-contents"
           changeset={org.unsaved_changes}
           ignoredChanges={org.ignored_changes}
-          inputs={inputs as CommitData}
+          inputs={inputs as MetadataCommit}
           changesChecked={changesChecked}
           ignoredChecked={ignoredChecked}
           errors={errors}
@@ -289,7 +289,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       contents: (
         <CommitMessageForm
           key="page-3-contents"
-          inputs={inputs as CommitData}
+          inputs={inputs as MetadataCommit}
           errors={errors}
           handleInputChange={handleInputChange}
         />
@@ -300,13 +300,13 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
           label={t('Go Back')}
           variant="outline-brand"
           onClick={prevPage}
-          disabled={capturingChanges}
+          disabled={retrievingChanges}
         />,
         <Button
           key="page-3-button-2"
           type="submit"
           label={
-            capturingChanges ? (
+            retrievingChanges ? (
               <LabelWithSpinner
                 label={t('Retrieving Selected Changes…')}
                 variant="inverse"
@@ -317,7 +317,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
           }
           variant="brand"
           onClick={submitChanges}
-          disabled={capturingChanges || !hasCommitMessage}
+          disabled={retrievingChanges || !hasCommitMessage}
         />,
       ],
     },
@@ -327,7 +327,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     <Modal
       isOpen={isOpen}
       size="small"
-      disableClose={capturingChanges}
+      disableClose={retrievingChanges}
       dismissOnClickOutside={false}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}
@@ -340,4 +340,4 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   );
 };
 
-export default CaptureModal;
+export default RetrieveMetadataModal;

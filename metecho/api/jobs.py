@@ -13,6 +13,10 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
+from cumulusci.core.datasets import Dataset
+from cumulusci.core.runtime import BaseCumulusCI
+from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
+from cumulusci.tasks.github.util import CommitDir
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
@@ -41,10 +45,13 @@ from .gh import (
     try_to_make_branch,
 )
 from .models import (
+    Epic,
     GitHubCollaboration,
     GitHubOrganization,
     GitHubUser,
     Project,
+    ScratchOrg,
+    Task,
     TaskReviewStatus,
     User,
 )
@@ -300,8 +307,6 @@ create_repository_job = job(create_repository)
 
 
 def alert_user_about_expiring_org(*, org, days):
-    from .models import ScratchOrg, User
-
     # if scratch org is there
     try:
         org.refresh_from_db()
@@ -819,8 +824,6 @@ def refresh_commits(*, project, branch_name, originating_user_id):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import Epic, Task
-
     repo = get_repo_info(
         None, repo_owner=project.repo_owner, repo_name=project.repo_name
     )
@@ -1146,3 +1149,172 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 
 
 user_reassign_job = job(user_reassign)
+
+
+@contextlib.contextmanager
+def dataset_env(org: ScratchOrg, user: User):
+    """
+    Yields all configuration objects required by the CumulusCI `Dataset` class
+    """
+    task = org.task
+    repo = get_repo_info(
+        None,
+        repo_owner=task.root_project.repo_owner,
+        repo_name=task.root_project.repo_name,
+    )
+    with local_github_checkout(
+        repo_owner=repo.owner.login,
+        repo_name=repo.name,
+        commit_ish=task.branch_name,
+    ) as project_path:
+        project_config = get_project_config(
+            repo_root=project_path,
+            repo_name=repo.name,
+            repo_url=repo.html_url,
+            repo_owner=repo.owner.login,
+            repo_branch=task.branch_name,
+            repo_commit=repo.branch(task.branch_name).latest_sha(),
+        )
+        cci = BaseCumulusCI(
+            repo_info={
+                "root": project_path,
+                "url": repo.html_url,
+                "name": repo.name,
+                "owner": repo.owner.login,
+                "commit": task.branch_name,
+            }
+        )
+        org_config = org.get_refreshed_org_config(keychain=cci.keychain)
+        project_config.keychain = org_config.keychain
+        sf = org_config.salesforce_client
+        with get_org_schema(
+            sf,
+            org_config,
+            include_counts=True,
+            filters=[Filters.extractable, Filters.createable],
+        ) as schema:
+            yield project_config, org_config, sf, schema, repo
+
+
+def parse_datasets(*, org: ScratchOrg, user: User):
+    """
+    Parse dataset definitions from the `datasets/` folder in the Task branch
+    """
+    # These fields are automatically captured by CCI or cause trouble while capturing,
+    # so we don't even include them in the schema at all
+    IGNORED_FIELDS = ("Id",)
+
+    datasets = {}
+    org_schema = {}
+    dataset_errors = []
+    try:
+        org.refresh_from_db()
+        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+            # JSON-friendly version of `schema`
+            org_schema = {
+                obj_name: {
+                    "label": obj.label,
+                    "count": obj.count,
+                    "fields": {
+                        field_name: {"label": field.label}
+                        for field_name, field in obj.fields.items()
+                        if field_name not in IGNORED_FIELDS
+                    },
+                }
+                for obj_name, obj in schema.items()
+            }
+
+            project_path = project_config.repo_root
+            datasets_dir = Path(project_path) / "datasets"
+            entries = datasets_dir.iterdir() if datasets_dir.is_dir() else ()
+            entries = sorted(entries)
+            if not entries:
+                dataset_errors.append(
+                    _("Found empty 'datasets/' directory in the Task branch")
+                )
+            for entry in entries:
+                if not entry.is_dir():
+                    continue
+                with Dataset(
+                    entry.name, project_config, org_config, sf, schema
+                ) as dataset:
+                    rel_file = dataset.extract_file.relative_to(project_path)
+                    if not dataset.extract_file.exists():
+                        dataset_errors.append(
+                            _("Missing dataset definition file: {}").format(rel_file)
+                        )
+                        continue
+                    try:
+                        datasets[entry.name] = dataset.read_schema_subset()
+                    except Exception:
+                        logger.exception(
+                            f"Failed to parse {dataset.extract_file}. Task: {org.task}. "
+                            f"Contents: \n{dataset.extract_file.read_text()}"
+                        )
+                        dataset_errors.append(
+                            _("Failed to parse file: {}").format(rel_file)
+                        )
+            dataset_errors = list(map(str, dataset_errors))
+    except Exception as e:
+        org.finalize_parse_datasets(error=e, originating_user_id=user.id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        org.finalize_parse_datasets(
+            datasets=datasets,
+            schema=org_schema,
+            dataset_errors=dataset_errors,
+            originating_user_id=user.id,
+        )
+
+
+parse_datasets_job = job(parse_datasets)
+
+
+def commit_dataset_from_org(
+    *,
+    org: ScratchOrg,
+    user: User,
+    commit_message: str,
+    dataset_name: str,
+    dataset_definition: dict,
+):
+    """
+    Given a JSON dataset definition:
+
+    1. Write a YAML definition to the `datasets/` folder
+    2. Retrieve and dump the corresponding SQL data from `org` on the same folder
+    3. Commit the new files to the parent Task branch
+    """
+    try:
+        org.refresh_from_db()
+        task = org.task
+        task.refresh_from_db()
+        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+            with Dataset(
+                dataset_name, project_config, org_config, sf, schema
+            ) as dataset:
+                dataset.path.mkdir(parents=True, exist_ok=True)
+                dataset.update_schema_subset(dataset_definition)
+                dataset.extract()
+                commit = CommitDir(
+                    repo, author={"name": user.username, "email": user.email}
+                )
+                commit(
+                    str(dataset.path),
+                    repo_dir=str(dataset.path.relative_to(project_config.repo_root)),
+                    branch=task.branch_name,
+                    commit_message=commit_message,
+                )
+    except Exception as e:
+        org.refresh_from_db()
+        org.finalize_commit_dataset(error=e, originating_user_id=user.id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        org.finalize_commit_dataset(originating_user_id=user.id)
+
+
+commit_dataset_from_org_job = job(commit_dataset_from_org)

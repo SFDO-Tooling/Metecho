@@ -694,7 +694,11 @@ paths:
       - cookieAuth: []
       responses:
         '202':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
   /api/scratch-orgs/:
     get:
       operationId: scratch_orgs_list
@@ -871,7 +875,7 @@ paths:
   /api/scratch-orgs/{id}/commit/:
     post:
       operationId: scratch_orgs_commit_create
-      description: Queue a job that commits changes captured from a ScratchOrg.
+      description: Queue a job that commits changes retrieved from a ScratchOrg.
       parameters:
       - in: path
         name: id
@@ -894,6 +898,66 @@ paths:
             schema:
               $ref: '#/components/schemas/CommitRequest'
         required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/scratch-orgs/{id}/commit_dataset/:
+    post:
+      operationId: scratch_orgs_commit_dataset_create
+      description: Queue a job that updates and commits a dataset from the Dev Org
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommitDatasetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommitDatasetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommitDatasetRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
+  /api/scratch-orgs/{id}/parse_datasets/:
+    post:
+      operationId: scratch_orgs_parse_datasets_create
+      description: Queue a job to parse the dataset definitions for this Org's Task
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1514,6 +1578,26 @@ components:
           minLength: 1
       required:
       - name
+    CommitDatasetRequest:
+      type: object
+      properties:
+        commit_message:
+          type: string
+          minLength: 1
+        dataset_name:
+          type: string
+          minLength: 1
+        dataset_definition:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              minLength: 1
+      required:
+      - commit_message
+      - dataset_definition
+      - dataset_name
     CommitRequest:
       type: object
       properties:
@@ -2408,7 +2492,7 @@ components:
         currently_refreshing_changes:
           type: boolean
           readOnly: true
-        currently_capturing_changes:
+        currently_retrieving_metadata:
           type: boolean
           readOnly: true
         currently_refreshing_org:
@@ -2441,11 +2525,19 @@ components:
           readOnly: true
         org_config_name:
           type: string
+        currently_parsing_datasets:
+          type: boolean
+          readOnly: true
+        currently_retrieving_dataset:
+          type: boolean
+          readOnly: true
       required:
-      - currently_capturing_changes
+      - currently_parsing_datasets
       - currently_reassigning_user
       - currently_refreshing_changes
       - currently_refreshing_org
+      - currently_retrieving_dataset
+      - currently_retrieving_metadata
       - delete_queued_at
       - description_rendered
       - expires_at

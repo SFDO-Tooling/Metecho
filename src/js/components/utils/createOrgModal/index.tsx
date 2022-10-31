@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
-import React, { useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -105,7 +105,7 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
     setInputs,
   });
 
-  const doSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const doSubmit = (e: MouseEvent<HTMLButtonElement>) => {
     setIsSaving(true);
     handleSubmit(e as any);
   };

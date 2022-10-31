@@ -1,6 +1,6 @@
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import { uniq, without } from 'lodash';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -39,6 +39,7 @@ const SelectProjectDependenciesForm = ({
 
   return (
     <form className="slds-form slds-p-around_large slds-is-relative">
+      <button type="submit" disabled hidden />
       <p className="slds-m-bottom_medium">
         <Trans i18nKey="projectDependenciesHelp">
           Select any dependencies for your new Project.
@@ -61,7 +62,7 @@ const SelectProjectDependenciesForm = ({
             checked={inputs.dependencies.includes(dep.id)}
             errorText={errors.dependencies}
             onChange={(
-              event: React.ChangeEvent<HTMLInputElement>,
+              event: ChangeEvent<HTMLInputElement>,
               { checked }: { checked: boolean },
             ) => handleChange({ id: dep.id, checked })}
           />

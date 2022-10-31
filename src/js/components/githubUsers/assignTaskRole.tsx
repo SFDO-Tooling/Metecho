@@ -1,10 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
-import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
-import Input from '@salesforce/design-system-react/components/input';
+import Search from '@salesforce/design-system-react/components/input/search';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { orderBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -85,7 +84,7 @@ const AssignTaskRoleModal = ({
     : validGitHubUsers;
 
   const handleAlertAssignee = (
-    event: React.FormEvent<HTMLFormElement>,
+    event: FormEvent<HTMLFormElement>,
     { checked }: { checked: boolean },
   ) => {
     setShouldAlertAssignee(checked);
@@ -113,7 +112,11 @@ const AssignTaskRoleModal = ({
     handleClose();
   };
 
-  const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleClearFindText = () => {
+    setFindText('');
+  };
+
+  const handleFindTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
   };
 
@@ -207,11 +210,13 @@ const AssignTaskRoleModal = ({
             slds-p-horizontal_medium
             slds-p-bottom_medium"
         >
-          <Input
+          <Search
             value={findText}
-            onChange={handleFindTextChange}
-            iconRight={<InputIcon name="search" category="utility" />}
+            assistiveText={{ label: t('Search for user') }}
             placeholder={t('Search for user')}
+            onChange={handleFindTextChange}
+            clearable
+            onClear={handleClearFindText}
           />
         </div>
         {epicUsers && taskHasEpic ? (

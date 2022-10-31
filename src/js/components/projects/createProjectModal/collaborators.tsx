@@ -1,7 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import { uniqBy } from 'lodash';
-import React, { useCallback } from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { EmptyIllustration } from '@/js/components/404';
@@ -53,7 +53,7 @@ const SelectProjectCollaboratorsForm = ({
   );
 
   const updateSelection = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     data: { selection: GitHubUserTableItem[] },
   ) => {
     const users: GitHubUser[] = data.selection.map((u) => ({
@@ -72,6 +72,7 @@ const SelectProjectCollaboratorsForm = ({
 
   return (
     <form className="slds-form">
+      <button type="submit" disabled hidden />
       <div
         className="slds-grid
           slds-grid_vertical-align-start

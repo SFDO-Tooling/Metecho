@@ -1,11 +1,29 @@
 import { t } from 'i18next';
-import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
+import {
+  chain,
+  cloneDeep,
+  intersection,
+  isEmpty,
+  mapValues,
+  mergeWith,
+  pick,
+  pickBy,
+  sortBy,
+  union,
+  without,
+} from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
 import TourPopover from '@/js/components/tour/popover';
 import { Epic } from '@/js/store/epics/reducer';
-import { Changeset, Org } from '@/js/store/orgs/reducer';
+import {
+  Changeset,
+  DatasetPairs,
+  DatasetPairsObject,
+  DatasetSchema,
+  Org,
+} from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import {
   EPIC_STATUSES,
@@ -184,6 +202,7 @@ export const getPercentage = (complete: number, total: number) =>
 export const getCompletedTasks = (tasks: Task[]) =>
   tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);
 
+// Removes `comparison` items from `changes`
 export const splitChangeset = (changes: Changeset, comparison: Changeset) => {
   const remaining: Changeset = {};
   const removed: Changeset = {};
@@ -208,3 +227,104 @@ export const mergeChangesets = (original: Changeset, adding: Changeset) =>
   mergeWith(cloneDeep(original), adding, (objVal, srcVal) =>
     union(objVal, srcVal),
   );
+
+export const getSchemaForChangeset = (
+  schema: DatasetSchema,
+  changes: Changeset,
+) => {
+  const matchedSchema: DatasetSchema = {};
+
+  for (const [objectName, fieldNames] of Object.entries(changes)) {
+    /* istanbul ignore else */
+    if (schema[objectName]) {
+      const fields = pick(schema[objectName].fields, fieldNames);
+      matchedSchema[objectName] = { ...schema[objectName], fields };
+    }
+  }
+
+  return matchedSchema;
+};
+
+export const filterChangesetBySchema = (
+  schema: DatasetSchema,
+  changes: Changeset,
+) => {
+  const matchedChangeset: Changeset = {};
+  const unmatchedChangeset: Changeset = {};
+
+  for (const [objectName, fieldNames] of Object.entries(changes)) {
+    if (schema[objectName]) {
+      const matchedFields = intersection(
+        fieldNames,
+        Object.keys(schema[objectName].fields),
+      );
+      if (matchedFields.length) {
+        matchedChangeset[objectName] = matchedFields;
+      }
+      const unmatchedFields = without(fieldNames, ...matchedFields);
+      if (unmatchedFields.length) {
+        unmatchedChangeset[objectName] = unmatchedFields;
+      }
+    } else {
+      unmatchedChangeset[objectName] = fieldNames;
+    }
+  }
+
+  return { matchedChangeset, unmatchedChangeset };
+};
+
+export const filterSchema = (schema: DatasetSchema, search: string) => {
+  /* istanbul ignore if */
+  if (!search) {
+    return schema;
+  }
+
+  const term = search.toLowerCase();
+  const filteredSchema: DatasetSchema = {};
+
+  for (const [name, value] of Object.entries(schema)) {
+    if (
+      name.toLowerCase().includes(term) ||
+      value.label.toLowerCase().includes(term)
+    ) {
+      filteredSchema[name] = value;
+    } else {
+      const fields = pickBy(
+        value.fields,
+        (field, fieldName) =>
+          fieldName.toLowerCase().includes(search) ||
+          field.label.toLowerCase().includes(search),
+      );
+      if (!isEmpty(fields)) {
+        filteredSchema[name] = { ...value, fields };
+      }
+    }
+  }
+
+  return filteredSchema;
+};
+
+export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
+  chain(schema)
+    .toPairs()
+    .sortBy([(pair) => pair[1].label.toLowerCase(), (pair) => pair[0]])
+    .map(
+      ([key, value]) =>
+        [
+          key,
+          {
+            ...value,
+            fields: chain(value.fields)
+              .toPairs()
+              .sortBy([
+                (pair) => pair[1].label.toLowerCase(),
+                (pair) => pair[0],
+              ])
+              .value(),
+          },
+        ] as [string, DatasetPairsObject],
+    )
+    .value();
+
+export const sortChangesetFields = (changes: Changeset): Changeset =>
+  mapValues(changes, (fields) => sortBy(fields));

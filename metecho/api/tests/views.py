@@ -972,7 +972,7 @@ class TestScratchOrgViewSet:
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
-            currently_capturing_changes=False,
+            currently_retrieving_metadata=False,
             currently_refreshing_changes=False,
             owner=other_user,
         )
@@ -992,7 +992,7 @@ class TestScratchOrgViewSet:
             url="https://example.com",
             is_created=True,
             delete_queued_at=None,
-            currently_capturing_changes=False,
+            currently_retrieving_metadata=False,
             currently_refreshing_changes=False,
             owner=other_user,
         )
@@ -1009,7 +1009,7 @@ class TestScratchOrgViewSet:
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
-                currently_capturing_changes=False,
+                currently_retrieving_metadata=False,
                 currently_refreshing_changes=False,
                 owner=client.user,
             )
@@ -1030,7 +1030,7 @@ class TestScratchOrgViewSet:
                 url="https://example.com",
                 is_created=True,
                 delete_queued_at=None,
-                currently_capturing_changes=False,
+                currently_retrieving_metadata=False,
                 currently_refreshing_changes=False,
                 owner=client.user,
             )
@@ -1174,6 +1174,75 @@ class TestScratchOrgViewSet:
 
             assert response.status_code == 403
             assert not refresh_scratch_org_job.delay.called
+
+    def test_parse_datasets(self, mocker, client, scratch_org_factory):
+        org = scratch_org_factory(currently_parsing_datasets=False)
+        parse_datasets_job = mocker.patch(
+            "metecho.api.jobs.parse_datasets_job", autospec=True
+        )
+
+        response = client.post(reverse("scratch-org-parse-datasets", args=[org.pk]))
+        org.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert org.currently_parsing_datasets
+        assert response.data["currently_parsing_datasets"]
+        parse_datasets_job.delay.assert_called_once_with(org=org, user=client.user)
+
+    def test_commit_dataset_from_org(self, mocker, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_dataset=False, owner=client.user
+        )
+        commit_dataset_from_org_job = mocker.patch(
+            "metecho.api.jobs.commit_dataset_from_org_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-commit-dataset", args=[scratch_org.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "dataset_name": "NewDataset",
+                "dataset_definition": {"foo": ["bar"]},
+            },
+        )
+        scratch_org.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert scratch_org.currently_retrieving_dataset
+        assert response.data["currently_retrieving_dataset"]
+        commit_dataset_from_org_job.delay.assert_called_once_with(
+            org=scratch_org,
+            user=client.user,
+            commit_message="New commit",
+            dataset_name="NewDataset",
+            dataset_definition={"foo": ["bar"]},
+        )
+
+    def test_commit_dataset_from_org__bad_user(
+        self, mocker, client, scratch_org_factory
+    ):
+        scratch_org = scratch_org_factory(currently_retrieving_dataset=False)
+        commit_dataset_from_org_job = mocker.patch(
+            "metecho.api.jobs.commit_dataset_from_org_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-commit-dataset", args=[scratch_org.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "dataset_name": "NewDataset",
+                "dataset_definition": {"foo": ["bar"]},
+            },
+        )
+        scratch_org.refresh_from_db()
+
+        assert (
+            response.status_code == 403
+        ), "Expected a 403 when the user is not the Org owner"
+        assert not scratch_org.currently_retrieving_dataset
+        assert not commit_dataset_from_org_job.delay.called
 
 
 @pytest.mark.django_db
