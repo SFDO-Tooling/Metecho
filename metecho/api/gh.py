@@ -205,7 +205,7 @@ def extract_zip_file(zip_file, owner, repo_name):
 
 @contextlib.contextmanager
 def local_github_checkout(
-    user=None, repo_id=None, repo_owner=None, repo_name=None, commit_ish=None
+    user=None, repo_id=None, commit_ish=None, repo_owner=None, repo_name=None,
 ):
     with temporary_dir() as repo_root:
         # pretend it's a git clone to satisfy cci
@@ -214,8 +214,10 @@ def local_github_checkout(
         repo = get_repo_info(
             user=user, repo_id=repo_id, repo_owner=repo_owner, repo_name=repo_name
         )
-        if commit_ish is None:
+        if commit_ish == "#DEFAULT":
             commit_ish = repo.default_branch
+        assert commit_ish, "Default branch should be supplied"
+
         zip_file = get_zip_file(repo, commit_ish)
 
         if not zip_file_is_safe(zip_file):

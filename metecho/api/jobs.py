@@ -87,7 +87,7 @@ def creating_gh_branch(instance):
 def get_branch_prefix(user, repository: Repository):
     if settings.BRANCH_PREFIX:
         return settings.BRANCH_PREFIX
-    with local_github_checkout(user, repository.id) as repo_root:
+    with local_github_checkout(user, repository.id, "#DEFAULT") as repo_root:
         return get_cumulus_prefix(
             repo_root=repo_root,
             repo_name=repository.name,
@@ -520,7 +520,9 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
 
         delete_org(scratch_org)
 
-        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
+        with local_github_checkout(
+            user, repo_id, commit_ish
+        ) as repo_root:
             _create_org_and_run_flow(
                 scratch_org,
                 user=user,
@@ -1102,7 +1104,7 @@ def available_org_config_names(project, *, user):
             repo_owner=project.repo_owner,
             repo_name=project.repo_name,
         )
-        with local_github_checkout(user, repo_id) as repo_root:
+        with local_github_checkout(user, repo_id, "#DEFAULT") as repo_root:
             config = get_project_config(
                 repo_root=repo_root,
                 repo_name=repo.name,
