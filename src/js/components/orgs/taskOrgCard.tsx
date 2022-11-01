@@ -17,7 +17,11 @@ import TourPopover from '@/js/components/tour/popover';
 import { Org } from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import { GitHubUser, User } from '@/js/store/user/reducer';
-import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
+import {
+  ORG_TYPES,
+  OrgTypes,
+  SHOULD_CHECK_ORG_FRESHNESS,
+} from '@/js/utils/constants';
 import { getTaskCommits } from '@/js/utils/helpers';
 import { logError } from '@/js/utils/logging';
 
@@ -200,7 +204,8 @@ const TaskOrgCard = ({
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
   // We consider an org out-of-date if it is not based on the first commit.
-  const orgOutOfDate = Boolean(org && orgCommitIdx !== 0);
+  const orgOutOfDate =
+    SHOULD_CHECK_ORG_FRESHNESS && Boolean(org && orgCommitIdx !== 0);
   const testOrgOutOfDate = type === ORG_TYPES.QA && orgOutOfDate;
 
   return (

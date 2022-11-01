@@ -64,6 +64,7 @@ import {
   OrgTypes,
   RETRIEVE_CHANGES,
   REVIEW_STATUSES,
+  SHOULD_CHECK_ORG_FRESHNESS,
   TASK_STATUSES,
 } from '@/js/utils/constants';
 import { getBranchLink, getTaskCommits } from '@/js/utils/helpers';
@@ -211,10 +212,12 @@ const TaskDetail = (
   const readyToRetrieveMetadata = userIsDevOwner && orgHasChanges;
   const orgHasBeenVisited = Boolean(userIsDevOwner && devOrg?.has_been_visited);
   const taskCommits = task ? getTaskCommits(task) : [];
-  const testOrgOutOfDate = Boolean(
-    testOrg?.is_created &&
-      taskCommits.indexOf(testOrg.latest_commit || '') !== 0,
-  );
+  const testOrgOutOfDate =
+    SHOULD_CHECK_ORG_FRESHNESS &&
+    Boolean(
+      testOrg?.is_created &&
+        taskCommits.indexOf(testOrg.latest_commit || '') !== 0,
+    );
   const testOrgReadyForReview = Boolean(
     task?.pr_is_open &&
       userIsAssignedTester &&

@@ -21,6 +21,7 @@ import {
   CONFIRM_ORG_TRACKER,
   ConfirmOrgTracker,
   OBJECT_TYPES,
+  SHOULD_CHECK_ORG_FRESHNESS,
 } from '@/js/utils/constants';
 import { getTaskCommits } from '@/js/utils/helpers';
 
@@ -59,16 +60,20 @@ const PlaygroundOrgCard = ({
     const taskCommits = getTaskCommits(task);
     missingCommits = taskCommits.indexOf(org.latest_commit);
     // We consider an org out-of-date if it is not based on the first commit.
-    orgOutOfDate = missingCommits !== 0;
+    orgOutOfDate = SHOULD_CHECK_ORG_FRESHNESS && missingCommits !== 0;
     baseCommit = taskCommits[0];
   } else if (epic) {
     heading = t('Epic Scratch Org');
     baseCommit = epic.latest_sha;
-    orgOutOfDate = Boolean(baseCommit && org.latest_commit !== baseCommit);
+    orgOutOfDate =
+      SHOULD_CHECK_ORG_FRESHNESS &&
+      Boolean(baseCommit && org.latest_commit !== baseCommit);
   } else {
     heading = t('Project Scratch Org');
     baseCommit = (project as Project).latest_sha;
-    orgOutOfDate = Boolean(baseCommit && org.latest_commit !== baseCommit);
+    orgOutOfDate =
+      SHOULD_CHECK_ORG_FRESHNESS &&
+      Boolean(baseCommit && org.latest_commit !== baseCommit);
   }
   const isCreating = Boolean(org && !org.is_created);
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);

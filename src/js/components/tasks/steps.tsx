@@ -7,7 +7,11 @@ import { Step } from '@/js/components/steps/stepsItem';
 import { OrgsByParent } from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
 import { User } from '@/js/store/user/reducer';
-import { ORG_TYPES, REVIEW_STATUSES } from '@/js/utils/constants';
+import {
+  ORG_TYPES,
+  REVIEW_STATUSES,
+  SHOULD_CHECK_ORG_FRESHNESS,
+} from '@/js/utils/constants';
 import { getTaskCommits } from '@/js/utils/helpers';
 
 interface TaskStatusStepsProps {
@@ -70,7 +74,8 @@ const TaskStatusSteps = ({
   const testOrgIsSubmittingReview = task.currently_submitting_review;
   const taskCommits = getTaskCommits(task);
   const testOrgOutOfDate =
-    hasTestOrg && taskCommits.indexOf(testOrg?.latest_commit || '') !== 0;
+    SHOULD_CHECK_ORG_FRESHNESS &&
+    taskCommits.indexOf(testOrg?.latest_commit || '') !== 0;
 
   const devOrgLoading =
     devOrgIsCreating ||
