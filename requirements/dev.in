@@ -5,6 +5,7 @@
 -c prod.txt
 Sphinx
 black
+daphne
 django-extensions
 doc8
 factory_boy
