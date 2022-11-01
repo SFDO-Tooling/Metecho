@@ -3,9 +3,11 @@ from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
 from pathlib import Path
+from typing import NamedTuple, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
+from cumulusci.salesforce_api.org_schema import Field, SObject
 from django.utils.timezone import now
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.orgs import Organization
@@ -1551,6 +1553,72 @@ extract:
 """
 
 
+class FakeFieldSchema(NamedTuple):
+    name: str
+    createable: bool
+    nillable: bool
+    referenceTo: Sequence[str] = ()
+    defaultedOnCreate: bool = False
+
+    @property
+    def label(self):
+        return self.name.upper()
+
+    requiredOnCreate = Field.requiredOnCreate
+
+
+class FakeSObjectSchema:
+    createable = True
+    queryable = True
+    retrieveable = True
+
+    def __init__(self, sobject_name: str, count: int, fields: list):
+        self.Name = self.name = sobject_name
+        self.fields = {field.name: field for field in fields}
+        self.count = count
+        self.label = self.name.upper()
+
+    def __getitem__(self, name):
+        return getattr(self, name)
+
+    extractable = SObject.extractable
+
+
+class FakeSchema:
+
+    includes_counts = True
+    sobjects = [
+        FakeSObjectSchema(
+            "Account",
+            10,
+            [FakeFieldSchema("Name", createable=True, nillable=False)],
+        ),
+        FakeSObjectSchema(
+            "Contact",
+            15,
+            [
+                FakeFieldSchema("LastName", createable=True, nillable=False),
+                FakeFieldSchema(
+                    "ContactId", createable=True, nillable=True, referenceTo=["Contact"]
+                ),
+            ],
+        ),
+    ]
+    by_name = {obj.name: obj for obj in sobjects}
+
+    def keys(self):
+        return self.by_name.keys()
+
+    def __getitem__(self, name):
+        try:
+            return self.get(name)
+        except KeyError:  # pragma: no cover
+            raise AttributeError(name)
+
+    def get(self, name):
+        return self.by_name[name]
+
+
 @pytest.fixture
 def patch_dataset_env(mocker, tmp_path):
     """Mock all values returned by SF and GH APIs in the `dataset_env` context manager"""
@@ -1558,7 +1626,7 @@ def patch_dataset_env(mocker, tmp_path):
     project_config = mocker.MagicMock(repo_root=str(tmp_path))
     org_config = mocker.MagicMock()
     sf = mocker.MagicMock()
-    schema = mocker.MagicMock()
+    schema = FakeSchema()
 
     mocker.patch(
         "metecho.api.models.refresh_access_token",
@@ -1577,6 +1645,23 @@ def patch_dataset_env(mocker, tmp_path):
         autospec=True,
     )
     yield (project_config, org_config, sf, schema, repo)
+
+
+EXPECTED_SCHEMA_OUTPUT = {
+    "Account": {
+        "label": "ACCOUNT",
+        "count": 10,
+        "fields": {"Name": {"label": "NAME", "referenceTo": ()}},
+    },
+    "Contact": {
+        "label": "CONTACT",
+        "count": 15,
+        "fields": {
+            "LastName": {"label": "LASTNAME", "referenceTo": ()},
+            "ContactId": {"label": "CONTACTID", "referenceTo": ["Contact"]},
+        },
+    },
+}
 
 
 @pytest.mark.django_db
@@ -1606,9 +1691,18 @@ class TestParseDatasets:
                 "type": "SCRATCH_ORG_PARSE_DATASETS",
                 "payload": {
                     "originating_user_id": org.owner.id,
-                    "schema": {},
+                    "schema": EXPECTED_SCHEMA_OUTPUT,
                     "dataset_errors": [],
-                    "datasets": {"Default": {}, "MyDataset": {}},
+                    "datasets": {
+                        "Default": {
+                            "Account": ["Name"],
+                            "Contact": ["LastName", "ContactId"],
+                        },
+                        "MyDataset": {
+                            "Account": ["Name"],
+                            "Contact": ["LastName", "ContactId"],
+                        },
+                    },
                 },
             },
             for_list=False,
@@ -1651,7 +1745,7 @@ class TestParseDatasets:
                 "type": "SCRATCH_ORG_PARSE_DATASETS",
                 "payload": {
                     "originating_user_id": org.owner.id,
-                    "schema": {},
+                    "schema": EXPECTED_SCHEMA_OUTPUT,
                     "dataset_errors": errors,
                     "datasets": {},
                 },
@@ -1680,7 +1774,7 @@ class TestParseDatasets:
                 "type": "SCRATCH_ORG_PARSE_DATASETS",
                 "payload": {
                     "originating_user_id": org.owner.id,
-                    "schema": {},
+                    "schema": EXPECTED_SCHEMA_OUTPUT,
                     "dataset_errors": [
                         "Found empty 'datasets/' directory in the Task branch"
                     ],
