@@ -168,7 +168,7 @@ class TestLocalGitHubCheckout:
             gh_as_user.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
-            with local_github_checkout(user, repo) as repo_root:
+            with local_github_checkout(user, repo, "main") as repo_root:
                 assert (Path(repo_root) / "cumulusci.yml").read_text() == "Hello"
                 assert shutil.rmtree.called
                 assert os.remove.called
@@ -209,7 +209,7 @@ class TestLocalGitHubCheckout:
         glob.return_value = ["owner-repo_name-"]
 
         with pytest.raises(Exception):
-            with local_github_checkout(user, repo_id):
+            with local_github_checkout(user, repo_id, "#DEFAULT"):
                 pass  # pragma: nocover
 
 
