@@ -383,6 +383,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
                 "instance_url": org_config.instance_url,
                 "access_token": org_config.access_token,
                 "scratch": True,
+                "config_name": org_config.config_name,
             }
         ),
         "GITHUB_TOKEN": gh_token,
