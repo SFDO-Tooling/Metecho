@@ -60,12 +60,6 @@
     --slds-c-accordion-section-spacing-inline-end: #{$spacing-medium};
   }
 
-  &.metecho-scroll-panel-container {
-    .slds-accordion__section {
-      --slds-c-accordion-section-spacing-inline-end: 0;
-    }
-  }
-
   .accordion-no-padding {
     .slds-is-open {
       .slds-accordion__section {
