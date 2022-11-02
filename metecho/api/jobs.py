@@ -426,25 +426,6 @@ def _create_org_and_run_flow(
                 scratch_org.save()
         scratch_org.refresh_from_db()
 
-    try:
-        run_flow(
-            cci=cci,
-            org_config=org_config,
-            flow_name=flow_name,
-            project_path=project_path,
-            user=user,
-        )
-    finally:
-        log_path = Path(project_path, ".cumulusci/logs/cci.log")
-        if log_path.exists():
-            scratch_org.refresh_from_db()
-            breakpoint()
-            # scratch_org is a model instance
-            # org_config is an instance of OrgConfig cci class
-            # scratch_org_config is a pydantic model??
-            scratch_org.cci_log = log_path.read_text()
-            scratch_org.save()
-    scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
     # function is called in a context that will eventually call a
     # finalize_* method, which will save the model.
