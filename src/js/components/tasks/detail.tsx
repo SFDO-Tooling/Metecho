@@ -4,6 +4,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
+import cookies from 'js-cookie';
 import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -826,7 +827,7 @@ const TaskDetail = (
   }
 
   let retrieveButtons: ReactNode = null;
-  let retrieveMetadataButton: ReactNode = null;
+  const retrieveMetadataButton: ReactNode = null;
   let retrieveDatasetButton: ReactNode = null;
   let retrieveOmnistudioButton: ReactNode = null;
   if (
@@ -865,89 +866,75 @@ const TaskDetail = (
     } else if (orgHasChanges) {
       retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
-
-    retrieveDatasetButton = (
-      <div className="inline-container slds-m-right_small">
-        <Button
-          label={
-            currentlyCommittingDataset ? (
-              <LabelWithSpinner
-                label={t('Retrieving Selected Dataset…')}
-                variant="base"
-              />
-            ) : (
-              t('Retrieve Dataset')
-            )
-          }
-          variant="outline-brand"
-          className={classNames('slds-align-middle', {
-            'slds-m-bottom_medium': readyToSubmit,
-            'slds-m-bottom_x-large': !readyToSubmit,
-          })}
-          onClick={openRetrieveDatasetModal}
-          disabled={
-            fetchingChanges ||
-            currentlyFetching ||
-            currentlyCommittingMetadata ||
-            currentlyCommittingDataset ||
-            currentlyCommittingOmnistudio ||
-            currentlyReassigning
-          }
-        />
-      </div>
+    const should_show_datasets_button = cookies.get(
+      'should_show_datasets_button',
     );
 
-    retrieveOmnistudioButton = (
-      <div className="inline-container slds-m-right_small">
-        {/* {hasOmnistudioInstalled ? 'yay' : 'no'} */}
-        <Button
-          label={
-            currentlyCommittingOmnistudio ? (
-              <LabelWithSpinner
-                label={t('Retrieving Selected Omnistudio Configuration…')}
-                variant="base"
-              />
-            ) : (
-              t('Retrieve Omnistudio Configuration')
-            )
-          }
-          variant="outline-brand"
-          className={classNames('slds-align-middle', {
-            'slds-m-bottom_medium': readyToSubmit,
-            'slds-m-bottom_x-large': !readyToSubmit,
-          })}
-          onClick={openRetrieveOmnistudioModal}
-          disabled={
-            fetchingChanges ||
-            currentlyFetching ||
-            currentlyCommittingMetadata ||
-            currentlyCommittingDataset ||
-            currentlyCommittingOmnistudio ||
-            currentlyReassigning
-          }
-        />
-      </div>
-    );
-
-    retrieveMetadataButton = (
-      <Button
-        label={retrieveMetadataText}
-        variant={isPrimary ? 'brand' : 'outline-brand'}
-        className={classNames('slds-align-middle', 'slds-m-right_small', {
-          'slds-m-bottom_medium': readyToSubmit,
-          'slds-m-bottom_x-large': !readyToSubmit,
-        })}
-        onClick={doRetrieveMetadata}
-        disabled={
-          fetchingChanges ||
-          currentlyFetching ||
-          currentlyCommittingMetadata ||
-          currentlyCommittingDataset ||
-          currentlyCommittingOmnistudio ||
-          currentlyReassigning
-        }
-      />
-    );
+    if (
+      should_show_datasets_button &&
+      !(currentlyReassigning || currentlyCommittingMetadata)
+    ) {
+      retrieveDatasetButton = (
+        <div className="inline-container slds-m-right_small">
+          <Button
+            label={
+              currentlyCommittingDataset ? (
+                <LabelWithSpinner
+                  label={t('Retrieving Selected Dataset…')}
+                  variant="base"
+                />
+              ) : (
+                t('Retrieve Dataset')
+              )
+            }
+            variant="outline-brand"
+            className={classNames('slds-align-middle', {
+              'slds-m-bottom_medium': readyToSubmit,
+              'slds-m-bottom_x-large': !readyToSubmit,
+            })}
+            onClick={openRetrieveDatasetModal}
+            disabled={
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingMetadata ||
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
+            }
+          />
+        </div>
+      );
+      retrieveOmnistudioButton = (
+        <div className="inline-container slds-m-right_small">
+          <Button
+            label={
+              currentlyCommittingOmnistudio ? (
+                <LabelWithSpinner
+                  label={t('Retrieving Selected Omnistudio Configuration…')}
+                  variant="base"
+                />
+              ) : (
+                t('Retrieve Omnistudio Configuration')
+              )
+            }
+            variant="outline-brand"
+            className={classNames('slds-align-middle', {
+              'slds-m-bottom_medium': readyToSubmit,
+              'slds-m-bottom_x-large': !readyToSubmit,
+            })}
+            onClick={openRetrieveOmnistudioModal}
+            disabled={
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingMetadata ||
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
+            }
+          />
+        </div>
+      );
+    }
 
     retrieveButtons = (
       <div className="slds-is-relative">

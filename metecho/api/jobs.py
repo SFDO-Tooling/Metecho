@@ -3,8 +3,9 @@ import logging
 import string
 import traceback
 from datetime import timedelta
+from io import StringIO
 from pathlib import Path
-from typing import Iterable
+from typing import Dict, Iterable, List
 
 import cumulusci
 import requests
@@ -15,9 +16,14 @@ from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
 from cumulusci.core.config import TaskConfig
-from cumulusci.core.datasets import Dataset
+from cumulusci.core.datasets import (
+    DEFAULT_EXTRACT_DATA,
+    Dataset,
+    ExtractRulesFile,
+    flatten_declarations,
+)
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.salesforce_api.org_schema import Filters, get_org_schema
+from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import download_extract_github, temporary_dir
@@ -98,7 +104,7 @@ def creating_gh_branch(instance):
 def get_branch_prefix(user, repository: Repository):
     if settings.BRANCH_PREFIX:
         return settings.BRANCH_PREFIX
-    with local_github_checkout(user, repository.id) as repo_root:
+    with local_github_checkout(user, repository.id, "#DEFAULT") as repo_root:
         return get_cumulus_prefix(
             repo_root=repo_root,
             repo_name=repository.name,
@@ -401,7 +407,24 @@ def _create_org_and_run_flow(
         "beta": "install_beta",
         "release": "install_prod",
     }
-    flow_name = scratch_org_config.setup_flow or cases[org_config_name]
+    flow_name = scratch_org_config.setup_flow or cases.get(org_config_name)
+
+    if flow_name:
+        try:
+            run_flow(
+                cci=cci,
+                org_config=org_config,
+                flow_name=flow_name,
+                project_path=project_path,
+                user=user,
+            )
+        finally:
+            log_path = Path(project_path, ".cumulusci/logs/cci.log")
+            if log_path.exists():
+                scratch_org.refresh_from_db()
+                scratch_org.cci_log = log_path.read_text()
+                scratch_org.save()
+        scratch_org.refresh_from_db()
 
     try:
         run_flow(
@@ -1117,7 +1140,7 @@ def available_org_config_names(project, *, user):
             repo_owner=project.repo_owner,
             repo_name=project.repo_name,
         )
-        with local_github_checkout(user, repo_id) as repo_root:
+        with local_github_checkout(user, repo_id, "#DEFAULT") as repo_root:
             config = get_project_config(
                 repo_root=repo_root,
                 repo_name=repo.name,
@@ -1165,13 +1188,62 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
 
 user_reassign_job = job(user_reassign)
 
+sobjname = str
+
+FieldList = List[str]
+
+SchemaFilter = Dict[sobjname, FieldList]
+
+
+# TODO: Move this function somewhere into CCI itself
+#       perhaps as a method of ExtractRulesFile or Schema
+def filter_schema_to_extractaable_objs_and_fields(schema: Schema) -> SchemaFilter:
+    # DEFAULT_EXTRACT_DATA is a rule to extract basically everything
+    extract_file = StringIO(DEFAULT_EXTRACT_DATA)
+    decls = ExtractRulesFile.parse_extract(extract_file)
+
+    # Find the obbjects and fields that constitute "everything"
+    flattened_declarations = flatten_declarations(list(decls.values()), schema)
+    return {decl.sf_object: decl.fields for decl in flattened_declarations}
+
+
+def get_objs_and_fields_from_org(schema: Schema) -> Dict[str, Dict]:
+    filtered_schema: SchemaFilter = filter_schema_to_extractaable_objs_and_fields(
+        schema
+    )
+    return {
+        objname: schema_obj_to_json(schema, objname, fields)
+        for objname, fields in filtered_schema.items()
+    }
+
+
+def schema_obj_to_json(schema: Schema, objname: str, fields: FieldList):
+    schema_obj = schema[objname]
+    return {
+        "label": schema_obj.label,
+        "count": schema_obj.count,
+        "fields": {
+            fieldname: schema_field_to_json(schema_obj.fields[fieldname])
+            for fieldname in fields
+        },
+    }
+
+
+def schema_field_to_json(field_data: Field):
+    return {
+        "label": field_data.label,
+        # TODO: compress empty reference targets to reduce network bytes
+        "referenceTo": field_data.referenceTo,
+    }
+
 
 @contextlib.contextmanager
-def dataset_env(org: ScratchOrg, user: User):
+def dataset_env(org: ScratchOrg):
     """
     Yields all configuration objects required by the CumulusCI `Dataset` class
     """
     task = org.task
+    assert task
     repo = get_repo_info(
         None,
         repo_owner=task.root_project.repo_owner,
@@ -1217,31 +1289,19 @@ def parse_datasets(*, org: ScratchOrg, user: User):
     """
     # These fields are automatically captured by CCI or cause trouble while capturing,
     # so we don't even include them in the schema at all
-    IGNORED_FIELDS = ("Id",)
 
     datasets = {}
     org_schema = {}
     dataset_errors = []
     try:
         org.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
-            # JSON-friendly version of `schema`
-            org_schema = {
-                obj_name: {
-                    "label": obj.label,
-                    "count": obj.count,
-                    "fields": {
-                        field_name: {"label": field.label}
-                        for field_name, field in obj.fields.items()
-                        if field_name not in IGNORED_FIELDS
-                    },
-                }
-                for obj_name, obj in schema.items()
-            }
+        with dataset_env(org) as (project_config, org_config, sf, schema, repo):
+            org_schema = get_objs_and_fields_from_org(schema)
 
             project_path = project_config.repo_root
             datasets_dir = Path(project_path) / "datasets"
-            entries = list(datasets_dir.iterdir()) if datasets_dir.is_dir() else ()
+            entries = datasets_dir.iterdir() if datasets_dir.is_dir() else ()
+            entries = sorted(entries)
             if not entries:
                 dataset_errors.append(
                     _("Found empty 'datasets/' directory in the Task branch")
@@ -1250,7 +1310,7 @@ def parse_datasets(*, org: ScratchOrg, user: User):
                 if not entry.is_dir():
                     continue
                 with Dataset(
-                    entry.name, project_config, org_config, sf, schema
+                    entry.name, project_config, sf, org_config, schema
                 ) as dataset:
                     rel_file = dataset.extract_file.relative_to(project_path)
                     if not dataset.extract_file.exists():
@@ -1307,7 +1367,7 @@ def commit_dataset_from_org(
         task.refresh_from_db()
         with dataset_env(org, user) as (project_config, sf, org_config, schema, repo):
             with Dataset(
-                dataset_name, project_config, org_config, sf, schema
+                dataset_name, project_config, sf, org_config, schema
             ) as dataset:
                 dataset.path.mkdir(parents=True, exist_ok=True)
                 dataset.update_schema_subset(dataset_definition)
@@ -1357,19 +1417,17 @@ def commit_omnistudio_from_org(
                 config={"options": {"job_file": yaml_path, "org": org_config.name}}
             )
             repo_root = project_config.repo_root
-            if not (Path(repo_root) / yaml_path).is_file():
+            jobfile: Path = Path(repo_root, yaml_path)
+            if not jobfile.is_file():
                 raise MissingJobfileError(f"Jobfile not found at path {yaml_path}")
 
-            with (Path(repo_root) / yaml_path) as jobfile:
-                jobfileobj = yaml.safe_load(open(jobfile))
-                if "projectPath" not in jobfileobj:
-                    raise MissingProjectPathError(
-                        f"No projectPath defined in Jobfile at path {yaml_path}"
-                    )
-
-                vlocity_path = (
-                    Path(project_config.repo_root) / jobfileobj["projectPath"]
+            jobfileobj = yaml.safe_load(jobfile.read_text())
+            if "projectPath" not in jobfileobj:
+                raise MissingProjectPathError(
+                    f"No projectPath defined in Jobfile at path {yaml_path}"
                 )
+
+            vlocity_path = Path(project_config.repo_root) / jobfileobj["projectPath"]
 
             vlocity_task = VlocityRetrieveTask(project_config, task_config, org_config)
             vlocity_task()

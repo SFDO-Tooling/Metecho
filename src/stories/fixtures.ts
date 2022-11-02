@@ -801,6 +801,7 @@ export const sampleDevOrg = {
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
   currently_retrieving_dataset: false,
+  currently_retrieving_omnistudio: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
@@ -838,6 +839,7 @@ export const sampleScratchOrg = {
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
   currently_retrieving_dataset: false,
+  currently_retrieving_omnistudio: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
@@ -944,7 +946,8 @@ export const sampleDatasetSchema = {
     count: 5,
     fields: {
       FooBar: { label: 'Foo Bar' },
-      BuzBaz: { label: 'Buz Baz' },
+      BuzBaz: { label: 'Buz Baz' }, // , referenceTo: []
+      Custom__ApexRef__c: { label: 'Fake Apex Ref' }, // , referenceTo: ['Apex Class']
     },
   },
   ApexClass: {
@@ -954,10 +957,17 @@ export const sampleDatasetSchema = {
       ApiVersion: { label: 'Api Version' },
     },
   },
+  Contact: {
+    label: 'Contact',
+    count: 3,
+    fields: {
+      AccountId: { label: 'Parent Account', referenceTo: ['Account'] },
+    },
+  },
 };
 
 export const sampleChangeset = {
-  Account: ['FooBar', 'BuzBaz'],
+  Account: ['FooBar', 'BuzBaz', 'Custom__ApexRef__c'],
 };
 
 export const sampleDatasets = {

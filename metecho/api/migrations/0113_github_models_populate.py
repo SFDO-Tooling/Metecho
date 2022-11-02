@@ -13,30 +13,40 @@ def forwards(apps, schema_editor):
     # Create GitHubCollaboration objects from Project.github_users
     for project in Project.objects.all():
         for collaborator in project.github_users_json:
+            name = collaborator.get("name")
+            avatar_url = collaborator.get("avatar_url")
             user, _ = GitHubUser.objects.update_or_create(
                 id=collaborator["id"],
                 defaults={
                     "login": collaborator["login"],
-                    "name": collaborator.get("name", ""),
-                    "avatar_url": collaborator.get("avatar_url", ""),
+                    "name": name or "",
+                    "avatar_url": avatar_url or "",
                 },
             )
+
             GitHubCollaboration.objects.create(
-                project=project, user=user, permissions=collaborator["permissions"]
+                project=project, user=user, permissions=collaborator.get("permissions")
             )
 
     # Convert JSON Epic collaborators into m2m entries
     for epic in Epic.objects.all():
         for user_id in epic.github_users_json:
-            user = GitHubUser.objects.get(id=user_id)
-            epic.github_users.add(user)
+            try:
+                user = GitHubUser.objects.get(id=user_id)
+                epic.github_users.add(user)
+            except GitHubUser.DoesNotExist:
+                pass
 
     # Convert Task assignees into GitHubUser instances
     for task in Task.objects.all():
-        if task.assigned_dev_old:
-            task.assigned_dev = GitHubUser.objects.get(id=task.assigned_dev_old)
-        if task.assigned_qa_old:
-            task.assigned_qa = GitHubUser.objects.get(id=task.assigned_qa_old)
+        try:
+            if task.assigned_dev_old:
+                task.assigned_dev = GitHubUser.objects.get(id=task.assigned_dev_old)
+            if task.assigned_qa_old:
+                task.assigned_qa = GitHubUser.objects.get(id=task.assigned_qa_old)
+        except GitHubUser.DoesNotExist:
+            pass
+
         if task.assigned_dev or task.assigned_qa:
             task.save()
 
