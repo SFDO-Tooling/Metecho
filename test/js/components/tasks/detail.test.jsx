@@ -1,5 +1,6 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
+import cookies from 'js-cookie';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -661,6 +662,9 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('retrieving dataset', () => {
+    // For should_show_datasets_button = True
+    cookies.get = jest.fn(() => 'True');
+
     test('renders loading button', () => {
       const { getAllByText } = setup({
         initialState: {
@@ -887,6 +891,9 @@ describe('<TaskDetail/>', () => {
 
   describe('<RetrieveDatasetModal />', () => {
     describe('"cancel" click', () => {
+      // For should_show_datasets_button = True
+      cookies.get = jest.fn(() => 'True');
+
       test('closes modal', () => {
         const { getByText, queryByText, getByTitle } = setup();
         fireEvent.click(getByText('Retrieve Dataset'));

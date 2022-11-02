@@ -54,6 +54,7 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
       activeIdx={activeIdx}
       isCompleted={isCompleted}
       isLost={isLost}
+      label={t('Task Status')}
     />
   );
 };

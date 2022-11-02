@@ -4,6 +4,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
+import cookies from 'js-cookie';
 import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -853,7 +854,15 @@ const TaskDetail = (
     } else if (orgHasChanges) {
       retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
-    if (!(currentlyReassigning || currentlyCommittingMetadata)) {
+
+    const should_show_datasets_button = cookies.get(
+      'should_show_datasets_button',
+    );
+
+    if (
+      should_show_datasets_button &&
+      !(currentlyReassigning || currentlyCommittingMetadata)
+    ) {
       retrieveDatasetButton = (
         <div className="inline-container slds-m-left_small">
           <Button

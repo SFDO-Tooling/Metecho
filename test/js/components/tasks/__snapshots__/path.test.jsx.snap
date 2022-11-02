@@ -12,6 +12,7 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
         class="slds-grid slds-path__track"
       >
         <ul
+          aria-label="Task Status"
           aria-orientation="horizontal"
           class="slds-path__nav"
           role="listbox"
@@ -175,6 +176,7 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
         class="slds-grid slds-path__track"
       >
         <ul
+          aria-label="Task Status"
           aria-orientation="horizontal"
           class="slds-path__nav"
           role="listbox"
@@ -328,6 +330,7 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
         class="slds-grid slds-path__track"
       >
         <ul
+          aria-label="Task Status"
           aria-orientation="horizontal"
           class="slds-path__nav"
           role="listbox"
@@ -481,6 +484,7 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
         class="slds-grid slds-path__track"
       >
         <ul
+          aria-label="Task Status"
           aria-orientation="horizontal"
           class="slds-path__nav"
           role="listbox"
@@ -644,6 +648,7 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
         class="slds-grid slds-path__track"
       >
         <ul
+          aria-label="Task Status"
           aria-orientation="horizontal"
           class="slds-path__nav"
           role="listbox"
@@ -792,6 +797,7 @@ exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
         class="slds-grid slds-path__track"
       >
         <ul
+          aria-label="Task Status"
           aria-orientation="horizontal"
           class="slds-path__nav"
           role="listbox"
