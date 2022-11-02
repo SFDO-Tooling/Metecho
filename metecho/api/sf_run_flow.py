@@ -18,6 +18,8 @@ from django_rq import get_scheduler
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
+from metecho.exceptions import SubcommandException
+
 logger = logging.getLogger(__name__)
 
 # Salesforce connected app
@@ -420,7 +422,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
-        raise Exception(
+        raise SubcommandException(
             _last_line(traceback) or _last_line(orig_stdout.decode("utf-8"))
         )
 

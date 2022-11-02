@@ -1,0 +1,3 @@
+class SubcommandException(Exception):
+    pass
+
