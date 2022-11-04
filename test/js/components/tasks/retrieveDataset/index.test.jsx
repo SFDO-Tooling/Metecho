@@ -219,6 +219,7 @@ describe('<RetrieveDatasetModal/>', () => {
         getByLabelText('Foo Bar'),
         getByLabelText('Buz Baz'),
         getByLabelText('Api Version'),
+        getByLabelText('Parent Account'),
       ];
     });
 
@@ -253,6 +254,26 @@ describe('<RetrieveDatasetModal/>', () => {
         expect(inputs[0].checked).toBe(true);
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
+      });
+    });
+
+    describe('select/lookup', () => {
+      test('selects lookup targets', () => {
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(false);
+
+        fireEvent.click(group1);
+
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(false);
+
+        fireEvent.click(inputs[3]);
+
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(false);
       });
     });
 

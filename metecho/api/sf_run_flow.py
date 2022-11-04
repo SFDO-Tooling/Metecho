@@ -18,6 +18,8 @@ from django_rq import get_scheduler
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
+from metecho.exceptions import SubcommandException
+
 logger = logging.getLogger(__name__)
 
 # Salesforce connected app
@@ -383,6 +385,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
                 "instance_url": org_config.instance_url,
                 "access_token": org_config.access_token,
                 "scratch": True,
+                "config_name": org_config.config_name,
             }
         ),
         "GITHUB_TOKEN": gh_token,
@@ -395,7 +398,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
     # To determine this, check for the presence of env vars related to dyno metadata.
     # The heroku labs feature must be enabled on the application for this to work:
     # https://devcenter.heroku.com/articles/dyno-metadata#dyno-metadata
-    if os.environ["HEROKU_APP_ID"]:  # pragma: nocover
+    if os.environ.get("HEROKU_APP_ID"):  # pragma: nocover
         heroku_specific_env = {
             "PYTHONPATH": os.environ["PYTHONPATH"],
             "LD_LIBRARY_PATH": os.environ["LD_LIBRARY_PATH"],
@@ -419,7 +422,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
-        raise Exception(
+        raise SubcommandException(
             _last_line(traceback) or _last_line(orig_stdout.decode("utf-8"))
         )
 
