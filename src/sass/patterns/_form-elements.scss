@@ -75,6 +75,14 @@
     }
   }
 
+  .slds-button.slds-accordion__summary-action {
+    &:focus {
+      svg {
+        outline: 2px solid $color-border-brand-dark;
+      }
+    }
+  }
+
   .grow-inner-item {
     .slds-accordion__summary-action > .slds-truncate {
       flex-grow: 1;
