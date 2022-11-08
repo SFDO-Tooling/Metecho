@@ -329,5 +329,9 @@ export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
 export const sortChangesetFields = (changes: Changeset): Changeset =>
   mapValues(changes, (fields) => sortBy(fields));
 
-export const getMyDomain = (url: string) =>
-  url.replace(/^http(s*)?:\/\//, '').replace(/.my.salesforce.com$/, '');
+export const extractCustomDomain = (url: string): string => {
+  const protocol = /(http(s?)):\/\//;
+  const domain =
+    /(\.(scratch|develop|demo|free|patch|sandbox|trailblaze))*\.my\.salesforce\.com(\/?)/;
+  return url.replace(protocol, '').replace(domain, '');
+};

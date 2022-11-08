@@ -1,11 +1,11 @@
 import { fireEvent } from '@testing-library/react';
+import { indexOf } from 'lodash';
 import React from 'react';
 
 import ConnectModal from '@/js/components/user/connect';
 
-import { getMyDomain } from './../../../../src/js/utils/helpers';
+import { extractCustomDomain } from './../../../../src/js/utils/helpers';
 import { render } from './../../utils';
-import { indexOf } from 'lodash';
 
 describe('<ConnectModal />', () => {
   const toggleModal = jest.fn();
@@ -77,12 +77,25 @@ describe('<ConnectModal />', () => {
       expect(getByTestId('custom-domain')).toHaveTextContent('domain');
       expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
 
-      const inputs = ['https://sfdc-ax-hub-axe.my.salesforce.com', 'http://sfdc-ax-hub-axe.my.salesforce.com', 'sfdc-ax-hub-axe']
+      const inputs = [
+        'https://sfdc-ax-hub-axe.scratch.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.patch.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.demo.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.sandbox.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.free.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.trailblaze.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.develop.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.my.salesforce.com',
+        'http://sfdc-ax-hub-axe.my.salesforce.com',
+        'sfdc-ax-hub-axe',
+      ];
 
       inputs.forEach((custom_domain) => {
         fireEvent.change(input, {
           target: {
-            value: getMyDomain('https://sfdc-ax-hub-axe.my.salesforce.com'),
+            value: extractCustomDomain(
+              'https://sfdc-ax-hub-axe.my.salesforce.com',
+            ),
           },
         });
         expect(getByTestId('custom-domain')).toHaveTextContent(
@@ -96,17 +109,17 @@ describe('<ConnectModal />', () => {
       // Testing any other dns notation found in the wild
       fireEvent.change(input, {
         target: {
-          value: getMyDomain(
+          value: extractCustomDomain(
             'https://sfdc-ax-hub-axe.scratch.my.salesforce.com',
           ),
         },
       });
 
       expect(getByTestId('custom-domain')).toHaveTextContent(
-        'https://sfdc-ax-hub-axe.scratch.my.salesforce.com',
+        'https://sfdc-ax-hub-axe.my.salesforce.com',
       );
       expect(getByTestId('sf-login-custom-domain')).toHaveValue(
-        'sfdc-ax-hub-axe.scratch',
+        'sfdc-ax-hub-axe',
       );
     });
 

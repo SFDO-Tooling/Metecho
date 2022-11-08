@@ -1,6 +1,8 @@
 import { TASK_STATUSES } from '@/js/utils/constants';
 import * as helpers from '@/js/utils/helpers';
 
+import { extractCustomDomain } from '../../../src/js/utils/helpers';
+
 describe('pluralize', () => {
   test.each([
     [0, 'test', 'tests'],
@@ -114,5 +116,15 @@ describe('mergeChangesets', () => {
     };
 
     expect(actual).toEqual(expected);
+  });
+});
+
+describe('extractCustomDomain', () => {
+  test('extracts custom subdomain from url', () => {
+    const input = 'https://foo-bar-01.cs42.my.salesforce.com/';
+    const expected = 'foo-bar-01.cs42';
+    const actual = extractCustomDomain(input);
+
+    return expect(actual).toBe(expected);
   });
 });
