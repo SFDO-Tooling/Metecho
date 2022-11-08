@@ -1347,7 +1347,7 @@ def commit_dataset_from_org(
         org.refresh_from_db()
         task = org.task
         task.refresh_from_db()
-        with dataset_env(org, user) as (project_config, sf, org_config, schema, repo):
+        with dataset_env(org) as (project_config, org_config, sf, schema, repo):
             with Dataset(
                 dataset_name, project_config, sf, org_config, schema
             ) as dataset:
@@ -1394,7 +1394,7 @@ def commit_omnistudio_from_org(
         org.refresh_from_db()
         task = org.task
         task.refresh_from_db()
-        with dataset_env(org, user) as (project_config, org_config, sf, schema, repo):
+        with dataset_env(org) as (project_config, org_config, sf, schema, repo):
             task_config = TaskConfig(
                 config={"options": {"job_file": yaml_path, "org": org_config.name}}
             )

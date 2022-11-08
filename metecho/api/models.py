@@ -1261,7 +1261,7 @@ class ScratchOrg(
         return True
 
     @property
-    def is_omnistudio_installed(self):
+    def is_omnistudio_installed(self) -> bool:
         return "omnistudio" in self.installed_packages
 
     @property
