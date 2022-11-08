@@ -3,6 +3,7 @@ import React from 'react';
 
 import ConnectModal from '@/js/components/user/connect';
 
+import { getMyDomain } from './../../../../src/js/utils/helpers';
 import { render } from './../../utils';
 
 describe('<ConnectModal />', () => {
@@ -60,6 +61,73 @@ describe('<ConnectModal />', () => {
 
       expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
       expect(getByTestId('sf-login-custom-domain')).toHaveValue('foobar');
+    });
+
+    test('Checks custom domain properly formats regardless of format', () => {
+      const { getByLabelText, getByTestId } = result;
+      const input = getByLabelText('Custom Domain');
+
+      expect(input).toBeVisible();
+      expect(getByTestId('custom-domain')).toHaveTextContent('domain');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
+
+      fireEvent.change(input, { target: { value: ' ' } });
+
+      expect(getByTestId('custom-domain')).toHaveTextContent('domain');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
+
+      // expect(getMyDomain("https://sfdc-ax-hub-axe.my.salesforce.com").toHaveValue("sfdc-ax-hub-axe"));
+      fireEvent.change(input, {
+        target: {
+          value: getMyDomain('https://sfdc-ax-hub-axe.my.salesforce.com'),
+        },
+      });
+
+      expect(getByTestId('custom-domain')).toHaveTextContent(
+        'https://sfdc-ax-hub-axe.my.salesforce.com',
+      );
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue(
+        'sfdc-ax-hub-axe',
+      );
+
+      fireEvent.change(input, {
+        target: {
+          value: getMyDomain('http://sfdc-ax-hub-axe.my.salesforce.com'),
+        },
+      });
+
+      expect(getByTestId('custom-domain')).toHaveTextContent(
+        'https://sfdc-ax-hub-axe.my.salesforce.com',
+      );
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue(
+        'sfdc-ax-hub-axe',
+      );
+
+      fireEvent.change(input, {
+        target: { value: getMyDomain('sfdc-ax-hub-axe') },
+      });
+
+      expect(getByTestId('custom-domain')).toHaveTextContent(
+        'https://sfdc-ax-hub-axe.my.salesforce.com',
+      );
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue(
+        'sfdc-ax-hub-axe',
+      );
+
+      fireEvent.change(input, {
+        target: {
+          value: getMyDomain(
+            'https://sfdc-ax-hub-axe.scratch.my.salesforce.com',
+          ),
+        },
+      });
+
+      expect(getByTestId('custom-domain')).toHaveTextContent(
+        'https://sfdc-ax-hub-axe.scratch.my.salesforce.com',
+      );
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue(
+        'sfdc-ax-hub-axe.scratch',
+      );
     });
 
     describe('"back" click', () => {

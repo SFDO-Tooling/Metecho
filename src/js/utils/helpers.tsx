@@ -328,3 +328,6 @@ export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
 
 export const sortChangesetFields = (changes: Changeset): Changeset =>
   mapValues(changes, (fields) => sortBy(fields));
+
+export const getMyDomain = (url: string) =>
+  url.replace(/^http(s*)?:\/\//, '').replace(/.my.salesforce.com$/, '');
