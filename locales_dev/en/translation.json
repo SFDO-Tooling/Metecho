@@ -350,7 +350,7 @@
   "Submitting a review…": "Submitting a review…",
   "Submitting changes for testing…": "Submitting changes for testing…",
   "Submitting review…": "Submitting review…",
-  "Successfully created GitHub Repository for new Project: “{{project_name}}.”": "Successfully created GitHub Repository for new Project: “{{project_name}}.”",
+  "Successfully created GitHub Repository for new Project: “{{project_name}}.” Please ensure to enable branch protection rules on your main branch.": "Successfully created GitHub Repository for new Project: “{{project_name}}.” Please ensure to enable branch protection rules on your main branch.",
   "Successfully created {{orgType}} for {{parent}} “{{name}}.”": "Successfully created {{orgType}} for {{parent}} “{{name}}.”",
   "Successfully created {{orgType}}.": "Successfully created {{orgType}}.",
   "Successfully deleted {{orgType}} for {{parent}} “{{name}}.”": "Successfully deleted {{orgType}} for {{parent}} “{{name}}.”",
