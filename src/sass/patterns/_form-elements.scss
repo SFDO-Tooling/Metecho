@@ -60,12 +60,6 @@
     --slds-c-accordion-section-spacing-inline-end: #{$spacing-medium};
   }
 
-  &.metecho-scroll-panel-container {
-    .slds-accordion__section {
-      --slds-c-accordion-section-spacing-inline-end: 0;
-    }
-  }
-
   .accordion-no-padding {
     .slds-is-open {
       .slds-accordion__section {
@@ -78,6 +72,14 @@
   &.has-checkboxes {
     .slds-accordion__summary {
       @include icon-checkbox-layout;
+    }
+  }
+
+  .slds-button.slds-accordion__summary-action {
+    &:focus {
+      svg {
+        outline: 2px solid $color-border-brand-dark;
+      }
     }
   }
 
