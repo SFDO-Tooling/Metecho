@@ -1262,7 +1262,7 @@ class ScratchOrg(
 
     @property
     def is_omnistudio_installed(self):
-        return "omni" in self.installed_packages
+        return "omnistudio" in self.installed_packages
 
     @property
     def parent(self):

@@ -435,8 +435,9 @@ def _create_org_and_run_flow(
         originating_user_id=originating_user_id,
     )
     scratch_org.is_created = True
-    breakpoint()
-    scratch_org.installed_packages = org_config.installed_packages
+    scratch_org.installed_packages = [
+        k for k, v in org_config.installed_packages.items()
+    ]
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT

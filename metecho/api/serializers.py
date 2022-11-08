@@ -1102,9 +1102,6 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "is_omnistudio_installed": {"read_only": True},
         }
 
-    # def is_omnistudio_installed(self, obj) -> bool:
-    #     return "omni" in obj.installed_packages
-
     def _X_changes(self, obj, kind):
         user = getattr(self.context.get("request"), "user", None)
         if obj.owner == user:

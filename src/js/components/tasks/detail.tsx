@@ -827,52 +827,69 @@ const TaskDetail = (
   }
 
   let retrieveButtons: ReactNode = null;
-  const retrieveMetadataButton: ReactNode = null;
+  let retrieveMetadataButton: ReactNode = null;
   let retrieveDatasetButton: ReactNode = null;
   let retrieveOmnistudioButton: ReactNode = null;
-  if (
-    project.has_push_permission &&
-    !taskIsMerged &&
-    (readyToRetrieveMetadata || orgHasBeenVisited)
-  ) {
+  if (project.has_push_permission && !taskIsMerged) {
     let retrieveMetadataText: JSX.Element = t('Check for Unretrieved Changes');
-    const isPrimary =
-      (orgHasChanges || !readyToSubmit) &&
-      (!task.pr_is_open || hasReviewRejected);
-    if (currentlyCommittingMetadata) {
-      /* istanbul ignore next */
-      retrieveMetadataText = (
-        <LabelWithSpinner
-          label={t('Retrieving Selected Changes…')}
-          variant={isPrimary ? 'inverse' : 'base'}
-        />
-      );
-    } else if (fetchingChanges || currentlyFetching) {
-      /* istanbul ignore next */
-      retrieveMetadataText = (
-        <LabelWithSpinner
-          label={t('Checking for Unretrieved Changes…')}
-          variant={isPrimary ? 'inverse' : 'base'}
-        />
-      );
-    } else if (currentlyReassigning) {
-      /* istanbul ignore next */
-      retrieveMetadataText = (
-        <LabelWithSpinner
-          label={t('Reassigning Org Ownership…')}
-          variant={isPrimary ? 'inverse' : 'base'}
-        />
-      );
-    } else if (orgHasChanges) {
-      retrieveMetadataText = t('Retrieve Changes from Dev Org');
-    }
     const should_show_datasets_button = cookies.get(
       'should_show_datasets_button',
     );
+    if (readyToRetrieveMetadata || orgHasBeenVisited) {
+      const isPrimary =
+        (orgHasChanges || !readyToSubmit) &&
+        (!task.pr_is_open || hasReviewRejected);
+      if (currentlyCommittingMetadata) {
+        /* istanbul ignore next */
+        retrieveMetadataText = (
+          <LabelWithSpinner
+            label={t('Retrieving Selected Changes…')}
+            variant={isPrimary ? 'inverse' : 'base'}
+          />
+        );
+      } else if (fetchingChanges || currentlyFetching) {
+        /* istanbul ignore next */
+        retrieveMetadataText = (
+          <LabelWithSpinner
+            label={t('Checking for Unretrieved Changes…')}
+            variant={isPrimary ? 'inverse' : 'base'}
+          />
+        );
+      } else if (currentlyReassigning) {
+        /* istanbul ignore next */
+        retrieveMetadataText = (
+          <LabelWithSpinner
+            label={t('Reassigning Org Ownership…')}
+            variant={isPrimary ? 'inverse' : 'base'}
+          />
+        );
+      } else if (orgHasChanges) {
+        retrieveMetadataText = t('Retrieve Changes from Dev Org');
+      }
 
+      retrieveMetadataButton = (
+        <div className="inline-container slds-m-right_small">
+          <Button
+            label={retrieveMetadataText}
+            variant={isPrimary ? 'brand' : 'outline-brand'}
+            className={classNames('slds-align-middle', 'slds-m-bottom_medium')}
+            onClick={doRetrieveMetadata}
+            disabled={
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingMetadata ||
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
+            }
+          />
+        </div>
+      );
+    }
     if (
-      should_show_datasets_button &&
-      !(currentlyReassigning || currentlyCommittingMetadata)
+      !(currentlyReassigning || currentlyCommittingMetadata) &&
+      // should_show_datasets_button &&
+      orgHasBeenVisited
     ) {
       retrieveDatasetButton = (
         <div className="inline-container slds-m-right_small">
@@ -888,10 +905,7 @@ const TaskDetail = (
               )
             }
             variant="outline-brand"
-            className={classNames('slds-align-middle', {
-              'slds-m-bottom_medium': readyToSubmit,
-              'slds-m-bottom_x-large': !readyToSubmit,
-            })}
+            className={classNames('slds-align-middle', 'slds-m-bottom_medium')}
             onClick={openRetrieveDatasetModal}
             disabled={
               fetchingChanges ||
@@ -904,36 +918,38 @@ const TaskDetail = (
           />
         </div>
       );
-      retrieveOmnistudioButton = (
-        <div className="inline-container slds-m-right_small">
-          <Button
-            label={
-              currentlyCommittingOmnistudio ? (
-                <LabelWithSpinner
-                  label={t('Retrieving Selected Omnistudio Configuration…')}
-                  variant="base"
-                />
-              ) : (
-                t('Retrieve Omnistudio Configuration')
-              )
-            }
-            variant="outline-brand"
-            className={classNames('slds-align-middle', {
-              'slds-m-bottom_medium': readyToSubmit,
-              'slds-m-bottom_x-large': !readyToSubmit,
-            })}
-            onClick={openRetrieveOmnistudioModal}
-            disabled={
-              fetchingChanges ||
-              currentlyFetching ||
-              currentlyCommittingMetadata ||
-              currentlyCommittingDataset ||
-              currentlyCommittingOmnistudio ||
-              currentlyReassigning
-            }
-          />
-        </div>
-      );
+      if (hasOmnistudioInstalled) {
+        retrieveOmnistudioButton = (
+          <div className="inline-container">
+            <Button
+              label={
+                currentlyCommittingOmnistudio ? (
+                  <LabelWithSpinner
+                    label={t('Retrieving Selected Omnistudio Configuration…')}
+                    variant="base"
+                  />
+                ) : (
+                  t('Retrieve Omnistudio Configuration')
+                )
+              }
+              variant="outline-brand"
+              className={classNames(
+                'slds-align-middle',
+                'slds-m-bottom_medium',
+              )}
+              onClick={openRetrieveOmnistudioModal}
+              disabled={
+                fetchingChanges ||
+                currentlyFetching ||
+                currentlyCommittingMetadata ||
+                currentlyCommittingDataset ||
+                currentlyCommittingOmnistudio ||
+                currentlyReassigning
+              }
+            />
+          </div>
+        );
+      }
     }
 
     retrieveButtons = (
@@ -1128,7 +1144,6 @@ const TaskDetail = (
       >
         {retrieveButtons}
         {submitButton}
-
         {taskOrgs ? (
           <TaskOrgCards
             orgs={taskOrgs}
