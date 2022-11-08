@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from requests.exceptions import HTTPError
 
+from metecho.exceptions import SubcommandException
+
 from ..sf_run_flow import (
     ScratchOrgError,
     capitalize,
@@ -26,7 +28,6 @@ from ..sf_run_flow import (
     refresh_access_token,
     run_flow,
 )
-from metecho.exceptions import SubcommandException
 
 PATCH_ROOT = "metecho.api.sf_run_flow"
 

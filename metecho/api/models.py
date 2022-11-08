@@ -1572,6 +1572,26 @@ class ScratchOrg(
             dataset_definition=dataset_definition,
         )
 
+    def queue_commit_omnistudio(
+        self,
+        *,
+        user: User,
+        commit_message: str,
+        yaml_path: str,
+    ):
+        from .jobs import commit_omnistudio_from_org_job
+
+        self.currently_retrieving_omnistudio = True
+        self.save()
+        self.notify_changed(originating_user_id=user.id)
+
+        commit_omnistudio_from_org_job.delay(
+            org=self,
+            user=user,
+            commit_message=commit_message,
+            yaml_path=yaml_path,
+        )
+
     def finalize_commit_dataset(self, *, error=None, originating_user_id):
         self.currently_retrieving_dataset = False
         self.save()
@@ -1588,6 +1608,25 @@ class ScratchOrg(
             self.notify_scratch_org_error(
                 error=error,
                 type_="SCRATCH_ORG_COMMIT_DATASET_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
+    def finalize_commit_omnistudio(self, *, error=None, originating_user_id):
+        self.currently_retrieving_omnistudio = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="SCRATCH_ORG_COMMIT_OMNISTUDIO",
+                originating_user_id=originating_user_id,
+            )
+            if self.task:
+                self.task.finalize_commit_changes(
+                    originating_user_id=originating_user_id
+                )
+        else:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_COMMIT_OMNISTUDIO_FAILED",
                 originating_user_id=originating_user_id,
             )
 
