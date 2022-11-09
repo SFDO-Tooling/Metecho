@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0116_scratchorg_currently_retrieving_omnistudio'),
+        ("api", "0116_scratchorg_currently_retrieving_omnistudio"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scratchorg',
-            name='installed_packages',
-            field=models.JSONField(default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+            model_name="scratchorg",
+            name="installed_packages",
+            field=models.JSONField(
+                default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder
+            ),
         ),
     ]
