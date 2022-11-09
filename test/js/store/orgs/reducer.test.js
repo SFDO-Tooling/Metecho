@@ -259,6 +259,7 @@ describe('reducer', () => {
           org_type: 'Dev',
           currently_retrieving_metadata: false,
           currently_retrieving_dataset: false,
+          currently_retrieving_omnistudio: false,
         };
         const expected = {
           ...defaultState,
@@ -305,6 +306,7 @@ describe('reducer', () => {
           org_type: 'Dev',
           currently_retrieving_metadata: false,
           currently_retrieving_dataset: true,
+          currently_retrieving_omnistudio: false,
         };
         const expected = {
           ...defaultState,
@@ -317,6 +319,46 @@ describe('reducer', () => {
           payload: {
             object: org,
             objectType: 'scratch_org_commit_dataset',
+          },
+        });
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('ignores if unknown objectType', () => {
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            object: { id: 'org-id' },
+            objectType: 'foobar',
+          },
+        });
+
+        expect(actual).toEqual(defaultState);
+      });
+    });
+
+    describe('OBJECT_TYPES.COMMIT_OMNISTUDIO', () => {
+      test('sets currently_retrieving_omnistudio: true', () => {
+        const org = {
+          id: 'org-id',
+          task: 'task-1',
+          org_type: 'Dev',
+          currently_retrieving_metadata: false,
+          currently_retrieving_dataset: false,
+          currently_retrieving_omnistudio: true,
+        };
+        const expected = {
+          ...defaultState,
+          orgs: {
+            [org.id]: org,
+          },
+        };
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            object: org,
+            objectType: 'scratch_org_commit_omnistudio',
           },
         });
 
