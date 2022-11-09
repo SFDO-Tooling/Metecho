@@ -1,5 +1,4 @@
 import { fireEvent } from '@testing-library/react';
-import { indexOf } from 'lodash';
 import React from 'react';
 
 import ConnectModal from '@/js/components/user/connect';
