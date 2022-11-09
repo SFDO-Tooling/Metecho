@@ -92,7 +92,7 @@ describe('<ConnectModal />', () => {
       inputs.forEach((custom_domain) => {
         fireEvent.change(input, {
           target: {
-            value: extractCustomDomain(custom_domain)
+            value: extractCustomDomain(custom_domain),
           },
         });
         expect(getByTestId('custom-domain')).toHaveTextContent(
