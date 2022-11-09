@@ -331,20 +331,13 @@ export const sortChangesetFields = (changes: Changeset): Changeset =>
 
 export const extractCustomDomain = (url: string): string => {
   const protocol = /(http(s?)):\/\//;
-  const org_type = /\.(scratch|develop|demo|free|patch|sandbox|trailblaze)/;
+  const org_type = /\.scratch|develop|demo|free|patch|sandbox|trailblaze/;
   const domain = /\.my\.salesforce\.com(\/?)/;
   return url.replace(protocol, '').replace(org_type, '').replace(domain, '');
 };
 
 // can 
-export const extractShard = (url: string): string => {
-  const org_type = /\.(scratch|develop|demo|free|patch|sandbox|trailblaze)/;
-  if (!url.match(org_type)) {
-    return "";
-  }
-  else {
-    // assuming second group is present with match success
-    return `${url.match(org_type)[0]}`;
-  }
-
+export const extractShard = (url: string): any => {
+  const org_type = /\.scratch|develop|demo|free|patch|sandbox|trailblaze/;
+  return !url.match(org_type) ? "" : `${url.match(org_type)}`;
 };
