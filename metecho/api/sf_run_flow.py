@@ -1,3 +1,4 @@
+from asyncio import sleep
 import contextlib
 import json
 import logging
@@ -6,7 +7,7 @@ import shutil
 import subprocess
 import time
 from datetime import datetime
-import urllib3
+from urllib3.exceptions import NewConnectionError, ProxyError
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
@@ -300,10 +301,11 @@ def get_access_token(*, org_result, scratch_org_config):
                 "access_token"
             ]
             return
-        except urllib3.exceptions.NewConnectionError:
+        except (NewConnectionError, ProxyError):
             attempts += 10
-    if attempts >= settings.MAXIMUM_JOB_LENGTH:
-        raise ScratchOrgError("Failed to build your job after ")
+            sleep(attempts)
+        if attempts >= settings.MAXIMUM_JOB_LENGTH:
+            raise ScratchOrgError(message="Failed to build your job after")
 
 
 def deploy_org_settings(
