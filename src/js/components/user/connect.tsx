@@ -135,7 +135,7 @@ const ConnectModal = ({
               className="slds-form-element__help slds-truncate slds-p-top_small"
               data-testid="custom-domain"
             >
-              https://{extractCustomDomain(customDomain) || <em>domain</em>}
+              https://{extractCustomDomain(customDomain.trim()) || <em>domain</em>}
               .my.salesforce.com
             </div>
           </Input>
