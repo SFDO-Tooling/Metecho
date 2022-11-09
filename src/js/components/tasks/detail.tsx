@@ -888,7 +888,7 @@ const TaskDetail = (
     }
     if (
       !(currentlyReassigning || currentlyCommittingMetadata) &&
-      // should_show_datasets_button &&
+      should_show_datasets_button &&
       orgHasBeenVisited
     ) {
       retrieveDatasetButton = (
