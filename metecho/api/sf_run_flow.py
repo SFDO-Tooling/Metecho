@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import time
 from datetime import datetime
-
+import urllib3
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
@@ -79,10 +79,14 @@ def delete_org_on_error(scratch_org=None, originating_user_id=None):
                 f"Are you certain that the Org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
             )
         else:
-            error_msg = _(f"Are you certain that the Org still exists? {err.args[0]}")
+            error_msg = _(
+                f"Are you certain that the Org still exists? {err.args[0]}"
+            )
 
         error = ScratchOrgError(error_msg)
-        scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)
+        scratch_org.remove_scratch_org(
+            error, originating_user_id=originating_user_id
+        )
         raise error
 
 
@@ -181,7 +185,9 @@ def get_org_result(
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
 
-    scratch_org_definition = {k.lower(): v for k, v in scratch_org_definition.items()}
+    scratch_org_definition = {
+        k.lower(): v for k, v in scratch_org_definition.items()
+    }
     features = scratch_org_definition.get("features", [])
     # Map between fields in the scratch org definition and fields on the ScratchOrgInfo object.
     # Start with fields that have special handling outside the .json.
@@ -192,7 +198,9 @@ def get_org_result(
         "description": f"{repo_owner}/{repo_name} {repo_branch}",
         # Override whatever is in scratch_org_config.days:
         "durationdays": DURATION_DAYS,
-        "features": ";".join(features) if isinstance(features, list) else features,
+        "features": ";".join(features)
+        if isinstance(features, list)
+        else features,
         "namespace": (
             cci.project_config.project__package__namespace
             if scratch_org_config.namespaced
@@ -273,19 +281,29 @@ def get_access_token(*, org_result, scratch_org_config):
     the scratch org is created. This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
-    oauth_config = OAuth2ClientConfig(
-        client_id=SF_CLIENT_ID,
-        client_secret=SF_CLIENT_SECRET,
-        redirect_uri=SF_CALLBACK_URL,
-        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
-        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
-        scope="web full refresh_token",
-    )
-    oauth = OAuth2Client(oauth_config)
-    auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
-    scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
-        "access_token"
-    ] = auth_result["access_token"]
+    attempts = 0
+    while attempts < settings.MAXIMUM_JOB_LENGTH:
+        try:
+            oauth_config = OAuth2ClientConfig(
+                client_id=SF_CLIENT_ID,
+                client_secret=SF_CLIENT_SECRET,
+                redirect_uri=SF_CALLBACK_URL,
+                auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+                token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+                scope="web full refresh_token",
+            )
+            oauth = OAuth2Client(oauth_config)
+            auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
+            scratch_org_config.config[
+                "access_token"
+            ] = scratch_org_config._scratch_info["access_token"] = auth_result[
+                "access_token"
+            ]
+            return
+        except urllib3.exceptions.NewConnectionError:
+            attempts += 10
+    if attempts >= settings.MAXIMUM_JOB_LENGTH:
+        raise ScratchOrgError("Failed to build your job after ")
 
 
 def deploy_org_settings(
@@ -301,7 +319,9 @@ def deploy_org_settings(
         keychain=cci.keychain,
         originating_user_id=originating_user_id,
     )
-    path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
+    path = os.path.join(
+        cci.project_config.repo_root, scratch_org_config.config_file
+    )
     task_config = TaskConfig({"options": {"definition_file": path}})
     task = DeployOrgSettings(cci.project_config, task_config, org_config)
     task()
@@ -352,9 +372,13 @@ def create_org(
     )
     org_result = poll_for_scratch_org_completion(devhub_api, org_result)
     mutate_scratch_org(
-        scratch_org_config=scratch_org_config, org_result=org_result, email=email
+        scratch_org_config=scratch_org_config,
+        org_result=org_result,
+        email=email,
     )
-    get_access_token(org_result=org_result, scratch_org_config=scratch_org_config)
+    get_access_token(
+        org_result=org_result, scratch_org_config=scratch_org_config
+    )
     org_config = deploy_org_settings(
         cci=cci,
         org_name=org_name,
@@ -418,7 +442,9 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
     orig_stdout, _ = p.communicate()
     if p.returncode:
         p = subprocess.run(
-            [command, "error", "info"], capture_output=True, env={"HOME": project_path}
+            [command, "error", "info"],
+            capture_output=True,
+            env={"HOME": project_path},
         )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
