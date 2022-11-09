@@ -7,7 +7,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
-import { extractCustomDomain } from '@/js/utils/helpers';
+import { extractShard, extractCustomDomain } from '@/js/utils/helpers';
 
 const ConnectModal = ({
   user,
@@ -137,6 +137,7 @@ const ConnectModal = ({
             >
               https://
               {extractCustomDomain(customDomain.trim()) || <em>domain</em>}
+              {extractShard(customDomain.trim())}
               .my.salesforce.com
             </div>
           </Input>
