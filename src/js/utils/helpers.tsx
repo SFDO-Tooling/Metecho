@@ -336,7 +336,6 @@ export const extractCustomDomain = (url: string): string => {
   return url.replace(protocol, '').replace(org_type, '').replace(domain, '');
 };
 
-// can 
 export const extractShard = (url: string): any => {
   const org_type = /\.scratch|develop|demo|free|patch|sandbox|trailblaze/;
   return !url.match(org_type) ? "" : `${url.match(org_type)}`;
