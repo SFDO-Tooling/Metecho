@@ -335,5 +335,5 @@ export const checkCustomDomain = (url: string): string => {
   if (!url || url === null) {
     return "https://domain.my.salesforce.com"
   }
-  return url.includes("://") ? `https://${url}.my.salesforce.com` : url;
+  return !url.includes(".") ? `https://${url}.my.salesforce.com` : url;
 };
