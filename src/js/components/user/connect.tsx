@@ -7,6 +7,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
+import { checkCustomDomain } from '@/js/utils/helpers';
 
 const ConnectModal = ({
   user,
@@ -134,7 +135,7 @@ const ConnectModal = ({
               className="slds-form-element__help slds-truncate slds-p-top_small"
               data-testid="custom-domain"
             >
-              https://{customDomain || <em>domain</em>}.my.salesforce.com
+              {checkCustomDomain(customDomain.trim())}
             </div>
           </Input>
           <button
