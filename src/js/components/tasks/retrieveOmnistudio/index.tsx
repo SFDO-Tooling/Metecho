@@ -95,6 +95,11 @@ const RetrieveOmnistudioModal = ({ orgId, isOpen, closeModal }: Props) => {
       ),
       footer: [
         <Button
+          key="page-1-button-1"
+          label={t('Cancel')}
+          onClick={handleClose}
+        />,
+        <Button
           key="page-1-button-2"
           type="submit"
           label={
