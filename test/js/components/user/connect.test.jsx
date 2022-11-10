@@ -87,7 +87,7 @@ describe('<ConnectModal />', () => {
         `https://sfdc-ax-hub-axe.my.salesforce.com`,
         `http://sfdc-ax-hub-axe.my.salesforce.com`,
         `sfdc-ax-hub-axe`,
-        ``
+        ``,
       ];
 
       inputs.forEach((custom_domain) => {
@@ -103,7 +103,6 @@ describe('<ConnectModal />', () => {
           checkCustomDomain(custom_domain),
         );
       });
-
     });
 
     describe('"back" click', () => {
