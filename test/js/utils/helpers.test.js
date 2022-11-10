@@ -118,13 +118,3 @@ describe('mergeChangesets', () => {
     expect(actual).toEqual(expected);
   });
 });
-
-describe('extractCustomDomain', () => {
-  test('extracts custom subdomain from url', () => {
-    const input = 'https://foo-bar-01.cs42.my.salesforce.com/';
-    const expected = 'foo-bar-01.cs42';
-    const actual = extractCustomDomain(input);
-
-    return expect(actual).toBe(expected);
-  });
-});
