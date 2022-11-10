@@ -78,7 +78,7 @@ describe('<RetrieveOmnistudioModal/>', () => {
     });
   });
   describe('form close', () => {
-    test('can close the form', async () => {
+    test('can close the form', () => {
       const { getByText, getByTitle, closeModal } = setup();
 
       expect(
