@@ -329,14 +329,11 @@ export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
 export const sortChangesetFields = (changes: Changeset): Changeset =>
   mapValues(changes, (fields) => sortBy(fields));
 
-export const extractCustomDomain = (url: string): string => {
-  const protocol = /(http(s?)):\/\//;
-  const org_type = /\.scratch|develop|demo|free|patch|sandbox|trailblaze/;
-  const domain = /\.my\.salesforce\.com(\/?)/;
-  return url.replace(protocol, '').replace(org_type, '').replace(domain, '');
-};
 
-export const extractShard = (url: string): any => {
-  const org_type = /\.scratch|develop|demo|free|patch|sandbox|trailblaze/;
-  return !url.match(org_type) ? "" : `${url.match(org_type)}`;
+
+export const checkCustomDomain = (url: string): string => {
+  if (!url || url === null) {
+    return "https://domain.my.salesforce.com"
+  }
+  return url.includes("://") ? `https://${url}.my.salesforce.com` : url;
 };
