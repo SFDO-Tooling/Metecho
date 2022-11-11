@@ -35,7 +35,11 @@ const Footer = ({
   );
 
   if (isCreating || isRefreshingOrg) {
-    return loadingMsg;
+    return (
+      <>
+        <div role="status">{loadingMsg}</div>;
+      </>
+    );
   }
   if (isDeleting) {
     return t('Deleting Org…') as JSX.Element;
@@ -51,7 +55,9 @@ const Footer = ({
       return (
         <>
           {t('Retrieving Selected Changes…')}
-          <div className="slds-p-top_small">{loadingMsg}</div>
+          <div className="slds-p-top_small" role="status">
+            {loadingMsg}
+          </div>
         </>
       );
     }
@@ -59,7 +65,9 @@ const Footer = ({
       return (
         <>
           {t('Retrieving Selected Dataset…')}
-          <div className="slds-p-top_small">{loadingMsg}</div>
+          <div className="slds-p-top_small" role="status">
+            {loadingMsg}
+          </div>
         </>
       );
     }
