@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { Org } from '@/js/store/orgs/reducer';
-import { resolve } from 'core-js/library/es6/promise';
 
 const Footer = ({
   org,
@@ -31,8 +30,8 @@ const Footer = ({
 }) => {
   const { t } = useTranslation();
 
-  function as_status(block): JSX.Element {
-    return <div role='status'>{block}</div>
+  function as_status(block: JSX.Element): JSX.Element {
+    return <div role="status">{block}</div>;
   }
 
   const loadingMsg: JSX.Element = t(
