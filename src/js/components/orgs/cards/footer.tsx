@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { Org } from '@/js/store/orgs/reducer';
+import { resolve } from 'core-js/library/es6/promise';
 
 const Footer = ({
   org,
@@ -30,42 +31,42 @@ const Footer = ({
 }) => {
   const { t } = useTranslation();
 
+  function as_status(block): JSX.Element {
+    return <div role='status'>{block}</div>
+  }
+
   const loadingMsg: JSX.Element = t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
   if (isCreating || isRefreshingOrg) {
-    return (
-      <>
-        <div role="status">{loadingMsg}</div>;
-      </>
-    );
+    return as_status(loadingMsg);
   }
   if (isDeleting) {
-    return t('Deleting Org…') as JSX.Element;
+    return as_status(t('Deleting Org…'));
   }
   if (isRefreshingChanges) {
-    return t('Checking for Unretrieved Changes…') as JSX.Element;
+    return as_status(t('Checking for Unretrieved Changes…'));
   }
   if (isReassigningOrg) {
-    return t('Reassigning Org Ownership…') as JSX.Element;
+    return as_status(t('Reassigning Org Ownership…'));
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_retrieving_metadata) {
-      return (
+      return as_status(
         <>
           {t('Retrieving Selected Changes…')}
-          <div className="slds-p-top_small" role="status">
+          <div className="slds-p-top_small">
             {loadingMsg}
           </div>
         </>
       );
     }
     if (org.currently_retrieving_dataset) {
-      return (
+      return as_status(
         <>
           {t('Retrieving Selected Dataset…')}
-          <div className="slds-p-top_small" role="status">
+          <div className="slds-p-top_small">
             {loadingMsg}
           </div>
         </>
