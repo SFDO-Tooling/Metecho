@@ -9,50 +9,15 @@ import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
 import { extractCustomDomain } from '@/js/utils/helpers';
 
-
-const ConnectModal = (
-  {
-    user,
-    isOpen,
-    toggleModal,
-  }: {
-    user: User;
-    isOpen: boolean;
-    toggleModal: (open: boolean) => void;
-  }
-) => {
-  const { t } = useTranslation();
-  const [url, setUrl] = useState('');
-  const [isCustomDomain, setIsCustomDomain] = useState(false);
-  const customDomainSubmitButton = useRef<HTMLButtonElement | null>(null);
-
-  const handleClose = () => {
-    setUrl('');
-    setIsCustomDomain(false);
-    toggleModal(false);
-  };
-
-  const openCustomDomain = () => {
-    setIsCustomDomain(true);
-  };
-
-  const closeCustomDomain = () => {
-    setUrl('');
-    setIsCustomDomain(false);
-  };
-
-  const handleCustomDomainChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setUrl(event.target.value);
-  };
-
-  const customDomain = url.trim();
-
-  /* istanbul ignore next */
-  const handleCustomDomainConnect = (event: FormEvent<HTMLFormElement>) => {
-    if (!customDomain) {
-      event.preventDefault();
-    }
-  ) => {
+const ConnectModal = ({
+  user,
+  isOpen,
+  toggleModal,
+}: {
+  user: User;
+  isOpen: boolean;
+  toggleModal: (open: boolean) => void;
+}) => {
   const { t } = useTranslation();
   const [url, setUrl] = useState('');
   const [isCustomDomain, setIsCustomDomain] = useState(false);
