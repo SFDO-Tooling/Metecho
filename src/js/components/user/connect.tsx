@@ -9,6 +9,7 @@ import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
 import { extractCustomDomain } from '@/js/utils/helpers';
 
+
 const ConnectModal = ({
   user,
   isOpen,

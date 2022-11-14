@@ -14,7 +14,7 @@ const Steps = ({
   const someAssignees = steps.some((i) => i.assignee);
   return (
     <>
-      <h2 className="slds-text-heading_medium slds-m-bottom_small">{title}</h2>
+      <h3 className="slds-text-heading_medium slds-m-bottom_small">{title}</h3>
       <div className="slds-progress slds-progress_vertical">
         <ol className="slds-progress__list">
           {steps
