@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0115_add_task_dataset'),
+        ("api", "0115_add_task_dataset"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scratchorg',
-            name='currently_retrieving_omnistudio',
+            model_name="scratchorg",
+            name="currently_retrieving_omnistudio",
             field=models.BooleanField(default=False),
         ),
     ]

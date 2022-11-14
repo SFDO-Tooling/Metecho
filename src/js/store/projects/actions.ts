@@ -178,7 +178,7 @@ export const projectCreated =
       dispatch(
         addToast({
           heading: t(
-            'Successfully created GitHub Repository for new Project: “{{project_name}}.”',
+            'Successfully created GitHub Repository for new Project: “{{project_name}}.” Please ensure to enable branch protection rules on your main branch.',
             { project_name: model.name },
           ),
           linkText: model.repo_url

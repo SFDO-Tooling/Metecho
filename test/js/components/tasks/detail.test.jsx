@@ -96,6 +96,7 @@ const defaultOrg = {
     post: ['foo/bar', 'buz/baz'],
   },
   has_been_visited: true,
+  is_omnistudio_installed: true,
 };
 
 const defaultState = {
@@ -685,6 +686,55 @@ describe('<TaskDetail/>', () => {
     });
   });
 
+  describe('retrieving omnistudio', () => {
+    // For should_show_datasets_button = True
+    cookies.get = jest.fn(() => 'True');
+
+    test('renders loading button', () => {
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            ...defaultState.orgs,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
+                currently_retrieving_omnistudio: true,
+              },
+            },
+          },
+        },
+      });
+
+      expect(
+        getAllByText('Retrieving Selected Omnistudio Configuration…'),
+      ).toHaveLength(2);
+    });
+  });
+
+  describe('hide omnistudio button', () => {
+    // For should_show_datasets_button = True
+    cookies.get = jest.fn(() => 'True');
+
+    test('hides omnistudio button when omnistudio not installed', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            ...defaultState.orgs,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
+                is_omnistudio_installed: false,
+              },
+            },
+          },
+        },
+      });
+      expect(queryByText('Retrieve Omnistudio Configuration')).toBeNull();
+    });
+  });
+
   describe('converting org and retrieving changes', () => {
     test('opens retrieve changes modal', async () => {
       const { findByText, history } = setup({
@@ -900,6 +950,30 @@ describe('<TaskDetail/>', () => {
 
         expect(
           getByText('Select the dataset to create or modify'),
+        ).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(
+          queryByText('Select the dataset to create or modify'),
+        ).toBeNull();
+      });
+    });
+  });
+
+  describe('<RetrieveOmnistudioModal />', () => {
+    describe('"cancel" click', () => {
+      // For should_show_datasets_button = True
+      cookies.get = jest.fn(() => 'True');
+
+      test('closes modal', () => {
+        const { getByText, queryByText, getByTitle } = setup();
+        fireEvent.click(getByText('Retrieve Omnistudio Configuration'));
+
+        expect(
+          getByText(
+            'Describe the Omnistudio configuration you are retrieving.',
+          ),
         ).toBeVisible();
 
         fireEvent.click(getByTitle('Close'));

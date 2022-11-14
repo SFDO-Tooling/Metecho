@@ -33,10 +33,12 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
         <Input
           inputRef={(ref: HTMLInputElement) => (inputEl.current = ref)}
           placeholder={t('Jobfile YAML Path')}
+          assistiveText={{ label: t('Jobfile YAML Path') }}
           name="yaml_path"
           value={inputs.yaml_path}
           required
           aria-required
+          errorText={errors.yaml_path}
           onChange={handleInputChange}
         />
       </ModalCard>

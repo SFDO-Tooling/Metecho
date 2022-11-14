@@ -2582,6 +2582,13 @@ components:
         currently_retrieving_omnistudio:
           type: boolean
           readOnly: true
+        installed_packages:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        is_omnistudio_installed:
+          type: boolean
+          readOnly: true
       required:
       - currently_parsing_datasets
       - currently_reassigning_user
@@ -2598,7 +2605,9 @@ components:
       - has_unsaved_changes
       - id
       - ignored_changes
+      - installed_packages
       - is_created
+      - is_omnistudio_installed
       - last_checked_unsaved_changes_at
       - last_modified_at
       - latest_commit

@@ -41,7 +41,6 @@ from github3.repos.repo import Repository
 
 from .email_utils import get_user_facing_url
 from .gh import (
-    copy_branch_protection,
     get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
@@ -291,10 +290,11 @@ def create_repository(
                 raise Exception("Failed to push files to GitHub repository")
 
         # Copy branch protection rules from the template repo
-        if tpl_repo:
-            copy_branch_protection(
-                source=tpl_repo.branch(branch_name), target=repo.branch(branch_name)
-            )
+        # See copy_branch_protection() for why we don't use this currently
+        # if tpl_repo:
+        #     copy_branch_protection(
+        #         source=tpl_repo.branch(branch_name), target=repo.branch(branch_name)
+        #     )
     except Exception as e:
         project.finalize_create_repository(error=e, user=user)
         tb = traceback.format_exc()
@@ -435,6 +435,9 @@ def _create_org_and_run_flow(
         originating_user_id=originating_user_id,
     )
     scratch_org.is_created = True
+    scratch_org.installed_packages = [
+        k for k, v in org_config.installed_packages.items()
+    ]
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
@@ -886,9 +889,9 @@ def refresh_github_users(project: Project, *, originating_user_id):
         for collaborator in repo.collaborators():
             try:
                 # Retrieve additional information for each user by querying GitHub
-                collaborator.name = get_cached_user(
-                    GitHub(repo), collaborator.login
-                ).name
+                collaborator.name = (
+                    get_cached_user(GitHub(repo), collaborator.login).name or ""
+                )
             except Exception:
                 logger.exception(f"Failed to expand GitHub user {collaborator}")
                 collaborator.name = ""

@@ -84,6 +84,7 @@ export interface Org extends MinimalOrg {
   currently_retrieving_metadata: boolean;
   currently_retrieving_dataset: boolean;
   currently_retrieving_omnistudio: boolean;
+  is_omnistudio_installed: boolean;
   currently_refreshing_org: boolean;
   currently_reassigning_user: boolean;
   is_created: boolean;

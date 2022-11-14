@@ -38,7 +38,8 @@ class NoGitHubTokenError(Exception):
     pass
 
 
-def copy_branch_protection(source: Branch, target: Branch):
+# This currently is _not_ being used, so we don't want to include it for coverage
+def copy_branch_protection(source: Branch, target: Branch):  # pragma: nocover
     """
     Copy the branch protection [output][1] of one branch into the [input][2] of another.
 
@@ -50,8 +51,16 @@ def copy_branch_protection(source: Branch, target: Branch):
 
     [1]: https://docs.github.com/en/rest/branches/branch-protection#get-branch-protection
     [2]: https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection
+
     """
-    protection = source.protection().as_dict()
+    try:
+        # source.protection() currently throws a 403 stating that app permissions are not
+        # correct. As far as we can tell, this is a bug with GitHub App permissioning.
+        protection = source.protection().as_dict()
+    except NotFoundError:
+        # 404 is returned if no branch protection rules are enabled
+        return
+
     reviews = protection["required_pull_request_reviews"]
 
     required_pull_request_reviews = {
