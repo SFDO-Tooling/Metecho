@@ -328,3 +328,10 @@ export const sortSchema = (schema: DatasetSchema): DatasetPairs =>
 
 export const sortChangesetFields = (changes: Changeset): Changeset =>
   mapValues(changes, (fields) => sortBy(fields));
+
+export const checkCustomDomain = (url: string): string => {
+  if (!url) {
+    return `https://domain.my.salesforce.com`;
+  }
+  return url.includes('.') ? url : `https://${url}.my.salesforce.com`;
+};

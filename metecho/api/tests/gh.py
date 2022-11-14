@@ -9,6 +9,7 @@ from github3.exceptions import NotFoundError, UnprocessableEntity
 from ..gh import (
     NoGitHubTokenError,
     UnsafeZipfileError,
+    copy_branch_protection,
     extract_zip_file,
     get_all_org_repos,
     get_cached_user,
@@ -82,6 +83,14 @@ def test_log_unsafe_zipfile_error():
     with patch(f"{PATCH_ROOT}.logger") as logger:
         log_unsafe_zipfile_error("repo_url", "commit_ish")
         assert logger.error.called
+
+
+def test_copy_branch_protection_rules__not_enabled():
+    target_branch = MagicMock()
+    source_branch = MagicMock()
+    source_branch.protection.side_effect = NotFoundError(MagicMock())
+    result = copy_branch_protection(source_branch, target_branch)
+    assert result is None
 
 
 @pytest.mark.django_db
@@ -168,7 +177,7 @@ class TestLocalGitHubCheckout:
             gh_as_user.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
-            with local_github_checkout(user, repo) as repo_root:
+            with local_github_checkout(user, repo, "main") as repo_root:
                 assert (Path(repo_root) / "cumulusci.yml").read_text() == "Hello"
                 assert shutil.rmtree.called
                 assert os.remove.called
@@ -209,7 +218,7 @@ class TestLocalGitHubCheckout:
         glob.return_value = ["owner-repo_name-"]
 
         with pytest.raises(Exception):
-            with local_github_checkout(user, repo_id):
+            with local_github_checkout(user, repo_id, "#DEFAULT"):
                 pass  # pragma: nocover
 
 

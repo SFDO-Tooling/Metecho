@@ -39,7 +39,8 @@ class NoGitHubTokenError(Exception):
     pass
 
 
-def copy_branch_protection(source: Branch, target: Branch):
+# This currently is _not_ being used, so we don't want to include it for coverage
+def copy_branch_protection(source: Branch, target: Branch):  # pragma: nocover
     """
     Copy the branch protection [output][1] of one branch into the [input][2] of another.
 
@@ -51,8 +52,16 @@ def copy_branch_protection(source: Branch, target: Branch):
 
     [1]: https://docs.github.com/en/rest/branches/branch-protection#get-branch-protection
     [2]: https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection
+
     """
-    protection = source.protection().as_dict()
+    try:
+        # source.protection() currently throws a 403 stating that app permissions are not
+        # correct. As far as we can tell, this is a bug with GitHub App permissioning.
+        protection = source.protection().as_dict()
+    except NotFoundError:
+        # 404 is returned if no branch protection rules are enabled
+        return
+
     reviews = protection["required_pull_request_reviews"]
 
     required_pull_request_reviews = {
@@ -213,7 +222,11 @@ def extract_zip_file(zip_file, owner, repo_name):
 
 @contextlib.contextmanager
 def local_github_checkout(
-    user=None, repo_id=None, repo_owner=None, repo_name=None, commit_ish=None
+    user=None,
+    repo_id=None,
+    commit_ish=None,
+    repo_owner=None,
+    repo_name=None,
 ):
     with temporary_dir() as repo_root:
         # pretend it's a git clone to satisfy cci
@@ -222,8 +235,10 @@ def local_github_checkout(
         repo = get_repo_info(
             user=user, repo_id=repo_id, repo_owner=repo_owner, repo_name=repo_name
         )
-        if commit_ish is None:
+        if commit_ish == "#DEFAULT":
             commit_ish = repo.default_branch
+        assert commit_ish, "Default branch should be supplied"
+
         zip_file = get_zip_file(repo, commit_ish)
 
         if not zip_file_is_safe(zip_file):

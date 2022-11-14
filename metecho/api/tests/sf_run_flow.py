@@ -26,6 +26,7 @@ from ..sf_run_flow import (
     refresh_access_token,
     run_flow,
 )
+from metecho.exceptions import SubcommandException
 
 PATCH_ROOT = "metecho.api.sf_run_flow"
 
@@ -232,6 +233,7 @@ class TestRunFlow:
             id="https://test.salesforce.com/id/ORGID/USERID",
             instance_url="instance_url",
             access_token="access_token",
+            config_name="dev",
         )
         epic = epic_factory()
         with ExitStack() as stack:
@@ -263,7 +265,7 @@ class TestRunFlow:
                 org_name="dev",
                 originating_user_id=None,
             )
-            with pytest.raises(Exception):
+            with pytest.raises(SubcommandException):
                 run_flow(
                     cci=MagicMock(),
                     org_config=org_config,
