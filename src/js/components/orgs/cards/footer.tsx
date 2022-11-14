@@ -30,45 +30,41 @@ const Footer = ({
 }) => {
   const { t } = useTranslation();
 
-  function as_status(block: JSX.Element): JSX.Element {
+  const asStatus = function (block: JSX.Element): JSX.Element {
     return <div role="status">{block}</div>;
-  }
+  };
 
   const loadingMsg: JSX.Element = t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
   if (isCreating || isRefreshingOrg) {
-    return as_status(loadingMsg);
+    return asStatus(loadingMsg);
   }
   if (isDeleting) {
-    return as_status(t('Deleting Org…'));
+    return asStatus(t('Deleting Org…'));
   }
   if (isRefreshingChanges) {
-    return as_status(t('Checking for Unretrieved Changes…'));
+    return asStatus(t('Checking for Unretrieved Changes…'));
   }
   if (isReassigningOrg) {
-    return as_status(t('Reassigning Org Ownership…'));
+    return asStatus(t('Reassigning Org Ownership…'));
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_retrieving_metadata) {
-      return as_status(
+      return asStatus(
         <>
           {t('Retrieving Selected Changes…')}
-          <div className="slds-p-top_small">
-            {loadingMsg}
-          </div>
-        </>
+          <div className="slds-p-top_small">{loadingMsg}</div>
+        </>,
       );
     }
     if (org.currently_retrieving_dataset) {
-      return as_status(
+      return asStatus(
         <>
           {t('Retrieving Selected Dataset…')}
-          <div className="slds-p-top_small">
-            {loadingMsg}
-          </div>
-        </>
+          <div className="slds-p-top_small">{loadingMsg}</div>
+        </>,
       );
     }
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
