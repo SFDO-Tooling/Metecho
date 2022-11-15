@@ -3,7 +3,7 @@ import React from 'react';
 
 import ConnectModal from '@/js/components/user/connect';
 
-import { extractCustomDomain, extractShard } from './../../../../src/js/utils/helpers';
+import { extractCustomDomain } from './../../../../src/js/utils/helpers';
 import { render } from './../../utils';
 
 describe('<ConnectModal />', () => {
@@ -85,21 +85,20 @@ describe('<ConnectModal />', () => {
         `https://sfdc-ax-hub-axe.trailblaze.my.salesforce.com`,
         `https://sfdc-ax-hub-axe.develop.my.salesforce.com`,
         `https://sfdc-ax-hub-axe.my.salesforce.com`,
-        `http://sfdc-ax-hub-axe.my.salesforce.com`,
         `sfdc-ax-hub-axe`,
       ];
 
       inputs.forEach((custom_domain) => {
         fireEvent.change(input, {
           target: {
-            value: `https://${extractCustomDomain(custom_domain)}${extractShard(custom_domain)}.my.salesforce.com`,
+            value: custom_domain,
           },
         });
         expect(getByTestId('custom-domain')).toHaveTextContent(
-          `${extractCustomDomain(custom_domain)}${extractShard(custom_domain)}`,
+          `https://${extractCustomDomain(custom_domain)}.my.salesforce.com`,
         );
         expect(getByTestId('sf-login-custom-domain')).toHaveValue(
-          `https://${extractCustomDomain(custom_domain)}${extractShard(custom_domain)}.my.salesforce.com`,
+          extractCustomDomain(custom_domain),
         );
       });
     });

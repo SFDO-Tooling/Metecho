@@ -114,7 +114,7 @@ const ConnectModal = ({
           <input
             type="hidden"
             name="custom_domain"
-            value={customDomain}
+            value={extractCustomDomain(url.trim())}
             data-testid="sf-login-custom-domain"
           />
           <input type="hidden" name="process" value="connect" />
@@ -136,8 +136,7 @@ const ConnectModal = ({
               data-testid="custom-domain"
             >
               https://
-              {extractCustomDomain(customDomain.trim()) || <em>domain</em>}
-              {extractShard(customDomain.trim())}
+              {extractCustomDomain(url.trim()) || <em>domain</em>}
               .my.salesforce.com
             </div>
           </Input>
