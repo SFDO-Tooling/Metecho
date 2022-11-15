@@ -291,7 +291,7 @@ def test_get_access_token_dns_delay(sleep, mocker):
         name="dev",
         config={
             "access_token": 123,
-            "instance_url": "https://tesdfgfdsfg54w36st.co345654356tm",
+            "instance_url": "https://test.com",
         },
     )
     real_auth_code_grant = OAuth2Client.auth_code_grant
