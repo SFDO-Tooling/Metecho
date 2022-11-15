@@ -211,12 +211,6 @@ def test_get_access_token(mocker):
     assert OAuth2Client.called
 
 
-# def test_is_dns_false(mocker):
-#     assert not is_network_error(
-#         mocker.MagicMock(__cause__=None, __context__=None)
-#     )
-
-
 @pytest.mark.django_db
 @patch("metecho.api.sf_run_flow.time.sleep")
 @patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 9)
@@ -230,6 +224,7 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
     )
     real_auth_code_grant = OAuth2Client.auth_code_grant
     call_count = 0
+    # leaving for clarity
     is_network_error = mocker.patch(
         "metecho.api.sf_run_flow.is_network_error", False
     )
@@ -239,18 +234,16 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
         call_count += 1
         return real_auth_code_grant(self, config)
 
-    oauth = mocker.patch.object(
+    mocker.patch.object(
         OAuth2Client,
         "auth_code_grant",
         fake_auth_code_grant,
     )
-    oauth.auth_code_grant = "123"
-    # is_network_error.return_value = False
+    mocker.auth_code_grant = "123"
     with pytest.raises(
         InvalidSchema,
         match=f"No connection adapters were found for '{scratch_org_config.instance_url}/services/oauth2/token'",
     ):
-
         get_access_token(
             org_result={"AuthCode": "123"},
             scratch_org_config=scratch_org_config,
@@ -271,28 +264,20 @@ def test_get_access_token_dns_delay_raises_error(sleep, mocker):
             "instance_url": "https://test.com",
         },
     )
-    oauth_config = OAuth2ClientConfig(
-        client_id="abc",
-        client_secret="efg",
-        redirect_uri="https://test.com",
-        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
-        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
-        scope="web full refresh_token",
-    )
     real_auth_code_grant = OAuth2Client.auth_code_grant
     call_count = 0
-    
+
     def fake_auth_code_grant(self, config):
         nonlocal call_count
         call_count += 1
         return real_auth_code_grant(self, config)
 
-    oauth = mocker.patch.object(
+    mocker.patch.object(
         OAuth2Client,
         "auth_code_grant",
         fake_auth_code_grant,
     )
-    oauth.auth_code_grant = "123"
+    mocker.auth_code_grant = "123"
     with pytest.raises(
         requests.exceptions.ConnectionError,
         match="Connection refused by Responses - the call doesn't match any registered mock.",
@@ -317,16 +302,6 @@ def test_get_access_token_dns_delay(sleep, mocker):
             "instance_url": "https://tesdfgfdsfg54w36st.co345654356tm",
         },
     )
-
-    oauth_config = OAuth2ClientConfig(
-        client_id="abc",
-        client_secret="efg",
-        redirect_uri="https://test.com",
-        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
-        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
-        scope="web full refresh_token",
-    )
-
     real_auth_code_grant = OAuth2Client.auth_code_grant
     call_count = 0
 
@@ -344,7 +319,7 @@ def test_get_access_token_dns_delay(sleep, mocker):
     with pytest.raises(ScratchOrgError):
 
         get_access_token(
-            org_result={"AuthCode": "asdf"},
+            org_result={"AuthCode": "123"},
             scratch_org_config=scratch_org_config,
         )
     assert call_count == 2
