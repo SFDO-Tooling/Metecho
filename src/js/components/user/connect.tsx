@@ -177,7 +177,7 @@ const ConnectModal = ({
           />
         </div>
       )}
-    </Modal >
+    </Modal>
   );
 };
 
