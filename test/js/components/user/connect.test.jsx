@@ -3,7 +3,7 @@ import React from 'react';
 
 import ConnectModal from '@/js/components/user/connect';
 
-import { checkCustomDomain } from './../../../../src/js/utils/helpers';
+import { extractCustomDomain } from './../../../../src/js/utils/helpers';
 import { render } from './../../utils';
 
 describe('<ConnectModal />', () => {
@@ -85,22 +85,20 @@ describe('<ConnectModal />', () => {
         `https://sfdc-ax-hub-axe.trailblaze.my.salesforce.com`,
         `https://sfdc-ax-hub-axe.develop.my.salesforce.com`,
         `https://sfdc-ax-hub-axe.my.salesforce.com`,
-        `http://sfdc-ax-hub-axe.my.salesforce.com`,
         `sfdc-ax-hub-axe`,
-        ``,
       ];
 
       inputs.forEach((custom_domain) => {
         fireEvent.change(input, {
           target: {
-            value: checkCustomDomain(custom_domain),
+            value: custom_domain,
           },
         });
         expect(getByTestId('custom-domain')).toHaveTextContent(
-          checkCustomDomain(custom_domain),
+          `https://${extractCustomDomain(custom_domain)}.my.salesforce.com`,
         );
         expect(getByTestId('sf-login-custom-domain')).toHaveValue(
-          checkCustomDomain(custom_domain),
+          extractCustomDomain(custom_domain),
         );
       });
     });
