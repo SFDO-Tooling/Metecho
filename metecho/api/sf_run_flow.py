@@ -8,7 +8,6 @@ import shutil
 import subprocess
 import time
 from datetime import datetime
-from urllib3.exceptions import NewConnectionError, RequestError
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig

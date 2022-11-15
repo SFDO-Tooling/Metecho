@@ -4,19 +4,14 @@ to change substantially, and as it stands, it's full of implicit
 external calls, so this would be mock-heavy anyway.
 """
 import responses
-import requests
 from contextlib import ExitStack
-from socket import gaierror
 from unittest.mock import MagicMock, patch
 from requests.exceptions import InvalidSchema
-from metecho.api.sf_run_flow import is_network_error
 import pytest
 from requests.exceptions import HTTPError
 from cumulusci.core.config.scratch_org_config import ScratchOrgConfig
-from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
-from metecho.api.models import ScratchOrg
+from cumulusci.oauth.client import OAuth2Client
 
-from metecho.conftest import ScratchOrgFactory
 from requests.exceptions import ConnectionError
 from ..sf_run_flow import (
     ScratchOrgError,
@@ -224,10 +219,7 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
     )
     real_auth_code_grant = OAuth2Client.auth_code_grant
     call_count = 0
-    # leaving for clarity
-    is_network_error = mocker.patch(
-        "metecho.api.sf_run_flow.is_network_error", False
-    )
+    mocker.patch("metecho.api.sf_run_flow.is_network_error", False)
 
     def fake_auth_code_grant(self, config):
         nonlocal call_count
@@ -279,7 +271,7 @@ def test_get_access_token_dns_delay_raises_error(sleep, mocker):
     )
     mocker.auth_code_grant = "123"
     with pytest.raises(
-        requests.exceptions.ConnectionError,
+        ConnectionError,
         match="Connection refused by Responses - the call doesn't match any registered mock.",
     ):
         get_access_token(
