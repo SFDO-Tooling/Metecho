@@ -198,6 +198,8 @@ requests==2.27.1
     # via
     #   -c requirements/prod.txt
     #   sphinx
+responses==0.22.0
+    # via -r requirements/dev.in
 restructuredtext-lint==1.4.0
     # via doc8
 six==1.16.0
