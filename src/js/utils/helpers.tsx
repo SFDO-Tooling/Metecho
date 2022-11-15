@@ -331,7 +331,6 @@ export const sortChangesetFields = (changes: Changeset): Changeset =>
 
 export const extractCustomDomain = (url: string): string => {
   const protocol = /(http(s?)):\/\//;
-
   const domain = /\.my\.salesforce\.com(\/?)/;
   return url.replace(protocol, '').replace(domain, '');
 };
