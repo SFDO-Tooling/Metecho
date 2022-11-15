@@ -232,9 +232,15 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
         fake_auth_code_grant,
     )
     mocker.auth_code_grant = "123"
+    auth_token_endpoint = (
+        f"'{scratch_org_config.instance_url}/services/oauth2/token'"
+    )
+    expected_result = (
+        f"No connection adapters were found for {auth_token_endpoint}'"
+    )
     with pytest.raises(
         InvalidSchema,
-        match=f"No connection adapters were found for '{scratch_org_config.instance_url}/services/oauth2/token'",
+        match=expected_result,
     ):
         get_access_token(
             org_result={"AuthCode": "123"},
@@ -291,7 +297,7 @@ def test_get_access_token_dns_delay(sleep, mocker):
         name="dev",
         config={
             "access_token": 123,
-            "instance_url": "https://test.com",
+            "instance_url": "https://tesdfgfdsfg54w36st.co345654356tm",
         },
     )
     real_auth_code_grant = OAuth2Client.auth_code_grant

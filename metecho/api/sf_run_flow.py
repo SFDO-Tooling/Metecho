@@ -275,9 +275,12 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
 
 
 def is_network_error(exception) -> bool:
-    """Helper function to determine if a network error, such as a dns propagation delay is occuring."""
+    """Helper function to determine if a network error,
+    such as a dns propagation delay is occuring."""
+
+    # gai error stands for GetAddressInfo Error
     if isinstance(exception, gaierror):
-        return exception.errno == 8
+        return True
     subexception = exception.__context__ or exception.__cause__
     if subexception:
         return is_network_error(subexception)
@@ -286,11 +289,12 @@ def is_network_error(exception) -> bool:
 
 
 def get_access_token(*, org_result, scratch_org_config):
-    """Trades the AuthCode from a ScratchOrgInfo for an org access token,
-    and stores it in the org config.
+    """Trades the AuthCode from a ScratchOrgInfo for an
+    org access token,and stores it in the org config.
 
-    The AuthCode is short-lived so this is only useful immediately after
-    the scratch org is created. This must be completed once in order for future
+    The AuthCode is short-lived so this is only useful
+    immediately after the scratch org is created.
+    This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
     total_wait_time = 0
