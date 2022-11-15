@@ -7,7 +7,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
-import { extractShard, extractCustomDomain } from '@/js/utils/helpers';
+import { extractCustomDomain } from '@/js/utils/helpers';
 
 const ConnectModal = ({
   user,
@@ -177,8 +177,9 @@ const ConnectModal = ({
             onClick={openCustomDomain}
           />
         </div>
-      )}
-    </Modal>
+      )
+      }
+    </Modal >
   );
 };
 

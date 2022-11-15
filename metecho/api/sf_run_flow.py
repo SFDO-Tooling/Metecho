@@ -2,6 +2,8 @@ import contextlib
 import json
 import logging
 import os
+from socket import gaierror
+import requests
 import shutil
 import subprocess
 import time
@@ -79,10 +81,14 @@ def delete_org_on_error(scratch_org=None, originating_user_id=None):
                 f"Are you certain that the Org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
             )
         else:
-            error_msg = _(f"Are you certain that the Org still exists? {err.args[0]}")
+            error_msg = _(
+                f"Are you certain that the Org still exists? {err.args[0]}"
+            )
 
         error = ScratchOrgError(error_msg)
-        scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)
+        scratch_org.remove_scratch_org(
+            error, originating_user_id=originating_user_id
+        )
         raise error
 
 
@@ -181,7 +187,9 @@ def get_org_result(
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
 
-    scratch_org_definition = {k.lower(): v for k, v in scratch_org_definition.items()}
+    scratch_org_definition = {
+        k.lower(): v for k, v in scratch_org_definition.items()
+    }
     features = scratch_org_definition.get("features", [])
     # Map between fields in the scratch org definition and fields on the ScratchOrgInfo object.
     # Start with fields that have special handling outside the .json.
@@ -192,7 +200,9 @@ def get_org_result(
         "description": f"{repo_owner}/{repo_name} {repo_branch}",
         # Override whatever is in scratch_org_config.days:
         "durationdays": DURATION_DAYS,
-        "features": ";".join(features) if isinstance(features, list) else features,
+        "features": ";".join(features)
+        if isinstance(features, list)
+        else features,
         "namespace": (
             cci.project_config.project__package__namespace
             if scratch_org_config.namespaced
@@ -265,6 +275,17 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
     )
 
 
+def is_network_error(exception) -> bool:
+    """Helper function to determine if a network error, such as a dns propagation delay is occuring."""
+    if isinstance(exception, gaierror):
+        return exception.errno == 8
+    subexception = exception.__context__ or exception.__cause__
+    if subexception:
+        return is_network_error(subexception)
+    else:
+        return False
+
+
 def get_access_token(*, org_result, scratch_org_config):
     """Trades the AuthCode from a ScratchOrgInfo for an org access token,
     and stores it in the org config.
@@ -273,18 +294,18 @@ def get_access_token(*, org_result, scratch_org_config):
     the scratch org is created. This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
-    attempts = 0
-    while attempts < settings.MAXIMUM_JOB_LENGTH:
+    total_wait_time = 0
+    while total_wait_time < settings.MAXIMUM_JOB_LENGTH:
+        oauth_config = OAuth2ClientConfig(
+            client_id=SF_CLIENT_ID,
+            client_secret=SF_CLIENT_SECRET,
+            redirect_uri=SF_CALLBACK_URL,
+            auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+            token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+            scope="web full refresh_token",
+        )
+        oauth = OAuth2Client(oauth_config)
         try:
-            oauth_config = OAuth2ClientConfig(
-                client_id=SF_CLIENT_ID,
-                client_secret=SF_CLIENT_SECRET,
-                redirect_uri=SF_CALLBACK_URL,
-                auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
-                token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
-                scope="web full refresh_token",
-            )
-            oauth = OAuth2Client(oauth_config)
             auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
             scratch_org_config.config[
                 "access_token"
@@ -292,23 +313,19 @@ def get_access_token(*, org_result, scratch_org_config):
                 "access_token"
             ]
             return
-        except RequestError as exception:
-            real_exception = exception.__cause__ or exception.__context__
-            if isinstance(real_exception, NewConnectionError):
-                actual_exception = (
-                    real_exception.__cause__ or real_exception.__context__
-                )
-            if actual_exception.errno == 8:
-                print("Error 8")
-                return
-            attempts += 10
-            logger.info(actual_exception or real_exception)
-            time.sleep(attempts)
-        if attempts >= settings.MAXIMUM_JOB_LENGTH:
-            raise ScratchOrgError(
-                message=f"Failed to build your job after {settings.MAXIMUM_JOB_LENGTH} seconds."
-            )
-        return
+        except requests.exceptions.ConnectionError as exception:
+            if is_network_error(exception):
+                actual_exception = exception.__cause__ or exception.__context__
+                logger.info(actual_exception)
+                total_wait_time += 10
+                time.sleep(10)
+            else:
+                raise
+
+    if total_wait_time >= settings.MAXIMUM_JOB_LENGTH:
+        raise ScratchOrgError(
+            f"Failed to build your scratch org after {settings.MAXIMUM_JOB_LENGTH} seconds."
+        )
 
 
 def deploy_org_settings(
@@ -324,7 +341,9 @@ def deploy_org_settings(
         keychain=cci.keychain,
         originating_user_id=originating_user_id,
     )
-    path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
+    path = os.path.join(
+        cci.project_config.repo_root, scratch_org_config.config_file
+    )
     task_config = TaskConfig({"options": {"definition_file": path}})
     task = DeployOrgSettings(cci.project_config, task_config, org_config)
     task()
@@ -379,7 +398,9 @@ def create_org(
         org_result=org_result,
         email=email,
     )
-    get_access_token(org_result=org_result, scratch_org_config=scratch_org_config)
+    get_access_token(
+        org_result=org_result, scratch_org_config=scratch_org_config
+    )
     org_config = deploy_org_settings(
         cci=cci,
         org_name=org_name,

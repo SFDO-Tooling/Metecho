@@ -3,13 +3,21 @@ These tests are TRULY AWFUL but we're expecting the code in sf_run_flow
 to change substantially, and as it stands, it's full of implicit
 external calls, so this would be mock-heavy anyway.
 """
-
+import responses
+import requests
 from contextlib import ExitStack
+from socket import gaierror
 from unittest.mock import MagicMock, patch
-
+from requests.exceptions import InvalidSchema
+from metecho.api.sf_run_flow import is_network_error
 import pytest
 from requests.exceptions import HTTPError
+from cumulusci.core.config.scratch_org_config import ScratchOrgConfig
+from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
+from metecho.api.models import ScratchOrg
 
+from metecho.conftest import ScratchOrgFactory
+from requests.exceptions import ConnectionError
 from ..sf_run_flow import (
     ScratchOrgError,
     capitalize,
@@ -111,7 +119,9 @@ class TestGetDevhubApi:
 
     def test_bad(self):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            jwt_session = stack.enter_context(
+                patch(f"{PATCH_ROOT}.jwt_session")
+            )
             jwt_session.side_effect = HTTPError(
                 "Error message.", response=MagicMock(status_code=400)
             )
@@ -126,7 +136,9 @@ class TestGetDevhubApi:
 
     def test_bad_no_org(self):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            jwt_session = stack.enter_context(
+                patch(f"{PATCH_ROOT}.jwt_session")
+            )
             jwt_session.side_effect = HTTPError(
                 "Error message.", response=MagicMock(status_code=400)
             )
@@ -177,7 +189,11 @@ def test_mutate_scratch_org():
     scratch_org_config = MagicMock()
     mutate_scratch_org(
         scratch_org_config=scratch_org_config,
-        org_result={"LoginUrl": None, "ScratchOrg": None, "SignupUsername": None},
+        org_result={
+            "LoginUrl": None,
+            "ScratchOrg": None,
+            "SignupUsername": None,
+        },
         email=MagicMock(),
     )
 
@@ -193,6 +209,145 @@ def test_get_access_token(mocker):
     )
 
     assert OAuth2Client.called
+
+
+# def test_is_dns_false(mocker):
+#     assert not is_network_error(
+#         mocker.MagicMock(__cause__=None, __context__=None)
+#     )
+
+
+@pytest.mark.django_db
+@patch("metecho.api.sf_run_flow.time.sleep")
+@patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 9)
+def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
+    scratch_org_config = ScratchOrgConfig(
+        name="dev",
+        config={
+            "access_token": 123,
+            "instance_url": "garbage://tesdfgfdsfg54w36st.co345654356tm",
+        },
+    )
+    real_auth_code_grant = OAuth2Client.auth_code_grant
+    call_count = 0
+    is_network_error = mocker.patch(
+        "metecho.api.sf_run_flow.is_network_error", False
+    )
+
+    def fake_auth_code_grant(self, config):
+        nonlocal call_count
+        call_count += 1
+        return real_auth_code_grant(self, config)
+
+    oauth = mocker.patch.object(
+        OAuth2Client,
+        "auth_code_grant",
+        fake_auth_code_grant,
+    )
+    oauth.auth_code_grant = "123"
+    # is_network_error.return_value = False
+    with pytest.raises(
+        InvalidSchema,
+        match=f"No connection adapters were found for '{scratch_org_config.instance_url}/services/oauth2/token'",
+    ):
+
+        get_access_token(
+            org_result={"AuthCode": "123"},
+            scratch_org_config=scratch_org_config,
+        )
+
+    assert call_count == 1
+
+
+@responses.activate
+@pytest.mark.django_db
+@patch("metecho.api.sf_run_flow.time.sleep")
+@patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 9)
+def test_get_access_token_dns_delay_raises_error(sleep, mocker):
+    scratch_org_config = ScratchOrgConfig(
+        name="dev",
+        config={
+            "access_token": 123,
+            "instance_url": "https://test.com",
+        },
+    )
+    oauth_config = OAuth2ClientConfig(
+        client_id="abc",
+        client_secret="efg",
+        redirect_uri="https://test.com",
+        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+        scope="web full refresh_token",
+    )
+    real_auth_code_grant = OAuth2Client.auth_code_grant
+    call_count = 0
+    
+    def fake_auth_code_grant(self, config):
+        nonlocal call_count
+        call_count += 1
+        return real_auth_code_grant(self, config)
+
+    oauth = mocker.patch.object(
+        OAuth2Client,
+        "auth_code_grant",
+        fake_auth_code_grant,
+    )
+    oauth.auth_code_grant = "123"
+    with pytest.raises(
+        requests.exceptions.ConnectionError,
+        match="Connection refused by Responses - the call doesn't match any registered mock.",
+    ):
+        get_access_token(
+            org_result={"AuthCode": "123"},
+            scratch_org_config=scratch_org_config,
+        )
+
+    assert call_count == 1
+
+
+@pytest.mark.django_db
+@patch("metecho.api.sf_run_flow.time.sleep")
+@patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 11)
+def test_get_access_token_dns_delay(sleep, mocker):
+    """Prove test is looping for DNS delays"""
+    scratch_org_config = ScratchOrgConfig(
+        name="dev",
+        config={
+            "access_token": 123,
+            "instance_url": "https://tesdfgfdsfg54w36st.co345654356tm",
+        },
+    )
+
+    oauth_config = OAuth2ClientConfig(
+        client_id="abc",
+        client_secret="efg",
+        redirect_uri="https://test.com",
+        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+        scope="web full refresh_token",
+    )
+
+    real_auth_code_grant = OAuth2Client.auth_code_grant
+    call_count = 0
+
+    def fake_auth_code_grant(self, config):
+        nonlocal call_count
+        call_count += 1
+        return real_auth_code_grant(self, config)
+
+    mocker.patch.object(
+        OAuth2Client,
+        "auth_code_grant",
+        fake_auth_code_grant,
+    )
+    mocker.auth_code_grant = "123"
+    with pytest.raises(ScratchOrgError):
+
+        get_access_token(
+            org_result={"AuthCode": "asdf"},
+            scratch_org_config=scratch_org_config,
+        )
+    assert call_count == 2
 
 
 class TestDeployOrgSettings:
@@ -211,7 +366,9 @@ class TestDeployOrgSettings:
             scratch_org_definition = MagicMock()
 
             section_setting.items.return_value = [(MagicMock(), MagicMock())]
-            settings.items.return_value = [("orgPreferenceSettings", section_setting)]
+            settings.items.return_value = [
+                ("orgPreferenceSettings", section_setting)
+            ]
             scratch_org_definition.get.return_value = settings
 
             deploy_org_settings(
@@ -226,7 +383,9 @@ class TestDeployOrgSettings:
 
 @pytest.mark.django_db
 class TestRunFlow:
-    def test_create_org_and_run_flow__exception(self, user_factory, epic_factory):
+    def test_create_org_and_run_flow__exception(
+        self, user_factory, epic_factory
+    ):
         user = user_factory()
         org_config = MagicMock(
             org_id="org_id",
@@ -250,7 +409,9 @@ class TestRunFlow:
             get_org_details.return_value = (MagicMock(), MagicMock())
             stack.enter_context(patch(f"{PATCH_ROOT}.get_org_result"))
             stack.enter_context(patch(f"{PATCH_ROOT}.mutate_scratch_org"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.poll_for_scratch_org_completion"))
+            stack.enter_context(
+                patch(f"{PATCH_ROOT}.poll_for_scratch_org_completion")
+            )
             stack.enter_context(patch(f"{PATCH_ROOT}.get_access_token"))
             stack.enter_context(patch(f"{PATCH_ROOT}.deploy_org_settings"))
 
@@ -284,7 +445,9 @@ def test_delete_org(scratch_org_factory):
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         devhub_api = MagicMock()
-        get_devhub_api = stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
+        get_devhub_api = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_devhub_api")
+        )
         get_devhub_api.return_value = devhub_api
         devhub_api.query.return_value = {"records": [{"Id": "some-id"}]}
 
@@ -302,7 +465,11 @@ def test_poll_for_scratch_org_completion__success(sleep):
         "Status": "Creating",
         "ErrorCode": None,
     }
-    end_result = {"Id": scratch_org_info_id, "Status": "Active", "ErrorCode": None}
+    end_result = {
+        "Id": scratch_org_info_id,
+        "Status": "Active",
+        "ErrorCode": None,
+    }
     devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
 
     org_result = poll_for_scratch_org_completion(devhub_api, initial_result)
@@ -318,7 +485,12 @@ def test_poll_for_scratch_org_completion__failure(sleep):
         "Status": "Creating",
         "ErrorCode": None,
     }
-    end_result = {"Id": scratch_org_info_id, "Status": "Failed", "ErrorCode": "Foo"}
+    end_result = {
+        "Id": scratch_org_info_id,
+        "Status": "Failed",
+        "ErrorCode": "Foo",
+    }
+    devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
     devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
 
     with pytest.raises(ScratchOrgError, match="Scratch org creation failed"):
