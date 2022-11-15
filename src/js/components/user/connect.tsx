@@ -176,8 +176,7 @@ const ConnectModal = ({
             onClick={openCustomDomain}
           />
         </div>
-      )
-      }
+      )}
     </Modal >
   );
 };
