@@ -236,7 +236,7 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
         f"'{scratch_org_config.instance_url}/services/oauth2/token'"
     )
     expected_result = (
-        f"No connection adapters were found for {auth_token_endpoint}'"
+        f"No connection adapters were found for {auth_token_endpoint}"
     )
     with pytest.raises(
         InvalidSchema,
