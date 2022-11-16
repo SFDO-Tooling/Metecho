@@ -1401,7 +1401,7 @@ def commit_omnistudio_from_org(
             repo_root = project_config.repo_root
             jobfile: Path = Path(repo_root, yaml_path)
             if not jobfile.is_file():
-                raise MissingJobfileError(f"Jobfile not found at path {yaml_path}")
+                raise MissingJobfileError(f"Jobfile not found at path {yaml_path} in repository: {repo}")
 
             jobfileobj = yaml.safe_load(jobfile.read_text())
             if "projectPath" not in jobfileobj:
