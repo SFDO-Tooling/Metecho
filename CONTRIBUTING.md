@@ -56,8 +56,7 @@ Use the "Webhook secret" value as your `GITHUB_HOOK_SECRET` environment variable
 in Metecho.
 
 Use the app's "App ID" as `GITHUB_APP_ID`, "Client ID" as `GITHUB_CLIENT_ID`,
-and "Client secret" as `GITHUB_CLIENT_SECRET`. These are stored in a lastpass
-note.
+and "Client secret" as `GITHUB_CLIENT_SECRET`. These are stored in a shared lastpass note.
 
 Finally, generate a new private key for the app and set it as the
 `GITHUB_APP_KEY` environment variable (the entire key, not a path to one). If
