@@ -707,7 +707,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(
-        getAllByText('Retrieving Selected Omnistudio Configuration…'),
+        getAllByText('Retrieving Selected OmniStudio Configuration…'),
       ).toHaveLength(2);
     });
   });
@@ -731,7 +731,7 @@ describe('<TaskDetail/>', () => {
           },
         },
       });
-      expect(queryByText('Retrieve Omnistudio Configuration')).toBeNull();
+      expect(queryByText('Retrieve OmniStudio Configuration')).toBeNull();
     });
   });
 
@@ -968,11 +968,11 @@ describe('<TaskDetail/>', () => {
 
       test('closes modal', () => {
         const { getByText, queryByText, getByTitle } = setup();
-        fireEvent.click(getByText('Retrieve Omnistudio Configuration'));
+        fireEvent.click(getByText('Retrieve OmniStudio Configuration'));
 
         expect(
           getByText(
-            'Describe the Omnistudio configuration you are retrieving.',
+            'Describe the OmniStudio configuration you are retrieving.',
           ),
         ).toBeVisible();
 

@@ -66,7 +66,7 @@ const Footer = ({
     if (org.currently_retrieving_omnistudio) {
       return (
         <>
-          {t('Retrieving Selected Omnistudio Configuration…')}
+          {t('Retrieving Selected OmniStudio Configuration…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
         </>
       );
