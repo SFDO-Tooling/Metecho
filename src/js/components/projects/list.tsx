@@ -240,7 +240,10 @@ const ProjectList = (
         </div>
 
         <div className="slds-p-around_x-large">
-          <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
+          <main
+            tabIndex={-1}
+            className="metecho-toast-focus slds-grid slds-wrap slds-grid_pull-padded-small"
+          >
             <div
               className="slds-p-horizontal_small
                 slds-m-bottom_medium
@@ -277,7 +280,7 @@ const ProjectList = (
                 </Trans>
               </ul>
             </div>
-          </div>
+          </main>
           {refreshing ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative">
