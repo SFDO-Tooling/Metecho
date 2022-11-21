@@ -181,11 +181,7 @@ def test_mutate_scratch_org():
     scratch_org_config = MagicMock()
     mutate_scratch_org(
         scratch_org_config=scratch_org_config,
-        org_result={
-            "LoginUrl": None,
-            "ScratchOrg": None,
-            "SignupUsername": None,
-        },
+        org_result={"LoginUrl": None, "ScratchOrg": None, "SignupUsername": None},
         email=MagicMock(),
     )
 
@@ -423,11 +419,7 @@ def test_poll_for_scratch_org_completion__success(sleep):
         "Status": "Creating",
         "ErrorCode": None,
     }
-    end_result = {
-        "Id": scratch_org_info_id,
-        "Status": "Active",
-        "ErrorCode": None,
-    }
+    end_result = {"Id": scratch_org_info_id, "Status": "Active", "ErrorCode": None}
     devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
 
     org_result = poll_for_scratch_org_completion(devhub_api, initial_result)
@@ -443,12 +435,7 @@ def test_poll_for_scratch_org_completion__failure(sleep):
         "Status": "Creating",
         "ErrorCode": None,
     }
-    end_result = {
-        "Id": scratch_org_info_id,
-        "Status": "Failed",
-        "ErrorCode": "Foo",
-    }
-    devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
+    end_result = {"Id": scratch_org_info_id, "Status": "Failed", "ErrorCode": "Foo"}
     devhub_api.ScratchOrgInfo.get.side_effect = [initial_result, end_result]
 
     with pytest.raises(ScratchOrgError, match="Scratch org creation failed"):
