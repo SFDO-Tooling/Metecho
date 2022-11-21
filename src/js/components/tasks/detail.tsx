@@ -925,11 +925,11 @@ const TaskDetail = (
               label={
                 currentlyCommittingOmnistudio ? (
                   <LabelWithSpinner
-                    label={t('Retrieving Selected Omnistudio Configuration…')}
+                    label={t('Retrieving Selected OmniStudio Configuration…')}
                     variant="base"
                   />
                 ) : (
-                  t('Retrieve Omnistudio Configuration')
+                  t('Retrieve OmniStudio Configuration')
                 )
               }
               variant="outline-brand"

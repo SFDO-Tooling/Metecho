@@ -50,7 +50,7 @@ describe('<RetrieveOmnistudioModal/>', () => {
       const { getByText, getByLabelText, findByText } = setup();
 
       expect(
-        getByText('Describe the Omnistudio configuration you are retrieving.'),
+        getByText('Describe the OmniStudio configuration you are retrieving.'),
       ).toBeVisible();
 
       const commitInput = getByLabelText('*Commit Message', { exact: false });
@@ -59,10 +59,10 @@ describe('<RetrieveOmnistudioModal/>', () => {
       const yamlInput = getByLabelText('*Jobfile YAML Path', { exact: false });
       fireEvent.change(yamlInput, { target: { value: 'jobfile.yaml' } });
 
-      const submit = getByText('Retrieve Omnistudio Configuration');
+      const submit = getByText('Retrieve OmniStudio Configuration');
       fireEvent.click(submit);
 
-      await findByText('Retrieving Omnistudio Configuration…');
+      await findByText('Retrieving OmniStudio Configuration…');
 
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
@@ -82,7 +82,7 @@ describe('<RetrieveOmnistudioModal/>', () => {
       const { getByText, getByTitle, closeModal } = setup();
 
       expect(
-        getByText('Describe the Omnistudio configuration you are retrieving.'),
+        getByText('Describe the OmniStudio configuration you are retrieving.'),
       ).toBeVisible();
 
       fireEvent.click(getByTitle('Close'));
@@ -116,10 +116,10 @@ describe('<RetrieveOmnistudioModal/>', () => {
       const yamlInput = getByLabelText('*Jobfile YAML Path', { exact: false });
       fireEvent.change(yamlInput, { target: { value: 'jobfile.yaml' } });
 
-      const submit = getByText('Retrieve Omnistudio Configuration');
+      const submit = getByText('Retrieve OmniStudio Configuration');
       fireEvent.click(submit);
 
-      await findByText('Retrieving Omnistudio Configuration…');
+      await findByText('Retrieving OmniStudio Configuration…');
 
       if (showsErr) {
         await findByText('Do not do that');
