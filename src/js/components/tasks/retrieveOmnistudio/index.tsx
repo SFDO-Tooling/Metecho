@@ -85,7 +85,7 @@ const RetrieveOmnistudioModal = ({ orgId, isOpen, closeModal }: Props) => {
   const pages = [
     {
       size: 'small',
-      heading: t('Describe the Omnistudio configuration you are retrieving.'),
+      heading: t('Describe the OmniStudio configuration you are retrieving.'),
       contents: (
         <CommitMessageForm
           inputs={inputs as OmnistudioCommit}
@@ -105,11 +105,11 @@ const RetrieveOmnistudioModal = ({ orgId, isOpen, closeModal }: Props) => {
           label={
             retrievingOmnistudio ? (
               <LabelWithSpinner
-                label={t('Retrieving Omnistudio Configuration…')}
+                label={t('Retrieving OmniStudio Configuration…')}
                 variant="inverse"
               />
             ) : (
-              t('Retrieve Omnistudio Configuration')
+              t('Retrieve OmniStudio Configuration')
             )
           }
           variant="brand"
