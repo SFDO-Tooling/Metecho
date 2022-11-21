@@ -86,7 +86,7 @@ cryptography==38.0.1
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci @ https://github.com/SFDO-Tooling/CumulusCI/archive/v3.68.0.dev2.tar.gz
+cumulusci==3.68.1
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -155,7 +155,7 @@ github3-py==3.2.0
     # via
     #   -r requirements/prod.in
     #   cumulusci
-greenlet==1.1.3
+greenlet==1.1.3.post0
     # via
     #   cumulusci
     #   snowfakery
@@ -191,7 +191,7 @@ inflection==0.5.1
     # via drf-spectacular
 jeepney==0.8.0
     # via
-    #   cumulusci
+    #   keyring
     #   secretstorage
 jinja2==3.1.2
     # via
@@ -224,7 +224,7 @@ orderedmultidict==1.0.1
     # via furl
 packaging==21.3
     # via redis
-psutil==5.9.2
+psutil==5.9.3
     # via cumulusci
 psycopg2-binary==2.9.3
     # via -r requirements/prod.in
@@ -246,7 +246,7 @@ pygments==2.13.0
     # via
     #   cumulusci
     #   rich
-pyjwt[crypto]==2.5.0
+pyjwt[crypto]==2.6.0
     # via
     #   cumulusci
     #   django-allauth
@@ -271,12 +271,13 @@ python-dateutil==2.8.2
     #   snowfakery
 python3-openid==3.2.0
     # via django-allauth
-pytz==2022.4
+pytz==2022.5
     # via
     #   cumulusci
     #   djangorestframework
 pyyaml==6.0
     # via
+    #   -r requirements/prod.in
     #   cumulusci
     #   drf-spectacular
     #   snowfakery
@@ -302,7 +303,7 @@ requests-oauthlib==1.3.1
     # via django-allauth
 rich==12.6.0
     # via cumulusci
-robotframework==4.1.3
+robotframework==6.0
     # via
     #   cumulusci
     #   robotframework-lint
@@ -339,7 +340,7 @@ salesforce-bulk==2.2.0
 sarge==0.1.7.post1
     # via cumulusci
 secretstorage==3.3.3
-    # via cumulusci
+    # via keyring
 selenium==3.141.0
     # via
     #   cumulusci
@@ -368,7 +369,7 @@ six==1.16.0
     #   salesforce-bulk
     #   service-identity
     #   snowfakery
-snowfakery==3.3.0
+snowfakery==3.4.0
     # via cumulusci
 soupsieve==2.3.2.post1
     # via beautifulsoup4
@@ -382,11 +383,7 @@ twisted[tls]==22.4.0
     # via daphne
 txaio==22.2.1
     # via autobahn
-types-cryptography==3.3.23
-    # via
-    #   cumulusci
-    #   pyjwt
-typing-extensions==4.3.0
+typing-extensions==4.4.0
     # via
     #   cumulusci
     #   pydantic
@@ -416,7 +413,7 @@ wrapt==1.14.1
     # via deprecated
 xmltodict==0.13.0
     # via cumulusci
-zipp==3.9.0
+zipp==3.10.0
     # via
     #   cumulusci
     #   importlib-metadata

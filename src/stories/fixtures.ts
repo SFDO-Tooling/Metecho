@@ -28,6 +28,8 @@ export const api_urls = {
   scratch_org_commit: (id: string) => `/api/scratch_orgs/${id}/commit/`,
   scratch_org_commit_dataset: (id: string) =>
     `/api/scratch-orgs/${id}/commit_dataset/`,
+  scratch_org_commit_omnistudio: (id: string) =>
+    `/api/scratch-orgs/${id}/commit_omnistudio/`,
   scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
   scratch_org_parse_datasets: (id: string) =>
@@ -799,6 +801,8 @@ export const sampleDevOrg = {
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
   currently_retrieving_dataset: false,
+  currently_retrieving_omnistudio: false,
+  is_omnistudio_installed: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
@@ -836,6 +840,8 @@ export const sampleScratchOrg = {
   currently_refreshing_changes: false,
   currently_retrieving_metadata: false,
   currently_retrieving_dataset: false,
+  currently_retrieving_omnistudio: false,
+  is_omnistudio_installed: false,
   currently_refreshing_org: false,
   currently_reassigning_user: false,
   delete_queued_at: null,
