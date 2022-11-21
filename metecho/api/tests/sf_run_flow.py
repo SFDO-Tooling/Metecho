@@ -3,7 +3,6 @@ These tests are TRULY AWFUL but we're expecting the code in sf_run_flow
 to change substantially, and as it stands, it's full of implicit
 external calls, so this would be mock-heavy anyway.
 """
-import responses
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 from requests.exceptions import InvalidSchema
@@ -239,7 +238,6 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
     assert call_count == 1
 
 
-@responses.activate
 @pytest.mark.django_db
 @patch("metecho.api.sf_run_flow.time.sleep")
 @patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 9)
@@ -251,13 +249,12 @@ def test_get_access_token_dns_delay_raises_error(sleep, mocker):
             "instance_url": "https://test.com",
         },
     )
-    real_auth_code_grant = OAuth2Client.auth_code_grant
     call_count = 0
 
     def fake_auth_code_grant(self, config):
         nonlocal call_count
         call_count += 1
-        return real_auth_code_grant(self, config)
+        raise ConnectionError("FooBar")
 
     mocker.patch.object(
         OAuth2Client,
@@ -265,10 +262,7 @@ def test_get_access_token_dns_delay_raises_error(sleep, mocker):
         fake_auth_code_grant,
     )
     mocker.auth_code_grant = "123"
-    with pytest.raises(
-        ConnectionError,
-        match="Connection refused by Responses - the call doesn't match any registered mock.",
-    ):
+    with pytest.raises(ConnectionError, match="FooBar"):
         get_access_token(
             org_result={"AuthCode": "123"},
             scratch_org_config=scratch_org_config,

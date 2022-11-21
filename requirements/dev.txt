@@ -255,8 +255,6 @@ requests==2.28.1
     # via
     #   -c requirements/prod.txt
     #   sphinx
-responses==0.22.0
-    # via -r requirements/dev.in
 restructuredtext-lint==1.4.0
     # via doc8
 service-identity==21.1.0

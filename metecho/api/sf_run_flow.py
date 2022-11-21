@@ -317,10 +317,9 @@ def get_access_token(*, org_result, scratch_org_config):
             else:
                 raise
 
-    if total_wait_time >= settings.MAXIMUM_JOB_LENGTH:
-        raise ScratchOrgError(
-            f"Failed to build your scratch org after {settings.MAXIMUM_JOB_LENGTH} seconds."
-        )
+    raise ScratchOrgError(
+        f"Failed to build your scratch org after {settings.MAXIMUM_JOB_LENGTH} seconds."
+    )
 
 
 def deploy_org_settings(

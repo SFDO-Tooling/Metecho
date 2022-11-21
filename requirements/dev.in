@@ -22,6 +22,5 @@ pytest-factoryboy
 pytest-lazy-fixture
 pytest-mock
 pytest-sugar
-responses
 remote-pdb
 sphinxcontrib-httpdomain
