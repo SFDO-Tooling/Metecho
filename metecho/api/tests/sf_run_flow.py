@@ -13,6 +13,8 @@ from cumulusci.core.config.scratch_org_config import ScratchOrgConfig
 from cumulusci.oauth.client import OAuth2Client
 
 from requests.exceptions import ConnectionError
+from metecho.exceptions import SubcommandException
+
 from ..sf_run_flow import (
     ScratchOrgError,
     capitalize,
@@ -29,7 +31,6 @@ from ..sf_run_flow import (
     refresh_access_token,
     run_flow,
 )
-from metecho.exceptions import SubcommandException
 
 PATCH_ROOT = "metecho.api.sf_run_flow"
 
@@ -114,9 +115,7 @@ class TestGetDevhubApi:
 
     def test_bad(self):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(
-                patch(f"{PATCH_ROOT}.jwt_session")
-            )
+            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
             jwt_session.side_effect = HTTPError(
                 "Error message.", response=MagicMock(status_code=400)
             )
@@ -131,9 +130,7 @@ class TestGetDevhubApi:
 
     def test_bad_no_org(self):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(
-                patch(f"{PATCH_ROOT}.jwt_session")
-            )
+            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
             jwt_session.side_effect = HTTPError(
                 "Error message.", response=MagicMock(status_code=400)
             )
@@ -232,12 +229,8 @@ def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
         fake_auth_code_grant,
     )
     mocker.auth_code_grant = "123"
-    auth_token_endpoint = (
-        f"'{scratch_org_config.instance_url}/services/oauth2/token'"
-    )
-    expected_result = (
-        f"No connection adapters were found for {auth_token_endpoint}"
-    )
+    auth_token_endpoint = f"'{scratch_org_config.instance_url}/services/oauth2/token'"
+    expected_result = f"No connection adapters were found for {auth_token_endpoint}"
     with pytest.raises(
         InvalidSchema,
         match=expected_result,
@@ -339,9 +332,7 @@ class TestDeployOrgSettings:
             scratch_org_definition = MagicMock()
 
             section_setting.items.return_value = [(MagicMock(), MagicMock())]
-            settings.items.return_value = [
-                ("orgPreferenceSettings", section_setting)
-            ]
+            settings.items.return_value = [("orgPreferenceSettings", section_setting)]
             scratch_org_definition.get.return_value = settings
 
             deploy_org_settings(
@@ -356,9 +347,7 @@ class TestDeployOrgSettings:
 
 @pytest.mark.django_db
 class TestRunFlow:
-    def test_create_org_and_run_flow__exception(
-        self, user_factory, epic_factory
-    ):
+    def test_create_org_and_run_flow__exception(self, user_factory, epic_factory):
         user = user_factory()
         org_config = MagicMock(
             org_id="org_id",
@@ -382,9 +371,7 @@ class TestRunFlow:
             get_org_details.return_value = (MagicMock(), MagicMock())
             stack.enter_context(patch(f"{PATCH_ROOT}.get_org_result"))
             stack.enter_context(patch(f"{PATCH_ROOT}.mutate_scratch_org"))
-            stack.enter_context(
-                patch(f"{PATCH_ROOT}.poll_for_scratch_org_completion")
-            )
+            stack.enter_context(patch(f"{PATCH_ROOT}.poll_for_scratch_org_completion"))
             stack.enter_context(patch(f"{PATCH_ROOT}.get_access_token"))
             stack.enter_context(patch(f"{PATCH_ROOT}.deploy_org_settings"))
 
@@ -418,9 +405,7 @@ def test_delete_org(scratch_org_factory):
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         devhub_api = MagicMock()
-        get_devhub_api = stack.enter_context(
-            patch(f"{PATCH_ROOT}.get_devhub_api")
-        )
+        get_devhub_api = stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
         get_devhub_api.return_value = devhub_api
         devhub_api.query.return_value = {"records": [{"Id": "some-id"}]}
 

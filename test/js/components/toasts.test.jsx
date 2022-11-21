@@ -80,5 +80,26 @@ describe('<Toasts />', () => {
 
       expect(removeToast).not.toHaveBeenCalled();
     });
+
+    test('removeToast focus control', () => {
+      const { getByText } = setup();
+
+      /* Setup dom nodes for test */
+      const divNode = document.createElement('div');
+      divNode.classList.add('metecho-toast-focus');
+
+      const mockGetElement = jest.spyOn(document, 'getElementsByClassName');
+      const mockFocus = jest.spyOn(divNode, 'focus');
+      mockGetElement.mockReturnValue([divNode]);
+      Object.defineProperty(document, 'getElementsByClassName', {
+        value: mockGetElement,
+      });
+
+      fireEvent.click(getByText('Close'));
+
+      expect(mockGetElement).toHaveBeenCalled();
+      expect(mockFocus).toHaveBeenCalled();
+      // expect(divNode).toHaveFocus();
+    });
   });
 });

@@ -268,6 +268,30 @@ describe('getAction', () => {
     });
   });
 
+  describe('SCRATCH_ORG_COMMIT_OMNISTUDIO', () => {
+    test('calls commitSucceeded', () => {
+      const payload = { model: 'bar' };
+      const msg = { type: 'SCRATCH_ORG_COMMIT_OMNISTUDIO', payload };
+      sockets.getAction(msg);
+
+      expect(commitSucceeded).toHaveBeenCalledWith(payload, {
+        is_metadata: true,
+      });
+    });
+  });
+
+  describe('SCRATCH_ORG_COMMIT_OMNISTUDIO_FAILED', () => {
+    test('calls commitFailed', () => {
+      const payload = { model: 'bar' };
+      const msg = { type: 'SCRATCH_ORG_COMMIT_OMNISTUDIO_FAILED', payload };
+      sockets.getAction(msg);
+
+      expect(commitFailed).toHaveBeenCalledWith(payload, {
+        is_metadata: true,
+      });
+    });
+  });
+
   test('handles unknown event', () => {
     const event = { type: 'UNKNOWN' };
     const expected = null;

@@ -54,6 +54,8 @@ export const getDemoOrg = ({
     currently_refreshing_changes: false,
     currently_retrieving_metadata: false,
     currently_retrieving_dataset: false,
+    currently_retrieving_omnistudio: false,
+    is_omnistudio_installed: false,
     currently_refreshing_org: false,
     currently_reassigning_user: false,
     is_created: true,
