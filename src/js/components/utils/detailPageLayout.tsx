@@ -147,15 +147,12 @@ const DetailPageLayout = ({
         </div>
       </div>
       <div
-        // tabIndex required for toast close focus
-        tabIndex={-1}
-        className="metecho-toast-focus
-          slds-p-around_x-large
+        className="slds-p-around_x-large
           slds-grid
           slds-gutters
           slds-wrap"
       >
-        <aside
+        <div
           className="slds-col
             slds-size_1-of-1
             slds-medium-size_4-of-12
@@ -170,8 +167,8 @@ const DetailPageLayout = ({
             />
           )}
           {sidebar}
-        </aside>
-        <main
+        </div>
+        <div
           className="slds-col
             slds-size_1-of-1
             slds-medium-size_8-of-12
@@ -179,7 +176,7 @@ const DetailPageLayout = ({
             slds-p-bottom_x-large"
         >
           {children}
-        </main>
+        </div>
       </div>
     </>
   );
