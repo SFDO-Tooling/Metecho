@@ -1363,6 +1363,9 @@ def commit_dataset_from_org(
                     branch=task.branch_name,
                     commit_message=commit_message,
                 )
+                org.task.has_unmerged_commits = True
+                org.task.finalize_task_update(originating_user_id=user.id)
+
     except Exception as e:
         org.refresh_from_db()
         org.finalize_commit_dataset(error=e, originating_user_id=user.id)
@@ -1425,6 +1428,9 @@ def commit_omnistudio_from_org(
                 branch=task.branch_name,
                 commit_message=commit_message,
             )
+            org.task.has_unmerged_commits = True
+            org.task.finalize_task_update(originating_user_id=user.id)
+
     except Exception as e:
         org.refresh_from_db()
         org.finalize_commit_omnistudio(error=e, originating_user_id=user.id)
