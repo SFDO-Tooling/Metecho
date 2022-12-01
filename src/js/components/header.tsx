@@ -1,4 +1,3 @@
-import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
