@@ -14,14 +14,6 @@ const ToastMessage = withRouter(
     const closeToast = useCallback(() => {
       if (toast.id) {
         dispatch(removeToast(toast.id));
-
-        // Override default toast close behavior because default behavior
-        // selects HTML body when toast can't find openeing element,
-        // which is basically always in our case.
-        const wrapper = document.getElementsByClassName('metecho-toast-focus');
-        if (wrapper.length) {
-          (wrapper[0] as HTMLElement).focus();
-        }
       }
     }, [dispatch, toast]);
     const linkClicked = () => {
