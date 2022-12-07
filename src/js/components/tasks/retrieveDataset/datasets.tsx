@@ -47,6 +47,9 @@ const SelectDatasetForm = ({
   doRefreshDatasets,
 }: Props) => {
   const { t } = useTranslation();
+  if (!datasets.find((element) => element.toLowerCase() === 'default')) {
+    datasets.unshift('default');
+  }
   const existingDatasetSelected = Boolean(
     inputs.dataset_name &&
       map(datasets, toLower).includes(inputs.dataset_name.toLowerCase()),
