@@ -2,13 +2,7 @@
   "name": "Metecho",
   "description": "Web-based tool for collaborating on Salesforce projects",
   "repository": "https://github.com/SFDO-Tooling/Metecho",
-  "keywords": [
-    "ci",
-    "python",
-    "django",
-    "salesforce",
-    "github"
-  ],
+  "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
     "DJANGO_ALLOWED_HOSTS": {
       "description": "Heroku proxies web requests and Django needs to be configured to allow the forwards",
@@ -93,11 +87,7 @@
       "url": "heroku/python"
     }
   ],
-  "addons": [
-    "heroku-postgresql",
-    "heroku-redis",
-    "mailgun"
-  ],
+  "addons": ["heroku-postgresql", "heroku-redis", "mailgun"],
   "scripts": {
     "postdeploy": "python manage.py migrate --noinput"
   }

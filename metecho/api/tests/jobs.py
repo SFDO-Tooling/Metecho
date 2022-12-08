@@ -21,6 +21,7 @@ from ..jobs import (
     available_org_config_names,
     commit_changes_from_org,
     commit_dataset_from_org,
+    commit_omnistudio_from_org,
     convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
@@ -1864,3 +1865,116 @@ class TestCommitDatasetFromOrg:
 
         assert not scratch_org.currently_retrieving_dataset
         assert "Oh no!" in caplog.text
+
+
+JOBFILE_YAML = """
+projectPath: ./Exportfile1
+queries:
+    - DataRaptor
+    - OmniScript
+"""
+
+
+BAD_JOBFILE_YAML = """
+queries:
+    - DataRaptor
+    - OmniScript
+"""
+
+
+@pytest.mark.django_db
+class TestCommitOmnistudioFromOrg:
+    def test_ok(self, mocker, scratch_org_factory, patch_dataset_env):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=True, task__epic__project__repo_id=123
+        )
+        assert scratch_org.currently_retrieving_omnistudio
+
+        vlocity_task = mocker.patch(
+            f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
+        ).return_value
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        project_config, *_ = patch_dataset_env
+        folder = Path(project_config.repo_root) / "vlocity"
+        folder.mkdir(parents=True)
+        (folder / "test.yaml").write_text(JOBFILE_YAML)
+
+        commit_omnistudio_from_org(
+            org=scratch_org,
+            user=scratch_org.owner,
+            commit_message="Testing omnistudio",
+            yaml_path="vlocity/test.yaml",
+        )
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert commit.called
+        assert vlocity_task.called
+
+    def test_exception__no_file(
+        self, mocker, caplog, scratch_org_factory, patch_dataset_env
+    ):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=True, task__epic__project__repo_id=123
+        )
+        vlocity_task = mocker.patch(
+            f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
+        ).return_value
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        # Do not create the jobfile in the repo_root
+
+        with pytest.raises(
+            Exception, match="Jobfile not found at path vlocity/test.yaml"
+        ):
+            commit_omnistudio_from_org(
+                org=scratch_org,
+                user=scratch_org.owner,
+                commit_message="Testing omnistudio",
+                yaml_path="vlocity/test.yaml",
+            )
+
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert not commit.called
+        assert not vlocity_task.called
+        assert "Jobfile not found at path vlocity/test.yaml" in caplog.text
+
+    def test_exception__no_project_path(
+        self, mocker, caplog, scratch_org_factory, patch_dataset_env
+    ):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=True, task__epic__project__repo_id=123
+        )
+        assert scratch_org.currently_retrieving_omnistudio
+
+        vlocity_task = mocker.patch(
+            f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
+        ).return_value
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        project_config, *_ = patch_dataset_env
+        folder = Path(project_config.repo_root) / "vlocity"
+        folder.mkdir(parents=True)
+        (folder / "test.yaml").write_text(BAD_JOBFILE_YAML)
+
+        with pytest.raises(
+            Exception,
+            match="No projectPath defined in Jobfile at path vlocity/test.yaml",
+        ):
+            commit_omnistudio_from_org(
+                org=scratch_org,
+                user=scratch_org.owner,
+                commit_message="Testing omnistudio",
+                yaml_path="vlocity/test.yaml",
+            )
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert not commit.called
+        assert not vlocity_task.called
+        assert (
+            "No projectPath defined in Jobfile at path vlocity/test.yaml" in caplog.text
+        )
