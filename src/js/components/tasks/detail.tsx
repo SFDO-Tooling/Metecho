@@ -832,9 +832,6 @@ const TaskDetail = (
   let retrieveOmnistudioButton: ReactNode = null;
   if (project.has_push_permission && !taskIsMerged) {
     let retrieveMetadataText: JSX.Element = t('Check for Unretrieved Changes');
-    const should_show_datasets_button = cookies.get(
-      'should_show_datasets_button',
-    );
     if (readyToRetrieveMetadata || orgHasBeenVisited) {
       const isPrimary =
         (orgHasChanges || !readyToSubmit) &&
@@ -888,7 +885,6 @@ const TaskDetail = (
     }
     if (
       !(currentlyReassigning || currentlyCommittingMetadata) &&
-      should_show_datasets_button &&
       orgHasBeenVisited
     ) {
       retrieveDatasetButton = (
