@@ -973,6 +973,6 @@ export const sampleChangeset = {
 };
 
 export const sampleDatasets = {
-  Default: sampleChangeset,
+  default: sampleChangeset,
   'Another Dataset': { Account: ['Other'], WebLink: ['OpenType'] },
 };
