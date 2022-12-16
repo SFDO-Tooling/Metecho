@@ -127,8 +127,21 @@ const RetrieveDatasetModal = ({
     shouldSubscribeToObject: false,
   });
 
+  const dataArrivedFromServer = useRef(false);
+  // after fetching datasets, update inputs to match
+  useEffect(() => {
+    if (!fetchingDatasets && !dataArrivedFromServer.current) {
+      setInputs({
+        dataset_name: 'default',
+        dataset_definition: datasets.default ?? {},
+        commit_message: '',
+      });
+      dataArrivedFromServer.current = true;
+    }
+  }, [fetchingDatasets, datasets, setInputs]);
+
   // When datasets change, update default selection
-  const selectedDatasetRef = useRef(inputs.dataset_name);
+  const selectedDatasetRef = useRef('');
   useEffect(() => {
     const selectedDataset = inputs.dataset_name;
     const prevValue = selectedDatasetRef.current;
@@ -246,7 +259,7 @@ const RetrieveDatasetModal = ({
       ],
     },
     {
-      heading: t('Describe the dataset you are retrieving'),
+      heading: t('Describe the changes you are retrieving'),
       contents: (
         <CommitMessageForm
           selectedSchema={selectedSchema}

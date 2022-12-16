@@ -1674,9 +1674,9 @@ class TestParseDatasets:
         ).return_value
         project_config, *_ = patch_dataset_env
         repo_root = Path(project_config.repo_root)
-        folder1 = repo_root / "datasets" / "Default"
+        folder1 = repo_root / "datasets" / "default"
         folder1.mkdir(parents=True)
-        (folder1 / "Default.extract.yml").write_text(DATASET_YAML)
+        (folder1 / "default.extract.yml").write_text(DATASET_YAML)
         folder2 = repo_root / "datasets" / "MyDataset"
         folder2.mkdir(parents=True)
         (folder2 / "MyDataset.extract.yml").write_text(DATASET_YAML)
@@ -1695,7 +1695,7 @@ class TestParseDatasets:
                     "schema": EXPECTED_SCHEMA_OUTPUT,
                     "dataset_errors": [],
                     "datasets": {
-                        "Default": {
+                        "default": {
                             "Account": ["Name"],
                             "Contact": ["LastName", "ContactId"],
                         },
@@ -1718,9 +1718,9 @@ class TestParseDatasets:
         ).return_value
         project_config, *_ = patch_dataset_env
         repo_root = Path(project_config.repo_root)
-        folder1 = repo_root / "datasets" / "Default"
+        folder1 = repo_root / "datasets" / "default"
         folder1.mkdir(parents=True)
-        (folder1 / "Default.extract.yml").write_text("INVALID CONTENT")
+        (folder1 / "default.extract.yml").write_text("INVALID CONTENT")
         folder2 = repo_root / "datasets" / "Empty"
         folder2.mkdir(parents=True)
         (folder2 / "this-is-not-yaml.json").touch()
@@ -1736,9 +1736,9 @@ class TestParseDatasets:
         assert not org.currently_parsing_datasets
         assert "Failed to parse" in caplog.text
         errors = [
-            "Failed to parse file: datasets/Default/Default.extract.yml",
             "Missing dataset definition file: datasets/Empty/Empty.extract.yml",
             "Missing dataset definition file: datasets/FooBar/FooBar.extract.yml",
+            "Failed to parse file: datasets/default/default.extract.yml",
         ]
         async_to_sync.assert_called_with(
             org,
