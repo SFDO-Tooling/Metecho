@@ -1,0 +1,3 @@
+FROM ghcr.io/sfdc-qbranch/qbrix-maker:latest
+WORKDIR /app
+CMD honcho start -f Procfile_worker_short

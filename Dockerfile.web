@@ -1,0 +1,4 @@
+FROM ghcr.io/sfdc-qbranch/qbrix-maker:latest
+WORKDIR /app
+RUN chmod +x sfdx_analytics_setup.sh
+CMD python manage.py migrate --noinput && yarn django:serve:prod

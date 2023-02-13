@@ -152,7 +152,7 @@ class User(PushMixin, HashIdMixin, AbstractUser):
             body,
             settings.DEFAULT_FROM_EMAIL,
             [self.email],
-            fail_silently=False,
+            fail_silently=True,
         )
 
     def queue_refresh_repositories(self):
