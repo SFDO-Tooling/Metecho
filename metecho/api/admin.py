@@ -122,8 +122,10 @@ class GitHubCollaborationInlineAdmin(admin.TabularInline):
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     form = ProjectForm
-    list_display = ("name", "repo_owner", "repo_name", "created_at")
+    list_display = ("name", "repo_owner", "repo_name", "created_at", "deleted_at")
     search_fields = ("name", "repo_owner", "repo_name")
+    list_filter = (SoftDeletedListFilter, "repo_owner")
+
     inlines = (GitHubCollaborationInlineAdmin,)
 
     def save_model(self, request, obj, form, change):
