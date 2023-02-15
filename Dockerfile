@@ -39,11 +39,14 @@ COPY ./package.json package.json
 COPY ./yarn.lock yarn.lock
 RUN yarn install --check-files
 COPY . /app
-
+RUN ls
+RUN pwd
+RUN mkdir dist
+RUN mkdir dist/prod
+RUN yarn prod
 # Avoid building prod assets in development
 #RUN if [ "${BUILD_ENV}" = "production" ] || [ -n "${PROD_ASSETS}" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
-RUN yarn prod
-
+RUN pwd
 RUN \
   # Sample keys, not to be used for realsies:
   DB_ENCRYPTION_KEY="IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE=" \

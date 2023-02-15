@@ -9,7 +9,7 @@
     "url": "https://github.com/SFDO-Tooling/Metecho.git"
   },
   "engines": {
-    "node": "^16",
+    "node": ">=16.0.0",
     "yarn": "^1.22"
   },
   "scripts": {
