@@ -366,6 +366,7 @@ class Project(
     HashIdMixin,
     TimestampsMixin,
     SlugMixin,
+    SoftDeleteMixin,
     models.Model,
 ):
     repo_owner = StringField()
@@ -485,7 +486,7 @@ class Project(
                 type_="PROJECT_CREATE_ERROR",
                 originating_user_id=originating_user_id,
             )
-            self.delete()
+            self.hard_delete()
 
     def queue_refresh_github_users(self, *, originating_user_id):
         from .jobs import refresh_github_users_job
