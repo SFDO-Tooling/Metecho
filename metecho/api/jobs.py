@@ -24,6 +24,7 @@ from cumulusci.core.datasets import (
 )
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
+from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import download_extract_github, temporary_dir
@@ -1255,7 +1256,7 @@ def dataset_env(org: ScratchOrg):
         )
         org_config = org.get_refreshed_org_config(keychain=cci.keychain)
         project_config.keychain = org_config.keychain
-        sf = org_config.salesforce_client
+        sf = get_simple_salesforce_connection(project_config, org_config)
         with get_org_schema(
             sf,
             org_config,
