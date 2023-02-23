@@ -1560,6 +1560,7 @@ class FakeFieldSchema(NamedTuple):
     nillable: bool
     referenceTo: Sequence[str] = ()
     defaultedOnCreate: bool = False
+    defaultValue = None
 
     @property
     def label(self):
