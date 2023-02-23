@@ -954,6 +954,7 @@ class TestScratchOrg:
         scratch_org.installed_packages = ["npsp", "foobar"]
         assert not scratch_org.is_omnistudio_installed
 
+
 @pytest.mark.django_db
 class TestProjectDependency:
     def test_str(self, project_dependency_factory):
