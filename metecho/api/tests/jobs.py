@@ -7,7 +7,7 @@ from typing import NamedTuple, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
-from cumulusci.salesforce_api.org_schema import Field, SObject
+from cumulusci.salesforce_api.org_schema import Field, SObject, Schema
 from django.utils.timezone import now
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.orgs import Organization
@@ -1586,7 +1586,9 @@ class FakeSObjectSchema:
     extractable = SObject.extractable
 
 
-class FakeSchema:
+class FakeSchema(Schema):
+    def __init__(self):
+        pass
 
     includes_counts = True
     sobjects = [
