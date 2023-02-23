@@ -176,7 +176,7 @@ Set the following GitHub config vars for the Heroku app:
 
 Set the following Salesforce config vars for the Heroku app:
 
-* `SF_CALLBACK_URL: `https://yourmetechoapp.herokuapp.com/accounts/salesforce/login/callback/`. This is the same value that was entered for *Callback URL* when creating the Connected App.
+* `SF_CALLBACK_URL`: `https://yourmetechoapp.herokuapp.com/accounts/salesforce/login/callback/`. This is the same value that was entered for *Callback URL* when creating the Connected App.
 * `SF_CLIENT_ID`: *Consumer Key* from the Connected App
 * `SF_CLIENT_KEY`: Private key that was used to sign the certificate for the Connected App
 * `SF_CLIENT_SECRET`: *Consumer Secret* from the Connected App
