@@ -1264,7 +1264,7 @@ class ScratchOrg(
     @property
     def is_omnistudio_installed(self) -> bool:
         return any(
-            namespace in self.installed_packages 
+            namespace in self.installed_packages
             for namespace in ["omnistudio", "vlocity_cmt", "vlocity_ins", "vlocity_ps"]
         )
 
