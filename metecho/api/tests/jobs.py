@@ -1624,8 +1624,9 @@ class FakeSchema:
 def patch_dataset_env(mocker, tmp_path):
     """Mock all values returned by SF and GH APIs in the `dataset_env` context manager"""
     repo = mocker.MagicMock()
+    instance_url = "https://chocolate-cappuccino-8174-dev-ed.scratch.my.salesforce.com"
     project_config = mocker.MagicMock(repo_root=str(tmp_path))
-    org_config = mocker.MagicMock()
+    org_config = mocker.MagicMock(instance_url=instance_url)
     sf = mocker.MagicMock()
     schema = FakeSchema()
 
