@@ -1263,7 +1263,10 @@ class ScratchOrg(
 
     @property
     def is_omnistudio_installed(self) -> bool:
-        return "omnistudio" in self.installed_packages
+        return any(
+            namespace in self.installed_packages
+            for namespace in ["omnistudio", "vlocity_cmt", "vlocity_ins", "vlocity_ps"]
+        )
 
     @property
     def parent(self):
