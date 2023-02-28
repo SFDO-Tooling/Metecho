@@ -3,16 +3,17 @@
 # for stability.
 
 -c prod.txt
-Sphinx==5.1.0
+Sphinx
 black
+daphne
 django-extensions
-doc8==0.11.2
+doc8
 factory_boy
 flake8
 flake8-bugbear
 ipython
 isort
-myst-parser==0.18.0
+myst-parser
 pytest
 pytest-asyncio
 pytest-cov
