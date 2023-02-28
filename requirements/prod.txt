@@ -76,7 +76,7 @@ defusedxml==0.7.1
     #   python3-openid
 dj-database-url==1.2.0
     # via -r requirements/prod.in
-django==4.1.7
+django==4.0.6
     # via
     #   -r requirements/prod.in
     #   channels
