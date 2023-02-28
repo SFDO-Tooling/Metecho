@@ -55,7 +55,7 @@ describe('<RetrieveDatasetModal/>', () => {
 
     expect(getByText('Select the dataset to create or modify')).toBeVisible();
 
-    fireEvent.click(getByLabelText('Default'));
+    fireEvent.click(getByLabelText('default'));
     fireEvent.click(getByText('Save & Next'));
 
     expect(getByText('Select data to retrieve')).toBeVisible();
@@ -111,7 +111,7 @@ describe('<RetrieveDatasetModal/>', () => {
 
       expect(input).toHaveFocus();
 
-      fireEvent.change(input, { target: { value: 'Default' } });
+      fireEvent.change(input, { target: { value: 'default' } });
 
       expect(
         getByText('Dataset name cannot match existing dataset.'),
@@ -124,7 +124,7 @@ describe('<RetrieveDatasetModal/>', () => {
       const { findByText, getByText, getByLabelText } = setup();
 
       // Click forward to the select-changes modal:
-      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByLabelText('default'));
       fireEvent.click(getByText('Save & Next'));
 
       const checkbox = getByLabelText('Apex Class');
@@ -145,10 +145,49 @@ describe('<RetrieveDatasetModal/>', () => {
         objectType: 'scratch_org_commit_dataset',
         url: window.api_urls.scratch_org_commit_dataset('org-id'),
         data: {
-          dataset_name: 'Default',
+          dataset_name: 'default',
           commit_message: 'My Commit',
           dataset_definition: {
-            ...sampleDatasets.Default,
+            ...sampleDatasets.default,
+            ApexClass: ['ApiVersion'],
+          },
+        },
+        hasForm: true,
+        shouldSubscribeToObject: false,
+      });
+    });
+
+    test('creates a new commit from blank datasets', async () => {
+      // This is where this test differs from the one above
+      const datasets = {};
+      const { findByText, getByText, getByLabelText } = setup({ datasets });
+
+      // Click forward to the select-changes modal:
+      fireEvent.click(getByLabelText('default'));
+      fireEvent.click(getByText('Save & Next'));
+
+      const checkbox = getByLabelText('Apex Class');
+      fireEvent.click(checkbox);
+      // Click forward to the commit-message modal:
+      fireEvent.click(getByText('Save & Next'));
+
+      const commitInput = getByLabelText('*Commit Message', { exact: false });
+      fireEvent.change(commitInput, { target: { value: 'My Commit' } });
+      const submit = getByText('Retrieve Selected Data');
+      fireEvent.click(submit);
+
+      expect.assertions(2);
+      await findByText('Retrieving Selected Data…');
+
+      expect(createObject).toHaveBeenCalledTimes(1);
+      expect(createObject).toHaveBeenCalledWith({
+        objectType: 'scratch_org_commit_dataset',
+        url: window.api_urls.scratch_org_commit_dataset('org-id'),
+        data: {
+          dataset_name: 'default',
+          commit_message: 'My Commit',
+          dataset_definition: {
+            // This is where this test differs from the one above
             ApexClass: ['ApiVersion'],
           },
         },
@@ -162,8 +201,8 @@ describe('<RetrieveDatasetModal/>', () => {
     test.each([
       ['dataset_name', 'Select the dataset to create or modify', true],
       ['dataset_definition', 'Select data to retrieve', true],
-      ['commit_message', 'Describe the dataset you are retrieving', true],
-      ['foobar', 'Describe the dataset you are retrieving', false],
+      ['commit_message', 'Describe the changes you are retrieving', true],
+      ['foobar', 'Describe the changes you are retrieving', false],
     ])(
       'navigates to correct page to show error: %s',
       async (field, text, showsErr) => {
@@ -180,7 +219,7 @@ describe('<RetrieveDatasetModal/>', () => {
         );
         const { getByText, getByLabelText, findByText } = setup();
         // Click forward to the select-changes modal:
-        fireEvent.click(getByLabelText('Default'));
+        fireEvent.click(getByLabelText('default'));
         fireEvent.click(getByText('Save & Next'));
         const checkbox = getByLabelText('Apex Class');
         fireEvent.click(checkbox);
@@ -211,7 +250,7 @@ describe('<RetrieveDatasetModal/>', () => {
     beforeEach(() => {
       getters = setup();
       const { getByLabelText, getByText } = getters;
-      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByLabelText('default'));
       fireEvent.click(getByText('Save & Next'));
       group1 = getByLabelText('Account');
       group2 = getByLabelText('Apex Class');
@@ -362,7 +401,7 @@ describe('<RetrieveDatasetModal/>', () => {
       }
       getters = setup({ schema });
       const { getByLabelText, getByText } = getters;
-      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByLabelText('default'));
       fireEvent.click(getByText('Save & Next'));
     });
 
@@ -381,7 +420,7 @@ describe('<RetrieveDatasetModal/>', () => {
     beforeEach(() => {
       getters = setup();
       const { getByLabelText, getByText } = getters;
-      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByLabelText('default'));
       fireEvent.click(getByText('Save & Next'));
     });
 
@@ -433,7 +472,7 @@ describe('<RetrieveDatasetModal/>', () => {
     beforeEach(() => {
       getters = setup();
       const { getByLabelText, getByText } = getters;
-      fireEvent.click(getByLabelText('Default'));
+      fireEvent.click(getByLabelText('default'));
       fireEvent.click(getByText('Save & Next'));
       fireEvent.click(getByLabelText('Apex Class'));
       fireEvent.click(getByText('Save & Next'));

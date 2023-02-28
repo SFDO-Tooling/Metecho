@@ -945,6 +945,15 @@ class TestScratchOrg:
         scratch_org.refresh_from_db()
         assert scratch_org.config == {"anything else": "good"}
 
+    def test_is_omnistudio_installed(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.installed_packages = ["omnistudio", "foobar"]
+        assert scratch_org.is_omnistudio_installed
+        scratch_org.installed_packages = ["vlocity_cmt", "foobar"]
+        assert scratch_org.is_omnistudio_installed
+        scratch_org.installed_packages = ["npsp", "foobar"]
+        assert not scratch_org.is_omnistudio_installed
+
 
 @pytest.mark.django_db
 class TestProjectDependency:
