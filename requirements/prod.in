@@ -2,14 +2,13 @@
 # upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
 # for stability.
 
-Django==4.0.6
-daphne
+Django
 autobahn
 beautifulsoup4
 bleach
 channels
 channels-redis
-cumulusci==3.73.0
+cumulusci
 dj-database-url
 django-allauth
 django-anymail[mailgun]
