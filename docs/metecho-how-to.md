@@ -177,7 +177,8 @@ History list.*
   ![retrieve dataset button](/docs/retrieve-dataset.jpg?raw=true)
 
 - Select the Default dataset, another existing dataset, or enter a custom name
-  to create a new dataset.
+  to create a new dataset. If you don't know what to choose, select the 
+  default dataset.
 - Begin typing to search for objects and fields to include or remove from the
   dataset.
   - Only 50 objects are displayed, but you can enter a term in the search box to
@@ -196,27 +197,20 @@ History list.*
 ## Step 6c - Retrieve OmniStudio Configuration
 
 - The Developer can also retrieve OmniStudio metadata/configuration if they
-  have the omnistudio package installed in the dev org.
+  have OmniStudio development capabilities set up in the dev org.
 - Your repository `cumulusci.yml` needs to have a scratch org definition that
-  has OmniStudio features enabled and the `setup_flow` defined to install the VBT and OmniStudio package and deploy the necessary Remote Site Settings.   [See details on OmniStudio org configuration in CumulusCI docs.](https://cumulusci.readthedocs.io/en/stable/dev-omnistudio.html#set-up-a-dev-org-with-omnistudio)
-- The scratch org definition in your repository `cumulusci.yml` will look something like this:
-  ```
-  orgs:
-      scratch:
-          omni:
-              config_file: orgs/omni.json
-              setup_flow: omni_org
-              days: 7
-  ```
-- When this is in your repository's main branch `cumulusci.yml` file, you will
-  see the org shape available when creating a task in Metecho. Note that when you create an org using this org shape, it may take several minutes to create due to the two packages being installed.
+  has OmniStudio features enabled and the `setup_flow` defined to install the 
+  VBT and OmniStudio package and deploy the necessary Remote Site Settings. 
+  [See details on OmniStudio org configuration in CumulusCI docs.](https://cumulusci.readthedocs.io/en/stable/dev-omnistudio.html#set-up-a-dev-org-with-omnistudio) 
+  Note that initial OmniStudio setup happens outside of Metecho, as part of defining
+  the orgs for your project. Consult an engineer if you need assistance.
 - Visit the scratch org and make your OmniStudio changes.
 - Select `Retrieve OmniStudio Configuration`.
 
   ![retrieve omnistudio button](/docs/retrieve-omnistudio.jpg?raw=true)
 
-- Enter the path to your Vlocity yaml jobfile that includes queries that will
-  capture your changes.
+- Enter the path to your Vlocity YAML job file that includes queries that will
+  capture your changes. Your job file should have the filename extension `.yaml`.
 - Enter a commit message that briefly describes the OmniStudio configuration.
 - Select `Retrieve OmniStudio Configuration`.
 - Retrieving OmniStudio configuration can take a number of minutes. Feel free to
