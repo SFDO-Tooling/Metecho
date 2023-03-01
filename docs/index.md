@@ -4,6 +4,11 @@
 :maxdepth: 2
 :caption: 'Contents:'
 
+metecho-how-to
+heroku-setup
+running
+running-docker
+component-library-how-to
 api/index
 ```
 
