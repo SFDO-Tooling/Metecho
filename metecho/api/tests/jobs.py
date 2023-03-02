@@ -1846,6 +1846,7 @@ class TestCommitDatasetFromOrg:
 
         assert not scratch_org.currently_retrieving_dataset
         assert commit.called
+        assert scratch_org.task.has_unmerged_commits is True
 
     def test_exception(self, mocker, caplog, scratch_org_factory):
         mocker.patch(
@@ -1915,6 +1916,7 @@ class TestCommitOmnistudioFromOrg:
         assert not scratch_org.currently_retrieving_omnistudio
         assert commit.called
         assert vlocity_task.called
+        assert scratch_org.task.has_unmerged_commits is True
 
     def test_exception__no_file(
         self, mocker, caplog, scratch_org_factory, patch_dataset_env
