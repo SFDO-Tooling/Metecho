@@ -2,9 +2,9 @@
 
 [![Build Status](https://github.com/SFDO-Tooling/Metecho/actions/workflows/test.yml/badge.svg)](https://github.com/SFDO-Tooling/Metecho/actions/workflows/test.yml)
 
-## Development
+## Development and Deployment
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/SFDO-Tooling/metecho/tree/main)
+See [documentation](https://metecho.readthedocs.io/en/latest/heroku-setup.html) on how to set up Metecho on Heroku.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
