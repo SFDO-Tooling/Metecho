@@ -30,37 +30,41 @@ const Footer = ({
 }) => {
   const { t } = useTranslation();
 
+  const asStatus = function (block: JSX.Element): JSX.Element {
+    return <div role="status">{block}</div>;
+  };
+
   const loadingMsg: JSX.Element = t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
   if (isCreating || isRefreshingOrg) {
-    return loadingMsg;
+    return asStatus(loadingMsg);
   }
   if (isDeleting) {
-    return t('Deleting Org…') as JSX.Element;
+    return asStatus(t('Deleting Org…'));
   }
   if (isRefreshingChanges) {
-    return t('Checking for Unretrieved Changes…') as JSX.Element;
+    return asStatus(t('Checking for Unretrieved Changes…'));
   }
   if (isReassigningOrg) {
-    return t('Reassigning Org Ownership…') as JSX.Element;
+    return asStatus(t('Reassigning Org Ownership…'));
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_retrieving_metadata) {
-      return (
+      return asStatus(
         <>
           {t('Retrieving Selected Changes…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
-        </>
+        </>,
       );
     }
     if (org.currently_retrieving_dataset) {
-      return (
+      return asStatus(
         <>
           {t('Retrieving Selected Dataset…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
-        </>
+        </>,
       );
     }
     if (org.currently_retrieving_omnistudio) {
