@@ -69,24 +69,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         metecho = self.create_project(
-            name="Metecho-Test",
-            repo_owner="oddbird",
-            repo_name="Metecho-Test",
+            name="CCI Food Bank",
+            repo_owner="SFDO-Tooling",
+            repo_name="CCI-Food-Bank",
             description=(
                 "# Welcome to Metecho!\n\n"
-                "This is a description of the Project. "
+                "It's a bank for food."
                 "It might contain [links](https://install.salesforce.org)."
             ),
-        )
-        self.create_project(name="OddSite", repo_owner="oddbird", repo_name="oddsite")
-        self.create_project(name="Books", repo_owner="oddbird", repo_name="books")
-        self.create_project(name="True", repo_owner="oddbird", repo_name="true")
-        self.create_project(name="Susy", repo_owner="oddbird", repo_name="susy")
-        self.create_project(
-            name="Herman", repo_owner="oddbird", repo_name="sassdoc-theme-herman"
-        )
-        self.create_project(
-            name="Accoutrement", repo_owner="oddbird", repo_name="accoutrement"
         )
 
         for i in range(55):
