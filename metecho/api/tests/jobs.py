@@ -7,7 +7,7 @@ from typing import NamedTuple, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
-from cumulusci.salesforce_api.org_schema import Field, SObject
+from cumulusci.salesforce_api.org_schema import Field, SObject, Schema
 from django.utils.timezone import now
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.orgs import Organization
@@ -21,6 +21,7 @@ from ..jobs import (
     available_org_config_names,
     commit_changes_from_org,
     commit_dataset_from_org,
+    commit_omnistudio_from_org,
     convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
@@ -1559,6 +1560,7 @@ class FakeFieldSchema(NamedTuple):
     nillable: bool
     referenceTo: Sequence[str] = ()
     defaultedOnCreate: bool = False
+    defaultValue = None
 
     @property
     def label(self):
@@ -1584,7 +1586,9 @@ class FakeSObjectSchema:
     extractable = SObject.extractable
 
 
-class FakeSchema:
+class FakeSchema(Schema):
+    def __init__(self):
+        pass
 
     includes_counts = True
     sobjects = [
@@ -1623,8 +1627,9 @@ class FakeSchema:
 def patch_dataset_env(mocker, tmp_path):
     """Mock all values returned by SF and GH APIs in the `dataset_env` context manager"""
     repo = mocker.MagicMock()
+    instance_url = "https://chocolate-cappuccino-8174-dev-ed.scratch.my.salesforce.com"
     project_config = mocker.MagicMock(repo_root=str(tmp_path))
-    org_config = mocker.MagicMock()
+    org_config = mocker.MagicMock(instance_url=instance_url)
     sf = mocker.MagicMock()
     schema = FakeSchema()
 
@@ -1673,9 +1678,9 @@ class TestParseDatasets:
         ).return_value
         project_config, *_ = patch_dataset_env
         repo_root = Path(project_config.repo_root)
-        folder1 = repo_root / "datasets" / "Default"
+        folder1 = repo_root / "datasets" / "default"
         folder1.mkdir(parents=True)
-        (folder1 / "Default.extract.yml").write_text(DATASET_YAML)
+        (folder1 / "default.extract.yml").write_text(DATASET_YAML)
         folder2 = repo_root / "datasets" / "MyDataset"
         folder2.mkdir(parents=True)
         (folder2 / "MyDataset.extract.yml").write_text(DATASET_YAML)
@@ -1694,7 +1699,7 @@ class TestParseDatasets:
                     "schema": EXPECTED_SCHEMA_OUTPUT,
                     "dataset_errors": [],
                     "datasets": {
-                        "Default": {
+                        "default": {
                             "Account": ["Name"],
                             "Contact": ["LastName", "ContactId"],
                         },
@@ -1717,9 +1722,9 @@ class TestParseDatasets:
         ).return_value
         project_config, *_ = patch_dataset_env
         repo_root = Path(project_config.repo_root)
-        folder1 = repo_root / "datasets" / "Default"
+        folder1 = repo_root / "datasets" / "default"
         folder1.mkdir(parents=True)
-        (folder1 / "Default.extract.yml").write_text("INVALID CONTENT")
+        (folder1 / "default.extract.yml").write_text("INVALID CONTENT")
         folder2 = repo_root / "datasets" / "Empty"
         folder2.mkdir(parents=True)
         (folder2 / "this-is-not-yaml.json").touch()
@@ -1735,9 +1740,9 @@ class TestParseDatasets:
         assert not org.currently_parsing_datasets
         assert "Failed to parse" in caplog.text
         errors = [
-            "Failed to parse file: datasets/Default/Default.extract.yml",
             "Missing dataset definition file: datasets/Empty/Empty.extract.yml",
             "Missing dataset definition file: datasets/FooBar/FooBar.extract.yml",
+            "Failed to parse file: datasets/default/default.extract.yml",
         ]
         async_to_sync.assert_called_with(
             org,
@@ -1841,6 +1846,7 @@ class TestCommitDatasetFromOrg:
 
         assert not scratch_org.currently_retrieving_dataset
         assert commit.called
+        assert scratch_org.task.has_unmerged_commits is True
 
     def test_exception(self, mocker, caplog, scratch_org_factory):
         mocker.patch(
@@ -1864,3 +1870,117 @@ class TestCommitDatasetFromOrg:
 
         assert not scratch_org.currently_retrieving_dataset
         assert "Oh no!" in caplog.text
+
+
+JOBFILE_YAML = """
+projectPath: ./Exportfile1
+queries:
+    - DataRaptor
+    - OmniScript
+"""
+
+
+BAD_JOBFILE_YAML = """
+queries:
+    - DataRaptor
+    - OmniScript
+"""
+
+
+@pytest.mark.django_db
+class TestCommitOmnistudioFromOrg:
+    def test_ok(self, mocker, scratch_org_factory, patch_dataset_env):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=True, task__epic__project__repo_id=123
+        )
+        assert scratch_org.currently_retrieving_omnistudio
+
+        vlocity_task = mocker.patch(
+            f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
+        ).return_value
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        project_config, *_ = patch_dataset_env
+        folder = Path(project_config.repo_root) / "vlocity"
+        folder.mkdir(parents=True)
+        (folder / "test.yaml").write_text(JOBFILE_YAML)
+
+        commit_omnistudio_from_org(
+            org=scratch_org,
+            user=scratch_org.owner,
+            commit_message="Testing omnistudio",
+            yaml_path="vlocity/test.yaml",
+        )
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert commit.called
+        assert vlocity_task.called
+        assert scratch_org.task.has_unmerged_commits is True
+
+    def test_exception__no_file(
+        self, mocker, caplog, scratch_org_factory, patch_dataset_env
+    ):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=True, task__epic__project__repo_id=123
+        )
+        vlocity_task = mocker.patch(
+            f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
+        ).return_value
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        # Do not create the jobfile in the repo_root
+
+        with pytest.raises(
+            Exception, match="Jobfile not found at path vlocity/test.yaml"
+        ):
+            commit_omnistudio_from_org(
+                org=scratch_org,
+                user=scratch_org.owner,
+                commit_message="Testing omnistudio",
+                yaml_path="vlocity/test.yaml",
+            )
+
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert not commit.called
+        assert not vlocity_task.called
+        assert "Jobfile not found at path vlocity/test.yaml" in caplog.text
+
+    def test_exception__no_project_path(
+        self, mocker, caplog, scratch_org_factory, patch_dataset_env
+    ):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=True, task__epic__project__repo_id=123
+        )
+        assert scratch_org.currently_retrieving_omnistudio
+
+        vlocity_task = mocker.patch(
+            f"{PATCH_ROOT}.VlocityRetrieveTask", autospec=True
+        ).return_value
+        commit = mocker.patch(f"{PATCH_ROOT}.CommitDir", autospec=True).return_value
+
+        project_config, *_ = patch_dataset_env
+        folder = Path(project_config.repo_root) / "vlocity"
+        folder.mkdir(parents=True)
+        (folder / "test.yaml").write_text(BAD_JOBFILE_YAML)
+
+        with pytest.raises(
+            Exception,
+            match="No projectPath defined in Jobfile at path vlocity/test.yaml",
+        ):
+            commit_omnistudio_from_org(
+                org=scratch_org,
+                user=scratch_org.owner,
+                commit_message="Testing omnistudio",
+                yaml_path="vlocity/test.yaml",
+            )
+        scratch_org.refresh_from_db()
+
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert not commit.called
+        assert not vlocity_task.called
+        assert (
+            "No projectPath defined in Jobfile at path vlocity/test.yaml" in caplog.text
+        )

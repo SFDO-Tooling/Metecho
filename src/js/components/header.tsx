@@ -1,4 +1,3 @@
-import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -68,23 +67,29 @@ const Header = () => {
             </Trans>
           }
         />
-        <PageHeader
-          className="global-header
-            slds-p-horizontal_x-large
-            slds-p-vertical_medium"
-          title={
-            <Link
-              to={routes.home()}
-              className="slds-text-heading_large
-                slds-text-link_reset
-                walkthrough-metecho-name"
-            >
-              <span data-logo-bit="start">met</span>
-              <span data-logo-bit="end">échō</span>
-            </Link>
-          }
-          onRenderControls={controls}
-        />
+
+        <div className="slds-page-header global-header slds-p-horizontal_x-large slds-p-vertical_medium">
+          <div className="slds-page-header__row">
+            <div className="slds-page-header__col-title">
+              <div className="slds-page-header__name">
+                <div className="slds-page-header__name-title">
+                  <span className="slds-page-header__title slds-truncate">
+                    <Link
+                      to={routes.home()}
+                      className="slds-text-heading_large slds-text-link_reset walkthrough-metecho-name"
+                    >
+                      <span data-logo-bit="start">met</span>
+                      <span data-logo-bit="end">échō</span>
+                    </Link>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="slds-page-header__col-controls slds-align-middle">
+              <div className="slds-page-header__controls">{controls()}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   ) : null;

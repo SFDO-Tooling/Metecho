@@ -67,6 +67,14 @@ const Footer = ({
         </>,
       );
     }
+    if (org.currently_retrieving_omnistudio) {
+      return (
+        <>
+          {t('Retrieving Selected OmniStudio Configuration…')}
+          <div className="slds-p-top_small">{loadingMsg}</div>
+        </>
+      );
+    }
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
     /* istanbul ignore else */
     if (orgUrl) {

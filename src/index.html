@@ -11,6 +11,7 @@
     <meta name="author" content="Salesforce.org" />
     <meta name="keywords" content="{% block keywords %}{% endblock keywords %}" />
     <meta name="language" content="en-us" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'" />
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
@@ -21,10 +22,10 @@
     <meta name="description" content="{% block description %}Web-based tool for collaborating on Salesforce projects{% endblock description %}" />
 
     {% if GLOBALS.SENTRY_DSN %}
-      <!-- Insert Sentry setup -->
-      <script id="js-sentry-setup" type="application/json">
-        { "dsn": "{{ GLOBALS.SENTRY_DSN }}" }
-      </script>
+    <!-- Insert Sentry setup -->
+    <script id="js-sentry-setup" type="application/json">
+      { "dsn": "{{ GLOBALS.SENTRY_DSN }}" }
+    </script>
     {% endif %}
     <!-- Insert config variables from Django -->
     {{ GLOBALS|json_script:"js-globals" }}
@@ -36,12 +37,12 @@
     <!-- JavaScript and Styles are inserted here -->
   </head>
   <body>
-    <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
+    <div id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
       <div role="status" class="slds-spinner slds-spinner_large">
         <span class="slds-assistive-text">Loading…</span>
         <div class="slds-spinner__dot-a"></div>
         <div class="slds-spinner__dot-b"></div>
       </div>
-    </main>
+    </div>
   </body>
 </html>

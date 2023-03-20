@@ -1244,6 +1244,58 @@ class TestScratchOrgViewSet:
         assert not scratch_org.currently_retrieving_dataset
         assert not commit_dataset_from_org_job.delay.called
 
+    def test_commit_omnistudio_from_org(self, mocker, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(
+            currently_retrieving_omnistudio=False, owner=client.user
+        )
+        commit_omnistudio_from_org_job = mocker.patch(
+            "metecho.api.jobs.commit_omnistudio_from_org_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-commit-omnistudio", args=[scratch_org.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "yaml_path": "test",
+            },
+        )
+        scratch_org.refresh_from_db()
+
+        assert response.status_code == 202, response.data
+        assert scratch_org.currently_retrieving_omnistudio
+        assert response.data["currently_retrieving_omnistudio"]
+        commit_omnistudio_from_org_job.delay.assert_called_once_with(
+            org=scratch_org,
+            user=client.user,
+            commit_message="New commit",
+            yaml_path="test",
+        )
+
+    def test_commit_omnistudio_from_org__bad_user(
+        self, mocker, client, scratch_org_factory
+    ):
+        scratch_org = scratch_org_factory(currently_retrieving_omnistudio=False)
+        commit_omnistudio_from_org_job = mocker.patch(
+            "metecho.api.jobs.commit_omnistudio_from_org_job", autospec=True
+        )
+
+        response = client.post(
+            reverse("scratch-org-commit-omnistudio", args=[scratch_org.pk]),
+            format="json",
+            data={
+                "commit_message": "New commit",
+                "yaml_path": "test",
+            },
+        )
+        scratch_org.refresh_from_db()
+
+        assert (
+            response.status_code == 403
+        ), "Expected a 403 when the user is not the Org owner"
+        assert not scratch_org.currently_retrieving_omnistudio
+        assert not commit_omnistudio_from_org_job.delay.called
+
 
 @pytest.mark.django_db
 class TestTaskViewSet:

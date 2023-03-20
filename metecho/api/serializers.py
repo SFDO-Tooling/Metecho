@@ -1074,6 +1074,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "org_config_name",
             "currently_parsing_datasets",
             "currently_retrieving_dataset",
+            "currently_retrieving_omnistudio",
+            "installed_packages",
+            "is_omnistudio_installed",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -1094,6 +1097,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "has_been_visited": {"read_only": True},
             "currently_parsing_datasets": {"read_only": True},
             "currently_retrieving_dataset": {"read_only": True},
+            "currently_retrieving_omnistudio": {"read_only": True},
+            "installed_packages": {"read_only": True},
+            "is_omnistudio_installed": {"read_only": True},
         }
 
     def _X_changes(self, obj, kind):
@@ -1169,6 +1175,11 @@ class CommitDatasetSerializer(serializers.Serializer):
     commit_message = serializers.CharField()
     dataset_name = serializers.CharField()
     dataset_definition = serializers.DictField(child=StringListField())
+
+
+class CommitOmniStudioSerializer(serializers.Serializer):
+    commit_message = serializers.CharField()
+    yaml_path = serializers.CharField()
 
 
 class SiteSerializer(serializers.ModelSerializer):
