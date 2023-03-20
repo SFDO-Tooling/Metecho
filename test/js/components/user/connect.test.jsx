@@ -3,6 +3,7 @@ import React from 'react';
 
 import ConnectModal from '@/js/components/user/connect';
 
+import { extractCustomDomain } from './../../../../src/js/utils/helpers';
 import { render } from './../../utils';
 
 describe('<ConnectModal />', () => {
@@ -60,6 +61,46 @@ describe('<ConnectModal />', () => {
 
       expect(getByTestId('custom-domain')).toHaveTextContent('foobar');
       expect(getByTestId('sf-login-custom-domain')).toHaveValue('foobar');
+    });
+
+    test('Checks custom domain properly formats regardless of format', () => {
+      const { getByLabelText, getByTestId } = result;
+      const input = getByLabelText('Custom Domain');
+
+      expect(input).toBeVisible();
+      expect(getByTestId('custom-domain')).toHaveTextContent('domain');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
+
+      fireEvent.change(input, { target: { value: ' ' } });
+
+      expect(getByTestId('custom-domain')).toHaveTextContent('domain');
+      expect(getByTestId('sf-login-custom-domain')).toHaveValue('');
+
+      const inputs = [
+        `https://sfdc-ax-hub-axe.scratch.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.patch.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.demo.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.sandbox.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.free.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.trailblaze.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.develop.my.salesforce.com`,
+        `https://sfdc-ax-hub-axe.my.salesforce.com`,
+        `sfdc-ax-hub-axe`,
+      ];
+
+      inputs.forEach((custom_domain) => {
+        fireEvent.change(input, {
+          target: {
+            value: custom_domain,
+          },
+        });
+        expect(getByTestId('custom-domain')).toHaveTextContent(
+          `https://${extractCustomDomain(custom_domain)}.my.salesforce.com`,
+        );
+        expect(getByTestId('sf-login-custom-domain')).toHaveValue(
+          extractCustomDomain(custom_domain),
+        );
+      });
     });
 
     describe('"back" click', () => {

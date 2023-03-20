@@ -4,7 +4,6 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
-import cookies from 'js-cookie';
 import { pick } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -27,6 +26,7 @@ import CreateTaskModal from '@/js/components/tasks/createForm';
 import TaskStatusPath from '@/js/components/tasks/path';
 import RetrieveDatasetModal from '@/js/components/tasks/retrieveDataset';
 import RetrieveMetadataModal from '@/js/components/tasks/retrieveMetadata';
+import RetrieveOmnistudioModal from '@/js/components/tasks/retrieveOmnistudio';
 import TaskStatusSteps from '@/js/components/tasks/steps';
 import TourPopover from '@/js/components/tour/popover';
 import {
@@ -98,6 +98,8 @@ const TaskDetail = (
     useState(false);
   const [retrieveDatasetModalOpen, setRetrieveDatasetModalOpen] =
     useState(false);
+  const [retrieveOmnistudioModalOpen, setRetrieveOmnistudioModalOpen] =
+    useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -152,7 +154,9 @@ const TaskDetail = (
   let currentlyFetching = false;
   let currentlyCommittingMetadata = false;
   let currentlyCommittingDataset = false;
+  let currentlyCommittingOmnistudio = false;
   let currentlyReassigning = false;
+  let hasOmnistudioInstalled = false;
   let orgHasChanges = false;
   let userIsDevOwner = false;
   let userIsTestOwner = false;
@@ -193,6 +197,9 @@ const TaskDetail = (
       devOrg?.currently_retrieving_metadata,
     );
     currentlyCommittingDataset = Boolean(devOrg?.currently_retrieving_dataset);
+    currentlyCommittingOmnistudio = Boolean(
+      devOrg?.currently_retrieving_omnistudio,
+    );
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
     devOrgIsCreating = Boolean(
@@ -207,6 +214,7 @@ const TaskDetail = (
     if (devOrg || testOrg) {
       hasOrgs = true;
     }
+    hasOmnistudioInstalled = Boolean(devOrg?.is_omnistudio_installed);
   }
   const readyToRetrieveMetadata = userIsDevOwner && orgHasChanges;
   const orgHasBeenVisited = Boolean(userIsDevOwner && devOrg?.has_been_visited);
@@ -227,7 +235,8 @@ const TaskDetail = (
     currentlyFetching ||
     currentlyReassigning ||
     currentlyCommittingMetadata ||
-    currentlyCommittingDataset;
+    currentlyCommittingDataset ||
+    currentlyCommittingOmnistudio;
   const testOrgLoading =
     testOrgIsCreating ||
     testOrgIsDeleting ||
@@ -239,6 +248,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -254,6 +264,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(true);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -269,6 +280,7 @@ const TaskDetail = (
   const openRetrieveMetadataModal = () => {
     setRetrieveMetadataModalOpen(true);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
@@ -285,6 +297,7 @@ const TaskDetail = (
   const openRetrieveDatasetModal = () => {
     setRetrieveDatasetModalOpen(true);
     setRetrieveMetadataModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
@@ -298,11 +311,29 @@ const TaskDetail = (
   const closeRetrieveDatasetModal = () => {
     setRetrieveDatasetModalOpen(false);
   };
+  const openRetrieveOmnistudioModal = () => {
+    setRetrieveDatasetModalOpen(false);
+    setRetrieveMetadataModalOpen(false);
+    setRetrieveOmnistudioModalOpen(true);
+    setSubmitReviewModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setConvertOrgData(null);
+    setSelectIssueModalOpen(false);
+  };
+  const closeRetrieveOmnistudioModal = () => {
+    setRetrieveOmnistudioModalOpen(false);
+  };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
@@ -318,6 +349,7 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
@@ -336,6 +368,7 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setCreateOrgModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -352,6 +385,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -372,6 +406,7 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUserModalOpen(null);
     setContributeModalOpen(false);
@@ -388,6 +423,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -407,6 +443,7 @@ const TaskDetail = (
     setSubmitReviewModalOpen(false);
     setRetrieveMetadataModalOpen(false);
     setRetrieveDatasetModalOpen(false);
+    setRetrieveOmnistudioModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -789,54 +826,68 @@ const TaskDetail = (
   }
 
   let retrieveButtons: ReactNode = null;
+  let retrieveMetadataButton: ReactNode = null;
   let retrieveDatasetButton: ReactNode = null;
-  if (
-    project.has_push_permission &&
-    !taskIsMerged &&
-    (readyToRetrieveMetadata || orgHasBeenVisited)
-  ) {
+  let retrieveOmnistudioButton: ReactNode = null;
+  if (project.has_push_permission && !taskIsMerged) {
     let retrieveMetadataText: JSX.Element = t('Check for Unretrieved Changes');
-    const isPrimary =
-      (orgHasChanges || !readyToSubmit) &&
-      (!task.pr_is_open || hasReviewRejected);
-    if (currentlyCommittingMetadata) {
-      /* istanbul ignore next */
-      retrieveMetadataText = (
-        <LabelWithSpinner
-          label={t('Retrieving Selected Changes…')}
-          variant={isPrimary ? 'inverse' : 'base'}
-        />
+    if (readyToRetrieveMetadata || orgHasBeenVisited) {
+      const isPrimary =
+        (orgHasChanges || !readyToSubmit) &&
+        (!task.pr_is_open || hasReviewRejected);
+      if (currentlyCommittingMetadata) {
+        /* istanbul ignore next */
+        retrieveMetadataText = (
+          <LabelWithSpinner
+            label={t('Retrieving Selected Changes…')}
+            variant={isPrimary ? 'inverse' : 'base'}
+          />
+        );
+      } else if (fetchingChanges || currentlyFetching) {
+        /* istanbul ignore next */
+        retrieveMetadataText = (
+          <LabelWithSpinner
+            label={t('Checking for Unretrieved Changes…')}
+            variant={isPrimary ? 'inverse' : 'base'}
+          />
+        );
+      } else if (currentlyReassigning) {
+        /* istanbul ignore next */
+        retrieveMetadataText = (
+          <LabelWithSpinner
+            label={t('Reassigning Org Ownership…')}
+            variant={isPrimary ? 'inverse' : 'base'}
+          />
+        );
+      } else if (orgHasChanges) {
+        retrieveMetadataText = t('Retrieve Changes from Dev Org');
+      }
+
+      retrieveMetadataButton = (
+        <div className="inline-container slds-m-right_small">
+          <Button
+            label={retrieveMetadataText}
+            variant={isPrimary ? 'brand' : 'outline-brand'}
+            className={classNames('slds-align-middle', 'slds-m-bottom_medium')}
+            onClick={doRetrieveMetadata}
+            disabled={
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingMetadata ||
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
+            }
+          />
+        </div>
       );
-    } else if (fetchingChanges || currentlyFetching) {
-      /* istanbul ignore next */
-      retrieveMetadataText = (
-        <LabelWithSpinner
-          label={t('Checking for Unretrieved Changes…')}
-          variant={isPrimary ? 'inverse' : 'base'}
-        />
-      );
-    } else if (currentlyReassigning) {
-      /* istanbul ignore next */
-      retrieveMetadataText = (
-        <LabelWithSpinner
-          label={t('Reassigning Org Ownership…')}
-          variant={isPrimary ? 'inverse' : 'base'}
-        />
-      );
-    } else if (orgHasChanges) {
-      retrieveMetadataText = t('Retrieve Changes from Dev Org');
     }
-
-    const should_show_datasets_button = cookies.get(
-      'should_show_datasets_button',
-    );
-
     if (
-      should_show_datasets_button &&
-      !(currentlyReassigning || currentlyCommittingMetadata)
+      !(currentlyReassigning || currentlyCommittingMetadata) &&
+      orgHasBeenVisited
     ) {
       retrieveDatasetButton = (
-        <div className="inline-container slds-m-left_small">
+        <div className="inline-container slds-m-right_small">
           <Button
             label={
               currentlyCommittingDataset ? (
@@ -849,36 +900,58 @@ const TaskDetail = (
               )
             }
             variant="outline-brand"
-            className="slds-align-middle"
+            className={classNames('slds-align-middle', 'slds-m-bottom_medium')}
             onClick={openRetrieveDatasetModal}
             disabled={
-              fetchingChanges || currentlyFetching || currentlyCommittingDataset
+              fetchingChanges ||
+              currentlyFetching ||
+              currentlyCommittingMetadata ||
+              currentlyCommittingDataset ||
+              currentlyCommittingOmnistudio ||
+              currentlyReassigning
             }
           />
         </div>
       );
+      if (hasOmnistudioInstalled) {
+        retrieveOmnistudioButton = (
+          <div className="inline-container">
+            <Button
+              label={
+                currentlyCommittingOmnistudio ? (
+                  <LabelWithSpinner
+                    label={t('Retrieving Selected OmniStudio Configuration…')}
+                    variant="base"
+                  />
+                ) : (
+                  t('Retrieve OmniStudio Configuration')
+                )
+              }
+              variant="outline-brand"
+              className={classNames(
+                'slds-align-middle',
+                'slds-m-bottom_medium',
+              )}
+              onClick={openRetrieveOmnistudioModal}
+              disabled={
+                fetchingChanges ||
+                currentlyFetching ||
+                currentlyCommittingMetadata ||
+                currentlyCommittingDataset ||
+                currentlyCommittingOmnistudio ||
+                currentlyReassigning
+              }
+            />
+          </div>
+        );
+      }
     }
+
     retrieveButtons = (
-      <div
-        className={classNames('slds-is-relative', {
-          'slds-m-bottom_medium': readyToSubmit,
-          'slds-m-bottom_x-large': !readyToSubmit,
-        })}
-      >
-        <Button
-          label={retrieveMetadataText}
-          variant={isPrimary ? 'brand' : 'outline-brand'}
-          className="slds-align-middle"
-          onClick={doRetrieveMetadata}
-          disabled={
-            fetchingChanges ||
-            currentlyFetching ||
-            currentlyCommittingMetadata ||
-            currentlyCommittingDataset ||
-            currentlyReassigning
-          }
-        />
+      <div className="slds-is-relative">
+        {retrieveMetadataButton}
         {retrieveDatasetButton}
+        {retrieveOmnistudioButton}
         <TourPopover
           id="tour-task-retrieve"
           align="right"
@@ -1066,7 +1139,6 @@ const TaskDetail = (
       >
         {retrieveButtons}
         {submitButton}
-
         {taskOrgs ? (
           <TaskOrgCards
             orgs={taskOrgs}
@@ -1169,6 +1241,13 @@ const TaskDetail = (
                 fetchingDatasets={(devOrg as Org).currently_parsing_datasets}
                 isOpen={retrieveDatasetModalOpen}
                 closeModal={closeRetrieveDatasetModal}
+              />
+            )}
+            {orgHasBeenVisited && (
+              <RetrieveOmnistudioModal
+                orgId={(devOrg as Org).id}
+                isOpen={retrieveOmnistudioModalOpen}
+                closeModal={closeRetrieveOmnistudioModal}
               />
             )}
             {readyToSubmit && (

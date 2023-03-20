@@ -7,6 +7,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ExternalLink } from '@/js/components/utils';
 import { User } from '@/js/store/user/reducer';
+import { extractCustomDomain } from '@/js/utils/helpers';
 
 const ConnectModal = ({
   user,
@@ -113,7 +114,7 @@ const ConnectModal = ({
           <input
             type="hidden"
             name="custom_domain"
-            value={customDomain}
+            value={extractCustomDomain(url.trim())}
             data-testid="sf-login-custom-domain"
           />
           <input type="hidden" name="process" value="connect" />
@@ -134,7 +135,9 @@ const ConnectModal = ({
               className="slds-form-element__help slds-truncate slds-p-top_small"
               data-testid="custom-domain"
             >
-              https://{customDomain || <em>domain</em>}.my.salesforce.com
+              https://
+              {extractCustomDomain(url.trim()) || <em>domain</em>}
+              .my.salesforce.com
             </div>
           </Input>
           <button

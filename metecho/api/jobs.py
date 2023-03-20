@@ -10,10 +10,12 @@ from typing import Dict, Iterable, List
 import cumulusci
 import requests
 import sarge
+import yaml
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from cumulusci.cli.project import init_from_context
 from cumulusci.cli.runtime import CliRuntime
+from cumulusci.core.config import TaskConfig
 from cumulusci.core.datasets import (
     DEFAULT_EXTRACT_DATA,
     Dataset,
@@ -22,7 +24,9 @@ from cumulusci.core.datasets import (
 )
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
+from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
+from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import download_extract_github, temporary_dir
 from django.conf import settings
 from django.db import transaction
@@ -73,6 +77,14 @@ logger = logging.getLogger(__name__)
 
 
 class TaskReviewIntegrityError(Exception):
+    pass
+
+
+class MissingJobfileError(Exception):
+    pass
+
+
+class MissingProjectPathError(Exception):
     pass
 
 
@@ -424,6 +436,9 @@ def _create_org_and_run_flow(
         originating_user_id=originating_user_id,
     )
     scratch_org.is_created = True
+    scratch_org.installed_packages = [
+        k for k, v in org_config.installed_packages.items()
+    ]
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
@@ -1241,7 +1256,7 @@ def dataset_env(org: ScratchOrg):
         )
         org_config = org.get_refreshed_org_config(keychain=cci.keychain)
         project_config.keychain = org_config.keychain
-        sf = org_config.salesforce_client
+        sf = get_simple_salesforce_connection(project_config, org_config)
         with get_org_schema(
             sf,
             org_config,
@@ -1349,6 +1364,9 @@ def commit_dataset_from_org(
                     branch=task.branch_name,
                     commit_message=commit_message,
                 )
+                org.task.has_unmerged_commits = True
+                org.task.finalize_task_update(originating_user_id=user.id)
+
     except Exception as e:
         org.refresh_from_db()
         org.finalize_commit_dataset(error=e, originating_user_id=user.id)
@@ -1360,3 +1378,68 @@ def commit_dataset_from_org(
 
 
 commit_dataset_from_org_job = job(commit_dataset_from_org)
+
+
+def commit_omnistudio_from_org(
+    *,
+    org: ScratchOrg,
+    user: User,
+    commit_message: str,
+    yaml_path: str,
+):
+    """
+    Given a yaml_path:
+    1. Check that the yaml jobfile exists at the path
+    2. Check that the projectPath is defined in the yaml jobfile
+    3. Pass the yaml path to cci vlocity_retrieve
+    4. Commit the projectPath to the repo
+    """
+    try:
+        org.refresh_from_db()
+        task = org.task
+        task.refresh_from_db()
+        with dataset_env(org) as (project_config, org_config, sf, schema, repo):
+            task_config = TaskConfig(
+                config={"options": {"job_file": yaml_path, "org": org_config.name}}
+            )
+            repo_root = project_config.repo_root
+            jobfile: Path = Path(repo_root, yaml_path)
+            if not jobfile.is_file():
+                raise MissingJobfileError(
+                    f"Jobfile not found at path {yaml_path} in repository: {repo}"
+                )
+
+            jobfileobj = yaml.safe_load(jobfile.read_text())
+            if "projectPath" not in jobfileobj:
+                raise MissingProjectPathError(
+                    f"No projectPath defined in Jobfile at path {yaml_path}"
+                )
+
+            vlocity_path = Path(project_config.repo_root) / jobfileobj["projectPath"]
+
+            vlocity_task = VlocityRetrieveTask(project_config, task_config, org_config)
+            vlocity_task()
+            commit = CommitDir(
+                repo, author={"name": user.username, "email": user.email}
+            )
+
+            commit(
+                str(vlocity_path),
+                repo_dir=str(vlocity_path.relative_to(project_config.repo_root)),
+                branch=task.branch_name,
+                commit_message=commit_message,
+            )
+            org.task.has_unmerged_commits = True
+            org.task.finalize_task_update(originating_user_id=user.id)
+
+    except Exception as e:
+        org.refresh_from_db()
+        org.finalize_commit_omnistudio(error=e, originating_user_id=user.id)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        org.finalize_commit_omnistudio(originating_user_id=user.id)
+
+
+commit_omnistudio_from_org_job = job(commit_omnistudio_from_org)
