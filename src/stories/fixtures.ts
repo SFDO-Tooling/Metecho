@@ -30,6 +30,7 @@ export const api_urls = {
     `/api/scratch-orgs/${id}/commit_dataset/`,
   scratch_org_commit_omnistudio: (id: string) =>
     `/api/scratch-orgs/${id}/commit_omnistudio/`,
+  scratch_org_log: (id: string) => `/api/scratch-orgs/${id}/log/`,
   scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
   scratch_org_parse_datasets: (id: string) =>

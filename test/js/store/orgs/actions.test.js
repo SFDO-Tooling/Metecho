@@ -218,7 +218,7 @@ describe('provisionFailed', () => {
       store.dispatch(
         actions.provisionFailed({
           model: org,
-          message: 'error msg',
+          message: 'error msg.',
           originating_user_id: 'user-id',
         }),
       );
@@ -228,12 +228,14 @@ describe('provisionFailed', () => {
       expect(allActions[0].payload.heading).toMatch(
         'Uh oh. There was an error creating your new Dev Org for Task “My Task.”',
       );
-      expect(allActions[0].payload.details).toBe('error msg');
+      expect(allActions[0].payload.details).toBe(
+        'The last line of the log is “error msg.” If you need support, your scratch org id is org-id.',
+      );
       expect(allActions[0].payload.variant).toBe('error');
       expect(allActions[1]).toEqual(orgAction);
     });
 
-    test('does not fail if missing url', () => {
+    test('includes log URL in message', () => {
       const store = storeWithThunk({ ...defaultState, tasks: {} });
       const org = {
         id: 'org-id',
@@ -258,8 +260,10 @@ describe('provisionFailed', () => {
       expect(allActions[0].payload.heading).toBe(
         'Uh oh. There was an error creating your new Dev Org.',
       );
-      expect(allActions[0].payload.linkText).toBeUndefined();
-      expect(allActions[0].payload.linkUrl).toBeUndefined();
+      expect(allActions[0].payload.linkText).toBe('Download build log.');
+      expect(allActions[0].payload.linkUrl).toBe(
+        '/api/scratch-orgs/org-id/log/',
+      );
       expect(allActions[1]).toEqual(orgAction);
     });
   });
