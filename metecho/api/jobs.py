@@ -142,7 +142,7 @@ def epic_create_branch(
 
 def _create_branches_on_github(
     *, user, repo_id, epic=None, task=None, task_sha=None, originating_user_id=None
-)-> str:
+) -> str:
     if not (epic or task):
         raise ValueError("At least one of Task or Epic is required")
 
