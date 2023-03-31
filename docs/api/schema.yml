@@ -702,7 +702,7 @@ paths:
   /api/scratch-orgs/:
     get:
       operationId: scratch_orgs_list
-      description: Manage SalesForce ScratchOrgs.
+      description: Manage Salesforce scratch orgs.
       parameters:
       - in: query
         name: epic
@@ -735,7 +735,7 @@ paths:
           description: ''
     post:
       operationId: scratch_orgs_create
-      description: Manage SalesForce ScratchOrgs.
+      description: Manage Salesforce scratch orgs.
       tags:
       - scratch-orgs
       requestBody:
@@ -763,7 +763,7 @@ paths:
   /api/scratch-orgs/{id}/:
     get:
       operationId: scratch_orgs_retrieve
-      description: Manage SalesForce ScratchOrgs.
+      description: Manage Salesforce scratch orgs.
       parameters:
       - in: path
         name: id
@@ -786,7 +786,7 @@ paths:
           description: ''
     put:
       operationId: scratch_orgs_update
-      description: Manage SalesForce ScratchOrgs.
+      description: Manage Salesforce scratch orgs.
       parameters:
       - in: path
         name: id
@@ -821,7 +821,7 @@ paths:
           description: ''
     patch:
       operationId: scratch_orgs_partial_update
-      description: Manage SalesForce ScratchOrgs.
+      description: Manage Salesforce scratch orgs.
       parameters:
       - in: path
         name: id
@@ -855,7 +855,7 @@ paths:
           description: ''
     delete:
       operationId: scratch_orgs_destroy
-      description: Manage SalesForce ScratchOrgs.
+      description: Manage Salesforce scratch orgs.
       parameters:
       - in: path
         name: id
@@ -980,6 +980,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
+  /api/scratch-orgs/{id}/log/:
+    get:
+      operationId: scratch_orgs_log_retrieve
+      description: Return the CCI build log or traceback from a scratch org build.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Log content
   /api/scratch-orgs/{id}/parse_datasets/:
     post:
       operationId: scratch_orgs_parse_datasets_create

@@ -28,6 +28,12 @@ const ToastMessage = withRouter(
       if (toast.linkUrl) {
         if (toast.openLinkInNewWindow) {
           window.open(toast.linkUrl, '_blank');
+        } else if (toast.linkDownload) {
+          const link = document.createElement('a');
+
+          link.href = toast.linkUrl;
+          link.download = toast.linkDownloadFilename || 'output.txt';
+          link.click();
         } else {
           history.push(toast.linkUrl);
         }

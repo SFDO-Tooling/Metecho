@@ -61,6 +61,53 @@ describe('<Toasts />', () => {
 
       expect(window.open).not.toHaveBeenCalled();
     });
+
+    test('starts download if linkDownload set', () => {
+      const mockElement = {
+        click: () => {},
+      };
+      const clickSpy = jest.spyOn(mockElement, 'click');
+      const createElementSpy = jest.spyOn(window.document, 'createElement');
+
+      const { getByText } = setup({
+        toasts: [
+          {
+            ...defaultToast,
+            linkDownload: true,
+            linkDownloadFilename: 'foo.txt',
+            linkUrl: '/foo.txt',
+          },
+        ],
+      });
+
+      createElementSpy.mockReturnValueOnce(mockElement);
+      fireEvent.click(getByText('open link'));
+
+      expect(createElementSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(window.open).not.toHaveBeenCalled();
+    });
+
+    test('defaults linkDownloadFilename', () => {
+      const mockElement = {
+        click: () => {},
+      };
+      const createElementSpy = jest.spyOn(window.document, 'createElement');
+
+      const { getByText } = setup({
+        toasts: [
+          {
+            ...defaultToast,
+            linkDownload: true,
+            linkUrl: '/foo.txt',
+          },
+        ],
+      });
+
+      createElementSpy.mockReturnValueOnce(mockElement);
+      fireEvent.click(getByText('open link'));
+      expect(mockElement.download).toBe('output.txt');
+    });
   });
 
   describe('close click', () => {

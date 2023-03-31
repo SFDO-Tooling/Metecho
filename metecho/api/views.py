@@ -2,10 +2,11 @@ from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from github3.exceptions import ConnectionError, NotFoundError, ResponseError
 from rest_framework import mixins, status, viewsets
@@ -550,13 +551,24 @@ class ScratchOrgViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
-    """Manage SalesForce ScratchOrgs."""
+    """Manage Salesforce scratch orgs."""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer
-    queryset = ScratchOrg.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
+
+    def get_queryset(self):
+
+        # All actions except log() act on active scratch orgs only
+        # getattr() check guards against DRF-Spectacular
+        if (
+            not getattr(self, "swagger_fake_view", False)
+            and "/log" in self.request.resolver_match.route
+        ):
+            return ScratchOrg.objects.all()
+
+        return ScratchOrg.objects.active()
 
     def perform_create(self, *args, **kwargs):
         if self.request.user.is_devhub_enabled:
@@ -752,4 +764,27 @@ class ScratchOrgViewSet(
         scratch_org.queue_refresh_org(originating_user_id=str(request.user.id))
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: OpenApiResponse(OpenApiTypes.STR, description="Log content")},
+    )
+    @action(detail=True, methods=["GET"])
+    def log(self, request, pk=None):
+        """Return the CCI build log or traceback from a scratch org build."""
+        # Note that we override the viewset-level queryset as this action will usually
+        # run on deleted scratch org instances.
+        scratch_org = self.get_object()
+        if not (request.user == scratch_org.owner or request.user.is_superuser):
+            return Response(
+                {"error": _("Requesting user did not create Org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        return HttpResponse(
+            scratch_org.cci_log,
+            content_type="text/plain",
+            charset="utf-8",
+            status=status.HTTP_200_OK,
         )

@@ -1296,6 +1296,21 @@ class TestScratchOrgViewSet:
         assert not scratch_org.currently_retrieving_omnistudio
         assert not commit_omnistudio_from_org_job.delay.called
 
+    def test_download_log(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(owner=client.user, cci_log="Foo")
+        url = reverse("scratch-org-log", kwargs={"pk": str(scratch_org.id)})
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.content == b"Foo"
+
+    def test_download_log__not_authorized(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(cci_log="Foo")
+        url = reverse("scratch-org-log", kwargs={"pk": str(scratch_org.id)})
+        response = client.get(url)
+
+        assert response.status_code == 403
+
 
 @pytest.mark.django_db
 class TestTaskViewSet:
