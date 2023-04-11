@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,26 +34,33 @@ export const UserCard = ({
     );
   }
   return (
-    <Card
-      className={classNames(className, 'collaborator-card')}
-      icon={<GitHubUserAvatar user={user} />}
-      heading={name}
-      headerActions={
-        removeUser ? (
-          <Button
-            assistiveText={{ icon: t('Remove') }}
-            className="overflow-shadow"
-            iconCategory="utility"
-            iconName="close"
-            iconSize="small"
-            iconVariant="border-filled"
-            variant="icon"
-            title={t('Remove')}
-            onClick={removeUser}
-          />
-        ) : null
-      }
-    />
+    <article
+      className={`slds-card ${classNames(className, 'collaborator-card')}`}
+    >
+      <div className="slds-card__header slds-grid">
+        <div className="slds-media slds-media_center slds-has-flexi-truncate">
+          <div className="slds-media__figure">
+            <GitHubUserAvatar user={user} />
+          </div>
+          <div className="slds-media__body">{name}</div>
+        </div>
+        <div className="slds-no-flex">
+          {removeUser ? (
+            <Button
+              assistiveText={{ icon: t('Remove') }}
+              className="overflow-shadow"
+              iconCategory="utility"
+              iconName="close"
+              iconSize="small"
+              iconVariant="border-filled"
+              variant="icon"
+              title={`${t('Remove')} ${name}`}
+              onClick={removeUser}
+            />
+          ) : null}
+        </div>
+      </div>
+    </article>
   );
 };
 
