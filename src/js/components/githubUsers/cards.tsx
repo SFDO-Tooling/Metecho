@@ -47,7 +47,7 @@ export const UserCard = ({
         <div className="slds-no-flex">
           {removeUser ? (
             <Button
-              assistiveText={{ icon: t('Remove') }}
+              assistiveText={{ icon: `${t('Remove')} ${name}` }}
               className="overflow-shadow"
               iconCategory="utility"
               iconName="close"
