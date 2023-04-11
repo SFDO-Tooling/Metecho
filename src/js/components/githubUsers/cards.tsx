@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
