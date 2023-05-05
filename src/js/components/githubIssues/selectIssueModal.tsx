@@ -3,6 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
+import { t } from 'i18next';
 import React, { ChangeEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
@@ -85,10 +86,9 @@ const TaskStatus = ({ task }: { task: IssueTask }) => {
 
 const EpicStatus = ({ epic }: { epic: IssueEpic }) => {
   const { status } = getEpicStatus({ epicStatus: epic.status });
-
   return (
     <span className="slds-m-left_x-small v-align-center icon-text-block">
-      {status}
+      {`${t('Status')}: ${status}`}
     </span>
   );
 };
