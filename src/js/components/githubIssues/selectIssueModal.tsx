@@ -84,6 +84,7 @@ const TaskStatus = ({ task }: { task: IssueTask }) => {
 };
 
 const EpicStatus = ({ epic }: { epic: IssueEpic }) => {
+  const { t } = useTranslation();
   const { status } = getEpicStatus({ epicStatus: epic.status });
   return (
     <span className="slds-m-left_x-small v-align-center icon-text-block">
