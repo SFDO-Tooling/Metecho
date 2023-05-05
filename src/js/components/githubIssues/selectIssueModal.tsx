@@ -3,7 +3,6 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import { t } from 'i18next';
 import React, { ChangeEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
