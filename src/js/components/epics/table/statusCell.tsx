@@ -11,7 +11,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     return null;
   }
 
-  const { status, icon } = getEpicStatus({
+  const { status } = getEpicStatus({
     epicStatus: item.status,
   });
 
@@ -21,7 +21,6 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       title={status}
       className={classNames(className, 'status-cell', 'complex-cell')}
     >
-      {icon}
       <span className="slds-m-left_x-small status-cell-text">{status}</span>
     </DataTableCell>
   );
