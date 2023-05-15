@@ -50,17 +50,8 @@ export const GitHubIssueLink = ({ url }: { url: string }) => {
   const { t } = useTranslation();
 
   return (
-    <ExternalLink url={url}>
+    <ExternalLink url={url} showButtonIcon>
       {t('View on GitHub')}
-      <Icon
-        category="utility"
-        name="new_window"
-        size="xx-small"
-        className="slds-button__icon
-          slds-button__icon_right
-          slds-m-bottom_xx-small"
-        containerClassName="slds-icon_container slds-current-color"
-      />
     </ExternalLink>
   );
 };

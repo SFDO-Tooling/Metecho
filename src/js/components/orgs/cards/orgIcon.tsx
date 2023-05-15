@@ -41,7 +41,7 @@ const OrgIcon = ({
         onClick={openRefreshOrgModal}
       />
     ) : (
-      <ExternalLink url={orgUrl} title={t('View Org')}>
+      <ExternalLink url={orgUrl} title={t('View Org')} showButtonIcon>
         {iconLink}
       </ExternalLink>
     );

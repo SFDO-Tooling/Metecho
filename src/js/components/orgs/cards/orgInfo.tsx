@@ -107,7 +107,7 @@ const OrgInfo = ({
             <>
               {' '}
               (
-              <ExternalLink url={compareChangesUrl}>
+              <ExternalLink url={compareChangesUrl} showButtonIcon>
                 {t('view changes')}
               </ExternalLink>
               )
@@ -123,7 +123,7 @@ const OrgInfo = ({
           <li>
             <strong>{t('Deployed Commit:')}</strong>{' '}
             {org.latest_commit_url ? (
-              <ExternalLink url={org.latest_commit_url}>
+              <ExternalLink url={org.latest_commit_url} showButtonIcon>
                 {org.latest_commit.substring(0, 7)}
               </ExternalLink>
             ) : (

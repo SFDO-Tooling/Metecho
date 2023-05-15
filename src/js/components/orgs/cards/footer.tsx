@@ -88,7 +88,11 @@ const Footer = ({
         );
       }
       const label = readyForReview ? t('Test Changes in Org') : t('View Org');
-      return <ExternalLink url={orgUrl}>{label}</ExternalLink>;
+      return (
+        <ExternalLink url={orgUrl} showButtonIcon>
+          {label}
+        </ExternalLink>
+      );
     }
   }
 

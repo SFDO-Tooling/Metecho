@@ -239,6 +239,7 @@
   "Notify Assigned Tester by Email": "Notify Assigned Tester by Email",
   "Notify {{username}} by email": "Notify {{username}} by email",
   "Only displaying the first {{limit}} objects. Enter a term above to search the full list.": "Only displaying the first {{limit}} objects. Enter a term above to search the full list.",
+  "Opens in new tab": "Opens in new tab",
   "Optional Configuration Directories": "Optional Configuration Directories",
   "Optional description of this Project": "Optional description of this Project",
   "Optional notes about this Scratch Org": "Optional notes about this Scratch Org",
