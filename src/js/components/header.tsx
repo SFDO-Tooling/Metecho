@@ -33,10 +33,7 @@ const Header = () => {
             <Trans i18nKey="tourUser">
               Here you can check which GitHub account is logged in, connect and
               disconnect from Salesforce, or log out as needed.{' '}
-              <ExternalLink
-                url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0"
-                showButtonIcon
-              >
+              <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
                 Enable Dev Hub
               </ExternalLink>{' '}
               on your Salesforce account to contribute to Projects in Metecho.
