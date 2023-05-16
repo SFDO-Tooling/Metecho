@@ -59,7 +59,10 @@ const ConnectionInfoWarning = () => (
   <Trans i18nKey="devHubNotEnabled">
     This Salesforce Org does not have Dev Hub enabled or your user does not have
     permission to create Dev, Test, or Scratch Orgs. Learn how to{' '}
-    <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+    <ExternalLink
+      url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0"
+      showButtonIcon
+    >
       enable Dev Hub
     </ExternalLink>
     .

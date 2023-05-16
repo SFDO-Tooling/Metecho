@@ -30,7 +30,9 @@ const CommitTableCell = ({ item, className, ...props }: TableCellProps) => {
       title={item.id}
       className={classNames(className, 'commits-sha')}
     >
-      <ExternalLink url={item.url}>{shortSha}</ExternalLink>
+      <ExternalLink url={item.url} showButtonIcon>
+        {shortSha}
+      </ExternalLink>
     </DataTableCell>
   );
 };
