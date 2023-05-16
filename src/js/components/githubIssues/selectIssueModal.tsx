@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
