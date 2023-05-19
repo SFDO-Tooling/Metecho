@@ -318,7 +318,10 @@ const SubmitModal = ({
               <p>
                 <Trans i18nKey="markdownGuide">
                   For more options, view this{' '}
-                  <ExternalLink url="https://guides.github.com/features/mastering-markdown/">
+                  <ExternalLink
+                    url="https://guides.github.com/features/mastering-markdown/"
+                    showButtonIcon
+                  >
                     Markdown Guide
                   </ExternalLink>
                   .

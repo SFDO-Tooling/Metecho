@@ -57,6 +57,7 @@ const RefreshOrgModal = ({
           be testing the latest changes.
         </Trans>
         <ExternalLink
+          showButtonIcon
           url={orgUrl}
           className="slds-button
             slds-size_full

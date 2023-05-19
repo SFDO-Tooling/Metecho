@@ -373,14 +373,19 @@ exports[`<EpicStatusSteps /> renders steps: epic with pr 1`] = `
           >
             Merge pull request on GitHub
             <span
-              class="slds-m-left_xx-small"
+              class="slds-icon_container slds-current-color"
             >
               <svg
                 aria-hidden="true"
-                class="slds-m-bottom_xx-small slds-icon slds-icon_xx-small slds-icon-text-default"
+                class="slds-button__icon slds-button__icon_right slds-icon slds-icon_xx-small slds-icon-text-default"
               >
                 <use />
               </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                Opens in new tab
+              </span>
             </span>
           </a>
         </div>

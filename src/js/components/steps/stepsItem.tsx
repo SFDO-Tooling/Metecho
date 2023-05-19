@@ -35,15 +35,8 @@ const StepsItem = ({
   if (isActive) {
     if (step.link) {
       label = (
-        <ExternalLink url={step.link}>
+        <ExternalLink url={step.link} showButtonIcon>
           {step.label}
-          <Icon
-            category="utility"
-            name="new_window"
-            size="xx-small"
-            className="slds-m-bottom_xx-small"
-            containerClassName="slds-m-left_xx-small"
-          />
         </ExternalLink>
       );
     }

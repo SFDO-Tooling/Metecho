@@ -72,11 +72,17 @@ const ConnectModal = ({
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce Org with Dev Hub enabled is required to
           create a Dev, Test, or Scratch Org. Learn how to{' '}
-          <ExternalLink url="https://developer.salesforce.com/signup">
+          <ExternalLink
+            url="https://developer.salesforce.com/signup"
+            showButtonIcon
+          >
             create a Developer Edition Org
           </ExternalLink>{' '}
           and{' '}
-          <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+          <ExternalLink
+            url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0"
+            showButtonIcon
+          >
             enable Dev Hub
           </ExternalLink>
           .
