@@ -255,12 +255,16 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@metecho.org")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_ENABLED = True
 else:
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
     ANYMAIL = {
         "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=""),
         "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN", default=None),
     }
+    EMAIL_ENABLED = (
+        ANYMAIL["MAILGUN_API_KEY"] != "" and ANYMAIL["MAILGUN_SENDER_DOMAIN"]
+    )
 
 DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env.int("DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3)
 ORG_RECHECK_MINUTES = env.int("ORG_RECHECK_MINUTES", default=5)

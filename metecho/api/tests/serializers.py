@@ -874,6 +874,29 @@ class TestTaskAssigneeSerializer:
 
         assert len(mailoutbox) == 2
 
+    def test_try_send_assignment_emails__email_disabled(
+        self, auth_request, mailoutbox, git_hub_collaboration_factory, task, settings
+    ):
+        settings.EMAIL_ENABLED = False
+        git_hub_collaboration_factory(
+            permissions={"push": True},
+            project=task.root_project,
+            user__id=auth_request.user.github_id,
+        )
+        data = {
+            "assigned_dev": auth_request.user.github_id,
+            "assigned_qa": auth_request.user.github_id,
+            "should_alert_dev": True,
+            "should_alert_qa": True,
+        }
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+
+        assert len(mailoutbox) == 0
+
 
 @pytest.mark.django_db
 class TestScratchOrgSerializer:
