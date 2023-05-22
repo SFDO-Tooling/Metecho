@@ -342,7 +342,9 @@ class TestAlertUserAboutExpiringOrg:
             pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
         ),
     )
-    def test_good(self, scratch_org_factory, _task_factory):
+    def test_good(self, scratch_org_factory, _task_factory, settings):
+        settings.EMAIL_ENABLED = True
+
         scratch_org = scratch_org_factory(
             unsaved_changes={"something": 1}, task=_task_factory()
         )
@@ -913,7 +915,10 @@ class TestRefreshCommits:
 
 
 @pytest.mark.django_db
-def test_create_pr(mailoutbox, user_factory, task_factory, git_hub_user_factory):
+def test_create_pr(
+    mailoutbox, user_factory, task_factory, git_hub_user_factory, settings
+):
+    settings.EMAIL_ENABLED = True
     user = user_factory()
     task = task_factory(assigned_qa=git_hub_user_factory(id=user.github_id))
     with ExitStack() as stack:

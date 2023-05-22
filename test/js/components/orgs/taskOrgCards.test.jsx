@@ -237,6 +237,17 @@ describe('<TaskOrgCards/>', () => {
   });
 
   describe('Assign click', () => {
+    let EMAIL_ENABLED;
+
+    beforeAll(() => {
+      EMAIL_ENABLED = window.GLOBALS.EMAIL_ENABLED;
+      window.GLOBALS.EMAIL_ENABLED = true;
+    });
+
+    afterAll(() => {
+      window.GLOBALS.EMAIL_ENABLED = EMAIL_ENABLED;
+    });
+
     test('updates assigned user', () => {
       const task = {
         ...defaultTask,

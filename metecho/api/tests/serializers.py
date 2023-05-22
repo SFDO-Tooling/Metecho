@@ -853,8 +853,9 @@ class TestTaskAssigneeSerializer:
             assert user_reassign_job.delay.called
 
     def test_try_send_assignment_emails(
-        self, auth_request, mailoutbox, git_hub_collaboration_factory, task
+        self, auth_request, mailoutbox, git_hub_collaboration_factory, task, settings
     ):
+        settings.EMAIL_ENABLED = True
         git_hub_collaboration_factory(
             permissions={"push": True},
             project=task.root_project,
