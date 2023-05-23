@@ -613,5 +613,6 @@
   "walkthroughPlayMetechoName": "Metecho makes it easier for you to view, test, and contribute to Salesforce Projects without learning GitHub.<1></1><2></2><3>Pronunciation</3>: “Met” rhymes with “bet.” “Echo” as in the reflection of sound waves.<5></5><6>Definition</6>: To share or participate in.",
   "walkthroughPlayScratchOrg": "This is a sample Scratch Org for this Project. Select “View Org” to see the work on this Project. Your Org will expire after 30 days.",
   "walkthroughPlayScratchOrgContribute": "To contribute your own work from a Scratch Org, you need “push” permissions on the Project in GitHub. If you do not have the right permissions, ask a Project admin. Select “Contribute Work” to create a Task for your Scratch Org. When your Org expires or is deleted, any work not contributed will be lost.",
-  "welcomeMessage": "<0>To get started</0> log in with your GitHub account."
+  "welcomeMessage": "<0>To get started</0> log in with your GitHub account.",
+  "{{message}}. If you need support, your scratch org id is {{orgId}}.": "{{message}}. If you need support, your scratch org id is {{orgId}}."
 }

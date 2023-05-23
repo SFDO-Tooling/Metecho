@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 
 from cumulusci.core.config import OrgConfig, TaskConfig
+from cumulusci.core.exceptions import SalesforceCredentialsException
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
 from cumulusci.oauth.salesforce import jwt_session
@@ -52,13 +53,29 @@ PACKAGE_XML = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 class ScratchOrgError(Exception):
-    pass
+    has_build_log: bool
+
+    def __init__(self, message: str, has_build_log: bool):
+        self.has_build_log = has_build_log
+        super().__init__(message)
 
 
 @contextlib.contextmanager
 def delete_org_on_error(scratch_org=None, originating_user_id=None):
     try:
         yield
+    except ScratchOrgError:
+        raise
+    except SalesforceCredentialsException as err:
+        error_msg = _(
+            f"An authentication-related issue occured. Please report this issue to your administrator: {err.args[0]}"  # noqa: B950
+        )
+        error = ScratchOrgError(error_msg, False)
+        if scratch_org:
+            scratch_org.remove_scratch_org(
+                error, originating_user_id=originating_user_id
+            )
+        raise error
     except Exception as err:
         if not scratch_org:
             raise err
@@ -81,7 +98,7 @@ def delete_org_on_error(scratch_org=None, originating_user_id=None):
         else:
             error_msg = _(f"Are you certain that the Org still exists? {err.args[0]}")
 
-        error = ScratchOrgError(error_msg)
+        error = ScratchOrgError(error_msg, True)
         scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)
         raise error
 
@@ -239,7 +256,7 @@ def poll_for_scratch_org_completion(devhub_api, org_result):
 
     if org_result["Status"] != "Active":
         error = org_result["ErrorCode"] or _("Org creation timed out")
-        raise ScratchOrgError(f"Scratch org creation failed: {error}")
+        raise ScratchOrgError(f"Scratch org creation failed: {error}", False)
 
     return org_result
 

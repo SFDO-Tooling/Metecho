@@ -161,10 +161,12 @@ export const provisionFailed =
     model,
     message,
     originating_user_id,
+    has_build_log,
   }: {
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
+    has_build_log?: boolean;
   }): ThunkResult<OrgProvisionFailed> =>
   (dispatch, getState) => {
     const state = getState();
@@ -183,21 +185,31 @@ export const provisionFailed =
         );
       }
 
-      const detailMsg = t(
-        'The last line of the log is “{{message}}” If you need support, your scratch org id is {{orgId}}.',
-        {
-          message,
-          orgId: model.id,
-        },
-      );
+      const detailMsg = has_build_log
+        ? t(
+            'The last line of the log is “{{message}}” If you need support, your scratch org id is {{orgId}}.',
+            {
+              message,
+              orgId: model.id,
+            },
+          )
+        : t(
+            '{{message}}. If you need support, your scratch org id is {{orgId}}.',
+            {
+              message,
+              orgId: model.id,
+            },
+          );
 
       dispatch(
         addToast({
           heading: msg,
           details: detailMsg,
           variant: 'error',
-          linkUrl: window.api_urls.scratch_org_log(model.id),
-          linkText: t('Download build log.'),
+          linkUrl: has_build_log
+            ? window.api_urls.scratch_org_log(model.id)
+            : undefined,
+          linkText: has_build_log ? t('Download build log.') : undefined,
           linkDownload: true,
           linkDownloadFilename: t('Metecho Org {{orgId}} Build Log.txt', {
             message,
