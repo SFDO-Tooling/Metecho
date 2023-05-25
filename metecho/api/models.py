@@ -140,20 +140,21 @@ class User(PushMixin, HashIdMixin, AbstractUser):
     self_guided_tour_enabled = models.BooleanField(default=True)
     self_guided_tour_state = models.JSONField(null=True, blank=True)
 
-    def notify(self, subject, body):
-        # Right now, the only way we notify is via email. In future, we
-        # may add in-app notifications.
+    def notify(self, subject: str, body: str):
+        if settings.EMAIL_ENABLED and self.email:
+            # Right now, the only way we notify is via email. In future, we
+            # may add in-app notifications.
 
-        # Escape <>& in case the email gets accidentally rendered as HTML
-        subject = html.escape(subject, quote=False)
-        body = html.escape(body, quote=False)
-        send_mail(
-            subject,
-            body,
-            settings.DEFAULT_FROM_EMAIL,
-            [self.email],
-            fail_silently=False,
-        )
+            # Escape <>& in case the email gets accidentally rendered as HTML
+            subject = html.escape(subject, quote=False)
+            body = html.escape(body, quote=False)
+            send_mail(
+                subject,
+                body,
+                settings.DEFAULT_FROM_EMAIL,
+                [self.email],
+                fail_silently=False,
+            )
 
     def queue_refresh_repositories(self):
         from .jobs import refresh_github_repositories_for_user_job

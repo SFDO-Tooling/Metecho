@@ -1,5 +1,4 @@
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
-import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -59,15 +58,8 @@ const DetailTableCell = ({
               slds-truncate"
           >
             {t('Branch:')}{' '}
-            <ExternalLink url={branch_url}>
+            <ExternalLink url={branch_url} showButtonIcon>
               {branch_name}
-              <Icon
-                category="utility"
-                name="new_window"
-                size="xx-small"
-                className="slds-m-bottom_xx-small"
-                containerClassName="slds-m-left_xx-small"
-              />
             </ExternalLink>
           </p>
         )}

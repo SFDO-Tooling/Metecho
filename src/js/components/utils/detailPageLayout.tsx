@@ -96,7 +96,7 @@ const DetailPageLayout = ({
           }
           info={
             headerUrl && headerUrlText ? (
-              <ExternalLink url={headerUrl} showGitHubIcon>
+              <ExternalLink url={headerUrl} showGitHubIcon showButtonIcon>
                 /{headerUrlText}
               </ExternalLink>
             ) : null
