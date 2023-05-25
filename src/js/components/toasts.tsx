@@ -8,6 +8,8 @@ import { removeToast } from '@/js/store/toasts/actions';
 import { ToastType } from '@/js/store/toasts/reducer';
 import { selectToasts } from '@/js/store/toasts/selectors';
 
+import { ExternalLink } from './utils';
+
 const ToastMessage = withRouter(
   ({ toast, history }: { toast: ToastType } & RouteComponentProps) => {
     const dispatch = useDispatch();
@@ -39,11 +41,26 @@ const ToastMessage = withRouter(
         }
       }
     };
+
+    // Need to control for external links so a new tab notification can be added.
+    const linkProps = {
+      headingLink:
+        toast.linkText && !toast.openLinkInNewWindow ? toast.linkText : '',
+      heading:
+        toast.linkUrl && toast.openLinkInNewWindow
+          ? [
+              `${toast.heading} `,
+              <ExternalLink key={toast.id} url={toast.linkUrl} showButtonIcon>
+                {toast.linkText}
+              </ExternalLink>,
+            ]
+          : toast.heading,
+    };
+
     return (
       <Toast
         labels={{
-          heading: toast.heading,
-          headingLink: toast.linkText,
+          ...linkProps,
           details: toast.details,
         }}
         variant={toast.variant || 'success'}

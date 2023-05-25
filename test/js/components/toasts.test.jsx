@@ -38,7 +38,7 @@ describe('<Toasts />', () => {
   describe('link click', () => {
     test('navigates to link url', () => {
       const { getByText, context } = setup();
-      fireEvent.click(getByText('open link'));
+      fireEvent.click(getByText(/open link/));
 
       expect(context.action).toBe('PUSH');
       expect(context.url).toBe('/test/url/');
@@ -48,18 +48,19 @@ describe('<Toasts />', () => {
       const { getByText } = setup({
         toasts: [{ ...defaultToast, openLinkInNewWindow: true }],
       });
-      fireEvent.click(getByText('open link'));
 
-      expect(window.open).toHaveBeenCalledWith('/test/url/', '_blank');
+      const link = getByText(/open link/);
+
+      expect(link).toHaveAttribute('href', '/test/url/');
+      expect(link).toHaveAttribute('target', '_blank');
     });
 
-    test('does nothing if no linkUrl', () => {
-      const { getByText } = setup({
+    test('dont render link if no linkUrl', () => {
+      const { queryByRole } = setup({
         toasts: [{ ...defaultToast, openLinkInNewWindow: true, linkUrl: '' }],
       });
-      fireEvent.click(getByText('open link'));
-
-      expect(window.open).not.toHaveBeenCalled();
+      // A link should not render
+      expect(queryByRole('link')).toBeNull();
     });
 
     test('starts download if linkDownload set', () => {
