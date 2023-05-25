@@ -14,5 +14,6 @@ def env(request):
         "SENTRY_DSN": settings.SENTRY_DSN,
         "ORG_RECHECK_MINUTES": settings.ORG_RECHECK_MINUTES,
         "ENABLE_WALKTHROUGHS": settings.ENABLE_WALKTHROUGHS,
+        "EMAIL_ENABLED": settings.EMAIL_ENABLED,
     }
     return {"GLOBALS": GLOBALS}
