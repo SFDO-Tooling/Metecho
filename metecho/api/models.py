@@ -1405,6 +1405,7 @@ class ScratchOrg(
                 type_="SCRATCH_ORG_PROVISION_FAILED",
                 originating_user_id=originating_user_id,
                 message=self._build_message_extras(),
+                has_build_log=getattr(error, "has_build_log", False),
             )
             # If the scratch org has already been created on Salesforce,
             # we need to delete it there as well.
@@ -1649,7 +1650,9 @@ class ScratchOrg(
         )
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
-        self.delete(should_finalize=False, originating_user_id=originating_user_id)
+        if self.config and "org_id" in self.config:
+            # Don't try to delete if the org doesn't exist.
+            self.delete(should_finalize=False, originating_user_id=originating_user_id)
 
     def queue_refresh_org(self, *, originating_user_id):
         from .jobs import refresh_scratch_org_job
@@ -1673,6 +1676,7 @@ class ScratchOrg(
                 type_="SCRATCH_ORG_REFRESH_FAILED",
                 originating_user_id=originating_user_id,
                 message=self._build_message_extras(),
+                has_build_log=getattr(error, "has_build_log", False),
             )
             self.queue_delete(originating_user_id=originating_user_id)
 

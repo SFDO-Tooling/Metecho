@@ -113,7 +113,7 @@ class PushMixin:
         )
 
     def notify_scratch_org_error(
-        self, *, error, type_, originating_user_id, message=None
+        self, *, error, type_, originating_user_id, message=None, has_build_log=False
     ):
         """
         This is only used in the ScratchOrg model currently, but it
@@ -126,6 +126,7 @@ class PushMixin:
             type_=type_,
             originating_user_id=originating_user_id,
             message=message or {},
+            has_build_log=has_build_log,
         )
 
 

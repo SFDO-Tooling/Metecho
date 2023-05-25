@@ -105,7 +105,7 @@ async def report_error(user):
 
 
 async def report_scratch_org_error(
-    instance, *, error, type_, originating_user_id, message=None
+    instance, *, error, type_, originating_user_id, has_build_log=False, message=None
 ):
     # Unwrap the error in the case that there's only one,
     # which is the most common case, per this discussion:
@@ -125,6 +125,7 @@ async def report_scratch_org_error(
         "payload": {
             "message": prepared_message,
             "originating_user_id": originating_user_id,
+            "has_build_log": has_build_log,
         },
     }
     prepared_message["payload"].update(message or {})
