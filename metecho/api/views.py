@@ -347,6 +347,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
             dependencies=dependencies,
             template_repo_owner=getattr(site_profile, "template_repo_owner", ""),
             template_repo_name=getattr(site_profile, "template_repo_name", ""),
+            namespace=getattr(site_profile, "project_namespace", ""),
         )
         return Response(self.get_serializer(project).data)
 
@@ -559,7 +560,6 @@ class ScratchOrgViewSet(
     filterset_class = ScratchOrgFilter
 
     def get_queryset(self):
-
         # All actions except log() act on active scratch orgs only
         # getattr() check guards against DRF-Spectacular
         if (

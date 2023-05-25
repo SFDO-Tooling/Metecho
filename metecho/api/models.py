@@ -100,6 +100,12 @@ class SiteProfile(TranslatableModel):
             "Name of the GitHub repository to be used as a template for new Projects"
         ),
     )
+    project_namespace = StringField(
+        blank=True,
+        help_text=_(
+            "Namespace to be used for new Projects. Leave blank for no namespace."
+        ),
+    )
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),

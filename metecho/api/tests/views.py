@@ -549,6 +549,7 @@ class TestProjectViewset:
             site=Site.objects.get(),
             template_repo_owner="orgname",
             template_repo_name="reponame",
+            namespace="namespace",
         )
 
         create_repository_job = mocker.patch(
@@ -589,6 +590,7 @@ class TestProjectViewset:
             dependencies=["http://foo.com", "http://bar.com"],
             template_repo_owner="orgname",
             template_repo_name="reponame",
+            namespace="namespace",
         )
 
 

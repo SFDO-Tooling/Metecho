@@ -1396,6 +1396,7 @@ class TestCreateRepository:
             dependencies=["http://foo.com"],
             template_repo_owner="owner",
             template_repo_name="repo",
+            namespace="namespace",
         )
         project.refresh_from_db()
 
