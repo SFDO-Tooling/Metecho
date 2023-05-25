@@ -27,14 +27,16 @@ const ToastMessage = withRouter(
       }
     }, [dispatch, toast]);
     const linkClicked = () => {
-      if (toast.linkDownload) {
-        const link = document.createElement('a');
+      if (toast.linkUrl) {
+        if (toast.linkDownload) {
+          const link = document.createElement('a');
 
-        link.href = toast.linkUrl;
-        link.download = toast.linkDownloadFilename || 'output.txt';
-        link.click();
-      } else {
-        history.push(toast.linkUrl);
+          link.href = toast.linkUrl;
+          link.download = toast.linkDownloadFilename || 'output.txt';
+          link.click();
+        } else {
+          history.push(toast.linkUrl);
+        }
       }
     };
 

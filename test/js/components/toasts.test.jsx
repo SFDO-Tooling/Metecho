@@ -62,6 +62,15 @@ describe('<Toasts />', () => {
       expect(queryByRole('link')).toBeNull();
     });
 
+    test('does nothing if no linkUrl', () => {
+      const { getByText } = setup({
+        toasts: [{ ...defaultToast, linkUrl: '' }],
+      });
+      fireEvent.click(getByText(/open link/));
+
+      expect(window.open).not.toHaveBeenCalled();
+    });
+
     test('starts download if linkDownload set', () => {
       const mockElement = {
         click: () => {},
