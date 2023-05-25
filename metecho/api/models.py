@@ -466,6 +466,7 @@ class Project(
         dependencies: Iterable[str],
         template_repo_owner: str = None,
         template_repo_name: str = None,
+        namespace: str = None,
     ):
         from .jobs import create_repository_job
 
@@ -475,6 +476,7 @@ class Project(
             dependencies=dependencies,
             template_repo_owner=template_repo_owner,
             template_repo_name=template_repo_name,
+            namespace=namespace,
         )
 
     def finalize_create_repository(self, *, error=None, user: User):
