@@ -41,7 +41,12 @@ const OrgIcon = ({
         onClick={openRefreshOrgModal}
       />
     ) : (
-      <ExternalLink url={orgUrl} title={t('View Org')} showButtonIcon>
+      // leaving off showButtonIcon attribute because this is a LINK icon button
+      <ExternalLink
+        url={orgUrl}
+        title={t('View Org')}
+        aria-label={t('Opens in new tab')}
+      >
         {iconLink}
       </ExternalLink>
     );

@@ -8,6 +8,8 @@ import { removeToast } from '@/js/store/toasts/actions';
 import { ToastType } from '@/js/store/toasts/reducer';
 import { selectToasts } from '@/js/store/toasts/selectors';
 
+import { ExternalLink } from './utils';
+
 const ToastMessage = withRouter(
   ({ toast, history }: { toast: ToastType } & RouteComponentProps) => {
     const dispatch = useDispatch();
@@ -26,9 +28,7 @@ const ToastMessage = withRouter(
     }, [dispatch, toast]);
     const linkClicked = () => {
       if (toast.linkUrl) {
-        if (toast.openLinkInNewWindow) {
-          window.open(toast.linkUrl, '_blank');
-        } else if (toast.linkDownload) {
+        if (toast.linkDownload) {
           const link = document.createElement('a');
 
           link.href = toast.linkUrl;
@@ -39,11 +39,25 @@ const ToastMessage = withRouter(
         }
       }
     };
+
     return (
       <Toast
         labels={{
-          heading: toast.heading,
-          headingLink: toast.linkText,
+          headingLink:
+            toast.linkText && !toast.openLinkInNewWindow ? toast.linkText : '',
+          heading:
+            toast.linkUrl && toast.openLinkInNewWindow
+              ? [
+                  `${toast.heading} `,
+                  <ExternalLink
+                    key={toast.id}
+                    url={toast.linkUrl}
+                    showButtonIcon
+                  >
+                    {toast.linkText}
+                  </ExternalLink>,
+                ]
+              : toast.heading,
           details: toast.details,
         }}
         variant={toast.variant || 'success'}
