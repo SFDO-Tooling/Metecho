@@ -48,7 +48,6 @@ describe('<Toasts />', () => {
       const { getByText } = setup({
         toasts: [{ ...defaultToast, openLinkInNewWindow: true }],
       });
-
       const link = getByText(/open link/);
 
       expect(link).toHaveAttribute('href', '/test/url/');

@@ -27,40 +27,35 @@ const ToastMessage = withRouter(
       }
     }, [dispatch, toast]);
     const linkClicked = () => {
-      if (toast.linkUrl) {
-        if (toast.openLinkInNewWindow) {
-          window.open(toast.linkUrl, '_blank');
-        } else if (toast.linkDownload) {
-          const link = document.createElement('a');
+      if (toast.linkDownload) {
+        const link = document.createElement('a');
 
-          link.href = toast.linkUrl;
-          link.download = toast.linkDownloadFilename || 'output.txt';
-          link.click();
-        } else {
-          history.push(toast.linkUrl);
-        }
+        link.href = toast.linkUrl;
+        link.download = toast.linkDownloadFilename || 'output.txt';
+        link.click();
+      } else {
+        history.push(toast.linkUrl);
       }
-    };
-
-    // Need to control for external links so a new tab notification can be added.
-    const linkProps = {
-      headingLink:
-        toast.linkText && !toast.openLinkInNewWindow ? toast.linkText : '',
-      heading:
-        toast.linkUrl && toast.openLinkInNewWindow
-          ? [
-              `${toast.heading} `,
-              <ExternalLink key={toast.id} url={toast.linkUrl} showButtonIcon>
-                {toast.linkText}
-              </ExternalLink>,
-            ]
-          : toast.heading,
     };
 
     return (
       <Toast
         labels={{
-          ...linkProps,
+          headingLink:
+            toast.linkText && !toast.openLinkInNewWindow ? toast.linkText : '',
+          heading:
+            toast.linkUrl && toast.openLinkInNewWindow
+              ? [
+                  `${toast.heading} `,
+                  <ExternalLink
+                    key={toast.id}
+                    url={toast.linkUrl}
+                    showButtonIcon
+                  >
+                    {toast.linkText}
+                  </ExternalLink>,
+                ]
+              : toast.heading,
           details: toast.details,
         }}
         variant={toast.variant || 'success'}
