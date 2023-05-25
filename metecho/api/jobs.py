@@ -281,7 +281,7 @@ def create_repository(
                 git config user.name '{user.get_full_name() or user.username}';
                 git config user.email '{user.email}';
                 git add --all;
-                git commit -m 'Bootstrap project (via Metecho)';
+                git commit -m 'Bootstrap project (via Metecho) [ci-skip]';
                 git push https://{user_gh.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
                 """,  # noqa: B950
                 shell=True,
@@ -762,7 +762,6 @@ delete_scratch_org_job = job(delete_scratch_org)
 
 
 def refresh_github_repositories_for_user(user: User):
-
     try:
         repos = get_all_org_repos(user)
         with transaction.atomic():
