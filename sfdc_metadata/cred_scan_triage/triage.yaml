@@ -1,0 +1,15 @@
+clean: false
+production_secret:
+non_production_secret: []
+mock_secret:
+ -
+  id: Metecho://env.example_c9bfc9936bc00e059d89eb6315fddfa1dd0bb6e3
+  justification: Example environment file
+false_positive:
+ -
+  id: Metecho://.yarn/releases/yarn-1.22.19.cjs_305883a93e118719a5f89cec0ff8d734cfd44677
+  justification: Not a password
+ -
+  id: Metecho://.yarn/releases/yarn-1.22.19.cjs_2da3da7ae0ec57eaec8a179505320aa424cdf4f6
+  justification: Not a password
+
