@@ -217,9 +217,10 @@ const AssignTaskRoleModal = ({
             slds-p-bottom_medium"
         >
           <Search
+            label={t('Search for user')}
             value={findText}
             assistiveText={{ label: t('Search for user') }}
-            placeholder={t('Search for user')}
+            placeholder={t('Type to filter')}
             onChange={handleFindTextChange}
             clearable
             onClear={handleClearFindText}
