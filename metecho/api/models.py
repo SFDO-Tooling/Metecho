@@ -100,6 +100,12 @@ class SiteProfile(TranslatableModel):
             "Name of the GitHub repository to be used as a template for new Projects"
         ),
     )
+    project_namespace = StringField(
+        blank=True,
+        help_text=_(
+            "Namespace to be used for new Projects. Leave blank for no namespace."
+        ),
+    )
 
     translations = TranslatedFields(
         name=models.CharField(max_length=64),
@@ -461,6 +467,7 @@ class Project(
         dependencies: Iterable[str],
         template_repo_owner: str = None,
         template_repo_name: str = None,
+        namespace: str = None,
     ):
         from .jobs import create_repository_job
 
@@ -470,6 +477,7 @@ class Project(
             dependencies=dependencies,
             template_repo_owner=template_repo_owner,
             template_repo_name=template_repo_name,
+            namespace=namespace,
         )
 
     def finalize_create_repository(self, *, error=None, user: User):

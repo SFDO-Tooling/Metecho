@@ -193,6 +193,7 @@ def create_repository(
     dependencies: Iterable[str],
     template_repo_owner: str = None,
     template_repo_name: str = None,
+    namespace: str = None,
 ):
     """
     Given a local Metecho Project create and bootstrap the corresponding GitHub repository.
@@ -258,7 +259,7 @@ def create_repository(
                 "cci_version": cumulusci.__version__,
                 "project_name": project.repo_name,
                 "package_name": project.repo_name,
-                "package_namespace": None,
+                "package_namespace": namespace if namespace else None,
                 "api_version": runtime.universal_config.project__package__api_version,
                 "source_format": "sfdx",
                 "dependencies": [
