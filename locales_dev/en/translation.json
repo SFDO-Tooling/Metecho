@@ -414,6 +414,7 @@
   "Timestamp": "Timestamp",
   "Title": "Title",
   "To go to your company’s login page, enter the custom domain name.": "To go to your company’s login page, enter the custom domain name.",
+  "Type to filter": "Type to filter",
   "Type:": "Type:",
   "Uh oh, we've encountered an error. You may need to": "Uh oh, we've encountered an error. You may need to",
   "Uh oh. There was an error communicating with your {{orgType}} for {{parent}} “{{name}}.”": "Uh oh. There was an error communicating with your {{orgType}} for {{parent}} “{{name}}.”",
