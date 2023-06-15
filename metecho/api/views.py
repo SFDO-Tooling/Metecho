@@ -1,4 +1,3 @@
-from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
@@ -16,6 +15,8 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
+
+from metecho.api.reassignment import can_assign_task_role
 
 from . import gh
 from .authentication import GitHubHookAuthentication
@@ -37,6 +38,7 @@ from .models import (
     EpicStatus,
     GitHubIssue,
     GitHubOrganization,
+    GitHubUser,
     Project,
     ProjectDependency,
     ScratchOrg,
@@ -500,32 +502,18 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
         """Check if a GitHub user can be assigned to a Task"""
         serializer = CanReassignSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         task = self.get_object()
-        role = serializer.validated_data["role"]
+        github_user: GitHubUser = serializer.validated_data["gh_uid"]
         role_org_type = {
             "assigned_qa": ScratchOrgType.QA,
             "assigned_dev": ScratchOrgType.DEV,
-        }.get(role, None)
-        gh_uid = serializer.validated_data["gh_uid"]
-        org = task.orgs.active().filter(org_type=role_org_type).first()
-        new_user = getattr(
-            SocialAccount.objects.filter(provider="github", uid=gh_uid).first(),
-            "user",
-            None,
-        )
-        valid_commit = org and org.latest_commit == (
-            task.commits[0] if task.commits else task.origin_sha
-        )
-        return Response(
-            {
-                "can_reassign": bool(
-                    new_user
-                    and org
-                    and org.owner_sf_username == new_user.sf_username
-                    and valid_commit
-                )
-            }
-        )
+        }[
+            serializer.validated_data["role"]
+        ]  # Serializer enforces these values
+
+        response = can_assign_task_role(task, request.user, github_user, role_org_type)
+        return Response(response.dict())
 
     @extend_schema(request=TaskAssigneeSerializer)
     @action(detail=True, methods=["POST", "PUT"])

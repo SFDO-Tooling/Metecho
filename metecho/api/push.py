@@ -64,9 +64,13 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_RECREATE
 """
 from copy import deepcopy
+from typing import TYPE_CHECKING, Optional
 
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
+
+if TYPE_CHECKING:
+    from metecho.api.models import ScratchOrg
 
 from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME, LIST
@@ -105,13 +109,18 @@ async def report_error(user):
 
 
 async def report_scratch_org_error(
-    instance, *, error, type_, originating_user_id, message=None
+    instance: "ScratchOrg",
+    *,
+    error: Exception,
+    type_: str,
+    originating_user_id: str,
+    message: Optional[dict] = None
 ):
     # Unwrap the error in the case that there's only one,
     # which is the most common case, per this discussion:
     # https://github.com/SFDO-Tooling/Metecho/pull/149#discussion_r327308563
     try:
-        prepared_message = error.content
+        prepared_message = error.content  # type: ignore
         if isinstance(prepared_message, list) and len(prepared_message) == 1:
             prepared_message = prepared_message[0]
         if isinstance(prepared_message, dict):

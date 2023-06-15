@@ -1627,6 +1627,7 @@ components:
           $ref: '#/components/schemas/RoleEnum'
         gh_uid:
           type: integer
+          nullable: true
       required:
       - gh_uid
       - role

@@ -1,5 +1,6 @@
 import re
 from collections import namedtuple
+from typing import Optional
 
 from asgiref.sync import async_to_sync
 from django.db import models
@@ -113,7 +114,12 @@ class PushMixin:
         )
 
     def notify_scratch_org_error(
-        self, *, error, type_, originating_user_id, message=None
+        self,
+        *,
+        error: Exception,
+        type_: str,
+        originating_user_id: str,
+        message: Optional[dict] = None,
     ):
         """
         This is only used in the ScratchOrg model currently, but it
