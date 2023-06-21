@@ -32,16 +32,10 @@ const ConfirmRemoveUserModal = ({
     }
   };
 
-  const heading = waitingToRemoveUser?.assignee
-    ? t('Confirm Changing Developer and Deleting Dev Org')
-    : t('Confirm Removing Developer and Deleting Dev Org');
-  const message = waitingToRemoveUser?.assignee
-    ? t(
-        'The existing Dev Org for this Task has unretrieved changes. Changing the assigned Developer will also delete the Org, and any changes will be lost. Are you sure you want to do that?',
-      )
-    : t(
-        'The existing Dev Org for this Task has unretrieved changes. Removing the assigned Developer will also delete the Org, and any changes will be lost. Are you sure you want to do that?',
-      );
+  const heading = t('Confirm Removing Developer and Deleting Dev Org');
+  const message = t(
+    'The existing Dev Org for this Task has unretrieved changes. Removing the assigned Developer will also delete the Org, and any changes will be lost. Are you sure you want to do that?',
+  );
 
   return (
     <Modal

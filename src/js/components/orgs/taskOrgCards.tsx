@@ -13,6 +13,7 @@ import { deleteObject, updateObject } from '@/js/store/actions';
 import { refetchOrg } from '@/js/store/orgs/actions';
 import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
 import { Task } from '@/js/store/tasks/reducer';
+import { addToast } from '@/js/store/toasts/actions';
 import { GitHubUser, User } from '@/js/store/user/reducer';
 import { selectUserState } from '@/js/store/user/selectors';
 import apiFetch from '@/js/utils/api';
@@ -100,23 +101,24 @@ const TaskOrgCards = ({
     [dispatch],
   );
 
-  const checkIfTaskCanBeReassigned = async (assignee: number) => {
-    const { can_reassign } = await apiFetch({
-      url: window.api_urls.task_can_reassign(task.id),
-      dispatch,
-      opts: {
-        method: 'POST',
-        body: JSON.stringify({
-          role: 'assigned_dev',
-          gh_uid: assignee,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
+  const checkIfTaskCanBeReassigned = useCallback(
+    (assignee: number): Promise<{ can_reassign: boolean; issues: string[] }> =>
+      apiFetch({
+        url: window.api_urls.task_can_reassign(task.id),
+        dispatch,
+        opts: {
+          method: 'POST',
+          body: JSON.stringify({
+            role: 'assigned_dev',
+            gh_uid: assignee,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      },
-    });
-    return can_reassign;
-  };
+      }),
+    [dispatch, task.id],
+  );
 
   const deleteOrg = useCallback(
     (org: Org) => {
@@ -190,28 +192,47 @@ const TaskOrgCards = ({
     }
   };
 
-  const handleAssignUser = async ({
-    type,
-    assignee,
-    shouldAlertAssignee,
-  }: AssignedUserTracker) => {
-    const org = orgs[type];
-    /* istanbul ignore else */
-    if (org && type === ORG_TYPES.DEV) {
-      let canReassign = false;
-      if (assignee) {
-        canReassign = await checkIfTaskCanBeReassigned(assignee);
-      }
-      if (canReassign) {
+  const handleAssignUser = useCallback(
+    async ({ type, assignee, shouldAlertAssignee }: AssignedUserTracker) => {
+      const org = orgs[type];
+      /* istanbul ignore else */
+      if (org && type === ORG_TYPES.DEV) {
+        if (assignee) {
+          const { can_reassign, issues } = await checkIfTaskCanBeReassigned(
+            assignee,
+          );
+          if (can_reassign) {
+            assignUser({ type, assignee, shouldAlertAssignee });
+          } else {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            dispatch(
+              addToast({
+                heading: t('Cannot transfer scratch org'),
+                details: t(
+                  'The current scratch org cannot be transferred to the selected GitHub user. Remove the scratch org before transferring this task or correct the following issues: {{issueDescription}}',
+                  { issueDescription: issues.join('\n') },
+                ),
+                variant: 'error',
+              }),
+            );
+          }
+        } else {
+          checkForOrgChanges(org as Org);
+          setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
+        }
+      } else if (type !== ORG_TYPES.PLAYGROUND) {
         assignUser({ type, assignee, shouldAlertAssignee });
-      } else {
-        checkForOrgChanges(org as Org);
-        setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
       }
-    } else if (type !== ORG_TYPES.PLAYGROUND) {
-      assignUser({ type, assignee, shouldAlertAssignee });
-    }
-  };
+    },
+    [
+      assignUser,
+      checkForOrgChanges,
+      checkIfTaskCanBeReassigned,
+      dispatch,
+      orgs,
+      t,
+    ],
+  );
 
   let handleCreate: (...args: any[]) => void = openConnectModal;
   const userIsConnected =

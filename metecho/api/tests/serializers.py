@@ -1,10 +1,10 @@
 from contextlib import ExitStack
+from typing import List
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.utils import timezone
 
-from ..models import ScratchOrgType, Task
+from ..models import GitHubUser, ScratchOrgType, Task
 from ..serializers import (
     EpicSerializer,
     FullUserSerializer,
@@ -527,36 +527,24 @@ class TestTaskAssigneeSerializer:
         scratch_org_factory,
         _task_factory,
     ):
-        task = _task_factory()
-        git_hub_collaboration_factory(
+        task: Task = _task_factory()
+        _ = git_hub_collaboration_factory(
             user__id=auth_request.user.github_id,
             project=task.root_project,
             permissions={"push": True},
         )
-        dev = git_hub_collaboration_factory(
+        dev: GitHubUser = git_hub_collaboration_factory(
             project=task.root_project, permissions={"push": True}
         ).user
-        qa = git_hub_collaboration_factory(
+        qa: GitHubUser = git_hub_collaboration_factory(
             project=task.root_project, permissions={"push": True}
         ).user
-        so1 = scratch_org_factory(task=task, org_type=ScratchOrgType.DEV)
-        so2 = scratch_org_factory(task=task, org_type=ScratchOrgType.QA)
 
         data = {"assigned_dev": dev.id, "assigned_qa": qa.id}
         serializer = TaskAssigneeSerializer(
             task, data=data, context={"request": auth_request}
         )
         assert serializer.is_valid(), serializer.errors
-
-        with ExitStack() as stack:
-            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
-            org_config = MagicMock(config={"access_token": None})
-            OrgConfig.return_value = org_config
-            serializer.update(task, serializer.validated_data)
-        so1.refresh_from_db()
-        so2.refresh_from_db()
-        assert so1.deleted_at is not None
-        assert so2.deleted_at is not None
 
     def test_unassign(
         self,
@@ -782,7 +770,7 @@ class TestTaskAssigneeSerializer:
         data,
         success,
     ):
-        auth_request.user.socialaccount_set.update(uid="123")
+        auth_request.user.socialaccount_set.update(uid="123", provider="github")
         git_hub_collaboration_factory(
             project=task.root_project, user__id=123, permissions=assigner_perms
         )
@@ -797,60 +785,163 @@ class TestTaskAssigneeSerializer:
         if not success:
             assert data.keys() == serializer.errors.keys()
 
-    def test_queues_reassign(
+    @pytest.mark.parametrize(
+        [
+            # Role to assign to target user.
+            "target_role",
+            # Role of existing scratch org
+            "org_role",
+            # Does the target GitHub user have a Metecho user?
+            "target_has_metecho_user",
+            # Does the target user have the same Dev Hub as the org owner?
+            "target_has_same_dev_hub",
+            # Should this reassignment succeed?
+            "can_reassign",
+            # Issues that should be thrown
+            "issues",
+        ],
+        [
+            # Viable transfer scenarios
+            [
+                ScratchOrgType.DEV,
+                ScratchOrgType.DEV,
+                True,
+                True,
+                True,
+                [],
+            ],
+            [
+                ScratchOrgType.QA,
+                ScratchOrgType.QA,
+                True,
+                True,
+                True,
+                [],
+            ],
+            # Non-viable because the target user doesn't have a Metecho user
+            [
+                ScratchOrgType.DEV,
+                ScratchOrgType.DEV,
+                False,
+                True,
+                False,
+                ["Scratch orgs must be owned by a user who has logged in to Metecho."],
+            ],
+            [
+                ScratchOrgType.QA,
+                ScratchOrgType.QA,
+                False,
+                True,
+                False,
+                ["Scratch orgs must be owned by a user who has logged in to Metecho."],
+            ],
+            # Non-viable because the target user has a different Dev Hub
+            [
+                ScratchOrgType.DEV,
+                ScratchOrgType.DEV,
+                True,
+                False,
+                False,
+                [
+                    "The new owner has a different Dev Hub. Scratch orgs cannot be transferred across Dev Hubs."  # noqa: B950
+                ],
+            ],
+        ],
+    )
+    def test_assign__scratch_org_transfer(
         self,
-        rf,
+        auth_request,
         git_hub_collaboration_factory,
-        user_factory,
-        task_factory,
         scratch_org_factory,
+        user_factory,
+        git_hub_user_factory,
+        task,
+        target_role: ScratchOrgType,
+        org_role: ScratchOrgType,
+        target_has_metecho_user: bool,
+        target_has_same_dev_hub: bool,
+        can_reassign: bool,
+        issues: List[str],
     ):
-        user = user_factory()
-        new_user = user_factory(devhub_username="test")
-        task = task_factory(
-            assigned_dev_id=user.github_id,
-            assigned_qa_id=user.github_id,
-            commits=["abc123"],
+        CONTEXT_USER = "000"
+        GH_WITH_METECHO_ID = "123"
+        GH_WITHOUT_METECHO_ID = "456"
+        FIRST_DEVHUB_USER = "foo@dev.hub"
+        SECOND_DEVHUB_USER = "bar@dev.hub"
+
+        # There are three users in the test environment.
+        # The context user, who owns the org.
+        auth_request.user.socialaccount_set.update(uid=CONTEXT_USER, provider="github")
+        auth_request.user.devhub_username = FIRST_DEVHUB_USER
+        auth_request.user.save()
+        context_github_user = git_hub_user_factory(id=CONTEXT_USER)
+
+        # Potential transfer target who has a Metecho user.
+        _ = user_factory(
+            socialaccount_set__provider="github",
+            socialaccount_set__uid=GH_WITH_METECHO_ID,
+            devhub_username=FIRST_DEVHUB_USER
+            if target_has_same_dev_hub
+            else SECOND_DEVHUB_USER,
         )
-        git_hub_collaboration_factory(
-            permissions={"push": True},
-            user__id=new_user.github_id,
+        target_gh_with_user = git_hub_user_factory(id=GH_WITH_METECHO_ID)
+
+        # Potential transfer target who does not have a Metecho user
+        target_gh_without_user = git_hub_user_factory(id=GH_WITHOUT_METECHO_ID)
+
+        # We are not testing permissions (handled in other test cases).
+        # so all users in the test environment have push permissions
+        _ = git_hub_collaboration_factory(
             project=task.root_project,
-        )
-        git_hub_collaboration_factory(
+            user=target_gh_with_user,
             permissions={"push": True},
-            user__id=user.github_id,
+        )
+        _ = git_hub_collaboration_factory(
             project=task.root_project,
+            user=target_gh_without_user,
+            permissions={"push": True},
         )
-        scratch_org_factory(
-            owner__devhub_username="test",
-            task=task,
-            org_type=ScratchOrgType.DEV,
-            latest_commit="abc123",
-            deleted_at=timezone.now(),
-        )
-        scratch_org_factory(
-            owner__devhub_username="test",
-            task=task,
-            org_type=ScratchOrgType.QA,
-            latest_commit="abc123",
-            deleted_at=timezone.now(),
+        _ = git_hub_collaboration_factory(
+            project=task.root_project,
+            user=context_github_user,
+            permissions={"push": True},
         )
 
-        data = {"assigned_dev": new_user.github_id, "assigned_qa": new_user.github_id}
-        r = rf.get("/")
-        r.user = new_user
-        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
-        with ExitStack() as stack:
-            user_reassign_job = stack.enter_context(
-                patch("metecho.api.jobs.user_reassign_job")
-            )
-            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
-            org_config = MagicMock(config={"access_token": None})
-            OrgConfig.return_value = org_config
-            assert serializer.is_valid(), serializer.errors
-            serializer.save()
-            assert user_reassign_job.delay.called
+        # There is an existing scratch org attached to the task
+        _ = scratch_org_factory(task=task, org_type=org_role, owner=auth_request.user)
+
+        # Run the assignment attempt
+        data = {
+            f"assigned_{str(target_role).lower()}": int(
+                GH_WITH_METECHO_ID if target_has_metecho_user else GH_WITHOUT_METECHO_ID
+            ),
+        }
+        serializer = TaskAssigneeSerializer(
+            task, data=data, context={"request": auth_request}
+        )
+
+        # Validate the results.
+        assert serializer.is_valid() == can_reassign, serializer.errors
+        if not can_reassign:
+            # Only one key should have a failure on it
+            assert len(serializer.errors.keys()) == 1
+            errors = serializer.errors[list(serializer.errors.keys())[0]]
+            assert [str(err) for err in errors] == issues
+
+        if can_reassign:
+            # If this is a valid reassign situation, let the reassign run
+            # and validate that we call to the async job.
+            with ExitStack() as stack:
+                user_reassign_job = stack.enter_context(
+                    patch("metecho.api.jobs.user_reassign_job")
+                )
+                OrgConfig = stack.enter_context(
+                    patch("metecho.api.sf_run_flow.OrgConfig")
+                )
+                org_config = MagicMock(config={"access_token": None})
+                OrgConfig.return_value = org_config
+                serializer.save()
+                assert user_reassign_job.delay.called
 
     def test_try_send_assignment_emails(
         self, auth_request, mailoutbox, git_hub_collaboration_factory, task, settings

@@ -7,7 +7,7 @@ from typing import NamedTuple, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
-from cumulusci.salesforce_api.org_schema import Field, SObject, Schema
+from cumulusci.salesforce_api.org_schema import Field, Schema, SObject
 from django.utils.timezone import now
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.orgs import Organization

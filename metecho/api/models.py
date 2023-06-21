@@ -574,10 +574,18 @@ class Project(
         for task in matching_tasks:
             task.add_commits(commits, sender)
 
-    def has_push_permission(self, user):
+    def has_push_permission(self, user: "User | GitHubUser"):
+        if hasattr(user, "github_id"):
+            gh_uid = user.github_id
+        else:
+            gh_uid = user.id
+
         return self.githubcollaboration_set.filter(
-            user_id=user.github_id, permissions__push=True
+            user_id=gh_uid, permissions__push=True
         ).exists()
+
+    def has_pull_permission(self, user: "GitHubUser"):
+        return self.githubcollaboration_set.filter(user_id=user.id).exists()
 
 
 class ProjectDependency(HashIdMixin, TimestampsMixin):
@@ -623,6 +631,12 @@ class GitHubUser(models.Model):
 
     def __str__(self):
         return self.login
+
+    def get_matching_user(self) -> Optional[User]:
+        gh_id = getattr(self, "id", None)
+        if gh_id:
+            sa = SocialAccount.objects.filter(provider="github", uid=gh_id).first()
+            return getattr(sa, "user", None)
 
 
 class GitHubCollaboration(models.Model):
@@ -1680,15 +1694,7 @@ class ScratchOrg(
         from .jobs import user_reassign_job
 
         self.currently_reassigning_user = True
-        was_deleted = self.deleted_at is not None
-        self.deleted_at = None
         self.save()
-        if was_deleted:
-            self.notify_changed(
-                type_="SCRATCH_ORG_RECREATE",
-                originating_user_id=originating_user_id,
-                for_list=True,
-            )
         user_reassign_job.delay(
             self, new_user=new_user, originating_user_id=originating_user_id
         )
