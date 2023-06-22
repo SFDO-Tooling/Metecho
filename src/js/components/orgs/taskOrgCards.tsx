@@ -196,7 +196,7 @@ const TaskOrgCards = ({
     async ({ type, assignee, shouldAlertAssignee }: AssignedUserTracker) => {
       const org = orgs[type];
       /* istanbul ignore else */
-      if (org && type === ORG_TYPES.DEV) {
+      if (org && type !== ORG_TYPES.PLAYGROUND) {
         if (assignee) {
           const { can_reassign, issues } = await checkIfTaskCanBeReassigned(
             assignee,
@@ -220,8 +220,6 @@ const TaskOrgCards = ({
           checkForOrgChanges(org as Org);
           setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
         }
-      } else if (type !== ORG_TYPES.PLAYGROUND) {
-        assignUser({ type, assignee, shouldAlertAssignee });
       }
     },
     [
