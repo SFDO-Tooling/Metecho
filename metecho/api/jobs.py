@@ -28,6 +28,7 @@ from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import download_extract_github, temporary_dir
+from cumulusci.utils.http.requests_utils import safe_json_from_response
 from django.conf import settings
 from django.db import transaction
 from django.db.models.query_utils import Q
@@ -71,7 +72,7 @@ from .sf_org_changes import (
     get_latest_revision_numbers,
     get_valid_target_directories,
 )
-from .sf_run_flow import create_org, delete_org, run_flow
+from .sf_run_flow import create_org, delete_org, get_devhub_api, run_flow
 
 logger = logging.getLogger(__name__)
 
@@ -252,14 +253,25 @@ def create_repository(
                 zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
                 zipfile.extractall()
 
-            # Bootstrap repository with CumulusCI
+            # Ask the user's Dev Hub what its latest API version is
+            sf = get_devhub_api(devhub_username=user.sf_username)
+            response = requests.get(
+                f"https://{sf.sf_instance}/services/data", headers=sf.headers
+            )
             runtime = CliRuntime()
+
+            try:
+                version = safe_json_from_response(response)[-1]["version"]
+            except:
+                version = runtime.universal_config.project__package__api_version
+
+            # Bootstrap repository with CumulusCI
             context = {
                 "cci_version": cumulusci.__version__,
                 "project_name": project.repo_name,
                 "package_name": project.repo_name,
                 "package_namespace": None,
-                "api_version": runtime.universal_config.project__package__api_version,
+                "api_version": version,
                 "source_format": "sfdx",
                 "dependencies": [
                     {"type": "github", "url": url} for url in dependencies
