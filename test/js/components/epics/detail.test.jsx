@@ -710,7 +710,11 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByTitle('Remove'));
+      fireEvent.click(
+        getByTitle(
+          `Remove ${sampleGitHubUser2.name} (${sampleGitHubUser2.login})`,
+        ),
+      );
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
@@ -733,8 +737,11 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByTitle('Remove'));
-
+      fireEvent.click(
+        getByTitle(
+          `Remove ${sampleGitHubUser1.name} (${sampleGitHubUser1.login})`,
+        ),
+      );
       expect(updateObject).not.toHaveBeenCalled();
       expect(getByText('Confirm Removing Collaborator')).toBeVisible();
     });
@@ -817,6 +824,17 @@ describe('<EpicDetail/>', () => {
     });
 
     describe('alerts assigned user', () => {
+      let EMAIL_ENABLED;
+
+      beforeAll(() => {
+        EMAIL_ENABLED = window.GLOBALS.EMAIL_ENABLED;
+        window.GLOBALS.EMAIL_ENABLED = true;
+      });
+
+      afterAll(() => {
+        window.GLOBALS.EMAIL_ENABLED = EMAIL_ENABLED;
+      });
+
       test('assigning tester', () => {
         const { getAllByText, baseElement, getByText } = setup();
         fireEvent.click(getAllByText('Assign Tester')[0]);

@@ -142,7 +142,7 @@ export const provisionOrg =
       dispatch(
         addToast({
           heading: msg,
-          linkText: model.is_created ? t('View your new Org.') : undefined,
+          linkText: model.is_created ? t('View your new Org') : undefined,
           linkUrl: model.is_created
             ? window.api_urls.scratch_org_redirect(model.id)
             : undefined,
@@ -182,11 +182,27 @@ export const provisionFailed =
           { parent, name, orgType },
         );
       }
+
+      const detailMsg = t(
+        'The last line of the log is “{{message}}” If you need support, your scratch org id is {{orgId}}.',
+        {
+          message,
+          orgId: model.id,
+        },
+      );
+
       dispatch(
         addToast({
           heading: msg,
-          details: message,
+          details: detailMsg,
           variant: 'error',
+          linkUrl: window.api_urls.scratch_org_log(model.id),
+          linkText: t('Download build log.'),
+          linkDownload: true,
+          linkDownloadFilename: t('Metecho Org {{orgId}} Build Log.txt', {
+            message,
+            orgId: model.id,
+          }),
         }),
       );
     }

@@ -8,6 +8,7 @@ import TaskOrgCards, {
 } from '@/js/components/orgs/taskOrgCards';
 import { deleteObject, updateObject } from '@/js/store/actions';
 import { refetchOrg } from '@/js/store/orgs/actions';
+import { addToast } from '@/js/store/toasts/actions';
 
 import {
   sampleGitHubUser1,
@@ -22,6 +23,7 @@ import {
 
 jest.mock('@/js/store/actions');
 jest.mock('@/js/store/orgs/actions');
+jest.mock('@/js/store/toasts/actions');
 
 deleteObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
@@ -33,10 +35,13 @@ refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
 
+addToast.mockReturnValue(() => Promise.resolve());
+
 afterEach(() => {
   deleteObject.mockClear();
   updateObject.mockClear();
   refetchOrg.mockClear();
+  addToast.mockClear();
 });
 
 const defaultOrgs = {
@@ -237,6 +242,17 @@ describe('<TaskOrgCards/>', () => {
   });
 
   describe('Assign click', () => {
+    let EMAIL_ENABLED;
+
+    beforeAll(() => {
+      EMAIL_ENABLED = window.GLOBALS.EMAIL_ENABLED;
+      window.GLOBALS.EMAIL_ENABLED = true;
+    });
+
+    afterAll(() => {
+      window.GLOBALS.EMAIL_ENABLED = EMAIL_ENABLED;
+    });
+
     test('updates assigned user', () => {
       const task = {
         ...defaultTask,
@@ -329,38 +345,6 @@ describe('<TaskOrgCards/>', () => {
         assigned_qa: null,
       };
 
-      describe('org has changes', () => {
-        test('refetches, opens confirm modal, updates assignment', async () => {
-          fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
-            can_reassign: false,
-          });
-          const { findByText, getByText } = setup({
-            task,
-            assignUserModalOpen: 'Dev',
-          });
-          fireEvent.click(
-            getByText(`${sampleGitHubUser2.name} (${sampleGitHubUser2.login})`),
-          );
-          fireEvent.click(getByText('Save'));
-
-          expect.assertions(5);
-          await findByText('Confirm');
-
-          expect(refetchOrg).toHaveBeenCalledTimes(1);
-          expect(updateObject).not.toHaveBeenCalled();
-          expect(
-            getByText('Confirm Changing Developer and Deleting Dev Org'),
-          ).toBeVisible();
-
-          fireEvent.click(getByText('Confirm'));
-
-          expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
-            sampleGitHubUser2.id,
-          );
-        });
-      });
-
       describe('org can be reassigned', () => {
         test('updates assignment without refetching', async () => {
           fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
@@ -383,6 +367,30 @@ describe('<TaskOrgCards/>', () => {
           expect(updateObject).toHaveBeenCalledTimes(1);
           expect(updateObject.mock.calls[0][0].data.assigned_dev).toBe(
             sampleGitHubUser2.id,
+          );
+        });
+      });
+
+      describe('org cannot be reassigned', () => {
+        test('opens error toast', async () => {
+          fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
+            can_reassign: false,
+            issues: ["Can't do that!"],
+          });
+          const { getByText } = setup({ task, assignUserModalOpen: 'Dev' });
+          fireEvent.click(
+            getByText(`${sampleGitHubUser2.name} (${sampleGitHubUser2.login})`),
+          );
+          fireEvent.click(getByText('Save'));
+
+          await waitFor(() => {
+            if (!fetchMock.done() || addToast.mock.calls.length !== 1) {
+              throw new Error('waiting...');
+            }
+          });
+          expect(addToast.mock.calls).toHaveLength(1);
+          expect(addToast.mock.calls[0][0].heading).toBe(
+            'Cannot transfer scratch org',
           );
         });
       });

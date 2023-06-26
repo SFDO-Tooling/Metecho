@@ -24,6 +24,6 @@ def test_populate_data():
             gh_as_repo.return_value.repository.return_value = repo_info
             call_command("populate_data")
 
-    assert Project.objects.count() == 7
+    assert Project.objects.count() == 1
     assert Epic.objects.exists()
     assert Task.objects.exists()

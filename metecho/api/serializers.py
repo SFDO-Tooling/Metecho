@@ -1,6 +1,5 @@
-from typing import Optional, OrderedDict
+from typing import Literal, Optional, OrderedDict
 
-from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
@@ -10,6 +9,8 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import Direction, extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import JSONField
+
+from metecho.api.reassignment import can_assign_task_role
 
 from .email_utils import get_user_facing_url
 from .fields import MarkdownField
@@ -27,6 +28,7 @@ from .models import (
     Task,
     TaskReviewStatus,
 )
+from .models import User as UserModel
 from .sf_run_flow import is_org_good
 from .validators import CaseInsensitiveUniqueTogetherValidator, UnattachedIssueValidator
 
@@ -832,130 +834,105 @@ class TaskAssigneeSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 _("You must assign a Developer, Tester, or both")
             )
+
         return super().validate(data)
 
-    def validate_assigned_dev(self, new_dev):
-        user = self.context["request"].user
+    def validate_assigned_dev(self, new_dev: Optional[GitHubUser]):
+        assert self.instance
+        user: UserModel = self.context["request"].user
         task: Task = self.instance
 
-        if not task.has_push_permission(user):
-            raise serializers.ValidationError(
-                _("You don't have permissions to change the assigned Developer")
-            )
+        response = can_assign_task_role(task, user, new_dev, ScratchOrgType.DEV)
+        if not response.can_reassign:
+            raise serializers.ValidationError(response.issues)
 
-        collaboration = GitHubCollaboration.objects.filter(
-            user=new_dev, project=task.root_project
-        ).first()
-        if new_dev and not collaboration:
-            raise serializers.ValidationError(
-                _("User is not a valid GitHub collaborator: {}").format(new_dev)
-            )
-        if new_dev:
-            try:
-                assert collaboration.permissions["push"]
-            except Exception:
-                raise serializers.ValidationError(
-                    _("User does not have push permissions: {}").format(new_dev)
-                )
         return new_dev
 
-    def validate_assigned_qa(self, new_qa):
-        user = self.context["request"].user
+    def validate_assigned_qa(self, new_qa: Optional[GitHubUser]):
+        assert self.instance
+        user: UserModel = self.context["request"].user
         task: Task = self.instance
 
-        if not task.has_push_permission(user):
-            is_removing_self = new_qa is None and task.assigned_qa_id == user.github_id
-            is_assigning_self = (
-                new_qa and new_qa.id == user.github_id and task.assigned_qa is None
-            )
-            if not (is_removing_self or is_assigning_self):
-                raise serializers.ValidationError(
-                    _("You can only assign/remove yourself as a Tester")
-                )
+        response = can_assign_task_role(task, user, new_qa, ScratchOrgType.QA)
+        if not response.can_reassign:
+            raise serializers.ValidationError(response.issues)
 
-        collaboration_exists = GitHubCollaboration.objects.filter(
-            user=new_qa, project=task.root_project
-        ).exists()
-        if new_qa and not collaboration_exists:
-            raise serializers.ValidationError(
-                _("User is not valid GitHub collaborator: {}").format(new_qa)
-            )
         return new_qa
 
     def update(self, task, data):
         user = self.context["request"].user
         user_id = str(user.id)
+
+        # The user may be changing the dev, the QA, or both.
+        # The user's permission to do both is checked in `validate_*()`,
+        # so we can safely start both operations here.
+
         if "assigned_dev" in data:
             self._handle_reassign("dev", task, data, user, originating_user_id=user_id)
             task.assigned_dev = data["assigned_dev"]
         if "assigned_qa" in data:
             self._handle_reassign("qa", task, data, user, originating_user_id=user_id)
             task.assigned_qa = data["assigned_qa"]
+
         task.finalize_task_update(originating_user_id=user_id)
         return task
 
     def _handle_reassign(
-        self, type_, instance, validated_data, user, originating_user_id
+        self,
+        type_: Literal["dev"] | Literal["qa"],
+        instance: Task,
+        validated_data: dict,
+        running_user: UserModel,
+        originating_user_id: str,
     ):
         epic = instance.epic
-        new_assignee = validated_data.get(f"assigned_{type_}")
-        existing_assignee = getattr(instance, f"assigned_{type_}")
+        new_assignee: Optional[GitHubUser] = validated_data.get(f"assigned_{type_}")
+        existing_assignee: Optional[GitHubUser] = getattr(instance, f"assigned_{type_}")
         assigned_user_has_changed = new_assignee != existing_assignee
         has_assigned_user = bool(new_assignee)
         org_type = {"dev": ScratchOrgType.DEV, "qa": ScratchOrgType.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
+            # Add this user as an epic collaborator.
             if epic and not epic.github_users.filter(id=new_assignee.id).exists():
                 epic.github_users.add(new_assignee)
                 epic.notify_changed(originating_user_id=None)
 
+            # Notify the target user.
             if validated_data.get(f"should_alert_{type_}"):
-                self.try_send_assignment_emails(instance, type_, validated_data, user)
+                self.try_send_assignment_emails(
+                    org_type, instance, running_user, new_assignee
+                )
 
-            reassigned_org = False
-            # We want to consider soft-deleted orgs, too:
-            orgs = [
-                *instance.orgs.active().filter(org_type=org_type),
-                *instance.orgs.inactive().filter(org_type=org_type),
-            ]
-            for org in orgs:
-                new_user = self._valid_reassign(
-                    type_, org, validated_data[f"assigned_{type_}"]
-                )
-                valid_commit = org.latest_commit == (
-                    instance.commits[0] if instance.commits else instance.origin_sha
-                )
-                org_still_exists = is_org_good(org)
-                if (
-                    org_still_exists
-                    and new_user
-                    and valid_commit
-                    and not reassigned_org
-                ):
-                    org.queue_reassign(
+            # Locate the attached scratch org and reassign it.
+            candidate_org = instance.orgs.active().filter(org_type=org_type).first()
+            if candidate_org:
+                new_user = new_assignee.get_matching_user()
+                org_still_exists = is_org_good(candidate_org)
+
+                if org_still_exists:
+                    candidate_org.queue_reassign(
                         new_user=new_user, originating_user_id=originating_user_id
                     )
-                    reassigned_org = True
-                elif org.deleted_at is None:
-                    org.delete(
-                        originating_user_id=originating_user_id, preserve_sf_org=True
-                    )
         elif not has_assigned_user:
+            # We are removing a user assignment, but not creating a new one.
+            # Delete all extant orgs.
             for org in [*instance.orgs.active().filter(org_type=org_type)]:
                 org.delete(
                     originating_user_id=originating_user_id, preserve_sf_org=True
                 )
 
-    def _valid_reassign(self, type_, org, new_assignee):
-        new_user = self.get_matching_assigned_user(
-            type_, {f"assigned_{type_}": new_assignee}
-        )
-        if new_user and org.owner_sf_username == new_user.sf_username:
-            return new_user
-        return None
+        # Otherwise, we do nothing - this is an assignment to a new user
+        # but the task does not have an attached scratch org.
 
-    def try_send_assignment_emails(self, instance, type_, validated_data, user):
-        assigned_user = self.get_matching_assigned_user(type_, validated_data)
+    def try_send_assignment_emails(
+        self,
+        org_type: ScratchOrgType,
+        instance: Task,
+        running_user: UserModel,
+        user: GitHubUser,
+    ):
+        assigned_user = user.get_matching_user()
         if assigned_user:
             task = instance
             metecho_link = get_user_facing_url(path=task.get_absolute_url())
@@ -963,21 +940,14 @@ class TaskAssigneeSerializer(serializers.Serializer):
             body = render_to_string(
                 "user_assigned_to_task.txt",
                 {
-                    "role": "Tester" if type_ == "qa" else "Developer",
+                    "role": "Tester" if org_type is ScratchOrgType.QA else "Developer",
                     "task_name": task.full_name,
                     "assigned_user_name": assigned_user.username,
-                    "user_name": user.username if user else None,
+                    "user_name": running_user.username,
                     "metecho_link": metecho_link,
                 },
             )
             assigned_user.notify(subject, body)
-
-    def get_matching_assigned_user(self, type_, validated_data):
-        gh_user = validated_data.get(f"assigned_{type_}")
-        sa = SocialAccount.objects.filter(
-            provider="github", uid=getattr(gh_user, "id", "")
-        ).first()
-        return getattr(sa, "user", None)  # Optional[User]
 
 
 class CreatePrSerializer(serializers.Serializer):
@@ -1195,4 +1165,6 @@ class SiteSerializer(serializers.ModelSerializer):
 
 class CanReassignSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=("assigned_qa", "assigned_dev"))
-    gh_uid = serializers.IntegerField()
+    gh_uid = serializers.PrimaryKeyRelatedField(
+        queryset=GitHubUser.objects, allow_null=True, required=True
+    )

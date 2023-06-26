@@ -5,6 +5,8 @@ export interface ToastType {
   heading: string;
   linkText?: string;
   linkUrl?: string;
+  linkDownload?: boolean;
+  linkDownloadFilename?: string;
   openLinkInNewWindow?: boolean;
   details?: string;
   variant?: 'error' | 'info' | 'success' | 'warning';

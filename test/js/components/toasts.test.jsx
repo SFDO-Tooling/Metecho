@@ -38,7 +38,7 @@ describe('<Toasts />', () => {
   describe('link click', () => {
     test('navigates to link url', () => {
       const { getByText, context } = setup();
-      fireEvent.click(getByText('open link'));
+      fireEvent.click(getByText(/open link/));
 
       expect(context.action).toBe('PUSH');
       expect(context.url).toBe('/test/url/');
@@ -48,18 +48,74 @@ describe('<Toasts />', () => {
       const { getByText } = setup({
         toasts: [{ ...defaultToast, openLinkInNewWindow: true }],
       });
-      fireEvent.click(getByText('open link'));
+      const link = getByText(/open link/);
 
-      expect(window.open).toHaveBeenCalledWith('/test/url/', '_blank');
+      expect(link).toHaveAttribute('href', '/test/url/');
+      expect(link).toHaveAttribute('target', '_blank');
+    });
+
+    test('dont render link if no linkUrl', () => {
+      const { queryByRole } = setup({
+        toasts: [{ ...defaultToast, openLinkInNewWindow: true, linkUrl: '' }],
+      });
+      // A link should not render
+      expect(queryByRole('link')).toBeNull();
     });
 
     test('does nothing if no linkUrl', () => {
       const { getByText } = setup({
-        toasts: [{ ...defaultToast, openLinkInNewWindow: true, linkUrl: '' }],
+        toasts: [{ ...defaultToast, linkUrl: '' }],
       });
-      fireEvent.click(getByText('open link'));
+      fireEvent.click(getByText(/open link/));
 
       expect(window.open).not.toHaveBeenCalled();
+    });
+
+    test('starts download if linkDownload set', () => {
+      const mockElement = {
+        click: () => {},
+      };
+      const clickSpy = jest.spyOn(mockElement, 'click');
+      const createElementSpy = jest.spyOn(window.document, 'createElement');
+
+      const { getByText } = setup({
+        toasts: [
+          {
+            ...defaultToast,
+            linkDownload: true,
+            linkDownloadFilename: 'foo.txt',
+            linkUrl: '/foo.txt',
+          },
+        ],
+      });
+
+      createElementSpy.mockReturnValueOnce(mockElement);
+      fireEvent.click(getByText('open link'));
+
+      expect(createElementSpy).toHaveBeenCalled();
+      expect(clickSpy).toHaveBeenCalled();
+      expect(window.open).not.toHaveBeenCalled();
+    });
+
+    test('defaults linkDownloadFilename', () => {
+      const mockElement = {
+        click: () => {},
+      };
+      const createElementSpy = jest.spyOn(window.document, 'createElement');
+
+      const { getByText } = setup({
+        toasts: [
+          {
+            ...defaultToast,
+            linkDownload: true,
+            linkUrl: '/foo.txt',
+          },
+        ],
+      });
+
+      createElementSpy.mockReturnValueOnce(mockElement);
+      fireEvent.click(getByText('open link'));
+      expect(mockElement.download).toBe('output.txt');
     });
   });
 

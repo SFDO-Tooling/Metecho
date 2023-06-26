@@ -104,7 +104,7 @@ def is_org_good(org):
     org_name = org.org_config_name
     try:
         org_config = OrgConfig(config, org_name)
-        org_config.refresh_oauth_token(None)
+        org_config.refresh_oauth_token(None, is_sandbox=True)
         return "access_token" in org_config.config
     except Exception:
         return False

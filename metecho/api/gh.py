@@ -9,6 +9,7 @@ import logging
 import os
 import pathlib
 import shutil
+from typing import Generator
 import zipfile
 from glob import glob
 
@@ -227,7 +228,7 @@ def local_github_checkout(
     commit_ish=None,
     repo_owner=None,
     repo_name=None,
-):
+) -> Generator[str, None, None]:
     with temporary_dir() as repo_root:
         # pretend it's a git clone to satisfy cci
         os.mkdir(".git")
@@ -289,7 +290,7 @@ def get_source_format(**kwargs):
     return project_config.project__source_format
 
 
-def try_to_make_branch(repository, *, new_branch, base_sha):
+def try_to_make_branch(repository, *, new_branch, base_sha) -> str:
     branch_name = new_branch
     counter = 0
     max_length = 100  # From models.Epic.branch_name

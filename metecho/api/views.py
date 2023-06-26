@@ -1,11 +1,11 @@
-from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from github3.exceptions import ConnectionError, NotFoundError, ResponseError
 from rest_framework import mixins, status, viewsets
@@ -15,6 +15,8 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
+
+from metecho.api.reassignment import can_assign_task_role
 
 from . import gh
 from .authentication import GitHubHookAuthentication
@@ -36,6 +38,7 @@ from .models import (
     EpicStatus,
     GitHubIssue,
     GitHubOrganization,
+    GitHubUser,
     Project,
     ProjectDependency,
     ScratchOrg,
@@ -499,32 +502,18 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
         """Check if a GitHub user can be assigned to a Task"""
         serializer = CanReassignSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         task = self.get_object()
-        role = serializer.validated_data["role"]
+        github_user: GitHubUser = serializer.validated_data["gh_uid"]
         role_org_type = {
             "assigned_qa": ScratchOrgType.QA,
             "assigned_dev": ScratchOrgType.DEV,
-        }.get(role, None)
-        gh_uid = serializer.validated_data["gh_uid"]
-        org = task.orgs.active().filter(org_type=role_org_type).first()
-        new_user = getattr(
-            SocialAccount.objects.filter(provider="github", uid=gh_uid).first(),
-            "user",
-            None,
-        )
-        valid_commit = org and org.latest_commit == (
-            task.commits[0] if task.commits else task.origin_sha
-        )
-        return Response(
-            {
-                "can_reassign": bool(
-                    new_user
-                    and org
-                    and org.owner_sf_username == new_user.sf_username
-                    and valid_commit
-                )
-            }
-        )
+        }[
+            serializer.validated_data["role"]
+        ]  # Serializer enforces these values
+
+        response = can_assign_task_role(task, request.user, github_user, role_org_type)
+        return Response(response.dict())
 
     @extend_schema(request=TaskAssigneeSerializer)
     @action(detail=True, methods=["POST", "PUT"])
@@ -550,13 +539,24 @@ class ScratchOrgViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
-    """Manage SalesForce ScratchOrgs."""
+    """Manage Salesforce scratch orgs."""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer
-    queryset = ScratchOrg.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
+
+    def get_queryset(self):
+
+        # All actions except log() act on active scratch orgs only
+        # getattr() check guards against DRF-Spectacular
+        if (
+            not getattr(self, "swagger_fake_view", False)
+            and "/log" in self.request.resolver_match.route
+        ):
+            return ScratchOrg.objects.all()
+
+        return ScratchOrg.objects.active()
 
     def perform_create(self, *args, **kwargs):
         if self.request.user.is_devhub_enabled:
@@ -752,4 +752,27 @@ class ScratchOrgViewSet(
         scratch_org.queue_refresh_org(originating_user_id=str(request.user.id))
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )
+
+    @extend_schema(
+        request=None,
+        responses={200: OpenApiResponse(OpenApiTypes.STR, description="Log content")},
+    )
+    @action(detail=True, methods=["GET"])
+    def log(self, request, pk=None):
+        """Return the CCI build log or traceback from a scratch org build."""
+        # Note that we override the viewset-level queryset as this action will usually
+        # run on deleted scratch org instances.
+        scratch_org = self.get_object()
+        if not (request.user == scratch_org.owner or request.user.is_superuser):
+            return Response(
+                {"error": _("Requesting user did not create Org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        return HttpResponse(
+            scratch_org.cci_log,
+            content_type="text/plain",
+            charset="utf-8",
+            status=status.HTTP_200_OK,
         )

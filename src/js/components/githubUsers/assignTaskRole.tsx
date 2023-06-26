@@ -129,6 +129,29 @@ const AssignTaskRoleModal = ({
   const alertType =
     orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
 
+  const footerComponents = (
+    window.GLOBALS.EMAIL_ENABLED
+      ? [
+          <Checkbox
+            key="alert"
+            labels={{ label: checkboxLabel }}
+            className="slds-float_left slds-p-top_xx-small"
+            name={alertType}
+            checked={shouldAlertAssignee}
+            onChange={handleAlertAssignee}
+          />,
+        ]
+      : []
+  ).concat([
+    <Button key="cancel" label={t('Cancel')} onClick={handleClose} />,
+    <Button
+      key="submit"
+      label={t('Save')}
+      variant="brand"
+      disabled={!selection}
+      onClick={handleSave}
+    />,
+  ]);
   return (
     <Modal
       isOpen={isOpen}
@@ -139,24 +162,7 @@ const AssignTaskRoleModal = ({
       directional
       size="small"
       className="modal-set-height"
-      footer={[
-        <Checkbox
-          key="alert"
-          labels={{ label: checkboxLabel }}
-          className="slds-float_left slds-p-top_xx-small"
-          name={alertType}
-          checked={shouldAlertAssignee}
-          onChange={handleAlertAssignee}
-        />,
-        <Button key="cancel" label={t('Cancel')} onClick={handleClose} />,
-        <Button
-          key="submit"
-          label={t('Save')}
-          variant="brand"
-          disabled={!selection}
-          onClick={handleSave}
-        />,
-      ]}
+      footer={footerComponents}
     >
       {selectedUser && (
         <>
@@ -211,9 +217,10 @@ const AssignTaskRoleModal = ({
             slds-p-bottom_medium"
         >
           <Search
+            label={t('Search for user')}
             value={findText}
             assistiveText={{ label: t('Search for user') }}
-            placeholder={t('Search for user')}
+            placeholder={t('Type to filter')}
             onChange={handleFindTextChange}
             clearable
             onClear={handleClearFindText}

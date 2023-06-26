@@ -12,9 +12,9 @@ from github3.exceptions import NotFoundError, ResponseError
 from github3.users import User as GitHubApiUser
 from rest_framework import status
 
+from metecho.api.models import Project, ScratchOrgType, SiteProfile
+from metecho.api.reassignment import ReassignmentResponse
 from metecho.api.serializers import EpicSerializer, TaskSerializer
-
-from ..models import Project, ScratchOrgType, SiteProfile
 
 Branch = namedtuple("Branch", ["name"])
 
@@ -1296,6 +1296,21 @@ class TestScratchOrgViewSet:
         assert not scratch_org.currently_retrieving_omnistudio
         assert not commit_omnistudio_from_org_job.delay.called
 
+    def test_download_log(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(owner=client.user, cci_log="Foo")
+        url = reverse("scratch-org-log", kwargs={"pk": str(scratch_org.id)})
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.content == b"Foo"
+
+    def test_download_log__not_authorized(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(cci_log="Foo")
+        url = reverse("scratch-org-log", kwargs={"pk": str(scratch_org.id)})
+        response = client.get(url)
+
+        assert response.status_code == 403
+
 
 @pytest.mark.django_db
 class TestTaskViewSet:
@@ -1475,21 +1490,22 @@ class TestTaskViewSet:
 
         assert response.status_code == 400
 
-    def test_can_reassign__good(self, client, task_factory):
+    def test_can_reassign(self, client, task_factory, git_hub_user_factory):
         task = task_factory()
+        gh = git_hub_user_factory()
 
-        data = {
-            "role": "assigned_qa",
-            "gh_uid": "123",
-        }
-        response = client.post(
-            reverse("task-can-reassign", kwargs={"pk": str(task.id)}), data
-        )
+        data = {"role": "assigned_dev", "gh_uid": gh.id}
+        with patch("metecho.api.views.can_assign_task_role") as task_role:
+            task_role.return_value = ReassignmentResponse(can_reassign=True, issues=[])
 
-        assert response.status_code == 200
-        assert response.json() == {"can_reassign": False}
+            response = client.post(
+                reverse("task-can-reassign", kwargs={"pk": str(task.id)}), data
+            )
 
-    def test_can_reassign__bad(self, client, task_factory):
+            assert response.status_code == 200
+            assert response.json() == {"can_reassign": True, "issues": []}
+
+    def test_can_reassign__bad_parameters(self, client, task_factory):
         task = task_factory()
 
         data = {}

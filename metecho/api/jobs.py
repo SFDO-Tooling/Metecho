@@ -5,7 +5,7 @@ import traceback
 from datetime import timedelta
 from io import StringIO
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 import cumulusci
 import requests
@@ -24,6 +24,7 @@ from cumulusci.core.datasets import (
 )
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
+from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import download_extract_github, temporary_dir
@@ -141,7 +142,7 @@ def epic_create_branch(
 
 def _create_branches_on_github(
     *, user, repo_id, epic=None, task=None, task_sha=None, originating_user_id=None
-):
+) -> str:
     if not (epic or task):
         raise ValueError("At least one of Task or Epic is required")
 
@@ -359,13 +360,13 @@ def alert_user_about_expiring_org(*, org, days):
 
 
 def _create_org_and_run_flow(
-    scratch_org,
+    scratch_org: ScratchOrg,
     *,
-    user,
-    repo_id,
-    repo_branch,
-    project_path,
-    originating_user_id,
+    user: User,
+    repo_id: Any,
+    repo_branch: str,
+    project_path: str,
+    originating_user_id: str,
 ):
     """
     Expects to be called in the context of a local github checkout.
@@ -451,7 +452,7 @@ def _create_org_and_run_flow(
 
 
 def create_branches_on_github_then_create_scratch_org(
-    *, scratch_org, originating_user_id
+    *, scratch_org: ScratchOrg, originating_user_id: str
 ):
     scratch_org.refresh_from_db()
     user = scratch_org.owner
@@ -1255,7 +1256,7 @@ def dataset_env(org: ScratchOrg):
         )
         org_config = org.get_refreshed_org_config(keychain=cci.keychain)
         project_config.keychain = org_config.keychain
-        sf = org_config.salesforce_client
+        sf = get_simple_salesforce_connection(project_config, org_config)
         with get_org_schema(
             sf,
             org_config,
