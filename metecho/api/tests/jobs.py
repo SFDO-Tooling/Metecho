@@ -1384,11 +1384,17 @@ class TestCreateRepository:
         gh_org.create_team.return_value = team
         gh_org.create_repository.return_value = repo
 
-        return project, gh_org, team, repo
+        get_devhub_api = mocker.patch(f"{PATCH_ROOT}.get_devhub_api", autospec=True)
+        get_devhub_api.sf_instance = "foo"
+
+        requests = mocker.patch(f"{PATCH_ROOT}.requests", autospec=True)
+        requests.get.return_value.json.return_value = [{"version": "58.0"}]
+
+        return project, gh_org, team, repo, get_devhub_api, requests
 
     def test_ok(self, mocker, github_mocks, user_factory):
         user = user_factory()
-        project, org, team, repo = github_mocks
+        project, org, team, repo, get_devhub_api, requests = github_mocks
         mocker.patch(f"{PATCH_ROOT}.init_from_context")
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
@@ -1421,7 +1427,7 @@ class TestCreateRepository:
         assert sarge.capture_both.called
         assert zipfile.extractall.called
 
-    def test__gh_error(self, mocker, caplog, project, user_factory):
+    def test__gh_error(self, mocker, caplog, project, user_factory, github_mocks):
         user = user_factory()
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
         mocker.patch(f"{PATCH_ROOT}.gh_as_user", side_effect=Exception("Oh no!"))
@@ -1449,7 +1455,7 @@ class TestCreateRepository:
 
     def test__team_name_taken(self, mocker, github_mocks, project, user_factory):
         user = user_factory()
-        project, org, team, repo = github_mocks
+        project, org, _, _, _, _ = github_mocks
         resp = mocker.MagicMock(status_code=422)
         resp.json.return_value = {"message": "Validation Failed"}
         # Simulate the first two team names being taken
@@ -1476,7 +1482,7 @@ class TestCreateRepository:
 
     def test__team_error(self, mocker, github_mocks, project, user_factory):
         user = user_factory()
-        project, org, team, repo = github_mocks
+        project, org, _, _, _, _ = github_mocks
         resp = mocker.MagicMock(status_code=422)
         resp.json.return_value = {"message": "Not a validation error"}
         org.create_team.side_effect = UnprocessableEntity(resp)
@@ -1489,7 +1495,7 @@ class TestCreateRepository:
         self, mocker, caplog, github_mocks, user_factory, fail_repo_delete
     ):
         user = user_factory()
-        project, org, team, repo = github_mocks
+        project, _, team, repo, _, _ = github_mocks
         repo.teams.return_value = [team]
         if fail_repo_delete:
             repo.delete.side_effect = Exception("REPO DELETE FAIL")
