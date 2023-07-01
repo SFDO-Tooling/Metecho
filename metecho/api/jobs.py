@@ -253,16 +253,17 @@ def create_repository(
                 zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
                 zipfile.extractall()
 
-            # Ask the user's Dev Hub what its latest API version is
-            sf = get_devhub_api(devhub_username=user.sf_username)
-            response = requests.get(
-                f"https://{sf.sf_instance}/services/data", headers=sf.headers
-            )
             runtime = CliRuntime()
 
             try:
+                # Ask the user's Dev Hub what its latest API version is
+                sf = get_devhub_api(devhub_username=user.sf_username)
+                response = requests.get(
+                    f"https://{sf.sf_instance}/services/data", headers=sf.headers
+                )
+
                 version = safe_json_from_response(response)[-1]["version"]
-            except:
+            except Exception:
                 version = runtime.universal_config.project__package__api_version
 
             # Bootstrap repository with CumulusCI
