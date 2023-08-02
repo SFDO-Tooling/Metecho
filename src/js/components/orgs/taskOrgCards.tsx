@@ -283,9 +283,9 @@ const TaskOrgCards = ({
 
   return (
     <>
-      <h2 className="slds-text-heading_medium slds-m-bottom_xx-small">
+      <div className="slds-text-heading_medium slds-m-bottom_xx-small">
         {t('Task Team & Orgs')}
-      </h2>
+      </div>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
         <TaskOrgCard
           org={orgs[ORG_TYPES.DEV]}
