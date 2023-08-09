@@ -420,7 +420,7 @@ class TestProjectViewset:
             assert response.json() == ["include_me"], response.json()
 
     def test_get_queryset(self, client, project_factory, git_hub_collaboration_factory):
-        project = project_factory(repo_name="repo", repo_id="123")
+        project = project_factory(repo_name="repo")
         gh_user = git_hub_collaboration_factory(
             user__id=client.user.github_id, project=project
         ).user

@@ -2326,7 +2326,7 @@ components:
         name:
           type: string
         repo_id:
-          type: string
+          type: integer
           readOnly: true
         repo_url:
           type: string
