@@ -448,6 +448,7 @@ class TestProjectViewset:
                     "repo_url": (
                         f"https://github.com/{project.repo_owner}/{project.repo_name}"
                     ),
+                    "repo_id": project.repo_id,
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
                     "has_push_permission": False,
@@ -505,6 +506,7 @@ class TestProjectViewset:
                     ),
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
+                    "repo_id": project.repo_id,
                     "has_push_permission": False,
                     "branch_prefix": "",
                     "github_users": [

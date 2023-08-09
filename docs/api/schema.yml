@@ -2325,6 +2325,9 @@ components:
           readOnly: true
         name:
           type: string
+        repo_id:
+          type: integer
+          readOnly: true
         repo_url:
           type: string
           format: uri
@@ -2398,6 +2401,7 @@ components:
       - name
       - old_slugs
       - org_config_names
+      - repo_id
       - repo_image_url
       - repo_name
       - repo_owner
