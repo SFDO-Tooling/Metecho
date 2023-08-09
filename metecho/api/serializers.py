@@ -359,7 +359,7 @@ class ProjectSerializer(HashIdModelSerializer):
     old_slugs = StringListField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.URLField(read_only=True)
-    repo_id = serializers.CharField(read_only=True)
+    repo_id = serializers.IntegerField(read_only=True)
     repo_image_url = serializers.SerializerMethodField()
     has_push_permission = serializers.SerializerMethodField()
     github_users = serializers.SerializerMethodField()

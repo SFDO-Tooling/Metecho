@@ -420,7 +420,7 @@ class TestProjectViewset:
             assert response.json() == ["include_me"], response.json()
 
     def test_get_queryset(self, client, project_factory, git_hub_collaboration_factory):
-        project = project_factory(repo_name="repo")
+        project = project_factory(repo_name="repo", repo_id="123")
         gh_user = git_hub_collaboration_factory(
             user__id=client.user.github_id, project=project
         ).user
@@ -448,6 +448,7 @@ class TestProjectViewset:
                     "repo_url": (
                         f"https://github.com/{project.repo_owner}/{project.repo_name}"
                     ),
+                    "repo_id": project.repo_id,
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
                     "has_push_permission": False,
@@ -505,6 +506,7 @@ class TestProjectViewset:
                     ),
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
+                    "repo_id": project.repo_id,
                     "has_push_permission": False,
                     "branch_prefix": "",
                     "github_users": [
