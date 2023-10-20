@@ -209,7 +209,6 @@ const TaskOrgCard = ({
       org?.expires_at !== null &&
       new Date(org?.expires_at) < new Date()
     ) {
-      console.log('Called');
       doDeleteOrg();
     }
   }, []);
