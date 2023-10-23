@@ -57,7 +57,7 @@ const defaultOrg = {
   owner: 'user-id',
   owner_gh_username: 'user-name',
   owner_gh_id: 123456,
-  expires_at: '2019-09-16T12:58:53.721Z',
+  expires_at: new Date(new Date().getTime() + 86400000).toISOString(),
   latest_commit: '617a512',
   latest_commit_url: '/test/commit/url/',
   latest_commit_at: '2019-08-16T12:58:53.721Z',
