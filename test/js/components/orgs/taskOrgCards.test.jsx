@@ -913,7 +913,28 @@ describe('<TaskOrgCards/>', () => {
         expect(args.object.id).toBe('org-id');
       });
     });
+    test('checks  and then deletes  expired org', async () => {
+      const { findByText } = setup({
+        orgs: {
+          ...defaultOrgs,
+          Dev: {
+            ...defaultOrgs.Dev,
+            expires_at: new Date().toISOString(),
+            unsaved_changes: {},
+            total_unsaved_changes: 0,
+            has_unsaved_changes: false,
+          },
+        },
+      });
+      await findByText('Deleting Org…');
 
+      expect(deleteObject).toHaveBeenCalledTimes(1);
+
+      const deleteArgs = deleteObject.mock.calls[0][0];
+
+      expect(deleteArgs.objectType).toBe('scratch_org');
+      expect(deleteArgs.object.id).toBe('org-id');
+    });
     describe('Dev org', () => {
       test('refreshes and then deletes org', async () => {
         const { findByText, getByText } = setup({

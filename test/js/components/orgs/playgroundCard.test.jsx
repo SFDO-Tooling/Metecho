@@ -240,4 +240,25 @@ describe('<PlaygroundOrgCard/>', () => {
       expect(args.object.id).toEqual(defaultOrg.id);
     });
   });
+  describe('delete expired org', () => {
+    test('checks for expiry status and then deletes org', async () => {
+      const org = {
+        ...defaultOrg,
+        expires_at: new Date().toISOString(),
+        unsaved_changes: {},
+        total_unsaved_changes: 0,
+        has_unsaved_changes: false,
+      };
+      const { findByText } = setup({ org });
+
+      await findByText('Deleting Org…');
+
+      expect(deleteObject).toHaveBeenCalledTimes(1);
+
+      const args = deleteObject.mock.calls[0][0];
+
+      expect(args.objectType).toBe('scratch_org');
+      expect(args.object.id).toEqual(defaultOrg.id);
+    });
+  });
 });
