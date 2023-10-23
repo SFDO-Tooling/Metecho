@@ -132,15 +132,15 @@ const PlaygroundOrgCard = ({
       }
     }
   }, [doDeleteOrg, doRefreshOrg, isWaitingToDeleteOrg, org, dispatch]);
-  useEffect(() => {
-    if (
-      org &&
-      org?.expires_at !== null &&
-      new Date(org?.expires_at) < new Date()
-    ) {
-      doDeleteOrg();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (
+  //     org &&
+  //     org?.expires_at !== null &&
+  //     new Date(org?.expires_at) < new Date()
+  //   ) {
+  //     doDeleteOrg();
+  //   }
+  // }, []);
 
   /* istanbul ignore next */
   if (!(project || epic || task)) {
