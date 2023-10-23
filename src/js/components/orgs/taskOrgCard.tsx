@@ -203,15 +203,15 @@ const TaskOrgCard = ({
   // We consider an org out-of-date if it is not based on the first commit.
   const orgOutOfDate = Boolean(org && orgCommitIdx !== 0);
   const testOrgOutOfDate = type === ORG_TYPES.QA && orgOutOfDate;
-  // useEffect(() => {
-  //   if (
-  //     org &&
-  //     org?.expires_at !== null &&
-  //     new Date(org?.expires_at) < new Date()
-  //   ) {
-  //     doDeleteOrg();
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (
+      org &&
+      org?.expires_at !== null &&
+      new Date(org?.expires_at) < new Date()
+    ) {
+      doDeleteOrg();
+    }
+  }, []);
   return (
     <div
       className="slds-size_1-of-1
