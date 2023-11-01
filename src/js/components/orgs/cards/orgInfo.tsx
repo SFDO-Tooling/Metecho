@@ -87,7 +87,7 @@ const OrgInfo = ({
       // synced status for orgs
       if (baseCommit) {
         // eslint-disable-next-line max-len
-        compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${baseCommit}`;
+        compareChangesUrl = `${repoUrl}/compare/${baseCommit}...${org.latest_commit}`;
       }
       outOfDateMsg = (
         <li>
