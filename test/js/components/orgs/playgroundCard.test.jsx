@@ -250,7 +250,7 @@ describe('<PlaygroundOrgCard/>', () => {
         has_unsaved_changes: false,
       };
       const { findByText } = setup({ org });
-
+      expect.assertions(3);
       await findByText('Deleting Org…');
 
       expect(deleteObject).toHaveBeenCalledTimes(1);

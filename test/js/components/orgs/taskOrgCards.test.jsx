@@ -927,7 +927,7 @@ describe('<TaskOrgCards/>', () => {
         },
       });
       await findByText('Deleting Org…');
-
+      expect.assertions(3);
       expect(deleteObject).toHaveBeenCalledTimes(1);
 
       const deleteArgs = deleteObject.mock.calls[0][0];
