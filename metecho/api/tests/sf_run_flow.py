@@ -3,13 +3,15 @@ These tests are TRULY AWFUL but we're expecting the code in sf_run_flow
 to change substantially, and as it stands, it's full of implicit
 external calls, so this would be mock-heavy anyway.
 """
-
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
-
+from requests.exceptions import InvalidSchema
 import pytest
 from requests.exceptions import HTTPError
+from cumulusci.core.config.scratch_org_config import ScratchOrgConfig
+from cumulusci.oauth.client import OAuth2Client
 
+from requests.exceptions import ConnectionError
 from metecho.exceptions import SubcommandException
 
 from ..sf_run_flow import (
@@ -194,6 +196,114 @@ def test_get_access_token(mocker):
     )
 
     assert OAuth2Client.called
+
+
+@pytest.mark.django_db
+@patch("metecho.api.sf_run_flow.time.sleep")
+@patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 9)
+def test_get_access_token_dns_delay_garbage_url(sleep, mocker):
+    scratch_org_config = ScratchOrgConfig(
+        name="dev",
+        config={
+            "access_token": 123,
+            "instance_url": "garbage://tesdfgfdsfg54w36st.co345654356tm",
+        },
+    )
+    real_auth_code_grant = OAuth2Client.auth_code_grant
+    call_count = 0
+    mocker.patch("metecho.api.sf_run_flow.is_network_error", False)
+
+    def fake_auth_code_grant(self, config):
+        nonlocal call_count
+        call_count += 1
+        return real_auth_code_grant(self, config)
+
+    mocker.patch.object(
+        OAuth2Client,
+        "auth_code_grant",
+        fake_auth_code_grant,
+    )
+    mocker.auth_code_grant = "123"
+    auth_token_endpoint = f"'{scratch_org_config.instance_url}/services/oauth2/token'"
+    expected_result = f"No connection adapters were found for {auth_token_endpoint}"
+    with pytest.raises(
+        InvalidSchema,
+        match=expected_result,
+    ):
+        get_access_token(
+            org_result={"AuthCode": "123"},
+            scratch_org_config=scratch_org_config,
+        )
+
+    assert call_count == 1
+
+
+@pytest.mark.django_db
+@patch("metecho.api.sf_run_flow.time.sleep")
+@patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 9)
+def test_get_access_token_dns_delay_raises_error(sleep, mocker):
+    scratch_org_config = ScratchOrgConfig(
+        name="dev",
+        config={
+            "access_token": 123,
+            "instance_url": "https://test.com",
+        },
+    )
+    call_count = 0
+
+    def fake_auth_code_grant(self, config):
+        nonlocal call_count
+        call_count += 1
+        raise ConnectionError("FooBar")
+
+    mocker.patch.object(
+        OAuth2Client,
+        "auth_code_grant",
+        fake_auth_code_grant,
+    )
+    mocker.auth_code_grant = "123"
+    with pytest.raises(ConnectionError, match="FooBar"):
+        get_access_token(
+            org_result={"AuthCode": "123"},
+            scratch_org_config=scratch_org_config,
+        )
+
+    assert call_count == 1
+
+
+@pytest.mark.django_db
+@patch("metecho.api.sf_run_flow.time.sleep")
+@patch("metecho.api.sf_run_flow.settings.MAXIMUM_JOB_LENGTH", 11)
+def test_get_access_token_dns_delay(sleep, mocker):
+    """Prove test is looping for DNS delays"""
+    scratch_org_config = ScratchOrgConfig(
+        name="dev",
+        config={
+            "access_token": 123,
+            "instance_url": "https://tesdfgfdsfg54w36st.co345654356tm",
+        },
+    )
+    real_auth_code_grant = OAuth2Client.auth_code_grant
+    call_count = 0
+
+    def fake_auth_code_grant(self, config):
+        nonlocal call_count
+        call_count += 1
+        return real_auth_code_grant(self, config)
+
+    mocker.patch.object(
+        OAuth2Client,
+        "auth_code_grant",
+        fake_auth_code_grant,
+    )
+    mocker.auth_code_grant = "123"
+    with pytest.raises(ScratchOrgError):
+
+        get_access_token(
+            org_result={"AuthCode": "123"},
+            scratch_org_config=scratch_org_config,
+        )
+    assert call_count == 2
 
 
 class TestDeployOrgSettings:

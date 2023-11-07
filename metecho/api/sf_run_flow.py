@@ -2,11 +2,12 @@ import contextlib
 import json
 import logging
 import os
+from socket import gaierror
+import requests
 import shutil
 import subprocess
 import time
 from datetime import datetime
-
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
@@ -265,27 +266,60 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
     )
 
 
-def get_access_token(*, org_result, scratch_org_config):
-    """Trades the AuthCode from a ScratchOrgInfo for an org access token,
-    and stores it in the org config.
+def is_network_error(exception) -> bool:
+    """Helper function to determine if a network error,
+    such as a dns propagation delay is occuring."""
 
-    The AuthCode is short-lived so this is only useful immediately after
-    the scratch org is created. This must be completed once in order for future
+    # gai error stands for GetAddressInfo Error
+    if isinstance(exception, gaierror):
+        return True
+    subexception = exception.__context__ or exception.__cause__
+    if subexception:
+        return is_network_error(subexception)
+    else:
+        return False
+
+
+def get_access_token(*, org_result, scratch_org_config):
+    """Trades the AuthCode from a ScratchOrgInfo for an
+    org access token,and stores it in the org config.
+
+    The AuthCode is short-lived so this is only useful
+    immediately after the scratch org is created.
+    This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
-    oauth_config = OAuth2ClientConfig(
-        client_id=SF_CLIENT_ID,
-        client_secret=SF_CLIENT_SECRET,
-        redirect_uri=SF_CALLBACK_URL,
-        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
-        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
-        scope="web full refresh_token",
+    total_wait_time = 0
+    while total_wait_time < settings.MAXIMUM_JOB_LENGTH:
+        oauth_config = OAuth2ClientConfig(
+            client_id=SF_CLIENT_ID,
+            client_secret=SF_CLIENT_SECRET,
+            redirect_uri=SF_CALLBACK_URL,
+            auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+            token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+            scope="web full refresh_token",
+        )
+        oauth = OAuth2Client(oauth_config)
+        try:
+            auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
+            scratch_org_config.config[
+                "access_token"
+            ] = scratch_org_config._scratch_info["access_token"] = auth_result[
+                "access_token"
+            ]
+            return
+        except requests.exceptions.ConnectionError as exception:
+            if is_network_error(exception):
+                actual_exception = exception.__cause__ or exception.__context__
+                logger.info(actual_exception)
+                total_wait_time += 10
+                time.sleep(10)
+            else:
+                raise
+
+    raise ScratchOrgError(
+        f"Failed to build your scratch org after {settings.MAXIMUM_JOB_LENGTH} seconds."
     )
-    oauth = OAuth2Client(oauth_config)
-    auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
-    scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
-        "access_token"
-    ] = auth_result["access_token"]
 
 
 def deploy_org_settings(
@@ -352,7 +386,9 @@ def create_org(
     )
     org_result = poll_for_scratch_org_completion(devhub_api, org_result)
     mutate_scratch_org(
-        scratch_org_config=scratch_org_config, org_result=org_result, email=email
+        scratch_org_config=scratch_org_config,
+        org_result=org_result,
+        email=email,
     )
     get_access_token(org_result=org_result, scratch_org_config=scratch_org_config)
     org_config = deploy_org_settings(
@@ -418,7 +454,9 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
     orig_stdout, _ = p.communicate()
     if p.returncode:
         p = subprocess.run(
-            [command, "error", "info"], capture_output=True, env={"HOME": project_path}
+            [command, "error", "info"],
+            capture_output=True,
+            env={"HOME": project_path},
         )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
