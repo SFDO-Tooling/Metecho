@@ -246,7 +246,7 @@ def create_repository(
         )
         team.add_repository(repo.full_name, permission="push")
         project.repo_id = repo.id
-
+        breakpoint()
         with temporary_dir():
             # Populate files from the template repository
             if tpl_repo:
