@@ -40,6 +40,7 @@ from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError, UnprocessableEntity
 from github3.github import GitHub
 from github3.repos.repo import Repository
+from rest_framework.response import Response
 
 from .email_utils import get_user_facing_url
 from .gh import (
@@ -241,17 +242,53 @@ def create_repository(
             team.add_or_update_membership(login, role=role)
 
         # Create repo on GitHub
-        repo = org.create_repository(
-            project.repo_name, description=project.description, private=False
-        )
-        team.add_repository(repo.full_name, permission="push")
-        project.repo_id = repo.id
-        breakpoint()
-        with temporary_dir():
+        if tpl_repo:
+            #code for calling rest api to generate repo using github template repo
+                breakpoint()
+                gh_token=org_gh.session.auth.token
+                breakpoint()
+                # Extract data from the request body
+
+                # GitHub API endpoint URL for repository creation
+                api_url = f"https://api.github.com/repos/{tpl_repo.owner}/{tpl_repo.name}/generate"
+
+                # Headers for the GitHub API request
+                headers = {
+                    "Accept": "application/vnd.github+json",
+                    "Authorization": f"Bearer {gh_token}",  # Extract GitHub token from request data
+                }
+
+                # Data to be sent in the POST request to GitHub API
+                github_data = {
+                    "owner": project.repo_owner,
+                    "name": project.repo_name,
+                    "description": project.description,
+                    "include_all_branches": False,
+                    "private": False
+                }
+
+                # Sending a POST request to GitHub API
+                response = requests.post(api_url, headers=headers, json=github_data)
+                breakpoint()
+                team.add_repository(response.json()['full_name'], permission="push")
+                project.repo_id = response.json()['id']
+                breakpoint()
+                # Checking the response status code and returning the response
+                if response.status_code != 201:
+                    raise Exception("Create Repository using Template failed")
+
+
+        else:
+            repo = org.create_repository(
+            project.repo_name, description=project.description, private=False)
+            team.add_repository(repo.full_name, permission="push")
+            project.repo_id = repo.id
+            with temporary_dir():
             # Populate files from the template repository
-            if tpl_repo:
-                zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
-                zipfile.extractall()
+                breakpoint()
+                if tpl_repo:
+                    zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
+                    zipfile.extractall()
 
             runtime = CliRuntime()
 
@@ -309,6 +346,8 @@ def create_repository(
         #     copy_branch_protection(
         #         source=tpl_repo.branch(branch_name), target=repo.branch(branch_name)
         #     )
+
+
     except Exception as e:
         project.finalize_create_repository(error=e, user=user)
         tb = traceback.format_exc()

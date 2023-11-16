@@ -18,6 +18,10 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelV
 
 from metecho.api.reassignment import can_assign_task_role
 
+import requests
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+
 from . import gh
 from .authentication import GitHubHookAuthentication
 from .constants import GitHubAppErrors
@@ -753,7 +757,6 @@ class ScratchOrgViewSet(
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
-
     @extend_schema(
         request=None,
         responses={200: OpenApiResponse(OpenApiTypes.STR, description="Log content")},

@@ -1,0 +1,25 @@
+minimum_cumulusci_version: '3.76.0'
+project:
+    name: SN_Temp2
+    package:
+        name: SN_Temp2
+        api_version: '55.0'
+    git:
+        default_branch: 'main'
+    source_format: sfdx
+
+tasks:
+    robot:
+        options:
+            suites: robot/SN_Temp2/tests
+            options:
+                outputdir: robot/SN_Temp2/results
+
+    robot_testdoc:
+        options:
+            path: robot/SN_Temp2/tests
+            output: robot/SN_Temp2/doc/SN_Temp2_tests.html
+
+    run_tests:
+        options:
+            required_org_code_coverage_percent: 75
