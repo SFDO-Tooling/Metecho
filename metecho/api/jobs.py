@@ -27,7 +27,7 @@ from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_
 from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
-from cumulusci.utils import download_extract_github, temporary_dir
+from cumulusci.utils import temporary_dir
 from cumulusci.utils.http.requests_utils import safe_json_from_response
 from django.conf import settings
 from django.db import transaction
@@ -242,40 +242,40 @@ def create_repository(
 
         # Create repo on GitHub
         if tpl_repo:
-            #code for calling rest api to generate repo using github template repo
-                gh_token=org_gh.session.auth.token
-                # Extract data from the request body
+            # Calling rest api to generate repo using github template repo
+            gh_token = org_gh.session.auth.token
+            # Extract data from the request body
 
-                # GitHub API endpoint URL for repository creation
-                api_url = f"https://api.github.com/repos/{tpl_repo.owner}/{tpl_repo.name}/generate"
+            # GitHub API endpoint URL for repository creation
+            api_url = f"https://api.github.com/repos/{tpl_repo.owner}/{tpl_repo.name}/generate"
 
-                # Headers for the GitHub API request
-                headers = {
-                    "Accept": "application/vnd.github+json",
-                    "Authorization": f"Bearer {gh_token}",  # Extract GitHub token from request data
-                }
+            # Headers for the GitHub API request
+            headers = {
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {gh_token}",  # Extract GitHub token from request data
+            }
 
-                # Data to be sent in the POST request to GitHub API
-                github_data = {
-                    "owner": project.repo_owner,
-                    "name": project.repo_name,
-                    "description": project.description,
-                    "include_all_branches": False,
-                    "private": False
-                }
+            # Data to be sent in the POST request to GitHub API
+            github_data = {
+                "owner": project.repo_owner,
+                "name": project.repo_name,
+                "description": project.description,
+                "include_all_branches": False,
+                "private": False,
+            }
 
-                # Sending a POST request to GitHub API
-                response = requests.post(api_url, headers=headers, json=github_data)
-                team.add_repository(response.json()['full_name'], permission="push")
-                project.repo_id = response.json()['id']
-                # Checking the response status code and returning the response
-                if response.status_code != 201:
-                    raise Exception("Create Repository using Template failed")
-
+            # Sending a POST request to GitHub API
+            response = requests.post(api_url, headers=headers, json=github_data)
+            team.add_repository(response.json()["full_name"], permission="push")
+            project.repo_id = response.json()["id"]
+            # Checking the response status code and returning the response
+            if response.status_code != 201:
+                raise Exception("Create Repository using Template failed")
 
         else:
             repo = org.create_repository(
-            project.repo_name, description=project.description, private=False)
+                project.repo_name, description=project.description, private=False
+            )
             team.add_repository(repo.full_name, permission="push")
             project.repo_id = repo.id
             with temporary_dir():

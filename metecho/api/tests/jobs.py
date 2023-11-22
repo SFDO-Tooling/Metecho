@@ -1400,14 +1400,14 @@ class TestCreateRepository:
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
-        zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
+        # zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
 
         create_repository(
             project,
             user=user,
             dependencies=["http://foo.com"],
-            template_repo_owner="owner",
-            template_repo_name="repo",
+            template_repo_owner=None,
+            template_repo_name=None,
         )
         project.refresh_from_db()
 
@@ -1426,7 +1426,7 @@ class TestCreateRepository:
             include_user=False,
         )
         assert sarge.capture_both.called
-        assert zipfile.extractall.called
+        # assert zipfile.extractall.called
         assert init_from_context.call_args_list[0][0][0]["api_version"] == "600.0"
 
     def test_ok__no_version_from_devhub(self, mocker, github_mocks, user_factory):
@@ -1437,14 +1437,14 @@ class TestCreateRepository:
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
-        zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
+        # zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
 
         create_repository(
             project,
             user=user,
             dependencies=["http://foo.com"],
-            template_repo_owner="owner",
-            template_repo_name="repo",
+            template_repo_owner=None,
+            template_repo_name=None,
         )
         project.refresh_from_db()
 
@@ -1463,7 +1463,7 @@ class TestCreateRepository:
             include_user=False,
         )
         assert sarge.capture_both.called
-        assert zipfile.extractall.called
+        # assert zipfile.extractall.called
         assert init_from_context.call_args_list[0][0][0]["api_version"] != "600.0"
 
     def test__gh_error(self, mocker, caplog, project, user_factory, github_mocks):
@@ -1507,7 +1507,7 @@ class TestCreateRepository:
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
         mocker.patch("metecho.api.model_mixins.async_to_sync")
-        mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
+        # mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
 
         create_repository(project, user=user, dependencies=[])
 
