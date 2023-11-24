@@ -263,7 +263,6 @@ def create_repository(
                 "include_all_branches": False,
                 "private": False,
             }
-
             # Sending a POST request to GitHub API
             response = requests.post(api_url, headers=headers, json=github_data)
             team.add_repository(response.json()["full_name"], permission="push")
