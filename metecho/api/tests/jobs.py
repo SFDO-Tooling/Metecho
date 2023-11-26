@@ -1504,7 +1504,6 @@ class TestCreateRepository:
         init_from_context = mocker.patch(f"{PATCH_ROOT}.init_from_context")
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
-        mock_requests_get = mocker.patch(f"{PATCH_ROOT}.requests.get").return_value
 
         with patch(f"{PATCH_ROOT}"):
             create_repository(
