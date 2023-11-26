@@ -4,7 +4,7 @@ from contextlib import ExitStack
 from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple, Sequence
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from cumulusci.salesforce_api.org_schema import Field, Schema, SObject
@@ -1378,12 +1378,10 @@ class TestCreateRepository:
         gh_user.organizations.return_value = [
             mocker.MagicMock(login=project.repo_owner, spec=Organization)
         ]
-        gh_org = mocker.patch(
-            f"{PATCH_ROOT}.gh_as_org", autospec=True
-        ).return_value
+        gh_org = mocker.patch(f"{PATCH_ROOT}.gh_as_org", autospec=True).return_value
         tpl_repo = gh_org.repository.return_value
-        tpl_repo.owner="Industries-SolutionFactory-Connect"
-        tpl_repo.name="TemplateRepoTest"
+        tpl_repo.owner = "Industries-SolutionFactory-Connect"
+        tpl_repo.name = "TemplateRepoTest"
         gh_org_org = gh_org.organization.return_value
         gh_org_org.create_team.return_value = team
         gh_org_org.create_repository.return_value = repo
@@ -1409,8 +1407,8 @@ class TestCreateRepository:
             project,
             user=user,
             dependencies=["http://foo.com"],
-            template_repo_owner = None,
-            template_repo_name = None,
+            template_repo_owner=None,
+            template_repo_name=None,
         )
         project.refresh_from_db()
 
@@ -1441,13 +1439,12 @@ class TestCreateRepository:
         sarge.capture_both.return_value.returncode = 0
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
         # zipfile = mocker.patch(f"{PATCH_ROOT}.download_extract_github").return_value
-        with patch('requests.post') as mock_post:
-         response = mocker.patch(
-            f"{PATCH_ROOT}.requests.post" ).return_value
-         response.status_code = 201
-         response.json.return_value = {'full_name' : 'value', 'id': 123456}
-         mock_post.return_value = response
-         create_repository(
+        with patch("requests.post") as mock_post:
+            response = mocker.patch(f"{PATCH_ROOT}.requests.post").return_value
+            response.status_code = 201
+            response.json.return_value = {"full_name": "value", "id": 123456}
+            mock_post.return_value = response
+            create_repository(
                 project,
                 user=user,
                 dependencies=["http://foo.com"],
@@ -1473,6 +1470,34 @@ class TestCreateRepository:
         # assert sarge.capture_both.called
         # assert zipfile.extractall.called
         # assert init_from_context.call_args_list[0][0][0]["api_version"] != "600.0"
+
+    def test_ok__exception_from_template(self, mocker, github_mocks, user_factory):
+        user = user_factory()
+        project, org, team, repo, get_devhub_api, requests = github_mocks
+        get_devhub_api.side_effect = Exception
+        init_from_context = mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
+        sarge.capture_both.return_value.returncode = 0
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+
+        with patch(f"{PATCH_ROOT}.Exception") as mock_Exception:
+            mock_Exception.side_effect = Exception(
+                "Create Repository using Template failed"
+            )
+
+        with patch("requests.post") as mock_post:
+            response = mocker.patch(f"{PATCH_ROOT}.requests.post").return_value
+            response.status_code = 404
+            response.json.return_value = {"full_name": "value", "id": 123456}
+            mock_post.return_value = response
+        with pytest.raises(Exception, match="Create Repository using Template failed"):
+            create_repository(
+                project,
+                user=user,
+                dependencies=["http://foo.com"],
+                template_repo_owner="dummy1",
+                template_repo_name="dummy2",
+            )
 
     def test__gh_error(self, mocker, caplog, project, user_factory, github_mocks):
         user = user_factory()
