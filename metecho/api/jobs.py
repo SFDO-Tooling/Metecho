@@ -280,7 +280,6 @@ def create_repository(
             with temporary_dir():
 
                 runtime = CliRuntime()
-
                 try:
                     # Ask the user's Dev Hub what its latest API version is
                     sf = get_devhub_api(devhub_username=user.sf_username)

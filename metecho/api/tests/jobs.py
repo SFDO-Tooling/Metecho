@@ -1434,7 +1434,7 @@ class TestCreateRepository:
         user = user_factory()
         project, org, team, repo, get_devhub_api, requests = github_mocks
         get_devhub_api.side_effect = Exception
-        init_from_context = mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        # init_from_context = mocker.patch(f"{PATCH_ROOT}.init_from_context")
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
@@ -1475,10 +1475,8 @@ class TestCreateRepository:
         user = user_factory()
         project, org, team, repo, get_devhub_api, requests = github_mocks
         get_devhub_api.side_effect = Exception
-        init_from_context = mocker.patch(f"{PATCH_ROOT}.init_from_context")
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
-        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
         with patch(f"{PATCH_ROOT}.Exception") as mock_Exception:
             mock_Exception.side_effect = Exception(
@@ -1498,6 +1496,25 @@ class TestCreateRepository:
                 template_repo_owner="dummy1",
                 template_repo_name="dummy2",
             )
+
+    def test_ok__exception_from_repo(self, mocker, github_mocks, user_factory):
+        user = user_factory()
+        project, org, team, repo, get_devhub_api, requests = github_mocks
+        get_devhub_api.side_effect = Exception
+        init_from_context = mocker.patch(f"{PATCH_ROOT}.init_from_context")
+        sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
+        sarge.capture_both.return_value.returncode = 0
+        mock_requests_get = mocker.patch(f"{PATCH_ROOT}.requests.get").return_value
+
+        with patch(f"{PATCH_ROOT}"):
+            create_repository(
+                project,
+                user=user,
+                dependencies=["http://foo.com"],
+                template_repo_owner=None,
+                template_repo_name=None,
+            )
+            assert init_from_context.call_args_list[0][0][0]["api_version"] != "600.0"
 
     def test__gh_error(self, mocker, caplog, project, user_factory, github_mocks):
         user = user_factory()
