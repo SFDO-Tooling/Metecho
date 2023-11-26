@@ -1478,8 +1478,8 @@ class TestCreateRepository:
         sarge = mocker.patch(f"{PATCH_ROOT}.sarge", autospec=True)
         sarge.capture_both.return_value.returncode = 0
 
-        with patch(f"{PATCH_ROOT}.Exception") as mock_Exception:
-            mock_Exception.side_effect = Exception(
+        with patch(f"{PATCH_ROOT}.Exception") as mock_exception:
+            mock_exception.side_effect = Exception(
                 "Create Repository using Template failed"
             )
 
