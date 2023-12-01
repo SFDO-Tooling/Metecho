@@ -57,7 +57,7 @@ const defaultOrg = {
   owner: 'user-id',
   owner_gh_username: 'user-name',
   owner_gh_id: 123456,
-  expires_at: '2019-09-16T12:58:53.721Z',
+  expires_at: new Date(new Date().getTime() + 86400000).toISOString(),
   latest_commit: '617a512',
   latest_commit_url: '/test/commit/url/',
   latest_commit_at: '2019-08-16T12:58:53.721Z',
@@ -229,6 +229,27 @@ describe('<PlaygroundOrgCard/>', () => {
       fireEvent.click(getByText('Org Actions'));
       fireEvent.click(getByText('Delete Org'));
 
+      expect.assertions(3);
+      await findByText('Deleting Org…');
+
+      expect(deleteObject).toHaveBeenCalledTimes(1);
+
+      const args = deleteObject.mock.calls[0][0];
+
+      expect(args.objectType).toBe('scratch_org');
+      expect(args.object.id).toEqual(defaultOrg.id);
+    });
+  });
+  describe('delete expired org', () => {
+    test('checks for expiry status and then deletes org', async () => {
+      const org = {
+        ...defaultOrg,
+        expires_at: new Date().toISOString(),
+        unsaved_changes: {},
+        total_unsaved_changes: 0,
+        has_unsaved_changes: false,
+      };
+      const { findByText } = setup({ org });
       expect.assertions(3);
       await findByText('Deleting Org…');
 

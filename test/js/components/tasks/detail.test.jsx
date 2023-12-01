@@ -78,7 +78,7 @@ const defaultOrg = {
   owner: sampleUser1.id,
   owner_gh_username: sampleGitHubUser1.username,
   owner_gh_id: sampleGitHubUser1.id,
-  expires_at: '2019-09-16T12:58:53.721Z',
+  expires_at: new Date(new Date().getTime() + 86400000).toISOString(),
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
   latest_commit_at: '2019-08-16T12:58:53.721Z',
