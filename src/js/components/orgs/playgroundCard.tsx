@@ -121,7 +121,6 @@ const PlaygroundOrgCard = ({
     const readyToDeleteOrg =
       isWaitingToDeleteOrg && !org.currently_refreshing_changes;
     const action = isWaitingToDeleteOrg;
-
     if (readyToDeleteOrg) {
       setIsWaitingToDeleteOrg(null);
       if (org.has_unsaved_changes) {
@@ -132,7 +131,16 @@ const PlaygroundOrgCard = ({
         doDeleteOrg();
       }
     }
-  }, [doDeleteOrg, doRefreshOrg, isWaitingToDeleteOrg, org]);
+  }, [doDeleteOrg, doRefreshOrg, isWaitingToDeleteOrg, org, dispatch]);
+  useEffect(() => {
+    if (
+      org &&
+      org?.expires_at !== null &&
+      new Date(org?.expires_at) < new Date()
+    ) {
+      doDeleteOrg();
+    }
+  }, []);
 
   /* istanbul ignore next */
   if (!(project || epic || task)) {
