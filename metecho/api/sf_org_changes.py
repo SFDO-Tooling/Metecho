@@ -129,14 +129,17 @@ def run_retrieve_task(
         package_xml_opts = {}
 
     components = []
+    profiles = desired_changes.pop('Profile', [])
     for mdtype, members in desired_changes.items():
         for name in members:
             components.append({"MemberName": name, "MemberType": mdtype})
     retrieve_components(
-        components,
-        org_config,
-        os.path.realpath(target_directory),
-        md_format,
+        components=components,
+        profiles=profiles,
+        org_config=org_config,
+        project_config=cci.project_config,
+        target=os.path.realpath(target_directory),
+        md_format=md_format,
         extra_package_xml_opts=package_xml_opts,
         namespace_tokenize=False,
         api_version=cci.project_config.project__package__api_version,
