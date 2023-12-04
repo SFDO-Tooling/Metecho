@@ -4,7 +4,13 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -207,14 +213,25 @@ const ChangesForm = ({
   ) => {
     updateChecked(ignoredChanges, checked);
   };
-  const checkboxRef = useRef(null);
+
+  interface CheckboxRefType {
+    input?: HTMLElement | null;
+    // Add other properties if needed
+  }
+  // eslint-disable-next-line import/no-named-as-default-member
+  const checkboxRef: RefObject<CheckboxRefType> = React.createRef();
+  // const checkboxRef = useRef(null);
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (checkboxRef.current && checkboxRef.current!.input) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      checkboxRef.current!.input.focus();
+    const currentRef = checkboxRef.current;
+
+    if (
+      currentRef &&
+      currentRef.input &&
+      typeof currentRef.input.focus === 'function'
+    ) {
+      currentRef.input.focus();
     }
-  }, [totalChanges]);
+  }, [checkboxRef, totalChanges]);
 
   return (
     <form
