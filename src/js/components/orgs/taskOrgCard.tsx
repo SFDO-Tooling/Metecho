@@ -1,6 +1,6 @@
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import AssignTaskRoleModal from '@/js/components/githubUsers/assignTaskRole';
@@ -180,6 +180,7 @@ const TaskOrgCard = ({
       handleRefresh?.(org);
     }
   }, [handleRefresh, org]);
+
   const doCreateOrg = useCallback(() => {
     handleCreate(type);
   }, [handleCreate, type]);
@@ -202,7 +203,15 @@ const TaskOrgCard = ({
   // We consider an org out-of-date if it is not based on the first commit.
   const orgOutOfDate = Boolean(org && orgCommitIdx !== 0);
   const testOrgOutOfDate = type === ORG_TYPES.QA && orgOutOfDate;
-
+  useEffect(() => {
+    if (
+      org &&
+      org?.expires_at !== null &&
+      new Date(org?.expires_at) < new Date()
+    ) {
+      doDeleteOrg();
+    }
+  }, []);
   return (
     <div
       className="slds-size_1-of-1
