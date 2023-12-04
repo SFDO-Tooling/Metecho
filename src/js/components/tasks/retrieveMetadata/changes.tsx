@@ -209,8 +209,10 @@ const ChangesForm = ({
   };
   const checkboxRef = useRef(null);
   useEffect(() => {
-    if (checkboxRef.current && checkboxRef.current?.input) {
-      checkboxRef.current.input.focus();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (checkboxRef.current && checkboxRef.current!.input) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      checkboxRef.current!.input.focus();
     }
   }, [totalChanges]);
 
