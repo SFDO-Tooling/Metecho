@@ -400,6 +400,7 @@ def _create_org_and_run_flow(
         originating_user_id=originating_user_id,
         sf_username=scratch_org.owner_sf_username,
     )
+    scratch_org.save()
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
     # delete the org later, even if the initial flow run fails.
