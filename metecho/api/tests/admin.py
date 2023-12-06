@@ -37,13 +37,10 @@ class TestSoftDeletedListFilter:
         assert list(actual) == [epic]
 
     def test_queryset__deleted(self, epic_factory):
-        epic = epic_factory()
-        epic_factory(deleted_at=now())
-        epic.save()
-
+        epic = epic_factory(deleted_at=now())
         args = (
             None,
-            {"deleted_at": "true"},
+            {"deleted_at": ["true"]},
             None,
             None,
         )
