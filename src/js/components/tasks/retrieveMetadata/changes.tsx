@@ -210,14 +210,10 @@ const ChangesForm = ({
 
   interface CheckboxRefType {
     input?: HTMLElement | null;
-    // Add other properties if needed
   }
-  // eslint-disable-next-line import/no-named-as-default-member
   const checkboxRef: RefObject<CheckboxRefType> = React.createRef();
-  // const checkboxRef = useRef(null);
   useEffect(() => {
     const currentRef = checkboxRef.current;
-
     if (
       currentRef &&
       currentRef.input &&
