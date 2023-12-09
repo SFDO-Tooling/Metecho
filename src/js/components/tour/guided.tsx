@@ -6,7 +6,7 @@ import Joyride, {
   CallBackProps,
   EVENTS,
   STATUS,
-  status as StatusType,
+  Status as StatusType,
   Step,
   StoreHelpers,
 } from 'react-joyride';

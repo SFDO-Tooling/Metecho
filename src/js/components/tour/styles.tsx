@@ -48,6 +48,16 @@ const tourStyles: Styles = {
     margin: 0,
     padding: '1rem',
   },
+  beacon: {},
+  beaconInner: {},
+  beaconOuter: {},
+  buttonClose: {},
+  overlay: {},
+  overlayLegacy: {},
+  overlayLegacyCenter: {},
+  spotlight: {},
+  spotlightLegacy: {},
+  tooltipFooterSpacer: {},
 };
 
 export default tourStyles;
