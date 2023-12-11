@@ -42,7 +42,7 @@ class TestSoftDeletedListFilter:
 
         args = (
             None,
-            {"deleted_at": "true"},
+            {"deleted_at": ["true"]},
             None,
             None,
         )
