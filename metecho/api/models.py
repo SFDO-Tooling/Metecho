@@ -716,9 +716,10 @@ class Epic(
         return self.name
 
     def save(self, *args, **kwargs):
-        obj = super().save(*args, **kwargs)
+        if not self.id:
+            super().save(*args, **kwargs)
         self.update_status()
-        return obj
+        return super().save()
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
