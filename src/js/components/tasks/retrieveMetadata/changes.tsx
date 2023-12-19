@@ -4,7 +4,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, RefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -208,6 +208,14 @@ const ChangesForm = ({
     updateChecked(ignoredChanges, checked);
   };
 
+  interface CheckboxRefType {
+    input?: HTMLElement | null;
+  }
+  const checkboxRef: RefObject<CheckboxRefType> = React.createRef();
+  useEffect(() => {
+    checkboxRef.current?.input?.focus();
+  }, [checkboxRef]);
+
   return (
     <form
       className="slds-form slds-p-around_large has-checkboxes"
@@ -239,6 +247,7 @@ const ChangesForm = ({
                 indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
                 errorText={errors.changes}
                 onChange={handleSelectAllChange}
+                ref={checkboxRef}
               />
               <span className="slds-text-body_regular slds-p-top_xxx-small">
                 ({totalChanges})

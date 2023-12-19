@@ -115,6 +115,7 @@ describe('<RetrieveMetadataModal/>', () => {
       fireEvent.click(getByText('Save & Next'));
 
       const selectAll = getByLabelText('All Changes');
+      expect(selectAll).toHaveFocus();
       fireEvent.click(selectAll);
       // Click forward to the commit-message modal:
       fireEvent.click(getByText('Save & Next'));
@@ -124,7 +125,7 @@ describe('<RetrieveMetadataModal/>', () => {
       fireEvent.change(commitInput, { target: { value: 'My Commit' } });
       fireEvent.click(submit);
 
-      expect.assertions(2);
+      expect.assertions(3);
       await findByText('Retrieving Selected Changes…');
 
       expect(createObject).toHaveBeenCalledTimes(1);
