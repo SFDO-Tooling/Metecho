@@ -2,11 +2,11 @@
 # upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
 # for stability.
 
-Django
+Django~=4.2.0
 autobahn
 beautifulsoup4
 bleach
-channels
+channels==3.0.5
 channels-redis
 cumulusci
 dj-database-url

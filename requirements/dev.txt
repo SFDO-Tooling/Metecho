@@ -25,7 +25,9 @@ autobahn==23.6.2
     #   -c requirements/prod.txt
     #   daphne
 automat==22.10.0
-    # via twisted
+    # via
+    #   -c requirements/prod.txt
+    #   twisted
 babel==2.13.1
     # via sphinx
 black==23.11.0
@@ -47,7 +49,9 @@ click==8.1.6
     #   -c requirements/prod.txt
     #   black
 constantly==23.10.4
-    # via twisted
+    # via
+    #   -c requirements/prod.txt
+    #   twisted
 coverage[toml]==7.3.2
     # via
     #   coverage
@@ -58,11 +62,13 @@ cryptography==41.0.7
     #   autobahn
     #   pyopenssl
     #   service-identity
-daphne==4.0.0
-    # via -r requirements/dev.in
+daphne==3.0.2
+    # via
+    #   -c requirements/prod.txt
+    #   -r requirements/dev.in
 decorator==5.1.1
     # via ipython
-django~=4.2.0
+django==4.2.8
     # via
     #   -c requirements/prod.txt
     #   django-extensions
@@ -111,7 +117,9 @@ idna==3.4
 imagesize==1.4.1
     # via sphinx
 incremental==22.10.0
-    # via twisted
+    # via
+    #   -c requirements/prod.txt
+    #   twisted
 inflection==0.5.1
     # via
     #   -c requirements/prod.txt
@@ -200,7 +208,9 @@ pygments==2.17.2
     #   ipython
     #   sphinx
 pyopenssl==23.3.0
-    # via twisted
+    # via
+    #   -c requirements/prod.txt
+    #   twisted
 pytest==7.4.3
     # via
     #   -r requirements/dev.in
@@ -299,6 +309,7 @@ traitlets==5.14.0
     #   matplotlib-inline
 twisted[tls]==23.10.0
     # via
+    #   -c requirements/prod.txt
     #   daphne
     #   twisted
 txaio==23.1.1
@@ -319,7 +330,9 @@ urllib3==1.26.16
 wcwidth==0.2.12
     # via prompt-toolkit
 zope-interface==6.1
-    # via twisted
+    # via
+    #   -c requirements/prod.txt
+    #   twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
