@@ -121,7 +121,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "metecho.logging_middleware.LoggingMiddleware",
     "sfdo_template_helpers.admin.middleware.AdminRestrictMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
