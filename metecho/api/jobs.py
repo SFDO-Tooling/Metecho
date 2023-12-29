@@ -27,7 +27,7 @@ from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_
 from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
-from cumulusci.utils import download_extract_github, temporary_dir
+from cumulusci.utils import temporary_dir
 from cumulusci.utils.http.requests_utils import safe_json_from_response
 from django.conf import settings
 from django.db import transaction
@@ -241,67 +241,92 @@ def create_repository(
             team.add_or_update_membership(login, role=role)
 
         # Create repo on GitHub
-        repo = org.create_repository(
-            project.repo_name, description=project.description, private=False
-        )
-        team.add_repository(repo.full_name, permission="push")
-        project.repo_id = repo.id
+        if tpl_repo:
+            # Calling rest api to generate repo using github template repo
+            gh_token = org_gh.session.auth.token
+            # Extract data from the request body
 
-        with temporary_dir():
-            # Populate files from the template repository
-            if tpl_repo:
-                zipfile = download_extract_github(org_gh, tpl_repo.owner, tpl_repo.name)
-                zipfile.extractall()
+            # GitHub API endpoint URL for repository creation
+            api_url = f"https://api.github.com/repos/{tpl_repo.owner}/{tpl_repo.name}/generate"
 
-            runtime = CliRuntime()
-
-            try:
-                # Ask the user's Dev Hub what its latest API version is
-                sf = get_devhub_api(devhub_username=user.sf_username)
-                response = requests.get(
-                    f"https://{sf.sf_instance}/services/data", headers=sf.headers
-                )
-
-                version = safe_json_from_response(response)[-1]["version"]
-            except Exception:
-                version = runtime.universal_config.project__package__api_version
-
-            # Bootstrap repository with CumulusCI
-            context = {
-                "cci_version": cumulusci.__version__,
-                "project_name": project.repo_name,
-                "package_name": project.repo_name,
-                "package_namespace": None,
-                "api_version": version,
-                "source_format": "sfdx",
-                "dependencies": [
-                    {"type": "github", "url": url} for url in dependencies
-                ],
-                "git": {
-                    "default_branch": branch_name,
-                    "prefix_feature": "feature/",
-                    "prefix_beta": "beta/",
-                    "prefix_release": "release/",
-                },
-                "test_name_match": None,
-                "code_coverage": 75,
+            # Headers for the GitHub API request
+            headers = {
+                "Accept": "application/vnd.github+json",
+                "Authorization": f"Bearer {gh_token}",  # Extract GitHub token from request data
             }
-            init_from_context(context)
-            cmd = sarge.capture_both(
-                f"""
-                git init;
-                git checkout -b {branch_name};
-                git config user.name '{user.get_full_name() or user.username}';
-                git config user.email '{user.email}';
-                git add --all;
-                git commit -m 'Bootstrap project (via Metecho)';
-                git push https://{user_gh.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
-                """,  # noqa: B950
-                shell=True,
+
+            # Data to be sent in the POST request to GitHub API
+            github_data = {
+                "owner": project.repo_owner,
+                "name": project.repo_name,
+                "description": project.description,
+                "include_all_branches": False,
+                "private": False,
+            }
+            # Sending a POST request to GitHub API
+            response = requests.post(api_url, headers=headers, json=github_data)
+            team.add_repository(response.json()["full_name"], permission="push")
+            project.repo_id = response.json()["id"]
+            # Checking the response status code and returning the response
+            if response.status_code != 201:
+                raise Exception("Create Repository using Template failed")
+
+        else:
+            repo = org.create_repository(
+                project.repo_name, description=project.description, private=False
             )
-            if cmd.returncode:  # non-zero return code, something's wrong
-                logger.error(cmd.stderr.text)
-                raise Exception("Failed to push files to GitHub repository")
+            team.add_repository(repo.full_name, permission="push")
+            project.repo_id = repo.id
+            with temporary_dir():
+
+                runtime = CliRuntime()
+                try:
+                    # Ask the user's Dev Hub what its latest API version is
+                    sf = get_devhub_api(devhub_username=user.sf_username)
+                    response = requests.get(
+                        f"https://{sf.sf_instance}/services/data", headers=sf.headers
+                    )
+
+                    version = safe_json_from_response(response)[-1]["version"]
+                except Exception:
+                    version = runtime.universal_config.project__package__api_version
+
+                # Bootstrap repository with CumulusCI
+                context = {
+                    "cci_version": cumulusci.__version__,
+                    "project_name": project.repo_name,
+                    "package_name": project.repo_name,
+                    "package_namespace": None,
+                    "api_version": version,
+                    "source_format": "sfdx",
+                    "dependencies": [
+                        {"type": "github", "url": url} for url in dependencies
+                    ],
+                    "git": {
+                        "default_branch": branch_name,
+                        "prefix_feature": "feature/",
+                        "prefix_beta": "beta/",
+                        "prefix_release": "release/",
+                    },
+                    "test_name_match": None,
+                    "code_coverage": 75,
+                }
+                init_from_context(context)
+                cmd = sarge.capture_both(
+                    f"""
+                    git init;
+                    git checkout -b {branch_name};
+                    git config user.name '{user.get_full_name() or user.username}';
+                    git config user.email '{user.email}';
+                    git add --all;
+                    git commit -m 'Bootstrap project (via Metecho)';
+                    git push https://{user_gh.session.auth.token}@github.com/{repo.full_name}.git {branch_name};
+                    """,  # noqa: B950
+                    shell=True,
+                )
+                if cmd.returncode:  # non-zero return code, something's wrong
+                    logger.error(cmd.stderr.text)
+                    raise Exception("Failed to push files to GitHub repository")
 
         # Copy branch protection rules from the template repo
         # See copy_branch_protection() for why we don't use this currently
