@@ -261,7 +261,7 @@ def create_repository(
                 "name": project.repo_name,
                 "description": project.description,
                 "include_all_branches": False,
-                "private": False,
+                "private": settings.ENABLE_CREATE_PRIVATE_REPO,
             }
             # Sending a POST request to GitHub API
             response = requests.post(api_url, headers=headers, json=github_data)
@@ -273,7 +273,7 @@ def create_repository(
 
         else:
             repo = org.create_repository(
-                project.repo_name, description=project.description, private=False
+                project.repo_name, description=project.description, private=settings.ENABLE_CREATE_PRIVATE_REPO
             )
             team.add_repository(repo.full_name, permission="push")
             project.repo_id = repo.id

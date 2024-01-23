@@ -499,3 +499,6 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(), RedisIntegration(), RqIntegration()],
     )
+
+# create private repo
+ENABLE_CREATE_PRIVATE_REPO = env.bool("ENABLE_CREATE_PRIVATE_REPO", default=True)
