@@ -501,4 +501,4 @@ if SENTRY_DSN:
     )
 
 # create private repo
-ENABLE_CREATE_PRIVATE_REPO = env.bool("ENABLE_CREATE_PRIVATE_REPO", default=True)
+ENABLE_CREATE_PRIVATE_REPO = env.bool("ENABLE_CREATE_PRIVATE_REPO", default=False)
