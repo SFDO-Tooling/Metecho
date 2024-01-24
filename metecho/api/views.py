@@ -707,7 +707,7 @@ class ScratchOrgViewSet(
 
     @extend_schema(request= ListMetadataSerializer, responses={202: ScratchOrgSerializer})
     @action(detail=True, methods=["POST"])
-    def list_metadata(self,request,pk=None):
+    def listmetadata(self,request,pk=None):
         serializer = ListMetadataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         scratch_org= self.get_object()
@@ -720,7 +720,7 @@ class ScratchOrgViewSet(
         return Response(
                 self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
             )
-    
+
     @extend_schema(
         request=CommitOmniStudioSerializer, responses={202: ScratchOrgSerializer}
     )

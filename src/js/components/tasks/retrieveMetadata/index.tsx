@@ -256,6 +256,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           ignoredSuccess={isShowingTransientMessage}
           hasmetadatachanges={org.has_metadatatype_changes}
           metadatachanges={org.metadatatype_changes}
+          id= {org.id}
         />
       ),
       footer: [

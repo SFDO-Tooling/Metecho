@@ -6,13 +6,14 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import React, { ChangeEvent, RefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import { ApiError } from '@/js/utils/api';
 import {
   BooleanObject,
   MetadataCommit,
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
-import { UseFormProps } from '@/js/components/utils';
+import { UseFormProps,useForm,useFormDefaults, } from '@/js/components/utils';
 import { Changeset } from '@/js/store/orgs/reducer';
 import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 
@@ -27,6 +28,11 @@ interface Props {
   ignoredSuccess: boolean;
   hasmetadatachanges: boolean;
   metadatachanges: Changeset;
+  id: String;
+}
+
+export interface Components {
+  desiredType: string;
 }
 
 const ChangesList = ({
@@ -87,7 +93,10 @@ const ChangesList = ({
                 <div className="form-grid">
                   <Checkbox
                     labels={{ label: groupName }}
-                    checked={checkedChildren === children.length && children.length!==0 }
+                    checked={
+                      checkedChildren === children.length &&
+                      children.length !== 0
+                    }
                     indeterminate={Boolean(
                       checkedChildren && checkedChildren !== children.length,
                     )}
@@ -131,6 +140,7 @@ const ChangesForm = ({
   ignoredSuccess,
   metadatachanges,
   hasmetadatachanges,
+  id,
 }: Props) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
@@ -140,21 +150,21 @@ const ChangesForm = ({
     changeset,
     ignoredChanges,
   );
-  const {remaining: filteredmetadata}= splitChangeset(
+  const { remaining: filteredmetadata } = splitChangeset(
     metadatachanges,
     ignoredChanges,
   );
 
-  const {remaining: filteredchecked}= splitChangeset(filteredChanges,changesChecked)
+  const { remaining: filteredchecked } = splitChangeset(
+    filteredChanges,
+    changesChecked,
+  );
 
-  const totalmetadatachanges= Object.values(filteredmetadata).flat().length;
+  const totalmetadatachanges = Object.values(filteredmetadata).flat().length;
   const totalChanges = Object.values(filteredChanges).flat().length;
 
   const numberChangesChecked = Object.values(filteredchecked).flat().length;
-  const allChangesChecked = Boolean(
-    totalChanges && numberChangesChecked === 0,
-  );
-  const noChangesChecked = !numberChangesChecked;
+  const allChangesChecked = Boolean(totalChanges && numberChangesChecked === 0);
 
   const totalIgnored = Object.values(ignoredChanges).flat().length;
   const numberIgnoredChecked = Object.values(ignoredChecked).flat().length;
@@ -172,6 +182,45 @@ const ChangesForm = ({
       ...expandedPanels,
       [groupName]: !expandedPanels[groupName],
     });
+  };
+
+  const handlemetadataToggle = (groupName: string) => {
+
+    setExpandedPanels({
+      ...expandedPanels,
+      [groupName]: !expandedPanels[groupName],
+    });
+    if (expandedPanels[groupName]) {
+      const {inputs,
+        errors,
+        handleInputChange,
+        setInputs,
+        handleSubmit,
+        resetForm,} =
+    useForm({
+      fields: {
+        desiredType: groupName,
+      } as Components,
+      objectType: OBJECT_TYPES.ORG,
+      url: window.api_urls.scratch_org_listmetadata(id),
+      onSuccess: handleSuccess,
+      onError: handleError,
+      shouldSubscribeToObject: false,
+    });
+    }
+  };
+
+  const handleSuccess = () => {
+    /* istanbul ignore else */
+
+  };
+
+  // eslint-disable-next-line handle-callback-err
+  const handleError = (
+    err: ApiError,
+    fieldErrors: { [key: string]: string },
+  ) => {
+
   };
 
   const updateChecked = (changes: Changeset, checked: boolean) => {
@@ -341,37 +390,34 @@ const ChangesForm = ({
             </AccordionPanel>
           </Accordion>
         </ModalCard>
-        )}
-        {hasmetadatachanges === true && (
-           <ModalCard noBodyPadding>
-           <>
-             <div
-               className="form-grid
+      )}
+      {hasmetadatachanges === true && (
+        <ModalCard noBodyPadding>
+          <>
+            <div
+              className="form-grid
                  slds-m-left_xx-small
                  slds-p-left_x-large
                  slds-p-vertical_x-small
                  slds-p-right_medium"
-             >
-               <p>
-                Non source trackable
-               </p>
-               <span className="slds-text-body_regular slds-p-top_xxx-small">
-                 ({totalmetadatachanges})
-               </span>
-             </div>
-             <ChangesList
-               type="changes"
-               allChanges={filteredmetadata}
-               checkedChanges={changesChecked}
-               expandedPanels={expandedPanels}
-               handlePanelToggle={handlePanelToggle}
-               handleSelectGroup={handleSelectMetadataGroup}
-               handleChange={handleChange}
-             />
-           </>
-         </ModalCard>
-        )}
-
+            >
+              <p>Non source trackable</p>
+              <span className="slds-text-body_regular slds-p-top_xxx-small">
+                ({totalmetadatachanges})
+              </span>
+            </div>
+            <ChangesList
+              type="changes"
+              allChanges={filteredmetadata}
+              checkedChanges={changesChecked}
+              expandedPanels={expandedPanels}
+              handlePanelToggle={handlemetadataToggle}
+              handleSelectGroup={handleSelectMetadataGroup}
+              handleChange={handleChange}
+            />
+          </>
+        </ModalCard>
+      )}
     </form>
   );
 };
