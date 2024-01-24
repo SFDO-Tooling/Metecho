@@ -1238,12 +1238,16 @@ class ScratchOrg(
     unsaved_changes = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
+    metadatatype_changes = models.JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
     ignored_changes = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     latest_revision_numbers = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
+    currently_retrieving_nonsource= models.BooleanField(default=False)
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_retrieving_metadata = models.BooleanField(default=False)
     currently_parsing_datasets = models.BooleanField(default=False)
@@ -1472,6 +1476,13 @@ class ScratchOrg(
 
         get_unsaved_changes_job.delay(self, originating_user_id=originating_user_id)
 
+    def queue_get_nonsource_components(self,*,desired_type,originating_user_id):
+        from .jobs import get_nonsource_components_job
+        self.currently_refreshing_changes = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+        get_nonsource_components_job.delay(self,desired_type,originating_user_id=originating_user_id)
+
     def finalize_get_unsaved_changes(self, *, error=None, originating_user_id):
         self.currently_refreshing_changes = False
         if error is None:
@@ -1480,6 +1491,19 @@ class ScratchOrg(
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.unsaved_changes = {}
+            self.save()
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_FETCH_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
+    def finalize_get_nonsource_components(self,*,error=None,originating_user_id):
+        self.currently_refreshing_changes = False
+        if error is None:
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
             self.save()
             self.notify_scratch_org_error(
                 error=error,

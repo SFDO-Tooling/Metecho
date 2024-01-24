@@ -999,6 +999,9 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     description_rendered = MarkdownField(source="description", read_only=True)
     unsaved_changes = serializers.SerializerMethodField()
     has_unsaved_changes = serializers.SerializerMethodField()
+    metadatatype_changes = serializers.SerializerMethodField()
+    has_metadatatype_changes = serializers.SerializerMethodField()
+    total_metadatatype_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
     ignored_changes = serializers.SerializerMethodField()
     has_ignored_changes = serializers.SerializerMethodField()
@@ -1049,6 +1052,10 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "currently_retrieving_omnistudio",
             "installed_packages",
             "is_omnistudio_installed",
+            "metadatatype_changes",
+            "has_metadatatype_changes",
+            "total_metadatatype_changes",
+            "currently_retrieving_nonsource"
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -1059,6 +1066,7 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "last_checked_unsaved_changes_at": {"read_only": True},
             "url": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
+            "currently_retrieving_nonsource": {"read_only": True},
             "currently_retrieving_metadata": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
             "currently_reassigning_user": {"read_only": True},
@@ -1089,8 +1097,17 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     def get_unsaved_changes(self, obj) -> dict:
         return self._X_changes(obj, "unsaved")
 
+    def get_metadatatype_changes(self,obj) -> dict:
+        return self._X_changes(obj, "metadatatype")
+
+    def get_total_metadatatype_changes(self,obj) ->int:
+        return self._total_X_changes(obj, "metadatatype")
+
     def get_has_unsaved_changes(self, obj) -> bool:
         return self._has_X_changes(obj, "unsaved")
+
+    def get_has_metadatatype_changes(self,obj) ->bool:
+        return self._has_X_changes(obj,"metadatatype")
 
     def get_total_unsaved_changes(self, obj) -> int:
         return self._total_X_changes(obj, "unsaved")
@@ -1142,6 +1159,8 @@ class CommitSerializer(serializers.Serializer):
     changes = serializers.DictField(child=StringListField())
     target_directory = serializers.CharField()
 
+class ListMetadataSerializer(serializers.Serializer):
+    desiredType = serializers.CharField()
 
 class CommitDatasetSerializer(serializers.Serializer):
     commit_message = serializers.CharField()

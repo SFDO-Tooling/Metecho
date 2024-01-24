@@ -22,6 +22,9 @@ from cumulusci.core.datasets import (
     ExtractRulesFile,
     flatten_declarations,
 )
+from collections import defaultdict
+from cumulusci.tasks.salesforce.nonsourcetracking import ListComponents, ListNonSourceTrackable
+from cumulusci.core.config import TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
 from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
@@ -273,7 +276,7 @@ def create_repository(
 
         else:
             repo = org.create_repository(
-                project.repo_name, description=project.description, private=False
+                project.repo_name, description=project.description, private= True
             )
             team.add_repository(repo.full_name, permission="push")
             project.repo_id = repo.id
@@ -602,7 +605,6 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
 
 refresh_scratch_org_job = job(refresh_scratch_org)
 
-
 def get_unsaved_changes(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
@@ -621,6 +623,15 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
                 repo_root,
             )
         scratch_org.unsaved_changes = unsaved_changes
+        with dataset_env(scratch_org) as (project_config, org_config, sf, schema, repo):
+            components=ListNonSourceTrackable(
+                org_config=org_config,
+                project_config=project_config,
+                task_config=TaskConfig({"options":{}}),
+            )()
+        scratch_org.metadatatype_changes= {}
+        for types in components:
+            scratch_org.metadatatype_changes[types]=[types+"alpha"]
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(
@@ -633,10 +644,28 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
         scratch_org.finalize_get_unsaved_changes(
             originating_user_id=originating_user_id
         )
-
-
 get_unsaved_changes_job = job(get_unsaved_changes)
 
+def get_nonsource_components(scratch_org,*,desired_type,originating_user_id):
+    try:
+        scratch_org.refresh_from_db()
+        with dataset_env(scratch_org) as (project_config, org_config, sf, schema, repo):
+            components=ListComponents(
+                org_config=org_config,
+                project_config=project_config,
+                task_config=TaskConfig({"options":{"metadata_type":desired_type}}),
+            )()
+
+        scratch_org.metadatatype_changes[desired_type]=[cmp["MemberName"] for cmp in components]
+    except Exception as e:
+        scratch_org.refresh_from_db()
+
+    else:
+        scratch_org.finalize_get_unsaved_changes(
+            originating_user_id=originating_user_id
+        )
+
+get_nonsource_components_job = job(get_nonsource_components)
 
 def commit_changes_from_org(
     *,

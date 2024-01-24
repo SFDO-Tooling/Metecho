@@ -25,6 +25,8 @@ interface Props {
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
   ignoredSuccess: boolean;
+  hasmetadatachanges: boolean;
+  metadatachanges: Changeset;
 }
 
 const ChangesList = ({
@@ -85,7 +87,7 @@ const ChangesList = ({
                 <div className="form-grid">
                   <Checkbox
                     labels={{ label: groupName }}
-                    checked={checkedChildren === children.length}
+                    checked={checkedChildren === children.length && children.length!==0 }
                     indeterminate={Boolean(
                       checkedChildren && checkedChildren !== children.length,
                     )}
@@ -127,6 +129,8 @@ const ChangesForm = ({
   errors,
   setInputs,
   ignoredSuccess,
+  metadatachanges,
+  hasmetadatachanges,
 }: Props) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
@@ -136,11 +140,19 @@ const ChangesForm = ({
     changeset,
     ignoredChanges,
   );
+  const {remaining: filteredmetadata}= splitChangeset(
+    metadatachanges,
+    ignoredChanges,
+  );
 
+  const {remaining: filteredchecked}= splitChangeset(filteredChanges,changesChecked)
+
+  const totalmetadatachanges= Object.values(filteredmetadata).flat().length;
   const totalChanges = Object.values(filteredChanges).flat().length;
-  const numberChangesChecked = Object.values(changesChecked).flat().length;
+
+  const numberChangesChecked = Object.values(filteredchecked).flat().length;
   const allChangesChecked = Boolean(
-    totalChanges && numberChangesChecked === totalChanges,
+    totalChanges && numberChangesChecked === 0,
   );
   const noChangesChecked = !numberChangesChecked;
 
@@ -177,6 +189,16 @@ const ChangesForm = ({
     checked: boolean,
   ) => {
     const changes = type === 'changes' ? filteredChanges : ignoredChanges;
+    const thisGroup: Changeset = { [groupName]: changes[groupName] };
+    updateChecked(thisGroup, checked);
+  };
+
+  const handleSelectMetadataGroup = (
+    type: 'changes' | 'ignored',
+    groupName: string,
+    checked: boolean,
+  ) => {
+    const changes = filteredmetadata;
     const thisGroup: Changeset = { [groupName]: changes[groupName] };
     updateChecked(thisGroup, checked);
   };
@@ -244,7 +266,6 @@ const ChangesForm = ({
                   label: t('All Changes'),
                 }}
                 checked={allChangesChecked}
-                indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
                 errorText={errors.changes}
                 onChange={handleSelectAllChange}
                 ref={checkboxRef}
@@ -320,7 +341,37 @@ const ChangesForm = ({
             </AccordionPanel>
           </Accordion>
         </ModalCard>
-      )}
+        )}
+        {hasmetadatachanges === true && (
+           <ModalCard noBodyPadding>
+           <>
+             <div
+               className="form-grid
+                 slds-m-left_xx-small
+                 slds-p-left_x-large
+                 slds-p-vertical_x-small
+                 slds-p-right_medium"
+             >
+               <p>
+                Non source trackable
+               </p>
+               <span className="slds-text-body_regular slds-p-top_xxx-small">
+                 ({totalmetadatachanges})
+               </span>
+             </div>
+             <ChangesList
+               type="changes"
+               allChanges={filteredmetadata}
+               checkedChanges={changesChecked}
+               expandedPanels={expandedPanels}
+               handlePanelToggle={handlePanelToggle}
+               handleSelectGroup={handleSelectMetadataGroup}
+               handleChange={handleChange}
+             />
+           </>
+         </ModalCard>
+        )}
+
     </form>
   );
 };

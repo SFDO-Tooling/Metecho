@@ -1072,6 +1072,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
+
+  /api/scratch-orgs/{id}/listmetadata/:
+    post:
+      operationId: scratch_orgs_listmetadata
+      description: Queue a job that retrieves the components for a given non source trackable metadata type.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMetadataRequest'
+          description: ''
+
   /api/tasks/:
     get:
       operationId: tasks_list
@@ -1671,6 +1697,13 @@ components:
       required:
       - commit_message
       - yaml_path
+    ListMetadataRequest:
+      type: object
+      properties:
+        desiredType: string
+        minLength: 1
+      required:
+        - desiredType
     CommitRequest:
       type: object
       properties:
@@ -2510,6 +2543,11 @@ components:
           type: string
           format: HashID
           readOnly: true
+        metadatatype_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          nullable: true
         description:
           type: string
         description_rendered:
@@ -2553,7 +2591,16 @@ components:
         total_unsaved_changes:
           type: integer
           readOnly: true
+        total_metadatatype_changes:
+          type: integer
+        readOnly: true
         has_unsaved_changes:
+          type: boolean
+          readOnly: true
+        has_metadatatype_changes:
+          type: boolean
+          readOnly: true
+        currently_retrieving_nonsource:
           type: boolean
           readOnly: true
         ignored_changes:
