@@ -1481,7 +1481,7 @@ class ScratchOrg(
         self.currently_refreshing_changes = True
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
-        get_nonsource_components_job.delay(self,desired_type=desiredType,originating_user_id=originating_user_id)
+        get_nonsource_components_job.delay(self,desiredType=desiredType,originating_user_id=originating_user_id)
 
     def finalize_get_unsaved_changes(self, *, error=None, originating_user_id):
         self.currently_refreshing_changes = False
