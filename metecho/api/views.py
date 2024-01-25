@@ -1,3 +1,4 @@
+import logging
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
@@ -74,7 +75,7 @@ from .serializers import (
 )
 
 User = get_user_model()
-
+logger = logging.getLogger()
 
 class RepoPushPermission(BasePermission):
     """
@@ -716,6 +717,7 @@ class ScratchOrgViewSet(
                 {"error": _("Requesting user did not create Org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        logger.info(serializer.validated_data["desiredType"])
         scratch_org.queue_get_nonsource_components(**serializer.validated_data,originating_user_id=str(request.user.id))
         return Response(
                 self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED

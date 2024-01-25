@@ -7,13 +7,15 @@ import classNames from 'classnames';
 import React, { ChangeEvent, RefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OBJECT_TYPES } from '@/js/utils/constants';
-import { ApiError } from '@/js/utils/api';
+import { ThunkDispatch } from '@/js/store';
+import { useDispatch } from 'react-redux';
+import apiFetch, { addUrlParams } from '@/js/utils/api';
 import {
   BooleanObject,
   MetadataCommit,
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
-import { UseFormProps,useForm,useFormDefaults, } from '@/js/components/utils';
+import { UseFormProps, useForm, useFormDefaults } from '@/js/components/utils';
 import { Changeset } from '@/js/store/orgs/reducer';
 import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 
@@ -144,7 +146,7 @@ const ChangesForm = ({
 }: Props) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
-
+  const dispatch = useDispatch<ThunkDispatch>();
   // remove ignored changes from full list
   const { remaining: filteredChanges } = splitChangeset(
     changeset,
@@ -184,43 +186,30 @@ const ChangesForm = ({
     });
   };
 
-  const handlemetadataToggle = (groupName: string) => {
-
+  const handlemetadataToggle = async (groupName: string) => {
     setExpandedPanels({
       ...expandedPanels,
       [groupName]: !expandedPanels[groupName],
     });
+    const match = groupName.match(/changes-(.+)/);
+
+    // Check if there is a match and get the group name
+    const alpha = match ? match[1] : null;
     if (expandedPanels[groupName]) {
-      const {inputs,
-        errors,
-        handleInputChange,
-        setInputs,
-        handleSubmit,
-        resetForm,} =
-    useForm({
-      fields: {
-        desiredType: groupName,
-      } as Components,
-      objectType: OBJECT_TYPES.ORG,
-      url: window.api_urls.scratch_org_listmetadata(id),
-      onSuccess: handleSuccess,
-      onError: handleError,
-      shouldSubscribeToObject: false,
-    });
+      await apiFetch({
+        url: window.api_urls.scratch_org_listmetadata(id),
+        dispatch,
+        opts: {
+          method: 'POST',
+          body: JSON.stringify({
+            desiredType: alpha,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      });
     }
-  };
-
-  const handleSuccess = () => {
-    /* istanbul ignore else */
-
-  };
-
-  // eslint-disable-next-line handle-callback-err
-  const handleError = (
-    err: ApiError,
-    fieldErrors: { [key: string]: string },
-  ) => {
-
   };
 
   const updateChecked = (changes: Changeset, checked: boolean) => {
