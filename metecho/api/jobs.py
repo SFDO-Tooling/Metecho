@@ -649,7 +649,6 @@ get_unsaved_changes_job = job(get_unsaved_changes)
 def get_nonsource_components(*,scratch_org,desired_type,originating_user_id):
     try:
         scratch_org.refresh_from_db()
-        data= desired_type["desiredType"]
         with dataset_env(scratch_org) as (project_config, org_config, sf, schema, repo):
             components=ListComponents(
                 org_config=org_config,
