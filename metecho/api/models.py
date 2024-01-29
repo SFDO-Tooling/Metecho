@@ -1247,7 +1247,6 @@ class ScratchOrg(
     latest_revision_numbers = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
-    currently_retrieving_nonsource= models.BooleanField(default=False)
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_retrieving_metadata = models.BooleanField(default=False)
     currently_parsing_datasets = models.BooleanField(default=False)

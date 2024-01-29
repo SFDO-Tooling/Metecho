@@ -185,7 +185,7 @@ const TaskDetail = (
     orgHasChanges =
       (devOrg?.total_unsaved_changes || 0) -
         (devOrg?.total_ignored_changes || 0) >
-      0;
+      0 || (devOrg?.has_metadatatype_changes)==true;
     userIsDevOwner = Boolean(
       userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
     );

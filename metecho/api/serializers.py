@@ -1001,7 +1001,6 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     has_unsaved_changes = serializers.SerializerMethodField()
     metadatatype_changes = serializers.SerializerMethodField()
     has_metadatatype_changes = serializers.SerializerMethodField()
-    total_metadatatype_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
     ignored_changes = serializers.SerializerMethodField()
     has_ignored_changes = serializers.SerializerMethodField()
@@ -1054,8 +1053,6 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "is_omnistudio_installed",
             "metadatatype_changes",
             "has_metadatatype_changes",
-            "total_metadatatype_changes",
-            "currently_retrieving_nonsource"
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -1066,7 +1063,6 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "last_checked_unsaved_changes_at": {"read_only": True},
             "url": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
-            "currently_retrieving_nonsource": {"read_only": True},
             "currently_retrieving_metadata": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
             "currently_reassigning_user": {"read_only": True},
@@ -1099,9 +1095,6 @@ class ScratchOrgSerializer(HashIdModelSerializer):
 
     def get_metadatatype_changes(self,obj) -> dict:
         return self._X_changes(obj, "metadatatype")
-
-    def get_total_metadatatype_changes(self,obj) ->int:
-        return self._total_X_changes(obj, "metadatatype")
 
     def get_has_unsaved_changes(self, obj) -> bool:
         return self._has_X_changes(obj, "unsaved")

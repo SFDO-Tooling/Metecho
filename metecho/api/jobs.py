@@ -631,7 +631,7 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
             )()
         scratch_org.metadatatype_changes= {}
         for types in components:
-            scratch_org.metadatatype_changes[types]=[types+"alpha"]
+            scratch_org.metadatatype_changes[types]=[]
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(
@@ -653,7 +653,7 @@ def get_nonsource_components(*,scratch_org,desiredType,originating_user_id):
             components=ListComponents(
                 org_config=org_config,
                 project_config=project_config,
-                task_config=TaskConfig({"options":{"metadata_type":desiredType}}),
+                task_config=TaskConfig({"options":{"metadata_types":desiredType}}),
             )()
 
         scratch_org.metadatatype_changes[desiredType]=[cmp["MemberName"] for cmp in components]
@@ -661,7 +661,7 @@ def get_nonsource_components(*,scratch_org,desiredType,originating_user_id):
         scratch_org.refresh_from_db()
 
     else:
-        scratch_org.finalize_get_unsaved_changes(
+        scratch_org.finalize_get_nonsource_components(
             originating_user_id=originating_user_id
         )
 
@@ -712,6 +712,10 @@ def commit_changes_from_org(
         latest_revision_numbers = get_latest_revision_numbers(
             scratch_org, originating_user_id=originating_user_id
         )
+        member_types= list(desired_changes.keys())
+        for member_type in member_types:
+            if member_type in scratch_org.metadatatype_changes:
+                del desired_changes[member_type]
         for member_type in desired_changes.keys():
             for member_name in desired_changes[member_type]:
                 try:

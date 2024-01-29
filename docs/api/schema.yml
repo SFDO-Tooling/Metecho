@@ -2591,16 +2591,10 @@ components:
         total_unsaved_changes:
           type: integer
           readOnly: true
-        total_metadatatype_changes:
-          type: integer
-        readOnly: true
         has_unsaved_changes:
           type: boolean
           readOnly: true
         has_metadatatype_changes:
-          type: boolean
-          readOnly: true
-        currently_retrieving_nonsource:
           type: boolean
           readOnly: true
         ignored_changes:

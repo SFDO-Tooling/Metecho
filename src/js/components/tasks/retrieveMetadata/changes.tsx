@@ -195,7 +195,7 @@ const ChangesForm = ({
 
     // Check if there is a match and get the group name
     const alpha = match ? match[1] : null;
-    if (expandedPanels[groupName]) {
+    if (expandedPanels[groupName]=== undefined) {
       await apiFetch({
         url: window.api_urls.scratch_org_listmetadata(id),
         dispatch,
