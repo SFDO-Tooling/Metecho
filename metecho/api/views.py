@@ -1,4 +1,5 @@
 import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import Case, IntegerField, Q, When
@@ -52,7 +53,6 @@ from .serializers import (
     CanReassignSerializer,
     CheckRepoNameSerializer,
     CommitDatasetSerializer,
-    ListMetadataSerializer,
     CommitOmniStudioSerializer,
     CommitSerializer,
     CreatePrSerializer,
@@ -63,6 +63,7 @@ from .serializers import (
     GitHubIssueSerializer,
     GitHubOrganizationSerializer,
     GuidedTourSerializer,
+    ListMetadataSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
     ProjectDependencySerializer,
@@ -76,6 +77,7 @@ from .serializers import (
 
 User = get_user_model()
 logger = logging.getLogger()
+
 
 class RepoPushPermission(BasePermission):
     """
@@ -706,21 +708,26 @@ class ScratchOrgViewSet(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
 
-    @extend_schema(request= ListMetadataSerializer, responses={202: ScratchOrgSerializer})
+    @extend_schema(
+        request=ListMetadataSerializer, responses={202: ScratchOrgSerializer}
+    )
     @action(detail=True, methods=["POST"])
-    def listmetadata(self,request,pk=None):
+    def listmetadata(self, request, pk=None):
         serializer = ListMetadataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        scratch_org= self.get_object()
+        scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
                 {"error": _("Requesting user did not create Org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        scratch_org.queue_get_nonsource_components(desiredType=serializer.validated_data["desiredType"],originating_user_id=str(request.user.id))
+        scratch_org.queue_get_nonsource_components(
+            desiredType=serializer.validated_data["desiredType"],
+            originating_user_id=str(request.user.id),
+        )
         return Response(
-                self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
-            )
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )
 
     @extend_schema(
         request=CommitOmniStudioSerializer, responses={202: ScratchOrgSerializer}

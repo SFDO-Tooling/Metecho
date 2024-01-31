@@ -1,4 +1,3 @@
-
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
@@ -8,6 +7,7 @@ import classNames from 'classnames';
 import React, { ChangeEvent, RefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
+
 import {
   BooleanObject,
   MetadataCommit,

@@ -62,8 +62,8 @@ export interface MinimalOrg {
 }
 
 export interface Org extends MinimalOrg {
-  metadatatype_changes: Changeset;
-  has_metadatatype_changes: boolean;
+  non_source_changes: Changeset;
+  has_non_source_changes: boolean;
   owner: string | null;
   owner_gh_username: string;
   owner_gh_id: number | null;

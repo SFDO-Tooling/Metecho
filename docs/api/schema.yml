@@ -2543,7 +2543,7 @@ components:
           type: string
           format: HashID
           readOnly: true
-        metadatatype_changes:
+        non_source_changes:
           type: object
           additionalProperties: {}
           readOnly: true
@@ -2594,9 +2594,10 @@ components:
         has_unsaved_changes:
           type: boolean
           readOnly: true
-        has_metadatatype_changes:
+        has_non_source_changes:
           type: boolean
           readOnly: true
+          nullable: true
         ignored_changes:
           type: object
           additionalProperties: {}

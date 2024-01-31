@@ -145,7 +145,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   });
 
   // Separate checked changes into changes/ignored
-  const { remaining: changesChecked, removed: ignoredChecked} = splitChangeset(
+  const { remaining: changesChecked, removed: ignoredChecked } = splitChangeset(
     inputs.changes,
     org.ignored_changes,
   );
@@ -254,10 +254,10 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           errors={errors}
           setInputs={setInputs}
           ignoredSuccess={isShowingTransientMessage}
-          hasmetadatachanges={org.has_metadatatype_changes}
-          metadatachanges={org.metadatatype_changes}
+          hasmetadatachanges={org.has_non_source_changes}
+          metadatachanges={org.non_source_changes}
           id={org.id}
-          refreshing= {org.currently_refreshing_changes}
+          refreshing={org.currently_refreshing_changes}
         />
       ),
       footer: [
