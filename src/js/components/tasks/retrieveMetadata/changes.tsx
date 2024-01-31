@@ -1,3 +1,4 @@
+
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
@@ -6,17 +7,16 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import React, { ChangeEvent, RefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { OBJECT_TYPES } from '@/js/utils/constants';
-import { ThunkDispatch } from '@/js/store';
 import { useDispatch } from 'react-redux';
-import apiFetch, { addUrlParams } from '@/js/utils/api';
 import {
   BooleanObject,
   MetadataCommit,
   ModalCard,
 } from '@/js/components/tasks/retrieveMetadata';
-import { UseFormProps, useForm, useFormDefaults } from '@/js/components/utils';
+import { SpinnerWrapper, UseFormProps } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
 import { Changeset } from '@/js/store/orgs/reducer';
+import apiFetch from '@/js/utils/api';
 import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 
 interface Props {
@@ -30,7 +30,8 @@ interface Props {
   ignoredSuccess: boolean;
   hasmetadatachanges: boolean;
   metadatachanges: Changeset;
-  id: String;
+  id: string;
+  refreshing: boolean;
 }
 
 export interface Components {
@@ -143,6 +144,7 @@ const ChangesForm = ({
   metadatachanges,
   hasmetadatachanges,
   id,
+  refreshing,
 }: Props) => {
   const { t } = useTranslation();
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
@@ -195,7 +197,7 @@ const ChangesForm = ({
 
     // Check if there is a match and get the group name
     const alpha = match ? match[1] : null;
-    if (expandedPanels[groupName]=== undefined) {
+    if (expandedPanels[groupName] === undefined) {
       await apiFetch({
         url: window.api_urls.scratch_org_listmetadata(id),
         dispatch,
@@ -391,9 +393,13 @@ const ChangesForm = ({
                  slds-p-right_medium"
             >
               <p>Non source trackable</p>
-              <span className="slds-text-body_regular slds-p-top_xxx-small">
-                ({totalmetadatachanges})
-              </span>
+              {refreshing ? (
+                <SpinnerWrapper size="small" variant="brand"></SpinnerWrapper>
+              ) : (
+                <span className="slds-text-body_regular slds-p-top_xxx-small">
+                  ({totalmetadatachanges})
+                </span>
+              )}
             </div>
             <ChangesList
               type="changes"
