@@ -34,10 +34,6 @@ interface Props {
   refreshing: boolean;
 }
 
-export interface Components {
-  desiredType: string;
-}
-
 const ChangesList = ({
   type,
   allChanges,
@@ -193,10 +189,7 @@ const ChangesForm = ({
       ...expandedPanels,
       [groupName]: !expandedPanels[groupName],
     });
-    const match = groupName.match(/changes-(.+)/);
-
-    // Check if there is a match and get the group name
-    const alpha = match ? match[1] : null;
+    const metadata_type = groupName.match(/changes-(.+)/)?.[1];
     if (expandedPanels[groupName] === undefined) {
       await apiFetch({
         url: window.api_urls.scratch_org_listmetadata(id),
@@ -204,7 +197,7 @@ const ChangesForm = ({
         opts: {
           method: 'POST',
           body: JSON.stringify({
-            desiredType: alpha,
+            desired_type: metadata_type,
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -392,7 +385,7 @@ const ChangesForm = ({
                  slds-p-vertical_x-small
                  slds-p-right_medium"
             >
-              <p>Non source trackable</p>
+              Non-Source-Trackable
               {refreshing ? (
                 <SpinnerWrapper size="small" variant="brand"></SpinnerWrapper>
               ) : (

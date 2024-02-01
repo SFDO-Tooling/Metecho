@@ -1700,10 +1700,10 @@ components:
     ListMetadataRequest:
       type: object
       properties:
-        desiredType: string
+        desired_type: string
         minLength: 1
       required:
-        - desiredType
+        - desired_type
     CommitRequest:
       type: object
       properties:

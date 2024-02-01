@@ -1,4 +1,5 @@
 import { fireEvent, waitFor } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -30,6 +31,11 @@ const defaultChangeset = {
   Buz: ['Baz', 'Bing'],
 };
 
+const defaultComponents = {
+  Alpha: ['Beta'],
+  Gamma: ['Delta', 'Theta'],
+};
+
 const defaultIgnored = {
   Bang: ['Bazinga'],
 };
@@ -41,6 +47,9 @@ const defaultOrg = {
   unsaved_changes: defaultChangeset,
   ignored_changes: defaultIgnored,
   valid_target_directories: defaultDirs,
+  non_source_changes: defaultComponents,
+  has_non_source_changes: true,
+  currently_refreshing_changes: false,
 };
 
 describe('<RetrieveMetadataModal/>', () => {
@@ -266,7 +275,7 @@ describe('<RetrieveMetadataModal/>', () => {
   });
 
   describe('select changes', () => {
-    let getters, selectAll, selectAllIgnored, group1, group2, inputs;
+    let getters, selectAll, selectAllIgnored, group1, group2, group3, inputs;
 
     beforeEach(() => {
       getters = setup();
@@ -276,11 +285,13 @@ describe('<RetrieveMetadataModal/>', () => {
       selectAllIgnored = getByLabelText('All Ignored Changes');
       group1 = getByLabelText('Buz');
       group2 = getByLabelText('Bang');
+      group3 = getByLabelText('Alpha');
       inputs = [
         getByLabelText('Bar'),
         getByLabelText('Baz'),
         getByLabelText('Bing'),
         getByLabelText('Bazinga'),
+        getByLabelText('Beta'),
       ];
     });
 
@@ -292,6 +303,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(selectAllIgnored);
 
@@ -299,6 +311,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(selectAll);
 
@@ -306,6 +319,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(selectAllIgnored);
 
@@ -313,6 +327,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
       });
     });
 
@@ -324,6 +339,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(group2);
 
@@ -331,6 +347,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(group1);
 
@@ -338,6 +355,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(group2);
 
@@ -345,6 +363,14 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
+
+        fireEvent.click(group3);
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(true);
       });
     });
 
@@ -356,6 +382,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(inputs[2]);
 
@@ -363,6 +390,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(inputs[3]);
 
@@ -370,6 +398,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(inputs[2]);
 
@@ -377,6 +406,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
 
         fireEvent.click(inputs[3]);
 
@@ -384,6 +414,14 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(false);
+
+        fireEvent.click(inputs[4]);
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(false);
+        expect(inputs[4].checked).toBe(true);
       });
     });
 
@@ -391,11 +429,12 @@ describe('<RetrieveMetadataModal/>', () => {
       test('expands/collapses', () => {
         const { baseElement, getByTitle } = getters;
         const panels = baseElement.querySelectorAll('.slds-accordion__content');
-
+        const url = window.api_urls.scratch_org_listmetadata('org-id');
         expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[3]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
 
         fireEvent.click(getByTitle('Buz'));
 
@@ -403,6 +442,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[3]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
 
         fireEvent.click(getByTitle('Bang'));
 
@@ -410,6 +450,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
 
         fireEvent.click(getByTitle('All Ignored Changes'));
 
@@ -417,8 +458,41 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
+
+        fetchMock.postOnce(url, {
+          options: { desired_type: 'Alpha' },
+        });
+        fireEvent.click(getByTitle('Alpha'));
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'false');
+
+        fireEvent.click(getByTitle('Alpha'));
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
       });
     });
+  });
+
+  test('checks for the spinner', () => {
+    const { getByText, rerender, store } = setup();
+    fireEvent.click(getByText('Save & Next'));
+    setup({
+      org: {
+        ...defaultOrg,
+        currently_refreshing_changes: true,
+      },
+      store,
+      rerender,
+    });
+    const nonSourceTrackableElement = getByText('Loading...');
+    expect(nonSourceTrackableElement).not.toBeNull();
   });
 
   describe('commit message', () => {

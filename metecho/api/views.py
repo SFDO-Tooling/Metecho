@@ -722,7 +722,7 @@ class ScratchOrgViewSet(
                 status=status.HTTP_403_FORBIDDEN,
             )
         scratch_org.queue_get_nonsource_components(
-            desiredType=serializer.validated_data["desiredType"],
+            desired_type=serializer.validated_data["desired_type"],
             originating_user_id=str(request.user.id),
         )
         return Response(

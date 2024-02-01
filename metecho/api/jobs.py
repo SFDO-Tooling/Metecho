@@ -651,17 +651,17 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
-def get_nonsource_components(*, scratch_org, desiredType, originating_user_id):
+def get_nonsource_components(*, scratch_org, desired_type, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         with dataset_env(scratch_org) as (project_config, org_config, sf, schema, repo):
             components = ListComponents(
                 org_config=org_config,
                 project_config=project_config,
-                task_config=TaskConfig({"options": {"metadata_types": desiredType}}),
+                task_config=TaskConfig({"options": {"metadata_types": desired_type}}),
             )()
 
-        scratch_org.non_source_changes[desiredType] = [
+        scratch_org.non_source_changes[desired_type] = [
             cmp["MemberName"] for cmp in components
         ]
     except Exception as e:

@@ -1154,7 +1154,7 @@ class CommitSerializer(serializers.Serializer):
 
 
 class ListMetadataSerializer(serializers.Serializer):
-    desiredType = serializers.CharField()
+    desired_type = serializers.CharField()
 
 
 class CommitDatasetSerializer(serializers.Serializer):
