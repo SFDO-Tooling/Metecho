@@ -266,9 +266,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           label={t('Go Back')}
           variant="outline-brand"
           onClick={prevPage}
-          disabled={
-            ignoringChanges || org?.currently_refreshing_changes === true
-          }
+          disabled={ignoringChanges || org.currently_refreshing_changes}
         />,
         <Button
           key="page-2-button-2"
@@ -278,7 +276,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           disabled={
             !(numberChangesChecked || numberIgnoredChecked) ||
             ignoringChanges ||
-            org?.currently_refreshing_changes === true
+            org.currently_refreshing_changes
           }
         />,
         <Button
@@ -289,7 +287,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           disabled={
             !(numberChangesChecked || numberIgnoredChecked) ||
             ignoringChanges ||
-            org?.currently_refreshing_changes === true
+            org.currently_refreshing_changes
           }
         />,
       ],

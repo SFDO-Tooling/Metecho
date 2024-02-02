@@ -375,7 +375,7 @@ const ChangesForm = ({
           </Accordion>
         </ModalCard>
       )}
-      {hasmetadatachanges === true && (
+      {hasmetadatachanges && (
         <ModalCard noBodyPadding>
           <>
             <div
