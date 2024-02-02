@@ -813,6 +813,8 @@ export const sampleDevOrg = {
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
   currently_parsing_datasets: false,
+  has_non_source_changes: false,
+  non_source_changes: {},
 };
 
 export const sampleScratchOrg = {
@@ -852,6 +854,8 @@ export const sampleScratchOrg = {
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
   currently_parsing_datasets: false,
+  has_non_source_changes: false,
+  non_source_changes: {},
 };
 
 export const sampleIssue1 = {

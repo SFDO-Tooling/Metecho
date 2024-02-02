@@ -980,6 +980,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
+  /api/scratch-orgs/{id}/listmetadata/:
+    post:
+      operationId: scratch_orgs_listmetadata_create
+      description: Manage Salesforce scratch orgs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListMetadataRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ListMetadataRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ListMetadataRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
   /api/scratch-orgs/{id}/log/:
     get:
       operationId: scratch_orgs_log_retrieve
@@ -1072,32 +1108,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
-
-  /api/scratch-orgs/{id}/listmetadata/:
-    post:
-      operationId: scratch_orgs_listmetadata
-      description: Queue a job that retrieves the components for a given non source trackable metadata type.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: HashID
-        description: A unique integer value identifying this scratch org.
-        required: true
-      tags:
-      - scratch-orgs
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListMetadataRequest'
-          description: ''
-
   /api/tasks/:
     get:
       operationId: tasks_list
@@ -1697,13 +1707,6 @@ components:
       required:
       - commit_message
       - yaml_path
-    ListMetadataRequest:
-      type: object
-      properties:
-        desired_type: string
-        minLength: 1
-      required:
-        - desired_type
     CommitRequest:
       type: object
       properties:
@@ -2114,6 +2117,14 @@ components:
         state:
           type: object
           additionalProperties: {}
+    ListMetadataRequest:
+      type: object
+      properties:
+        desired_type:
+          type: string
+          minLength: 1
+      required:
+      - desired_type
     MinimalUser:
       type: object
       properties:
@@ -2543,11 +2554,6 @@ components:
           type: string
           format: HashID
           readOnly: true
-        non_source_changes:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-          nullable: true
         description:
           type: string
         description_rendered:
@@ -2594,10 +2600,6 @@ components:
         has_unsaved_changes:
           type: boolean
           readOnly: true
-        has_non_source_changes:
-          type: boolean
-          readOnly: true
-          nullable: true
         ignored_changes:
           type: object
           additionalProperties: {}
@@ -2660,6 +2662,13 @@ components:
         is_omnistudio_installed:
           type: boolean
           readOnly: true
+        non_source_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        has_non_source_changes:
+          type: boolean
+          readOnly: true
       required:
       - currently_parsing_datasets
       - currently_reassigning_user
@@ -2673,6 +2682,7 @@ components:
       - expires_at
       - has_been_visited
       - has_ignored_changes
+      - has_non_source_changes
       - has_unsaved_changes
       - id
       - ignored_changes
@@ -2684,6 +2694,7 @@ components:
       - latest_commit
       - latest_commit_at
       - latest_commit_url
+      - non_source_changes
       - org_config_name
       - org_type
       - owner

@@ -859,6 +859,16 @@ class TestScratchOrg:
 
             assert get_unsaved_changes_job.delay.called
 
+    def test_get_nonsource_components(self,scratch_org_factory):
+        with ExitStack() as stack:
+            get_non_source_components_job= stack.enter_context(
+                patch("metecho.api.jobs.get_nonsource_components_job")
+            )
+            scratch_org = scratch_org_factory()
+            scratch_org.queue_get_nonsource_components(originating_user_id=None,desired_type='')
+
+            assert get_non_source_components_job.delay.called
+
     def test_get_unsaved_changes__bail_early(self, scratch_org_factory):
         with ExitStack() as stack:
             get_unsaved_changes_job = stack.enter_context(
