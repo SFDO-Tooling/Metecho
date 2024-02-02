@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0117_scratchorg_installed_packages'),
+        ("api", "0117_scratchorg_installed_packages"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='deleted_at',
+            model_name="project",
+            name="deleted_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]
