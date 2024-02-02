@@ -912,6 +912,45 @@ class TestScratchOrgViewSet:
             assert response.status_code == 202
             assert commit_changes_from_org_job.delay.called
 
+    def test_listmetadata_happy_path(self, client, scratch_org_factory):
+        with ExitStack() as stack:
+            get_nonsource_components_job = stack.enter_context(
+                patch("metecho.api.jobs.get_nonsource_components_job", autospec=True)
+            )
+
+            scratch_org = scratch_org_factory(
+                org_type=ScratchOrgType.DEV,
+                owner=client.user,
+            )
+
+            response = client.post(
+                reverse("scratch-org-listmetadata", kwargs={"pk": str(scratch_org.id)}),
+                {"desired_type": "test_type"},
+                format="json",
+            )
+
+            assert response.status_code == 202
+            assert get_nonsource_components_job.delay.called
+
+    def test_listmetadata_403_path(self, client, scratch_org_factory):
+        with ExitStack() as stack:
+            get_nonsource_components_job = stack.enter_context(
+                patch("metecho.api.jobs.get_nonsource_components_job", autospec=True)
+            )
+
+            scratch_org = scratch_org_factory(
+                org_type=ScratchOrgType.DEV,
+            )
+
+            response = client.post(
+                reverse("scratch-org-listmetadata", kwargs={"pk": str(scratch_org.id)}),
+                {"desired_type": "test_type"},
+                format="json",
+            )
+
+            assert response.status_code == 403
+            assert not get_nonsource_components_job.delay.called
+
     def test_commit_invalid_target_directory(self, client, scratch_org_factory):
         with ExitStack() as stack:
             scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)

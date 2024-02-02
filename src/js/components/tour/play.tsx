@@ -64,7 +64,7 @@ export const getDemoOrg = ({
     valid_target_directories: {},
     currently_parsing_datasets: false,
     has_non_source_changes: false,
-    non_source_changes: {}
+    non_source_changes: {},
   };
 };
 
