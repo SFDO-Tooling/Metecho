@@ -199,7 +199,7 @@ const ChangesForm = ({
     if (
       metadata_type !== undefined &&
       expandedPanels[groupName] === undefined &&
-      metadatachanges[metadata_type].length == 0
+      metadatachanges[metadata_type].length === 0
     ) {
       await apiFetch({
         url: window.api_urls.scratch_org_listmetadata(id),
