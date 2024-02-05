@@ -196,7 +196,10 @@ const ChangesForm = ({
       [groupName]: !expandedPanels[groupName],
     });
     const metadata_type = groupName.match(/changes-(.+)/)?.[1];
-    if (expandedPanels[groupName] === undefined) {
+    if (
+      expandedPanels[groupName] === undefined &&
+      metadatachanges[metadata_type].length == 0
+    ) {
       await apiFetch({
         url: window.api_urls.scratch_org_listmetadata(id),
         dispatch,

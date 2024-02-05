@@ -34,6 +34,7 @@ const defaultChangeset = {
 const defaultComponents = {
   Alpha: ['Beta'],
   Gamma: ['Delta', 'Theta'],
+  Zeta: [],
   Zam: [],
 };
 
@@ -472,9 +473,6 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
 
-        fetchMock.postOnce(url, {
-          options: { desired_type: 'Alpha' },
-        });
         fireEvent.click(getByTitle('Alpha'));
         expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
@@ -484,6 +482,16 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[5]).toHaveAttribute('aria-hidden', 'false');
 
         fireEvent.click(getByTitle('Alpha'));
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[5]).toHaveAttribute('aria-hidden', 'true');
+        fetchMock.postOnce(url, {
+          options: { desired_type: 'Zeta' },
+        });
+        fireEvent.click(getByTitle('Zeta'));
         expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
