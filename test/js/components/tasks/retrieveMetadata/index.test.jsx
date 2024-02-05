@@ -517,20 +517,6 @@ describe('<RetrieveMetadataModal/>', () => {
     expect(nonSourceTrackableElement).not.toBeNull();
   });
 
-  test('ignore changes for non-source-trackable', () => {
-    const { getByText, rerender, store } = setup();
-    fireEvent.click(getByText('Save & Next'));
-    setup({
-      org: {
-        ...defaultOrg,
-        ignored_changes: { Alpha: ['Beta'] },
-        non_source_changes: { Gamma: ['Delta'] },
-      },
-      store,
-      rerender,
-    });
-  });
-
   describe('commit message', () => {
     let getters;
 
