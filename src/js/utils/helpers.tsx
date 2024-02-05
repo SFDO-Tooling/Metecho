@@ -35,7 +35,15 @@ export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
 
 export const getOrgStatusMsg = (org: Org) => {
-  const totalChanges = org.total_unsaved_changes - org.total_ignored_changes;
+  const nonsourceIgnored: Changeset = {};
+  for (const groupName in org.ignored_changes) {
+    if (Object.keys(org.non_source_changes).indexOf(groupName) !== -1) {
+      nonsourceIgnored[groupName] = org.ignored_changes[groupName];
+    }
+  }
+  const totalIgnored =
+    org.total_ignored_changes - Object.values(nonsourceIgnored).flat().length;
+  const totalChanges = org.total_unsaved_changes - totalIgnored;
   if (totalChanges > 0) {
     const statusMsgDefault = `${totalChanges} unretrieved ${pluralize(
       totalChanges,
