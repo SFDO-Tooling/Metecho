@@ -197,6 +197,7 @@ const ChangesForm = ({
     });
     const metadata_type = groupName.match(/changes-(.+)/)?.[1];
     if (
+      metadata_type !== undefined &&
       expandedPanels[groupName] === undefined &&
       metadatachanges[metadata_type].length == 0
     ) {
