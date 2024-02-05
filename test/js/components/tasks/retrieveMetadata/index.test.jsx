@@ -34,10 +34,12 @@ const defaultChangeset = {
 const defaultComponents = {
   Alpha: ['Beta'],
   Gamma: ['Delta', 'Theta'],
+  Zam: [],
 };
 
 const defaultIgnored = {
   Bang: ['Bazinga'],
+  Zam: ['Garnish'],
 };
 
 const defaultDirs = { config: ['foo/bar'], pre: ['buz/baz'] };
@@ -291,6 +293,7 @@ describe('<RetrieveMetadataModal/>', () => {
         getByLabelText('Baz'),
         getByLabelText('Bing'),
         getByLabelText('Bazinga'),
+        getByLabelText('Garnish'),
         getByLabelText('Beta'),
       ];
     });
@@ -304,6 +307,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(false);
         expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(selectAllIgnored);
 
@@ -311,7 +315,8 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(true);
-        expect(inputs[4].checked).toBe(false);
+        expect(inputs[4].checked).toBe(true);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(selectAll);
 
@@ -319,7 +324,8 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(true);
-        expect(inputs[4].checked).toBe(false);
+        expect(inputs[4].checked).toBe(true);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(selectAllIgnored);
 
@@ -328,6 +334,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
         expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(false);
       });
     });
 
@@ -340,6 +347,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(false);
         expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(group2);
 
@@ -348,6 +356,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[2].checked).toBe(true);
         expect(inputs[3].checked).toBe(true);
         expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(group1);
 
@@ -356,6 +365,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(true);
         expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(group2);
 
@@ -364,13 +374,15 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
         expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(false);
 
         fireEvent.click(group3);
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
         expect(inputs[3].checked).toBe(false);
-        expect(inputs[4].checked).toBe(true);
+        expect(inputs[4].checked).toBe(false);
+        expect(inputs[5].checked).toBe(true);
       });
     });
 
@@ -468,7 +480,8 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
         expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
-        expect(panels[4]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[5]).toHaveAttribute('aria-hidden', 'false');
 
         fireEvent.click(getByTitle('Alpha'));
         expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
@@ -476,6 +489,7 @@ describe('<RetrieveMetadataModal/>', () => {
         expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
         expect(panels[4]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[5]).toHaveAttribute('aria-hidden', 'true');
       });
     });
   });
@@ -493,6 +507,20 @@ describe('<RetrieveMetadataModal/>', () => {
     });
     const nonSourceTrackableElement = getByText('Loading...');
     expect(nonSourceTrackableElement).not.toBeNull();
+  });
+
+  test('ignore changes for non-source-trackable', () => {
+    const { getByText, rerender, store } = setup();
+    fireEvent.click(getByText('Save & Next'));
+    setup({
+      org: {
+        ...defaultOrg,
+        ignored_changes: { Alpha: ['Beta'] },
+        non_source_changes: { Gamma: ['Delta'] },
+      },
+      store,
+      rerender,
+    });
   });
 
   describe('commit message', () => {

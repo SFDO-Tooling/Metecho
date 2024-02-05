@@ -155,6 +155,12 @@ const ChangesForm = ({
     ignoredChanges,
   );
 
+  for (const groupName of Object.keys(metadatachanges)) {
+    if (Object.keys(filteredmetadata).indexOf(groupName) === -1) {
+      filteredmetadata[groupName] = [];
+    }
+  }
+
   const { remaining: filteredchecked } = splitChangeset(
     filteredChanges,
     changesChecked,
