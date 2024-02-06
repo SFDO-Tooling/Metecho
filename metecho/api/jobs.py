@@ -631,6 +631,7 @@ def unsaved_changes(scratch_org, originating_user_id):
 
 
 def nonsource_types(scratch_org):
+    scratch_org.non_source_changes = {}
     with dataset_env(scratch_org) as (
         project_config,
         org_config,
@@ -638,14 +639,16 @@ def nonsource_types(scratch_org):
         schema,
         repo,
     ):
-        components = ListNonSourceTrackable(
-            org_config=org_config,
-            project_config=project_config,
-            task_config=TaskConfig({"options": {}}),
-        )()
-    scratch_org.non_source_changes = {}
-    for types in components:
-        scratch_org.non_source_changes[types] = []
+        try:
+            components = ListNonSourceTrackable(
+                org_config=org_config,
+                project_config=project_config,
+                task_config=TaskConfig({"options": {}}),
+            )()
+            for types in components:
+                scratch_org.non_source_changes[types] = []
+        except Exception as e:
+            logger.error(f"Error in listing non-source-trackable metadatatypes: {e}")
 
 
 def get_unsaved_changes(scratch_org, *, originating_user_id):

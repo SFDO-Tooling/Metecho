@@ -476,7 +476,10 @@ def test_create_org_and_run_flow__no_setup_flow():
 
 
 @pytest.mark.django_db
-def test_get_unsaved_changes(scratch_org_factory, patch_dataset_env):
+@pytest.mark.parametrize("ListNonSourceTrackable_exception", [False, True])
+def test_get_unsaved_changes(
+    scratch_org_factory, patch_dataset_env, ListNonSourceTrackable_exception
+):
     scratch_org = scratch_org_factory(
         latest_revision_numbers={"TypeOne": {"NameOne": 10}}
     )
@@ -494,9 +497,12 @@ def test_get_unsaved_changes(scratch_org_factory, patch_dataset_env):
             {"source": ["src"], "config": [], "post": [], "pre": []},
             False,
         )
-        ListNonSourceTrackable.return_value = MagicMock(
-            return_value=["TypeThree", "TypeFour"]
-        )
+        if ListNonSourceTrackable_exception:
+            ListNonSourceTrackable.return_value = MagicMock(side_effect=Exception)
+        else:
+            ListNonSourceTrackable.return_value = MagicMock(
+                return_value=["TypeThree", "TypeFour"]
+            )
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )
@@ -512,10 +518,13 @@ def test_get_unsaved_changes(scratch_org_factory, patch_dataset_env):
             "TypeOne": ["NameOne"],
             "TypeTwo": ["NameTwo"],
         }
-        assert scratch_org.non_source_changes == {
-            "TypeThree": [],
-            "TypeFour": [],
-        }
+        if ListNonSourceTrackable_exception:
+            assert scratch_org.non_source_changes == {}
+        else:
+            assert scratch_org.non_source_changes == {
+                "TypeThree": [],
+                "TypeFour": [],
+            }
         assert scratch_org.latest_revision_numbers == {"TypeOne": {"NameOne": 10}}
 
 
