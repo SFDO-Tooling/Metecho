@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-from allauth.socialaccount.models import SocialApp
 
 from ..views import CustomGitHubOAuth2Adapter
 

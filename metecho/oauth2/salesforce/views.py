@@ -10,10 +10,7 @@ from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from metecho.api.constants import ORGANIZATION_DETAILS
 
-from ..views import (
-    LoggingOAuth2CallbackView,
-    LoggingOAuth2LoginView,
-)
+from ..views import LoggingOAuth2CallbackView, LoggingOAuth2LoginView
 
 logger = logging.getLogger(__name__)
 ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")

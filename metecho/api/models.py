@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.sites.models import Site
-from django.core.exceptions import ValidationError, MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
@@ -241,9 +241,8 @@ class User(PushMixin, HashIdMixin, AbstractUser):
         except (AttributeError, KeyError, TypeError):
             return None
         # if social app exists in both db and settings retrun sample url
-        except (MultipleObjectsReturned):
+        except MultipleObjectsReturned:
             return "https://example.com/avatar/"
-
 
     @property
     def org_id(self) -> Optional[str]:

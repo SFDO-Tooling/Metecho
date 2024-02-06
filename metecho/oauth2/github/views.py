@@ -1,9 +1,6 @@
 from allauth.socialaccount.providers.github.views import GitHubOAuth2Adapter
 
-from ..views import (
-    LoggingOAuth2CallbackView,
-    LoggingOAuth2LoginView,
-)
+from ..views import LoggingOAuth2CallbackView, LoggingOAuth2LoginView
 
 
 class CustomGitHubOAuth2Adapter(GitHubOAuth2Adapter):

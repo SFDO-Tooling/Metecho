@@ -4,7 +4,8 @@
 
 ## Development and Deployment
 
-See [documentation](https://metecho.readthedocs.io/en/latest/heroku-setup.html) on how to set up Metecho on Heroku.
+See [documentation](https://metecho.readthedocs.io/en/latest/heroku-setup.html)
+on how to set up Metecho on Heroku.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
