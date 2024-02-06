@@ -13,7 +13,6 @@ from metecho.api.constants import ORGANIZATION_DETAILS
 from ..views import (
     LoggingOAuth2CallbackView,
     LoggingOAuth2LoginView,
-    ensure_socialapp_in_db,
 )
 
 logger = logging.getLogger(__name__)
@@ -66,8 +65,6 @@ class SalesforceOAuth2Adapter(SalesforceOAuth2BaseAdapter):
         return resp.json()
 
     def complete_login(self, request, app, token, **kwargs):
-        # make sure token is attached to a SocialApp in the db
-        ensure_socialapp_in_db(token)
 
         token = fernet_decrypt(token.token)
         headers = {"Authorization": f"Bearer {token}"}

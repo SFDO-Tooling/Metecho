@@ -4,60 +4,59 @@
 #
 #    pip-compile --output-file=requirements/dev.txt requirements/dev.in
 #
-alabaster==0.7.12
+alabaster==0.7.16
     # via sphinx
-asgiref==3.5.2
+asgiref==3.7.2
     # via
     #   -c requirements/prod.txt
     #   daphne
     #   django
-asttokens==2.0.5
+asttokens==2.4.1
     # via stack-data
-attrs==21.4.0
+attrs==23.2.0
     # via
     #   -c requirements/prod.txt
     #   automat
     #   flake8-bugbear
-    #   pytest
     #   service-identity
     #   twisted
-autobahn==22.6.1
+autobahn==23.6.2
     # via
     #   -c requirements/prod.txt
     #   daphne
-automat==20.2.0
+automat==22.10.0
     # via
     #   -c requirements/prod.txt
     #   twisted
-babel==2.10.3
+babel==2.14.0
     # via sphinx
-backcall==0.2.0
-    # via ipython
-black==22.6.0
+black==24.1.1
     # via -r requirements/dev.in
-certifi==2022.12.7
+certifi==2023.7.22
     # via
     #   -c requirements/prod.txt
     #   requests
-cffi==1.15.1
+cffi==1.16.0
     # via
     #   -c requirements/prod.txt
     #   cryptography
-charset-normalizer==3.0.1
+charset-normalizer==3.2.0
     # via
     #   -c requirements/prod.txt
     #   requests
-click==8.1.3
+click==8.1.6
     # via
     #   -c requirements/prod.txt
     #   black
-constantly==15.1.0
+constantly==23.10.4
     # via
     #   -c requirements/prod.txt
     #   twisted
-coverage[toml]==6.4.2
-    # via pytest-cov
-cryptography==39.0.1
+coverage[toml]==7.4.1
+    # via
+    #   coverage
+    #   pytest-cov
+cryptography==41.0.7
     # via
     #   -c requirements/prod.txt
     #   autobahn
@@ -69,11 +68,11 @@ daphne==3.0.2
     #   -r requirements/dev.in
 decorator==5.1.1
     # via ipython
-django==4.0.6
+django==4.2.9
     # via
     #   -c requirements/prod.txt
     #   django-extensions
-django-extensions==3.2.0
+django-extensions==3.2.3
     # via -r requirements/dev.in
 doc8==0.11.2
     # via -r requirements/dev.in
@@ -84,21 +83,25 @@ docutils==0.16
     #   myst-parser
     #   restructuredtext-lint
     #   sphinx
-executing==0.9.0
+exceptiongroup==1.2.0
+    # via
+    #   ipython
+    #   pytest
+executing==2.0.1
     # via stack-data
-factory-boy==3.2.1
+factory-boy==3.3.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==17.0.0
+faker==19.3.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
-flake8==4.0.1
+flake8==7.0.0
     # via
     #   -r requirements/dev.in
     #   flake8-bugbear
-flake8-bugbear==22.7.1
+flake8-bugbear==24.1.17
     # via -r requirements/dev.in
 hyperlink==21.0.0
     # via
@@ -113,7 +116,7 @@ idna==3.4
     #   twisted
 imagesize==1.4.1
     # via sphinx
-incremental==21.3.0
+incremental==22.10.0
     # via
     #   -c requirements/prod.txt
     #   twisted
@@ -121,102 +124,94 @@ inflection==0.5.1
     # via
     #   -c requirements/prod.txt
     #   pytest-factoryboy
-iniconfig==1.1.1
+iniconfig==2.0.0
     # via pytest
-ipython==8.4.0
+ipython==8.21.0
     # via -r requirements/dev.in
-isort==5.10.1
+isort==5.13.2
     # via -r requirements/dev.in
-jedi==0.18.1
+jedi==0.19.1
     # via ipython
 jinja2==3.1.2
     # via
     #   -c requirements/prod.txt
     #   myst-parser
     #   sphinx
-markdown-it-py==2.1.0
+markdown-it-py==2.2.0
     # via
     #   -c requirements/prod.txt
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.2
+markupsafe==2.1.3
     # via
     #   -c requirements/prod.txt
     #   jinja2
-matplotlib-inline==0.1.3
+matplotlib-inline==0.1.6
     # via ipython
-mccabe==0.6.1
+mccabe==0.7.0
     # via flake8
-mdit-py-plugins==0.3.0
+mdit-py-plugins==0.3.5
     # via myst-parser
 mdurl==0.1.2
     # via
     #   -c requirements/prod.txt
     #   markdown-it-py
-mypy-extensions==0.4.3
+mypy-extensions==1.0.0
     # via black
-myst-parser==0.18.0
+myst-parser==1.0.0
     # via -r requirements/dev.in
-packaging==21.3
+packaging==23.2
     # via
-    #   -c requirements/prod.txt
+    #   black
     #   pytest
     #   pytest-sugar
     #   sphinx
 parso==0.8.3
     # via jedi
-pathspec==0.9.0
+pathspec==0.12.1
     # via black
-pbr==5.9.0
+pbr==6.0.0
     # via stevedore
-pexpect==4.8.0
+pexpect==4.9.0
     # via ipython
-pickleshare==0.7.5
-    # via ipython
-platformdirs==2.5.2
+platformdirs==4.2.0
     # via black
-pluggy==1.0.0
+pluggy==1.4.0
     # via pytest
-prompt-toolkit==3.0.30
+prompt-toolkit==3.0.43
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
-py==1.11.0
-    # via pytest
-pyasn1==0.4.8
+pyasn1==0.5.1
     # via
     #   -c requirements/prod.txt
     #   pyasn1-modules
     #   service-identity
-pyasn1-modules==0.2.8
+pyasn1-modules==0.3.0
     # via
     #   -c requirements/prod.txt
     #   service-identity
-pycodestyle==2.8.0
+pycodestyle==2.11.1
     # via flake8
 pycparser==2.21
     # via
     #   -c requirements/prod.txt
     #   cffi
-pyflakes==2.4.0
+pyflakes==3.2.0
     # via flake8
-pygments==2.14.0
+pygments==2.17.2
     # via
     #   -c requirements/prod.txt
     #   doc8
     #   ipython
     #   sphinx
-pyopenssl==23.0.0
+pyopenssl==24.0.0
     # via
     #   -c requirements/prod.txt
     #   twisted
-pyparsing==3.0.9
-    # via
-    #   -c requirements/prod.txt
-    #   packaging
-pytest==7.1.2
+pytest==7.4.4
     # via
     #   -r requirements/dev.in
     #   pytest-asyncio
@@ -226,41 +221,37 @@ pytest==7.1.2
     #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
-pytest-asyncio==0.19.0
+pytest-asyncio==0.23.4
     # via -r requirements/dev.in
-pytest-cov==3.0.0
+pytest-cov==4.1.0
     # via -r requirements/dev.in
-pytest-django==4.5.2
+pytest-django==4.8.0
     # via -r requirements/dev.in
-pytest-factoryboy==2.5.0
+pytest-factoryboy==2.6.0
     # via -r requirements/dev.in
 pytest-lazy-fixture==0.6.3
     # via -r requirements/dev.in
-pytest-mock==3.8.2
+pytest-mock==3.12.0
     # via -r requirements/dev.in
-pytest-sugar==0.9.5
+pytest-sugar==1.0.0
     # via -r requirements/dev.in
 python-dateutil==2.8.2
     # via
     #   -c requirements/prod.txt
     #   faker
-pytz==2022.7.1
-    # via
-    #   -c requirements/prod.txt
-    #   babel
-pyyaml==6.0
+pyyaml==6.0.1
     # via
     #   -c requirements/prod.txt
     #   myst-parser
 remote-pdb==2.1.0
     # via -r requirements/dev.in
-requests==2.28.2
+requests==2.29.0
     # via
     #   -c requirements/prod.txt
     #   sphinx
 restructuredtext-lint==1.4.0
     # via doc8
-service-identity==21.1.0
+service-identity==24.1.0
     # via
     #   -c requirements/prod.txt
     #   twisted
@@ -270,69 +261,70 @@ six==1.16.0
     #   asttokens
     #   automat
     #   python-dateutil
-    #   service-identity
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.1.0
+sphinx==5.3.0
     # via
     #   -r requirements/dev.in
     #   myst-parser
     #   sphinxcontrib-httpdomain
-sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-applehelp==1.0.8
     # via sphinx
-sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-devhelp==1.0.6
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.0
+sphinxcontrib-htmlhelp==2.0.5
     # via sphinx
-sphinxcontrib-httpdomain==1.8.0
+sphinxcontrib-httpdomain==1.8.1
     # via -r requirements/dev.in
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-qthelp==1.0.7
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.5
+sphinxcontrib-serializinghtml==1.1.10
     # via sphinx
-sqlparse==0.4.2
+sqlparse==0.4.4
     # via
     #   -c requirements/prod.txt
     #   django
-stack-data==0.3.0
+stack-data==0.6.3
     # via ipython
-stevedore==4.0.0
+stevedore==5.1.0
     # via doc8
-termcolor==1.1.0
+termcolor==2.4.0
     # via pytest-sugar
 tomli==2.0.1
     # via
     #   black
     #   coverage
     #   pytest
-traitlets==5.3.0
+traitlets==5.14.1
     # via
     #   ipython
     #   matplotlib-inline
-twisted[tls]==22.4.0
+twisted[tls]==23.10.0
     # via
     #   -c requirements/prod.txt
     #   daphne
-txaio==22.2.1
+    #   twisted
+txaio==23.1.1
     # via
     #   -c requirements/prod.txt
     #   autobahn
-typing-extensions==4.5.0
+typing-extensions==4.7.1
     # via
     #   -c requirements/prod.txt
-    #   myst-parser
+    #   asgiref
+    #   black
     #   pytest-factoryboy
     #   twisted
-urllib3==1.26.14
+urllib3==1.26.16
     # via
     #   -c requirements/prod.txt
     #   requests
-wcwidth==0.2.5
+wcwidth==0.2.13
     # via prompt-toolkit
-zope-interface==5.4.0
+zope-interface==6.1
     # via
     #   -c requirements/prod.txt
     #   twisted
