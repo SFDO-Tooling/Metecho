@@ -617,6 +617,10 @@ def unsaved_changes(scratch_org, originating_user_id):
         scratch_org, originating_user_id=originating_user_id
     )
     unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
+    scratch_org.unsaved_changes = unsaved_changes
+
+
+def nonsource_types(scratch_org):
     user = scratch_org.owner
     repo_id = scratch_org.parent.get_repo_id()
     commit_ish = scratch_org.parent.branch_name
@@ -627,10 +631,6 @@ def unsaved_changes(scratch_org, originating_user_id):
             scratch_org,
             repo_root,
         )
-    scratch_org.unsaved_changes = unsaved_changes
-
-
-def nonsource_types(scratch_org):
     scratch_org.non_source_changes = {}
     with dataset_env(scratch_org) as (
         project_config,
