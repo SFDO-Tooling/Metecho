@@ -53,9 +53,7 @@ constantly==23.10.4
     #   -c requirements/prod.txt
     #   twisted
 coverage[toml]==7.4.1
-    # via
-    #   coverage
-    #   pytest-cov
+    # via pytest-cov
 cryptography==41.0.7
     # via
     #   -c requirements/prod.txt
@@ -306,7 +304,6 @@ twisted[tls]==23.10.0
     # via
     #   -c requirements/prod.txt
     #   daphne
-    #   twisted
 txaio==23.1.1
     # via
     #   -c requirements/prod.txt

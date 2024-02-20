@@ -56,7 +56,6 @@ cffi==1.16.0
 channels[daphne]==3.0.5
     # via
     #   -r requirements/prod.in
-    #   channels
     #   channels-redis
 channels-redis==3.4.1
     # via -r requirements/prod.in
@@ -85,7 +84,7 @@ cryptography==41.0.7
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.84.1
+cumulusci==3.84.2
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -273,7 +272,6 @@ pyjwt[crypto]==2.8.0
     #   cumulusci
     #   django-allauth
     #   github3-py
-    #   pyjwt
 pyopenssl==24.0.0
     # via twisted
 python-baseconv==1.2.2
@@ -405,9 +403,7 @@ sqlalchemy==1.4.49
 sqlparse==0.4.4
     # via django
 twisted[tls]==23.10.0
-    # via
-    #   daphne
-    #   twisted
+    # via daphne
 txaio==23.1.1
     # via autobahn
 typing-extensions==4.7.1
