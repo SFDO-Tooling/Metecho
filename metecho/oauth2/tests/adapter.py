@@ -7,5 +7,5 @@ def test_authentication_error_logs(mocker):
     )  # noqa
     error = mocker.patch("metecho.oauth2.adapter.logger.error")
     adapter = CustomSocialAccountAdapter()
-    adapter.authentication_error()
+    adapter.on_authentication_error()
     assert error.called
