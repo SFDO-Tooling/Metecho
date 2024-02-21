@@ -273,8 +273,9 @@ def create_repository(
 
         else:
             repo = org.create_repository(
-                project.repo_name, description=project.description,
-                private=settings.ENABLE_CREATE_PRIVATE_REPO
+                project.repo_name,
+                description=project.description,
+                private=settings.ENABLE_CREATE_PRIVATE_REPO,
             )
             team.add_repository(repo.full_name, permission="push")
             project.repo_id = repo.id

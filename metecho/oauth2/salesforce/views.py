@@ -10,11 +10,7 @@ from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from metecho.api.constants import ORGANIZATION_DETAILS
 
-from ..views import (
-    LoggingOAuth2CallbackView,
-    LoggingOAuth2LoginView,
-    ensure_socialapp_in_db,
-)
+from ..views import LoggingOAuth2CallbackView, LoggingOAuth2LoginView
 
 logger = logging.getLogger(__name__)
 ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")
@@ -66,8 +62,6 @@ class SalesforceOAuth2Adapter(SalesforceOAuth2BaseAdapter):
         return resp.json()
 
     def complete_login(self, request, app, token, **kwargs):
-        # make sure token is attached to a SocialApp in the db
-        ensure_socialapp_in_db(token)
 
         token = fernet_decrypt(token.token)
         headers = {"Authorization": f"Bearer {token}"}
