@@ -30,6 +30,8 @@ export const api_urls = {
     `/api/scratch-orgs/${id}/commit_dataset/`,
   scratch_org_commit_omnistudio: (id: string) =>
     `/api/scratch-orgs/${id}/commit_omnistudio/`,
+  scratch_org_listmetadata: (id: string) =>
+    `/api/scratch_orgs/${id}/listmetadata/`,
   scratch_org_log: (id: string) => `/api/scratch-orgs/${id}/log/`,
   scratch_org_redirect: (id: string) => `/api/scratch-orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch-orgs/${id}/refresh/`,
@@ -811,6 +813,8 @@ export const sampleDevOrg = {
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
   currently_parsing_datasets: false,
+  has_non_source_changes: false,
+  non_source_changes: {},
 };
 
 export const sampleScratchOrg = {
@@ -850,6 +854,8 @@ export const sampleScratchOrg = {
   last_checked_unsaved_changes_at: null,
   valid_target_directories: {},
   currently_parsing_datasets: false,
+  has_non_source_changes: false,
+  non_source_changes: {},
 };
 
 export const sampleIssue1 = {

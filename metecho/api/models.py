@@ -1243,6 +1243,9 @@ class ScratchOrg(
     unsaved_changes = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
+    non_source_changes = models.JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
     ignored_changes = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
@@ -1485,6 +1488,32 @@ class ScratchOrg(
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.unsaved_changes = {}
+            self.save()
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_FETCH_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
+
+    def queue_get_nonsource_components(self, *, originating_user_id, desired_type):
+        from .jobs import get_nonsource_components_job
+
+        self.currently_refreshing_changes = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+        get_nonsource_components_job.delay(
+            scratch_org=self,
+            desired_type=desired_type,
+            originating_user_id=originating_user_id,
+        )
+
+    def finalize_get_nonsource_components(self, *, error=None, originating_user_id):
+        self.currently_refreshing_changes = False
+        if error is None:
+            self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
+        else:
+            self.non_source_changes = {}
             self.save()
             self.notify_scratch_org_error(
                 error=error,

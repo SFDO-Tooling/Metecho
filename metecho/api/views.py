@@ -61,6 +61,7 @@ from .serializers import (
     GitHubIssueSerializer,
     GitHubOrganizationSerializer,
     GuidedTourSerializer,
+    ListMetadataSerializer,
     MinimalUserSerializer,
     ProjectCreateSerializer,
     ProjectDependencySerializer,
@@ -700,6 +701,27 @@ class ScratchOrgViewSet(
                 status=status.HTTP_403_FORBIDDEN,
             )
         scratch_org.queue_commit_dataset(**serializer.validated_data, user=request.user)
+        return Response(
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )
+
+    @extend_schema(
+        request=ListMetadataSerializer, responses={202: ScratchOrgSerializer}
+    )
+    @action(detail=True, methods=["POST"])
+    def listmetadata(self, request, pk=None):
+        serializer = ListMetadataSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": _("Requesting user did not create Org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        scratch_org.queue_get_nonsource_components(
+            desired_type=serializer.validated_data["desired_type"],
+            originating_user_id=str(request.user.id),
+        )
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )

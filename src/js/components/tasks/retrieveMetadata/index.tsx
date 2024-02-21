@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
-import React, { FormEvent, ReactNode, useState } from 'react';
+import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
@@ -71,6 +71,7 @@ export const ModalCard = ({
 const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   const { t } = useTranslation();
   const [retrievingChanges, setRetrievingChanges] = useState(false);
+  const [refreshingChanges, setRefreshingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const { showTransientMessage, isShowingTransientMessage } =
@@ -81,6 +82,10 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
   };
+
+  useEffect(() => {
+    setRefreshingChanges(org.currently_refreshing_changes);
+  }, [org.currently_refreshing_changes]);
 
   const prevPage = () => {
     setPageIndex(Math.max(pageIndex - 1, 0));
@@ -244,17 +249,23 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
     {
       heading: t('Select the changes to retrieve or ignore'),
       contents: (
-        <ChangesForm
-          key="page-2-contents"
-          changeset={org.unsaved_changes}
-          ignoredChanges={org.ignored_changes}
-          inputs={inputs as MetadataCommit}
-          changesChecked={changesChecked}
-          ignoredChecked={ignoredChecked}
-          errors={errors}
-          setInputs={setInputs}
-          ignoredSuccess={isShowingTransientMessage}
-        />
+        <div style={{ pointerEvents: refreshingChanges ? 'none' : 'auto' }}>
+          <ChangesForm
+            key="page-2-contents"
+            changeset={org.unsaved_changes}
+            ignoredChanges={org.ignored_changes}
+            inputs={inputs as MetadataCommit}
+            changesChecked={changesChecked}
+            ignoredChecked={ignoredChecked}
+            errors={errors}
+            setInputs={setInputs}
+            ignoredSuccess={isShowingTransientMessage}
+            hasmetadatachanges={org.has_non_source_changes}
+            metadatachanges={org.non_source_changes}
+            id={org.id}
+            refreshing={org.currently_refreshing_changes}
+          />
+        </div>
       ),
       footer: [
         <Button
@@ -262,7 +273,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           label={t('Go Back')}
           variant="outline-brand"
           onClick={prevPage}
-          disabled={ignoringChanges}
+          disabled={ignoringChanges || org.currently_refreshing_changes}
         />,
         <Button
           key="page-2-button-2"
@@ -270,7 +281,9 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           variant={onlyIgnoredChecked ? 'brand' : 'outline-brand'}
           onClick={saveIgnored}
           disabled={
-            !(numberChangesChecked || numberIgnoredChecked) || ignoringChanges
+            !(numberChangesChecked || numberIgnoredChecked) ||
+            ignoringChanges ||
+            org.currently_refreshing_changes
           }
         />,
         <Button
@@ -279,7 +292,9 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
           variant={onlyIgnoredChecked ? 'outline-brand' : 'brand'}
           onClick={nextPage}
           disabled={
-            !(numberChangesChecked || numberIgnoredChecked) || ignoringChanges
+            !(numberChangesChecked || numberIgnoredChecked) ||
+            ignoringChanges ||
+            org.currently_refreshing_changes
           }
         />,
       ],
@@ -327,7 +342,7 @@ const RetrieveMetadataModal = ({ org, isOpen, closeModal }: Props) => {
     <Modal
       isOpen={isOpen}
       size="small"
-      disableClose={retrievingChanges}
+      disableClose={retrievingChanges || refreshingChanges}
       dismissOnClickOutside={false}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}

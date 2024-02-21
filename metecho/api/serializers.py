@@ -999,6 +999,8 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     description_rendered = MarkdownField(source="description", read_only=True)
     unsaved_changes = serializers.SerializerMethodField()
     has_unsaved_changes = serializers.SerializerMethodField()
+    non_source_changes = serializers.SerializerMethodField()
+    has_non_source_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
     ignored_changes = serializers.SerializerMethodField()
     has_ignored_changes = serializers.SerializerMethodField()
@@ -1049,6 +1051,8 @@ class ScratchOrgSerializer(HashIdModelSerializer):
             "currently_retrieving_omnistudio",
             "installed_packages",
             "is_omnistudio_installed",
+            "non_source_changes",
+            "has_non_source_changes",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -1089,8 +1093,14 @@ class ScratchOrgSerializer(HashIdModelSerializer):
     def get_unsaved_changes(self, obj) -> dict:
         return self._X_changes(obj, "unsaved")
 
+    def get_non_source_changes(self, obj) -> dict:
+        return self._X_changes(obj, "non_source")
+
     def get_has_unsaved_changes(self, obj) -> bool:
         return self._has_X_changes(obj, "unsaved")
+
+    def get_has_non_source_changes(self, obj) -> bool:
+        return self._has_X_changes(obj, "non_source")
 
     def get_total_unsaved_changes(self, obj) -> int:
         return self._total_X_changes(obj, "unsaved")
@@ -1141,6 +1151,10 @@ class CommitSerializer(serializers.Serializer):
     # Expect this to be Dict<str, List<str>>
     changes = serializers.DictField(child=StringListField())
     target_directory = serializers.CharField()
+
+
+class ListMetadataSerializer(serializers.Serializer):
+    desired_type = serializers.CharField()
 
 
 class CommitDatasetSerializer(serializers.Serializer):

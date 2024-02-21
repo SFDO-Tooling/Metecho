@@ -1,3 +1,4 @@
+import concurrent.futures
 import contextlib
 import logging
 import string
@@ -26,6 +27,10 @@ from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.salesforce_api.org_schema import Field, Filters, Schema, get_org_schema
 from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
 from cumulusci.tasks.github.util import CommitDir
+from cumulusci.tasks.salesforce.nonsourcetracking import (
+    ListComponents,
+    ListNonSourceTrackable,
+)
 from cumulusci.tasks.vlocity.vlocity import VlocityRetrieveTask
 from cumulusci.utils import temporary_dir
 from cumulusci.utils.http.requests_utils import safe_json_from_response
@@ -605,24 +610,63 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
 refresh_scratch_org_job = job(refresh_scratch_org)
 
 
-def get_unsaved_changes(scratch_org, *, originating_user_id):
-    try:
-        scratch_org.refresh_from_db()
-        old_revision_numbers = scratch_org.latest_revision_numbers
-        new_revision_numbers = get_latest_revision_numbers(
-            scratch_org, originating_user_id=originating_user_id
+def unsaved_changes(scratch_org, originating_user_id):
+    old_revision_numbers = scratch_org.latest_revision_numbers
+
+    new_revision_numbers = get_latest_revision_numbers(
+        scratch_org, originating_user_id=originating_user_id
+    )
+    unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
+    scratch_org.unsaved_changes = unsaved_changes
+
+
+def nonsource_types(scratch_org):
+    user = scratch_org.owner
+    repo_id = scratch_org.parent.get_repo_id()
+    commit_ish = scratch_org.parent.branch_name
+
+    with local_github_checkout(user, repo_id, commit_ish) as repo_root:
+        scratch_org.valid_target_directories, _ = get_valid_target_directories(
+            user,
+            scratch_org,
+            repo_root,
         )
-        unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
-        user = scratch_org.owner
-        repo_id = scratch_org.parent.get_repo_id()
-        commit_ish = scratch_org.parent.branch_name
-        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
-            scratch_org.valid_target_directories, _ = get_valid_target_directories(
-                user,
-                scratch_org,
-                repo_root,
+    scratch_org.non_source_changes = {}
+    with dataset_env(scratch_org) as (
+        project_config,
+        org_config,
+        sf,
+        schema,
+        repo,
+    ):
+        try:
+            components = ListNonSourceTrackable(
+                org_config=org_config,
+                project_config=project_config,
+                task_config=TaskConfig({"options": {}}),
+            )()
+            for types in components:
+                scratch_org.non_source_changes[types] = []
+        except Exception as e:
+            logger.error(f"Error in listing non-source-trackable metadatatypes: {e}")
+
+
+def get_unsaved_changes(scratch_org, *, originating_user_id):
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            unsaved_changes_result = executor.submit(
+                unsaved_changes,
+                scratch_org=scratch_org,
+                originating_user_id=originating_user_id,
             )
-        scratch_org.unsaved_changes = unsaved_changes
+            nonsource_types_result = executor.submit(
+                nonsource_types, scratch_org=scratch_org
+            )
+            concurrent.futures.wait([unsaved_changes_result, nonsource_types_result])
+            unsaved_changes_result.result()
+            nonsource_types_result.result()
+
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(
@@ -638,6 +682,36 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
 
 
 get_unsaved_changes_job = job(get_unsaved_changes)
+
+
+def get_nonsource_components(*, scratch_org, desired_type, originating_user_id):
+    try:
+        scratch_org.refresh_from_db()
+        with dataset_env(scratch_org) as (project_config, org_config, sf, schema, repo):
+            components = ListComponents(
+                org_config=org_config,
+                project_config=project_config,
+                task_config=TaskConfig({"options": {"metadata_types": desired_type}}),
+            )()
+
+        scratch_org.non_source_changes[desired_type] = [
+            cmp["MemberName"] for cmp in components
+        ]
+    except Exception as e:
+        scratch_org.refresh_from_db()
+        scratch_org.finalize_get_nonsource_components(
+            error=e, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_get_nonsource_components(
+            originating_user_id=originating_user_id
+        )
+
+
+get_nonsource_components_job = job(get_nonsource_components)
 
 
 def commit_changes_from_org(
@@ -685,6 +759,10 @@ def commit_changes_from_org(
         latest_revision_numbers = get_latest_revision_numbers(
             scratch_org, originating_user_id=originating_user_id
         )
+        member_types = list(desired_changes.keys())
+        for member_type in member_types:
+            if member_type in scratch_org.non_source_changes:
+                del desired_changes[member_type]
         for member_type in desired_changes.keys():
             for member_name in desired_changes[member_type]:
                 try:

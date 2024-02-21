@@ -28,6 +28,7 @@ from ..jobs import (
     create_pr,
     create_repository,
     delete_scratch_org,
+    get_nonsource_components,
     get_social_image,
     get_unsaved_changes,
     parse_datasets,
@@ -475,20 +476,33 @@ def test_create_org_and_run_flow__no_setup_flow():
 
 
 @pytest.mark.django_db
-def test_get_unsaved_changes(scratch_org_factory):
+@pytest.mark.parametrize("ListNonSourceTrackable_exception", [False, True])
+def test_get_unsaved_changes(
+    scratch_org_factory, patch_dataset_env, ListNonSourceTrackable_exception
+):
     scratch_org = scratch_org_factory(
         latest_revision_numbers={"TypeOne": {"NameOne": 10}}
     )
     with ExitStack() as stack:
+        project_config, org_config, sf, schema, repo = patch_dataset_env
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
         stack.enter_context(patch("metecho.api.sf_org_changes.get_repo_info"))
         get_valid_target_directories = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_valid_target_directories")
         )
+        ListNonSourceTrackable = stack.enter_context(
+            patch(f"{PATCH_ROOT}.ListNonSourceTrackable")
+        )
         get_valid_target_directories.return_value = (
             {"source": ["src"], "config": [], "post": [], "pre": []},
             False,
         )
+        if ListNonSourceTrackable_exception:
+            ListNonSourceTrackable.return_value = MagicMock(side_effect=Exception)
+        else:
+            ListNonSourceTrackable.return_value = MagicMock(
+                return_value=["TypeThree", "TypeFour"]
+            )
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )
@@ -504,7 +518,62 @@ def test_get_unsaved_changes(scratch_org_factory):
             "TypeOne": ["NameOne"],
             "TypeTwo": ["NameTwo"],
         }
+        if ListNonSourceTrackable_exception:
+            assert scratch_org.non_source_changes == {}
+        else:
+            assert scratch_org.non_source_changes == {
+                "TypeThree": [],
+                "TypeFour": [],
+            }
         assert scratch_org.latest_revision_numbers == {"TypeOne": {"NameOne": 10}}
+
+
+@pytest.mark.django_db
+class TestNonSourceComponents:
+    def test_get_nonsource_components(self, scratch_org_factory, patch_dataset_env):
+        scratch_org = scratch_org_factory(
+            non_source_changes={"TypeOne": [], "TypeTwo": []}
+        )
+        with ExitStack() as stack:
+            project_config, org_config, sf, schema, repo = patch_dataset_env
+            ListComponents = stack.enter_context(patch(f"{PATCH_ROOT}.ListComponents"))
+            ListComponents.return_value = MagicMock(
+                return_value=[
+                    {"MemberType": "TypeOne", "MemberName": "ListOne"},
+                    {"MemberType": "TypeOne", "MemberName": "ListTwo"},
+                ]
+            )
+            get_nonsource_components(
+                scratch_org=scratch_org,
+                originating_user_id=None,
+                desired_type="TypeOne",
+            )
+            scratch_org.refresh_from_db()
+            assert scratch_org.non_source_changes == {
+                "TypeOne": ["ListOne", "ListTwo"],
+                "TypeTwo": [],
+            }
+            assert ListComponents.called
+
+    def test_get_nonsource_components_fail(
+        self, caplog, scratch_org_factory, patch_dataset_env, task_factory
+    ):
+        scratch_org = scratch_org_factory(
+            non_source_changes={"TypeOne": [], "TypeTwo": []}
+        )
+        with ExitStack() as stack:
+            project_config, org_config, sf, schema, repo = patch_dataset_env
+            ListComponents = stack.enter_context(patch(f"{PATCH_ROOT}.ListComponents"))
+            ListComponents.side_effect = MagicMock(side_effect=Exception("Not valid!!"))
+            with pytest.raises(Exception):
+                get_nonsource_components(
+                    scratch_org=scratch_org,
+                    originating_user_id=None,
+                    desired_type="TypeOne",
+                )
+            scratch_org.refresh_from_db()
+            assert ListComponents.called
+            assert "Not valid!!" in caplog.text
 
 
 def test_create_branches_on_github_then_create_scratch_org():
@@ -743,7 +812,9 @@ class TestRefreshGitHubOrganizationsForUser:
 
 @pytest.mark.django_db
 def test_commit_changes_from_org(scratch_org_factory, user_factory):
-    scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory(
+        non_source_changes={"nonsource": ["typeone", "typetwo"]}
+    )
     user = user_factory()
     with ExitStack() as stack:
         commit_changes_to_github = stack.enter_context(
@@ -766,7 +837,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         repository.branch.return_value = MagicMock(commit=commit)
         get_repo_info.return_value = repository
 
-        desired_changes = {"name": ["member"]}
+        desired_changes = {"name": ["member"], "nonsource": ["typeone"]}
         commit_message = "test message"
         target_directory = "src"
         assert scratch_org.latest_revision_numbers == {}
@@ -854,7 +925,7 @@ class TestErrorHandling:
 @pytest.mark.django_db
 class TestRefreshCommits:
     def test_refreshes_commits(self, project_factory, epic_factory, task_factory):
-        project = project_factory(repo_id=123, branch_name="project")
+        project = project_factory(repo_id=789, branch_name="project")
         epic = epic_factory(project=project, branch_name="epic")
         task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:

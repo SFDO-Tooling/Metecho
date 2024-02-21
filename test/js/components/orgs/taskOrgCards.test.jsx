@@ -187,11 +187,29 @@ describe('<TaskOrgCards/>', () => {
           has_ignored_changes: true,
           total_ignored_changes: 1,
           ignored_changes: { Foo: ['Bar'] },
+          non_source_changes: {},
         },
       };
       const { getByText } = setup({ orgs });
 
       expect(getByText('1 ignored')).toBeVisible();
+    });
+  });
+
+  describe('org has ignored nonsource changes', () => {
+    test('renders card status', () => {
+      const orgs = {
+        ...defaultOrgs,
+        Dev: {
+          ...defaultOrgs.Dev,
+          has_ignored_changes: true,
+          total_ignored_changes: 1,
+          ignored_changes: { Apple: ['Bars'] },
+          non_source_changes: { Apple: ['Bars'] },
+        },
+      };
+      const { getByText } = setup({ orgs });
+      expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
     });
   });
 

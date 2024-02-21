@@ -980,6 +980,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScratchOrg'
           description: ''
+  /api/scratch-orgs/{id}/listmetadata/:
+    post:
+      operationId: scratch_orgs_listmetadata_create
+      description: Manage Salesforce scratch orgs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: HashID
+        description: A unique integer value identifying this scratch org.
+        required: true
+      tags:
+      - scratch-orgs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListMetadataRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ListMetadataRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ListMetadataRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScratchOrg'
+          description: ''
   /api/scratch-orgs/{id}/log/:
     get:
       operationId: scratch_orgs_log_retrieve
@@ -2082,6 +2118,14 @@ components:
         enabled:
           type: boolean
         state: {}
+    ListMetadataRequest:
+      type: object
+      properties:
+        desired_type:
+          type: string
+          minLength: 1
+      required:
+      - desired_type
     MinimalUser:
       type: object
       properties:
@@ -2625,6 +2669,13 @@ components:
         is_omnistudio_installed:
           type: boolean
           readOnly: true
+        non_source_changes:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        has_non_source_changes:
+          type: boolean
+          readOnly: true
       required:
       - currently_parsing_datasets
       - currently_reassigning_user
@@ -2638,6 +2689,7 @@ components:
       - expires_at
       - has_been_visited
       - has_ignored_changes
+      - has_non_source_changes
       - has_unsaved_changes
       - id
       - ignored_changes
@@ -2649,6 +2701,7 @@ components:
       - latest_commit
       - latest_commit_at
       - latest_commit_url
+      - non_source_changes
       - org_config_name
       - org_type
       - owner
