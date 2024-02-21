@@ -9,9 +9,9 @@ import logging
 import os
 import pathlib
 import shutil
-from typing import Generator
 import zipfile
 from glob import glob
+from typing import Generator
 
 from cumulusci.utils import temporary_dir
 from django.conf import settings

@@ -1907,6 +1907,11 @@ components:
       - Review
       - Merged
       type: string
+      description: |-
+        * `Planned` - Planned
+        * `In progress` - In Progress
+        * `Review` - Review
+        * `Merged` - Merged
     FullUser:
       type: object
       properties:
@@ -1976,8 +1981,6 @@ components:
         self_guided_tour_enabled:
           type: boolean
         self_guided_tour_state:
-          type: object
-          additionalProperties: {}
           nullable: true
         organizations:
           type: array
@@ -2114,9 +2117,7 @@ components:
       properties:
         enabled:
           type: boolean
-        state:
-          type: object
-          additionalProperties: {}
+        state: {}
     ListMetadataRequest:
       type: object
       properties:
@@ -2162,6 +2163,10 @@ components:
       - QA
       - Playground
       type: string
+      description: |-
+        * `Dev` - Dev
+        * `QA` - QA
+        * `Playground` - Playground
     PaginatedEpicList:
       type: object
       properties:
@@ -2321,8 +2326,6 @@ components:
         description:
           type: string
         ignored_changes_write:
-          type: object
-          additionalProperties: {}
           writeOnly: true
         org_config_name:
           type: string
@@ -2525,11 +2528,17 @@ components:
       - Approved
       - Changes requested
       type: string
+      description: |-
+        * `Approved` - Approved
+        * `Changes requested` - Changes Requested
     RoleEnum:
       enum:
       - assigned_qa
       - assigned_dev
       type: string
+      description: |-
+        * `assigned_qa` - assigned_qa
+        * `assigned_dev` - assigned_dev
     ScratchOrg:
       type: object
       properties:
@@ -2656,8 +2665,6 @@ components:
           type: boolean
           readOnly: true
         installed_packages:
-          type: object
-          additionalProperties: {}
           readOnly: true
         is_omnistudio_installed:
           type: boolean
@@ -2725,8 +2732,6 @@ components:
         description:
           type: string
         ignored_changes_write:
-          type: object
-          additionalProperties: {}
           writeOnly: true
         org_config_name:
           type: string
@@ -2826,8 +2831,6 @@ components:
           format: uri
           readOnly: true
         commits:
-          type: object
-          additionalProperties: {}
           readOnly: true
         origin_sha:
           type: string
@@ -2962,6 +2965,11 @@ components:
       - Completed
       - Canceled
       type: string
+      description: |-
+        * `Planned` - Planned
+        * `In progress` - In Progress
+        * `Completed` - Completed
+        * `Canceled` - Canceled
   securitySchemes:
     cookieAuth:
       type: apiKey

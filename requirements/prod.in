@@ -2,12 +2,12 @@
 # upgrade-deps.yml workflow. Avoid pinning specific versions here unless required
 # for stability.
 
-Django
+Django<5
 autobahn
 beautifulsoup4
 bleach
-channels
-channels-redis
+channels[daphne]<4
+channels-redis<4
 cumulusci
 dj-database-url
 django-allauth
@@ -38,5 +38,5 @@ psycopg2-binary
 rq-scheduler
 sentry-sdk
 service_identity
-sfdo-template-helpers @ https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.20.0.tar.gz
+sfdo-template-helpers @ https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.23.0.tar.gz
 whitenoise

@@ -880,9 +880,9 @@ class TestTaskAssigneeSerializer:
         _ = user_factory(
             socialaccount_set__provider="github",
             socialaccount_set__uid=GH_WITH_METECHO_ID,
-            devhub_username=FIRST_DEVHUB_USER
-            if target_has_same_dev_hub
-            else SECOND_DEVHUB_USER,
+            devhub_username=(
+                FIRST_DEVHUB_USER if target_has_same_dev_hub else SECOND_DEVHUB_USER
+            ),
         )
         target_gh_with_user = git_hub_user_factory(id=GH_WITH_METECHO_ID)
 

@@ -63,6 +63,7 @@ Websocket notifications you can subscribe to:
     scratchorg.list
         SCRATCH_ORG_RECREATE
 """
+
 from copy import deepcopy
 from typing import TYPE_CHECKING, Optional
 
