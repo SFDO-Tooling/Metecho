@@ -395,7 +395,7 @@ const ChangesForm = ({
                  slds-p-vertical_x-small
                  slds-p-right_medium"
             >
-              Non-Source-Trackable-Changes
+              {t('Non Source Trackable Changes')}
               {refreshing ? (
                 <SpinnerWrapper size="small" variant="brand"></SpinnerWrapper>
               ) : (
