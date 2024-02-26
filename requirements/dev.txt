@@ -30,7 +30,7 @@ automat==22.10.0
     #   twisted
 babel==2.14.0
     # via sphinx
-black==24.1.1
+black==24.2.0
     # via -r requirements/dev.in
 certifi==2023.7.22
     # via
@@ -52,7 +52,7 @@ constantly==23.10.4
     # via
     #   -c requirements/prod.txt
     #   twisted
-coverage[toml]==7.4.1
+coverage[toml]==7.4.3
     # via pytest-cov
 cryptography==41.0.7
     # via
@@ -66,7 +66,7 @@ daphne==3.0.2
     #   -r requirements/dev.in
 decorator==5.1.1
     # via ipython
-django==4.2.9
+django==4.2.10
     # via
     #   -c requirements/prod.txt
     #   django-extensions
@@ -99,7 +99,7 @@ flake8==7.0.0
     # via
     #   -r requirements/dev.in
     #   flake8-bugbear
-flake8-bugbear==24.1.17
+flake8-bugbear==24.2.6
     # via -r requirements/dev.in
 hyperlink==21.0.0
     # via
@@ -124,7 +124,7 @@ inflection==0.5.1
     #   pytest-factoryboy
 iniconfig==2.0.0
     # via pytest
-ipython==8.21.0
+ipython==8.22.1
     # via -r requirements/dev.in
 isort==5.13.2
     # via -r requirements/dev.in
@@ -209,7 +209,7 @@ pyopenssl==24.0.0
     # via
     #   -c requirements/prod.txt
     #   twisted
-pytest==7.4.4
+pytest==8.0.2
     # via
     #   -r requirements/dev.in
     #   pytest-asyncio
@@ -219,7 +219,7 @@ pytest==7.4.4
     #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-sugar
-pytest-asyncio==0.23.4
+pytest-asyncio==0.23.5
     # via -r requirements/dev.in
 pytest-cov==4.1.0
     # via -r requirements/dev.in
@@ -287,7 +287,7 @@ sqlparse==0.4.4
     #   django
 stack-data==0.6.3
     # via ipython
-stevedore==5.1.0
+stevedore==5.2.0
     # via doc8
 termcolor==2.4.0
     # via pytest-sugar
@@ -321,7 +321,7 @@ urllib3==1.26.16
     #   requests
 wcwidth==0.2.13
     # via prompt-toolkit
-zope-interface==6.1
+zope-interface==6.2
     # via
     #   -c requirements/prod.txt
     #   twisted
