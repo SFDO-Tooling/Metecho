@@ -13,7 +13,7 @@ jobs:
     name: Build
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
         with:
           # By writing to the cache here subsequent jobs will get the updated
@@ -25,7 +25,7 @@ jobs:
     needs: [build]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
       - name: Lint
         run: docker-compose run --no-deps web yarn lint:nofix
@@ -35,7 +35,7 @@ jobs:
     needs: [build]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
       - name: Test frontend
         run: docker-compose run --no-deps web yarn test:js:coverage
@@ -51,7 +51,7 @@ jobs:
     needs: [build]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
       - name: Test backend
         # prettier-ignore
@@ -78,7 +78,7 @@ jobs:
     needs: [frontend, backend]
     runs-on: sfdc-ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/setup-docker-compose
       - name: Download frontend coverage artifacts
         uses: actions/download-artifact@v3
