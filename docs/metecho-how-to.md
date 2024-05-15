@@ -10,6 +10,9 @@ using GitHub, you've come to the right place.
 **Pronunciation:** *“Met” rhymes with “bet.” “Echo” as in the reflection of
 sound waves.*
 
+## Contact Info ##
+Kamalnath Devarakonda, Sr Director of Software Engineering and Product Owner, kdevarakonda@salesforce.com 
+
 ## Why We Built Metecho
 
 **Metecho makes it easier to collaborate on sharable Salesforce Projects.**
