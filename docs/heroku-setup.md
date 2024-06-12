@@ -84,6 +84,7 @@ Configure the following permissions on your GitHub app:
     * Metadata: read-only
     * Pull requests: read & write. This permission is used to create and comment on Pull Requests.
     * Commit statuses: read & write. This permission is used to reflect build statuses.
+    * *Optional* Workflows: read & write. Add this permission if you want to use a template repository that contains workflows
 * Organization permissions:
     * Members: read & write. This permission is used to manage teams.
 * User permissions:
